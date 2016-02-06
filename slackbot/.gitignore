@@ -1,0 +1,11 @@
+*.o
+*.swp
+.DS_Store
+
+## Output
+bin/
+build/
+*.xcodeproj
+
+## Third party
+rapidjson
