@@ -4,6 +4,11 @@ A Clang/GCC-compatible C/C++ project file generator for coding sketch.
 
 It is distributed under the [MIT License](https://opensource.org/licenses/MIT).
 
+## Features
+
+- Easily generate Xcode project (`.xcodeproj`)
+- Easily generate Visual Studio solution (`sln`) and project (`vcxproj`) files
+
 ## Build and run
 
 ```sh
@@ -24,6 +29,8 @@ nori -generator=xcode -o myapp myapp.cpp
 # Generate myapp.sln and myapp.vcxproj file
 nori -generator=msbuild -o myapp myapp.cpp
 ```
+
+### To build your application with Xcode
 
 ```sh
 nori \

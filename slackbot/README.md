@@ -22,4 +22,5 @@ make xcode
 
 ## Thanks
 
+- libcurl
 - RapidJSON
