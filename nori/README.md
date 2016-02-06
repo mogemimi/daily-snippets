@@ -2,6 +2,8 @@
 
 A Clang/GCC-compatible C/C++ project file generator for coding sketch.
 
+It is distributed under the [MIT License](https://opensource.org/licenses/MIT).
+
 ## Build and run
 
 ```sh
@@ -44,7 +46,3 @@ clang \
   -Ipath/to/include \
   *.cpp
 ```
-
-## License
-
-MIT License.

@@ -1,7 +1,8 @@
 # Slack Bot
 
 My personal slack bot. :boat:
-It is distributed under MIT License.
+
+It is distributed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ## Build and run
 

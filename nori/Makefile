@@ -20,13 +20,14 @@ bootstrap:
 	@mv nori bin/
 
 xcode:
-	./bin/nori -generator=xcode \
+	./bin/nori \
+		-generator=xcode \
 		-o $(PRODUCTNAME) \
 		-std=c++14 \
 		-stdlib=libc++ \
 		-I.. \
 		$(HEADERS) \
 		$(SOURCES)
-	@xcodebuild -project nori.xcodeproj -configuration Release
+	@xcodebuild -project $(PRODUCTNAME).xcodeproj -configuration Release
 	@mkdir -p bin
-	@cp build/Release/nori bin/nori
+	@cp build/Release/$(PRODUCTNAME) bin/$(PRODUCTNAME)

@@ -13,7 +13,8 @@ SOURCES = \
 	TerminalHelper.cpp
 
 xcode:
-	$(NORI) -generator=xcode \
+	$(NORI) \
+		-generator=xcode \
 		-o $(PRODUCTNAME) \
 		-std=c++14 \
 		-stdlib=libc++ \
