@@ -1,0 +1,8 @@
+*.o
+*.swp
+.DS_Store
+
+## Output
+bin/
+build/
+nori.xcodeproj
