@@ -79,8 +79,8 @@ private:
 public:
     SignalBody() = default;
 
-    SignalBody(SignalBody const&) = delete;
-    SignalBody & operator=(SignalBody const&) = delete;
+    SignalBody(const SignalBody&) = delete;
+    SignalBody & operator=(const SignalBody&) = delete;
 
     SignalBody(SignalBody &&) = delete;///@todo
     SignalBody & operator=(SignalBody &&) = delete;///@todo
@@ -205,7 +205,7 @@ void SignalBody<void(Arguments...)>::operator()(Arguments &&... arguments)
             }
         }
     }
-    catch (std::exception const& e) {
+    catch (const std::exception& e) {
         --nestedMethodCallCount;
         throw e;
     }
