@@ -33,6 +33,7 @@ nori -generator=msbuild -o myapp myapp.cpp
 ### To build your application with Xcode
 
 ```sh
+# Generate myapp.xcodeproj file
 nori \
   -generator=xcode \
   -o myapp \
@@ -40,7 +41,9 @@ nori \
   -stdlib=libc++ \
   -Ipath/to/include \
   *.cpp
-@xcodebuild -project myapp.xcodeproj -configuration Release
+
+# Build your project with Xcode
+xcodebuild -project myapp.xcodeproj -configuration Release
 ```
 
 The command-line tool is Clang/GCC-compatible, so it is the same as running the following commands in terminal:
