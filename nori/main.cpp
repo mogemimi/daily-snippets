@@ -12,9 +12,10 @@
 #include <fstream>
 
 using somera::CommandLineParser;
+namespace StringHelper = somera::StringHelper;
 namespace FileSystem = somera::FileSystem;
 
-namespace somera {
+namespace {
 
 void setupCommandLineParser(CommandLineParser & parser)
 {
@@ -89,7 +90,7 @@ auto eraseIf(Container & container, Func func)
         std::end(container));
 }
 
-} // namespace somera
+} // unnamed namespace
 
 int main(int argc, char *argv[])
 {
@@ -136,7 +137,7 @@ int main(int argc, char *argv[])
         options.sources.push_back(path);
     }
 
-    somera::eraseIf(options.sources, [](const std::string& path) {
+    eraseIf(options.sources, [](const std::string& path) {
         return somera::StringHelper::startWith(path, "*");
     });
 
@@ -148,7 +149,7 @@ int main(int argc, char *argv[])
         options.productName = *path;
     }
     options.targetName = options.productName;
-    options.author = somera::getAuthorName();
+    options.author = getAuthorName();
 
     if (auto value = parser.getValue("-std=")) {
         options.buildSettings.emplace("-std=", *value);
@@ -173,8 +174,8 @@ int main(int argc, char *argv[])
         path = FileSystem::relative(path, options.generatorOutputDirectory);
         printVerbose("[Path (Relative)] " + path);
     }
-    somera::sortByName(options.libraries);
-    somera::sortByName(options.sources);
+    sortByName(options.libraries);
+    sortByName(options.sources);
 
     if (auto generator = parser.getValue("-generator=")) {
         if (*generator == "xcode") {
