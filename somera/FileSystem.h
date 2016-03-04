@@ -3,7 +3,9 @@
 #pragma once
 
 #include <string>
+#include <system_error>
 #include <tuple>
+#include <vector>
 
 namespace somera {
 namespace FileSystem {
@@ -33,6 +35,12 @@ bool createDirectories(const std::string& path);
 bool exists(const std::string& path);
 
 bool isDirectory(const std::string& path);
+
+// NOTE: Return a list the names of files or folders in the directory.
+std::tuple<std::vector<std::string>, std::error_code>
+readDirectory(const std::string& directory) noexcept;
+
+std::error_code rename(const std::string& oldname, const std::string& newname) noexcept;
 
 } // namespace FileSystem
 } // namespace somera

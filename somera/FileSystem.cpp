@@ -11,9 +11,11 @@
 #ifdef SOMERA_IS_WINDOWS
 
 #else
+#include "somera/Defer.h"
 #include <array>
 #include <algorithm>
 #include <cstdio>
+#include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -488,6 +490,59 @@ bool FileSystem::isDirectory(const std::string& path)
     }
     return S_ISDIR(st.st_mode);
 #endif
+}
+
+std::tuple<std::vector<std::string>, std::error_code>
+FileSystem::readDirectory(const std::string& directory) noexcept
+{
+    if (!FileSystem::isDirectory(directory)) {
+        // error: This directory path is not directory.
+        std::error_code err {0, std::generic_category()};
+        return std::make_tuple(std::vector<std::string>{}, std::move(err));
+    }
+
+#ifdef SOMERA_IS_WINDOWS
+
+#else
+    ::DIR* directoryPointer = ::opendir(directory.c_str());
+
+    if (directoryPointer == nullptr) {
+        // error: Failed to open directory
+        std::error_code err {errno, std::generic_category()};
+        return std::make_tuple(std::vector<std::string>{}, std::move(err));
+    }
+
+    somera::Defer defer([&] {
+        ::closedir(directoryPointer);
+    });
+
+    std::vector<std::string> files;
+    ::dirent* entry = nullptr;
+    do {
+        entry = ::readdir(directoryPointer);
+        if (entry != nullptr) {
+            files.emplace_back(entry->d_name);
+        }
+    } while (entry != nullptr);
+
+    return std::make_tuple(std::move(files), std::error_code{});
+#endif
+}
+
+std::error_code FileSystem::rename(const std::string& oldname, const std::string& newname) noexcept
+{
+    if (!FileSystem::exists(oldname)) {
+        // error: Cannot find the file.
+        std::error_code err {0, std::generic_category()};
+        return std::move(err);
+    }
+    if (::rename(oldname.c_str(), newname.c_str()) != 0) {
+        // Error renaming file
+        std::error_code err {0, std::generic_category()};
+        return std::move(err);
+    }
+    // Yay, rename succeeded!
+    return {};
 }
 
 } // namespace somera
