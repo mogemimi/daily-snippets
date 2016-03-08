@@ -8,7 +8,7 @@ It is distributed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ```sh
 # Setup build tool
-make -C ../nori bootstrap
+make -C ../natsume bootstrap
 
 # Build
 make xcode
