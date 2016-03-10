@@ -7,7 +7,8 @@
 
 namespace somera {
 
-std::string SubprocessHelper::call(const std::string& command)
+std::tuple<std::string, std::error_code>
+SubprocessHelper::call(const std::string& command)
 {
     assert(!command.empty());
     constexpr int maxBufferSize = 255;
@@ -15,14 +16,20 @@ std::string SubprocessHelper::call(const std::string& command)
     ::FILE* stream = ::popen(command.c_str(), "r");
     if (stream == nullptr) {
         ::pclose(stream);
-        return "";
+        // error: Failed to call popen()
+        std::error_code err {errno, std::generic_category()};
+        return std::make_tuple(std::string{}, std::move(err));
     }
     std::string output;
     while (::fgets(buffer, maxBufferSize, stream) != nullptr) {
         output.append(buffer);
     }
-    ::pclose(stream);
-    return std::move(output);
+    if (::pclose(stream) != 0) {
+        // error: Failed to call popen()
+        std::error_code err {errno, std::generic_category()};
+        return std::make_tuple(std::move(output), std::move(err));
+    }
+    return std::make_tuple(std::move(output), std::error_code{});
 }
 
 } // namespace somera
