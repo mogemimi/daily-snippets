@@ -78,8 +78,14 @@ void sortByName(std::vector<std::string>& names)
 
 std::string getAuthorName()
 {
-    return somera::StringHelper::replace(
-        somera::SubprocessHelper::call("git config user.name"), "\n", "");
+    std::error_code err;
+    std::string result;
+    std::tie(result, err) = somera::SubprocessHelper::call("git config user.name");
+
+    if (err) {
+        return "";
+    }
+    return somera::StringHelper::replace(result, "\n", "");
 }
 
 template <class Container, typename Func>
