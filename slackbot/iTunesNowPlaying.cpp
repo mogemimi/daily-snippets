@@ -17,7 +17,9 @@ somera::Optional<Track> getCurrentTrack()
     && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8)
     // for Mac OS X
 #define SOMERA_TOSTRING(x) std::string(#x)
-    auto output = SubprocessHelper::call("osascript -e" + SOMERA_TOSTRING(
+    std::error_code err;
+    std::string result;
+    std::tie(result, err) = SubprocessHelper::call("osascript -e" + SOMERA_TOSTRING(
         'try' -e
             'tell application "iTunes"' -e
                 'set trackName to name of current track' -e
@@ -27,14 +29,16 @@ somera::Optional<Track> getCurrentTrack()
             'end tell' -e
         'end try'
     ));
-
-    if (output.empty()) {
+    if (err) {
+        return somera::NullOpt;
+    }
+    if (result.empty()) {
         return somera::NullOpt;
     }
 
     Track track;
     std::stringstream stream;
-    stream << output;
+    stream << result;
     std::getline(stream, track.trackName, '\n');
     std::getline(stream, track.artistName, '\n');
     std::getline(stream, track.albumName, '\n');
