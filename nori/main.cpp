@@ -21,7 +21,7 @@ void setupCommandLineParser(CommandLineParser & parser)
 {
     using somera::CommandLineArgumentType::Flag;
     using somera::CommandLineArgumentType::JoinedOrSeparate;
-    parser.setUsageText("hidamari [options ...] [build file ...]");
+    parser.setUsageText("nori [options ...] [build file ...]");
     parser.addArgument("-h", Flag, "Display available options");
     parser.addArgument("-help", Flag, "Display available options");
     parser.addArgument("-I", JoinedOrSeparate,

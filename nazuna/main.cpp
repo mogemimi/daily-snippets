@@ -18,7 +18,7 @@ void setupCommandLineParser(CommandLineParser & parser)
 {
     using somera::CommandLineArgumentType::Flag;
     using somera::CommandLineArgumentType::JoinedOrSeparate;
-    parser.setUsageText("norichan [options ...] [build file ...]");
+    parser.setUsageText("nazuna [options ...] [C/C++ file ...]");
     parser.addArgument("-h", Flag, "Display available options");
     parser.addArgument("-help", Flag, "Display available options");
 }

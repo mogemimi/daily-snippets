@@ -14,7 +14,7 @@ void setupCommandLineParser(CommandLineParser & parser)
 {
     using somera::CommandLineArgumentType::Flag;
     using somera::CommandLineArgumentType::JoinedOrSeparate;
-    parser.setUsageText("hiro [options ...] [source file ...]");
+    parser.setUsageText("pomdog-refactor [options ...] [source file ...]");
     parser.addArgument("-h", Flag, "Display available options");
     parser.addArgument("-help", Flag, "Display available options");
 }
