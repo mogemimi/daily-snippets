@@ -25,15 +25,25 @@ void setupCommandLineParser(CommandLineParser & parser)
     parser.setUsageText("nakayamasan [options ...]");
     parser.addArgument("-h", Flag, "Display available options");
     parser.addArgument("-help", Flag, "Display available options");
+    parser.addArgument("-days", JoinedOrSeparate, "Days ago");
+    parser.addArgument("-month", JoinedOrSeparate, "Month ago");
 }
 
-std::string getTwoMonthsAgo()
+std::chrono::hours convertFromDaysToHours(int days)
 {
-    auto twoMonths = std::chrono::hours(24 * 30 * 2);
+    return std::chrono::hours(24) * days;
+}
 
+std::chrono::hours convertFromMonthsToHours(int months)
+{
+    return std::chrono::hours(24) * 30 * months;
+}
+
+std::string getTimeAgo(const std::chrono::hours& hours)
+{
     using std::chrono::system_clock;
     auto now = system_clock::now();
-    auto tt = system_clock::to_time_t(now - twoMonths);
+    auto tt = system_clock::to_time_t(now - hours);
     auto utcTime = *gmtime(&tt);
 
     return StringHelper::format("%04d-%02d-%02d", utcTime.tm_year + 1900, utcTime.tm_mon + 1, utcTime.tm_mday);
@@ -44,7 +54,7 @@ bool compareYyyyMmDd(const std::string& a, const std::string& b)
     return a < b;
 }
 
-void enumerateFileList(const std::string& directory)
+void enumerateFileList(const std::chrono::hours& hours)
 {
     std::error_code err;
     std::string stringResult;
@@ -57,7 +67,7 @@ void enumerateFileList(const std::string& directory)
 
     std::vector<std::string> olderFiles;
 
-    const auto twoMonthsAgo = getTwoMonthsAgo();
+    const auto timeAgo = getTimeAgo(hours);
 
     auto files = StringHelper::split(stringResult, '\n');
     for (auto & file : files) {
@@ -69,13 +79,10 @@ void enumerateFileList(const std::string& directory)
         }
 
         const auto& date = stringResult;
-        if (compareYyyyMmDd(date, twoMonthsAgo)) {
+        if (compareYyyyMmDd(date, timeAgo)) {
+            std::cout << file << std::endl;
             olderFiles.push_back(file);
         }
-    }
-
-    for (auto& file : olderFiles) {
-        std::cout << file << std::endl;
     }
 }
 
@@ -95,14 +102,24 @@ int main(int argc, char *argv[])
         std::cout << parser.getHelpText() << std::endl;
         return 0;
     }
-    if (parser.getPaths().empty()) {
-        std::cerr << "error: no input file" << std::endl;
-        return 1;
+
+    auto hours = convertFromMonthsToHours(2);
+    if (auto months = parser.getValue("-month")) {
+        if (months->empty()) {
+            std::cerr << "error: invalid arguments" << std::endl;
+            return 1;
+        }
+        hours = convertFromMonthsToHours(std::atoi(months->c_str()));
+    }
+    if (auto days = parser.getValue("-days")) {
+        if (days->empty()) {
+            std::cerr << "error: invalid arguments" << std::endl;
+            return 1;
+        }
+        hours = convertFromDaysToHours(std::atoi(days->c_str()));
     }
 
-    for (auto & path : parser.getPaths()) {
-        enumerateFileList(path);
-    }
+    enumerateFileList(hours);
 
     return 0;
 }
