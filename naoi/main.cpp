@@ -42,7 +42,8 @@ void refactorSourceCode(const std::string& path)
         return;
     }
 
-    std::set<std::string> includes;
+    std::vector<std::set<std::string>> includeSetStack;
+    includeSetStack.push_back(std::set<std::string>{});
 
     auto lines = StringHelper::split(text, '\n');
     const auto lastLine = lines.back();
@@ -54,14 +55,49 @@ void refactorSourceCode(const std::string& path)
         std::string chunk;
         chunk = trimRight(trimRight(line, ' '), '\t');
         chunk = trimLeft(trimLeft(chunk, ' '), '\t');
+
         if (!StringHelper::startWith(chunk, "#include")) {
+            if (StringHelper::startWith(chunk, "#if")) {
+                includeSetStack.push_back(std::set<std::string>{});
+            }
+            else if (StringHelper::startWith(chunk, "#elif")
+                || StringHelper::startWith(chunk, "#else")) {
+                if (includeSetStack.empty()) {
+                    std::cout << "Warning: preprocessor mismatch" << std::endl;
+                }
+                if (!includeSetStack.empty()) {
+                    includeSetStack.pop_back();
+                }
+                includeSetStack.push_back(std::set<std::string>{});
+            }
+            else if (StringHelper::startWith(chunk, "#endif")) {
+                if (includeSetStack.empty()) {
+                    std::cout << "Warning: preprocessor mismatch" << std::endl;
+                }
+                if (!includeSetStack.empty()) {
+                    includeSetStack.pop_back();
+                }
+            }
             text += line;
             text += '\n';
             continue;
         }
-        if (includes.find(chunk) == std::end(includes)) {
+
+        auto findInclude = [&includeSetStack](const std::string& headerPath) -> bool {
+            for (const auto& includes : includeSetStack) {
+                auto iter = includes.find(headerPath);
+                if (iter != std::end(includes)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        if (!findInclude(chunk)) {
             text += line;
             text += '\n';
+            assert(!includeSetStack.empty());
+            auto & includes = includeSetStack.back();
             includes.emplace(std::move(chunk));
             continue;
         }
