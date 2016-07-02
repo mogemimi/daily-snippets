@@ -167,7 +167,6 @@ private:
     using DescriptorType = detail::DescriptorPOSIX;
     IOService* service_ = nullptr;
     DescriptorType descriptor_;
-    EndPoint endPoint_;
     std::vector<Session> sessions_;
     ScopedConnection connectionListen_;
     ScopedConnection connectionRead_;
