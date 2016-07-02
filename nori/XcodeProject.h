@@ -7,7 +7,7 @@
 namespace somera {
 namespace Xcode {
 
-GeneratorError generateXcodeProject(const CompileOptions& options);
+GeneratorError GenerateXcodeProject(const CompileOptions& options);
 
 } // namespace Xcode
 } // namespace somera

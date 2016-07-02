@@ -7,7 +7,7 @@
 namespace somera {
 namespace MSBuild {
 
-GeneratorError generateMSBuildProject(const CompileOptions& options);
+GeneratorError GenerateMSBuildProject(const CompileOptions& options);
 
 } // namespace MSBuild
 } // namespace somera

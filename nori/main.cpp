@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
 
     if (auto generator = parser.getValue("-generator=")) {
         if (*generator == "xcode") {
-            auto error = somera::Xcode::generateXcodeProject(options);
+            auto error = somera::Xcode::GenerateXcodeProject(options);
             if (error.hasError) {
                 std::cerr << error.description << std::endl;
                 return 1;
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
             std::cout << "Generated." << std::endl;
         }
         else if (*generator == "msbuild") {
-            auto error = somera::MSBuild::generateMSBuildProject(options);
+            auto error = somera::MSBuild::GenerateMSBuildProject(options);
             if (error.hasError) {
                 std::cerr << error.description << std::endl;
                 return 1;

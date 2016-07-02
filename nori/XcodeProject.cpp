@@ -18,7 +18,7 @@
 namespace somera {
 namespace {
 
-std::string generateXcodeID() noexcept
+std::string GenerateXcodeID() noexcept
 {
     std::mt19937 random(std::random_device{}());
     static uint32_t hash1 = random();
@@ -32,7 +32,7 @@ std::string generateXcodeID() noexcept
     return id;
 }
 
-std::string generateXCWorkSpaceData(const std::string& xcodeprojName)
+std::string GenerateXCWorkSpaceData(const std::string& xcodeprojName)
 {
     std::stringstream stream;
     stream <<
@@ -62,32 +62,32 @@ struct PBXSourcesBuildPhase;
 struct XCBuildConfiguration;
 struct XCConfigurationList;
 
-std::string encodeComment(const std::string& comment)
+std::string EncodeComment(const std::string& comment)
 {
     return "/* " + comment + " */";
 }
 
-std::string encodeDoubleQuotes(const std::string& comment)
+std::string EncodeDoubleQuotes(const std::string& comment)
 {
     return '\"' + comment + '\"';
 }
 
-std::string stringifyUUID(const std::string& uuid, const std::string& comment)
+std::string StringifyUUID(const std::string& uuid, const std::string& comment)
 {
     std::stringstream stream;
     stream << uuid;
     if (!comment.empty()) {
-        stream << ' ' + encodeComment(comment);
+        stream << ' ' + EncodeComment(comment);
     }
     return stream.str();
 }
 
-std::string stringifyUUID(const std::string& uuid, Optional<std::string> comment)
+std::string StringifyUUID(const std::string& uuid, Optional<std::string> comment)
 {
     std::stringstream stream;
     stream << uuid;
     if (comment && !comment->empty()) {
-        stream << ' ' + encodeComment(*comment);
+        stream << ' ' + EncodeComment(*comment);
     }
     return stream.str();
 }
@@ -103,7 +103,7 @@ struct XcodeObject : Noncopyable {
     virtual std::string isa() const noexcept = 0;
 
     std::string const uuid;
-    XcodeObject() : uuid(generateXcodeID()) {}
+    XcodeObject() : uuid(GenerateXcodeID()) {}
 };
 
 struct XcodeBuildPhase : public XcodeObject {
@@ -159,37 +159,37 @@ struct PBXGroup final : public XcodeObject {
     Optional<std::string> path;
     Optional<std::string> sourceTree;
 
-    std::string getSourceTree() const noexcept
+    std::string GetSourceTree() const noexcept
     {
         return sourceTree ? *sourceTree : "\"<group>\"";
     }
 
-    std::string getUuidWithComment()
+    std::string GetUuidWithComment()
     {
         if (name) {
-            return stringifyUUID(uuid, *name);
+            return StringifyUUID(uuid, *name);
         }
         if (path) {
-            return stringifyUUID(uuid, *path);
+            return StringifyUUID(uuid, *path);
         }
         return uuid;
     }
 
-    std::vector<std::string> getChildrenString() const
+    std::vector<std::string> GetChildrenString() const
     {
         std::vector<std::string> result;
         for (auto & child : children) {
             if (auto group = std::dynamic_pointer_cast<PBXGroup>(child)) {
-                result.push_back(group->getUuidWithComment());
+                result.push_back(group->GetUuidWithComment());
             }
             else if (auto file = std::dynamic_pointer_cast<PBXFileReference>(child)) {
-                result.push_back(stringifyUUID(file->uuid, file->path));
+                result.push_back(StringifyUUID(file->uuid, file->path));
             }
         }
         return result;
     }
 
-    void visit(const std::function<void(std::shared_ptr<PBXFileReference>)>& func) const
+    void Visit(const std::function<void(std::shared_ptr<PBXFileReference>)>& func) const
     {
         assert(func);
         for (auto & child : children) {
@@ -197,7 +197,7 @@ struct PBXGroup final : public XcodeObject {
                 func(file);
             }
             else if (auto group = std::dynamic_pointer_cast<PBXGroup>(child)) {
-                group->visit(func);
+                group->Visit(func);
             }
         }
     }
@@ -214,11 +214,11 @@ struct PBXNativeTarget final : public XcodeObject {
     std::shared_ptr<PBXFileReference> productReference;
     std::string productType;
 
-    std::vector<std::string> getBuildPhasesString() const
+    std::vector<std::string> GetBuildPhasesString() const
     {
         std::vector<std::string> result;
         for (auto & phase : buildPhases) {
-            result.push_back(stringifyUUID(phase->uuid, phase->comments()));
+            result.push_back(StringifyUUID(phase->uuid, phase->comments()));
         }
         return result;
     }
@@ -238,21 +238,21 @@ struct PBXProject final : public XcodeObject {
     std::string projectRoot;
     std::vector<std::shared_ptr<PBXNativeTarget>> targets;
 
-    std::vector<std::string> getTargetsString() const
+    std::vector<std::string> GetTargetsString() const
     {
         std::vector<std::string> result;
         for (auto & target : targets) {
-            result.push_back(stringifyUUID(target->uuid, target->name));
+            result.push_back(StringifyUUID(target->uuid, target->name));
         }
         return result;
     }
 
-    void addAttribute(const std::string& key, const std::string& value)
+    void AddAttribute(const std::string& key, const std::string& value)
     {
         attributes.emplace(key, value);
     }
 
-    void addAttribute(const std::string& key, std::vector<XcodeTargetAttribute> && value)
+    void AddAttribute(const std::string& key, std::vector<XcodeTargetAttribute> && value)
     {
         attributes.emplace(key, std::move(value));
     }
@@ -288,12 +288,12 @@ struct PBXSourcesBuildPhase final : public XcodeBuildPhase {
 };
 
 template <class BuildPhase>
-std::vector<std::string> toFileListString(const BuildPhase& phase)
+std::vector<std::string> ToFileListString(const BuildPhase& phase)
 {
     static_assert(std::is_base_of<XcodeBuildPhase, BuildPhase>::value, "");
     std::vector<std::string> result;
     for (auto & buildFile : phase.files) {
-        result.push_back(stringifyUUID(
+        result.push_back(StringifyUUID(
             buildFile->uuid,
             buildFile->fileRef->path + " in " + phase.comments()));
     }
@@ -305,7 +305,7 @@ struct XCBuildConfiguration final : public XcodeObject {
     std::vector<std::pair<std::string, Any>> buildSettings;
     std::string name;
 
-    void addBuildSettings(const std::string& key, const std::string& value)
+    void AddBuildSettings(const std::string& key, const std::string& value)
     {
         auto iter = std::find_if(std::begin(buildSettings), std::end(buildSettings),
             [&](const auto& a){ return a.first == key; });
@@ -318,7 +318,7 @@ struct XCBuildConfiguration final : public XcodeObject {
             [](const auto& a, const auto& b){ return a.first < b.first; });
     }
 
-    void addBuildSettings(const std::string& key, const std::vector<std::string>& value)
+    void AddBuildSettings(const std::string& key, const std::vector<std::string>& value)
     {
         auto iter = std::find_if(std::begin(buildSettings), std::end(buildSettings),
             [&](const auto& a){ return a.first == key; });
@@ -338,11 +338,11 @@ struct XCConfigurationList final : public XcodeObject {
     std::string defaultConfigurationIsVisible;
     Optional<std::string> defaultConfigurationName;
 
-    std::vector<std::string> getBuildConfigurationsString() const
+    std::vector<std::string> GetBuildConfigurationsString() const
     {
         std::vector<std::string> result;
         for (auto & buildConfig : buildConfigurations) {
-            result.push_back(stringifyUUID(
+            result.push_back(StringifyUUID(
                 buildConfig->uuid, buildConfig->name));
         }
         return result;
@@ -369,7 +369,7 @@ public:
         settingsStack.push_back(std::move(settings));
     }
 
-    std::string getIndent() const noexcept
+    std::string GetIndent() const noexcept
     {
         std::string spaces;
         for (int i = 0; i < tabs; ++i) {
@@ -378,86 +378,86 @@ public:
         return spaces;
     }
 
-    void beginKeyValue(const std::string& key)
+    void BeginKeyValue(const std::string& key)
     {
-        if (!isSingleLine()) {
-            stream << getIndent();
+        if (!IsSingleLine()) {
+            stream << GetIndent();
         }
         stream << key << " = ";
     }
 
-    void endKeyValue()
+    void EndKeyValue()
     {
         stream << ";";
-        if (!isSingleLine()) {
+        if (!IsSingleLine()) {
             stream << "\n";
         } else {
             stream << " ";
         }
     }
 
-    void printKeyValue(const std::string& key, const std::string& value)
+    void PrintKeyValue(const std::string& key, const std::string& value)
     {
-        beginKeyValue(key);
+        BeginKeyValue(key);
         stream << value;
-        endKeyValue();
+        EndKeyValue();
     }
 
-    void printKeyValue(const std::string& key, const std::function<void()>& valuePrinter)
+    void PrintKeyValue(const std::string& key, const std::function<void()>& valuePrinter)
     {
-        beginKeyValue(key);
+        BeginKeyValue(key);
         valuePrinter();
-        endKeyValue();
+        EndKeyValue();
     }
 
-    void printKeyValue(const std::string& key, const std::vector<std::string>& array)
+    void PrintKeyValue(const std::string& key, const std::vector<std::string>& array)
     {
-        beginKeyValue(key);
+        BeginKeyValue(key);
         stream << "(";
-        if (!isSingleLine()) {
+        if (!IsSingleLine()) {
             stream << "\n";
         }
         ++tabs;
         for (auto & value : array) {
-            stream << getIndent() << value << ",";
-            if (!isSingleLine()) {
+            stream << GetIndent() << value << ",";
+            if (!IsSingleLine()) {
                 stream << "\n";
             } else {
                 stream << " ";
             }
         }
         --tabs;
-        stream << getIndent() << ")";
-        endKeyValue();
+        stream << GetIndent() << ")";
+        EndKeyValue();
     }
 
-    void beginObject(bool singleLine = false)
+    void BeginObject(bool singleLine = false)
     {
         settingsStack.push_back(XcodePrinterSettings{singleLine});
         stream << "{";
-        if (!isSingleLine()) {
+        if (!IsSingleLine()) {
             stream << "\n";
             ++tabs;
         }
     }
 
-    void endObject()
+    void EndObject()
     {
-        if (!isSingleLine()) {
+        if (!IsSingleLine()) {
             --tabs;
-            stream << getIndent();
+            stream << GetIndent();
         }
         stream << "}";
         settingsStack.pop_back();
     }
 
-    bool isSingleLine() const
+    bool IsSingleLine() const
     {
         assert(!settingsStack.empty());
         return settingsStack.back().isSingleLine;
     }
 
-    void beginSection(const std::string& sectionIn)
+    void BeginSection(const std::string& sectionIn)
     {
         settingsStack.push_back(XcodePrinterSettings{false});
         this->section = sectionIn;
@@ -465,32 +465,32 @@ public:
         stream << "/* Begin " << section << " section */\n";
     }
 
-    void endSection()
+    void EndSection()
     {
         stream << "/* End " << section << " section */\n";
         settingsStack.pop_back();
     }
 };
 
-void printObject(
+void PrintObject(
     XcodePrinter & printer,
     const std::vector<std::pair<std::string, Any>>& object)
 {
-    printer.beginObject();
+    printer.BeginObject();
     for (auto & pair : object) {
         auto & key = pair.first;
         auto & value = pair.second;
         if (value.is<std::string>()) {
-            printer.printKeyValue(key, value.as<std::string>());
+            printer.PrintKeyValue(key, value.as<std::string>());
         }
         else if (pair.second.is<std::vector<std::string>>()) {
-            printer.printKeyValue(key, value.as<std::vector<std::string>>());
+            printer.PrintKeyValue(key, value.as<std::vector<std::string>>());
         }
     }
-    printer.endObject();
+    printer.EndObject();
 }
 
-std::string findLastKnownFileType(const std::string& path) noexcept
+std::string FindLastKnownFileType(const std::string& path) noexcept
 {
     auto ext = std::get<1>(FileSystem::splitExtension(path));
     if (ext == "cpp" || ext == "cxx" || ext == "cc") {
@@ -532,7 +532,7 @@ std::string findLastKnownFileType(const std::string& path) noexcept
     return "sourcecode";
 }
 
-bool isSourceFile(const std::string& path) noexcept
+bool IsSourceFile(const std::string& path) noexcept
 {
     auto ext = std::get<1>(FileSystem::splitExtension(path));
     return (ext == "c" || ext == "cc" || ext == "cpp" || ext == "cxx"
@@ -545,53 +545,53 @@ auto find(C & container, T & value) -> decltype(std::begin(container))
     return std::find(std::begin(container), std::end(container), value);
 }
 
-void setDefaultBuildConfig(XCBuildConfiguration& config)
+void SetDefaultBuildConfig(XCBuildConfiguration& config)
 {
-    config.addBuildSettings("ALWAYS_SEARCH_USER_PATHS", "NO");
-    config.addBuildSettings("CLANG_CXX_LANGUAGE_STANDARD", "\"c++14\"");
-    config.addBuildSettings("CLANG_CXX_LIBRARY", "\"libc++\"");
-    config.addBuildSettings("CLANG_ENABLE_MODULES", "YES");
-    config.addBuildSettings("CLANG_ENABLE_OBJC_ARC", "YES");
-    config.addBuildSettings("CLANG_WARN_BOOL_CONVERSION", "YES");
-    config.addBuildSettings("CLANG_WARN_CONSTANT_CONVERSION", "YES");
-    config.addBuildSettings("CLANG_WARN_DIRECT_OBJC_ISA_USAGE", "YES_ERROR");
-    config.addBuildSettings("CLANG_WARN_EMPTY_BODY", "YES");
-    config.addBuildSettings("CLANG_WARN_ENUM_CONVERSION", "YES");
-    config.addBuildSettings("CLANG_WARN_INT_CONVERSION", "YES");
-    config.addBuildSettings("CLANG_WARN_OBJC_ROOT_CLASS", "YES_ERROR");
-    config.addBuildSettings("CLANG_WARN_UNREACHABLE_CODE", "YES");
-    config.addBuildSettings("CLANG_WARN__DUPLICATE_METHOD_MATCH", "YES");
-    config.addBuildSettings("CODE_SIGN_IDENTITY", "\"-\"");
-    config.addBuildSettings("COPY_PHASE_STRIP", "NO");
-    config.addBuildSettings("GCC_C_LANGUAGE_STANDARD", "c11");
-    config.addBuildSettings("GCC_NO_COMMON_BLOCKS", "YES");
-    config.addBuildSettings("GCC_WARN_64_TO_32_BIT_CONVERSION", "YES");
-    config.addBuildSettings("GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS", "YES");
-    config.addBuildSettings("GCC_WARN_ABOUT_MISSING_NEWLINE", "YES");
-    config.addBuildSettings("GCC_WARN_ABOUT_MISSING_PROTOTYPES", "YES");
-    config.addBuildSettings("GCC_WARN_ABOUT_RETURN_TYPE", "YES_ERROR");
-    config.addBuildSettings("GCC_WARN_SHADOW", "YES");
-    config.addBuildSettings("GCC_WARN_SIGN_COMPARE", "YES");
-    config.addBuildSettings("GCC_WARN_UNDECLARED_SELECTOR", "YES");
-    config.addBuildSettings("GCC_WARN_UNINITIALIZED_AUTOS", "YES_AGGRESSIVE");
-    config.addBuildSettings("GCC_WARN_UNKNOWN_PRAGMAS", "YES");
-    config.addBuildSettings("GCC_WARN_UNUSED_FUNCTION", "YES");
-    config.addBuildSettings("GCC_WARN_UNUSED_LABEL", "YES");
-    config.addBuildSettings("GCC_WARN_UNUSED_VARIABLE", "YES");
-    config.addBuildSettings("MACOSX_DEPLOYMENT_TARGET", "10.11");
-    config.addBuildSettings("SDKROOT", "macosx");
+    config.AddBuildSettings("ALWAYS_SEARCH_USER_PATHS", "NO");
+    config.AddBuildSettings("CLANG_CXX_LANGUAGE_STANDARD", "\"c++14\"");
+    config.AddBuildSettings("CLANG_CXX_LIBRARY", "\"libc++\"");
+    config.AddBuildSettings("CLANG_ENABLE_MODULES", "YES");
+    config.AddBuildSettings("CLANG_ENABLE_OBJC_ARC", "YES");
+    config.AddBuildSettings("CLANG_WARN_BOOL_CONVERSION", "YES");
+    config.AddBuildSettings("CLANG_WARN_CONSTANT_CONVERSION", "YES");
+    config.AddBuildSettings("CLANG_WARN_DIRECT_OBJC_ISA_USAGE", "YES_ERROR");
+    config.AddBuildSettings("CLANG_WARN_EMPTY_BODY", "YES");
+    config.AddBuildSettings("CLANG_WARN_ENUM_CONVERSION", "YES");
+    config.AddBuildSettings("CLANG_WARN_INT_CONVERSION", "YES");
+    config.AddBuildSettings("CLANG_WARN_OBJC_ROOT_CLASS", "YES_ERROR");
+    config.AddBuildSettings("CLANG_WARN_UNREACHABLE_CODE", "YES");
+    config.AddBuildSettings("CLANG_WARN__DUPLICATE_METHOD_MATCH", "YES");
+    config.AddBuildSettings("CODE_SIGN_IDENTITY", "\"-\"");
+    config.AddBuildSettings("COPY_PHASE_STRIP", "NO");
+    config.AddBuildSettings("GCC_C_LANGUAGE_STANDARD", "c11");
+    config.AddBuildSettings("GCC_NO_COMMON_BLOCKS", "YES");
+    config.AddBuildSettings("GCC_WARN_64_TO_32_BIT_CONVERSION", "YES");
+    config.AddBuildSettings("GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS", "YES");
+    config.AddBuildSettings("GCC_WARN_ABOUT_MISSING_NEWLINE", "YES");
+    config.AddBuildSettings("GCC_WARN_ABOUT_MISSING_PROTOTYPES", "YES");
+    config.AddBuildSettings("GCC_WARN_ABOUT_RETURN_TYPE", "YES_ERROR");
+    config.AddBuildSettings("GCC_WARN_SHADOW", "YES");
+    config.AddBuildSettings("GCC_WARN_SIGN_COMPARE", "YES");
+    config.AddBuildSettings("GCC_WARN_UNDECLARED_SELECTOR", "YES");
+    config.AddBuildSettings("GCC_WARN_UNINITIALIZED_AUTOS", "YES_AGGRESSIVE");
+    config.AddBuildSettings("GCC_WARN_UNKNOWN_PRAGMAS", "YES");
+    config.AddBuildSettings("GCC_WARN_UNUSED_FUNCTION", "YES");
+    config.AddBuildSettings("GCC_WARN_UNUSED_LABEL", "YES");
+    config.AddBuildSettings("GCC_WARN_UNUSED_VARIABLE", "YES");
+    config.AddBuildSettings("MACOSX_DEPLOYMENT_TARGET", "10.11");
+    config.AddBuildSettings("SDKROOT", "macosx");
 }
 
-void setSearchPathsToBuildConfig(
+void SetSearchPathsToBuildConfig(
     XCBuildConfiguration& config,
     const CompileOptions& options)
 {
     if (!options.includeSearchPaths.empty()) {
-        config.addBuildSettings(
+        config.AddBuildSettings(
             "HEADER_SEARCH_PATHS", options.includeSearchPaths);
     }
     if (!options.librarySearchPaths.empty()) {
-        config.addBuildSettings(
+        config.AddBuildSettings(
             "LIBRARY_SEARCH_PATHS", options.librarySearchPaths);
     }
 
@@ -599,19 +599,19 @@ void setSearchPathsToBuildConfig(
         ///@todo Please refactor here
         auto iter = options.buildSettings.find("-std=");
         if (iter != std::end(options.buildSettings)) {
-            config.addBuildSettings("CLANG_CXX_LANGUAGE_STANDARD", encodeDoubleQuotes(iter->second));
+            config.AddBuildSettings("CLANG_CXX_LANGUAGE_STANDARD", EncodeDoubleQuotes(iter->second));
         }
     }
     {
         ///@todo Please refactor here
         auto iter = options.buildSettings.find("-stdlib=");
         if (iter != std::end(options.buildSettings)) {
-            config.addBuildSettings("CLANG_CXX_LIBRARY", encodeDoubleQuotes(iter->second));
+            config.AddBuildSettings("CLANG_CXX_LIBRARY", EncodeDoubleQuotes(iter->second));
         }
     }
 }
 
-std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
+std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
 {
     const bool hasFrameworks = !options.libraries.empty();
 
@@ -652,7 +652,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
 
     for (auto & source : options.sources) {
         auto fileRef = std::make_shared<PBXFileReference>();
-        fileRef->lastKnownFileType = findLastKnownFileType(source);
+        fileRef->lastKnownFileType = FindLastKnownFileType(source);
         fileRef->path = source;
         fileRef->sourceTree = "\"<group>\"";
 
@@ -682,7 +682,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
 
     for (auto & library : options.libraries) {
         auto fileRef = std::make_shared<PBXFileReference>();
-        fileRef->lastKnownFileType = findLastKnownFileType(library);
+        fileRef->lastKnownFileType = FindLastKnownFileType(library);
         if ("tbd" == std::get<1>(FileSystem::splitExtension(library))) {
             ///@todo This code is bad.
             fileRef->path = FileSystem::join("usr/lib/", library);
@@ -697,42 +697,42 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
     const auto buildConfigurationDebug = [&] {
         auto config = std::make_shared<XCBuildConfiguration>();
         config->name = "Debug";
-        setDefaultBuildConfig(*config);
-        setSearchPathsToBuildConfig(*config, options);
-        config->addBuildSettings("DEBUG_INFORMATION_FORMAT", "dwarf");
-        config->addBuildSettings("ENABLE_STRICT_OBJC_MSGSEND", "YES");
-        config->addBuildSettings("ENABLE_TESTABILITY", "YES");
-        config->addBuildSettings("GCC_DYNAMIC_NO_PIC", "NO");
-        config->addBuildSettings("GCC_OPTIMIZATION_LEVEL", "0");
-        config->addBuildSettings("GCC_PREPROCESSOR_DEFINITIONS", std::vector<std::string>{
+        SetDefaultBuildConfig(*config);
+        SetSearchPathsToBuildConfig(*config, options);
+        config->AddBuildSettings("DEBUG_INFORMATION_FORMAT", "dwarf");
+        config->AddBuildSettings("ENABLE_STRICT_OBJC_MSGSEND", "YES");
+        config->AddBuildSettings("ENABLE_TESTABILITY", "YES");
+        config->AddBuildSettings("GCC_DYNAMIC_NO_PIC", "NO");
+        config->AddBuildSettings("GCC_OPTIMIZATION_LEVEL", "0");
+        config->AddBuildSettings("GCC_PREPROCESSOR_DEFINITIONS", std::vector<std::string>{
             "\"DEBUG=1\"",
             "\"$(inherited)\"",
         });
-        config->addBuildSettings("MTL_ENABLE_DEBUG_INFO", "YES");
-        config->addBuildSettings("ONLY_ACTIVE_ARCH", "YES");
+        config->AddBuildSettings("MTL_ENABLE_DEBUG_INFO", "YES");
+        config->AddBuildSettings("ONLY_ACTIVE_ARCH", "YES");
         return config;
     } ();
     const auto buildConfigurationRelease = [&] {
         auto config = std::make_shared<XCBuildConfiguration>();
         config->name = "Release";
-        setDefaultBuildConfig(*config);
-        setSearchPathsToBuildConfig(*config, options);
-        config->addBuildSettings("DEBUG_INFORMATION_FORMAT", "\"dwarf-with-dsym\"");
-        config->addBuildSettings("ENABLE_NS_ASSERTIONS", "NO");
-        config->addBuildSettings("ENABLE_STRICT_OBJC_MSGSEND", "YES");
-        config->addBuildSettings("MTL_ENABLE_DEBUG_INFO", "NO");
+        SetDefaultBuildConfig(*config);
+        SetSearchPathsToBuildConfig(*config, options);
+        config->AddBuildSettings("DEBUG_INFORMATION_FORMAT", "\"dwarf-with-dsym\"");
+        config->AddBuildSettings("ENABLE_NS_ASSERTIONS", "NO");
+        config->AddBuildSettings("ENABLE_STRICT_OBJC_MSGSEND", "YES");
+        config->AddBuildSettings("MTL_ENABLE_DEBUG_INFO", "NO");
         return config;
     }();
     const auto buildConfigurationTargetDebug = [&] {
         auto config = std::make_shared<XCBuildConfiguration>();
         config->name = "Debug";
-        config->addBuildSettings("PRODUCT_NAME", "\"$(TARGET_NAME)\"");
+        config->AddBuildSettings("PRODUCT_NAME", "\"$(TARGET_NAME)\"");
         return config;
     }();
     const auto buildConfigurationTargetRelease = [&] {
         auto config = std::make_shared<XCBuildConfiguration>();
         config->name = "Release";
-        config->addBuildSettings("PRODUCT_NAME", "\"$(TARGET_NAME)\"");
+        config->AddBuildSettings("PRODUCT_NAME", "\"$(TARGET_NAME)\"");
         return config;
     }();
 
@@ -757,8 +757,8 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
         auto phase = std::make_shared<PBXSourcesBuildPhase>();
         phase->buildActionMask = "2147483647";
         phase->runOnlyForDeploymentPostprocessing = "0";
-        sourceGroup->visit([&](std::shared_ptr<PBXFileReference> source) {
-            if (isSourceFile(source->path)) {
+        sourceGroup->Visit([&](std::shared_ptr<PBXFileReference> source) {
+            if (IsSourceFile(source->path)) {
                 auto file = std::make_shared<PBXBuildFile>();
                 file->fileRef = source;
                 phase->files.push_back(std::move(file));
@@ -771,7 +771,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
         auto phase = std::make_shared<PBXFrameworksBuildPhase>();
         phase->buildActionMask = "2147483647";
         phase->runOnlyForDeploymentPostprocessing = "0";
-        frameworksGroup->visit([&](std::shared_ptr<PBXFileReference> source) {
+        frameworksGroup->Visit([&](std::shared_ptr<PBXFileReference> source) {
             auto file = std::make_shared<PBXBuildFile>();
             file->fileRef = source;
             phase->files.push_back(std::move(file));
@@ -814,9 +814,9 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
         project->projectRoot = "\"\"";
         project->targets.push_back(nativeTarget);
 
-        project->addAttribute("LastUpgradeCheck", "0710");
+        project->AddAttribute("LastUpgradeCheck", "0710");
         if (!options.author.empty()) {
-            project->addAttribute("ORGANIZATIONNAME", encodeDoubleQuotes(options.author));
+            project->AddAttribute("ORGANIZATIONNAME", EncodeDoubleQuotes(options.author));
         }
 
         std::vector<XcodeTargetAttribute> targetAttributes;
@@ -826,7 +826,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
             attribute.CreatedOnToolsVersion = "7.1.1";
             targetAttributes.push_back(std::move(attribute));
         }
-        project->addAttribute("TargetAttributes", std::move(targetAttributes));
+        project->AddAttribute("TargetAttributes", std::move(targetAttributes));
         return project;
     }();
 
@@ -835,10 +835,10 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
     xcodeProject->archiveVersion = "1";
     xcodeProject->objectVersion = "46";
     xcodeProject->rootObject = pbxProject;
-    sourceGroup->visit([&](std::shared_ptr<PBXFileReference> source) {
+    sourceGroup->Visit([&](std::shared_ptr<PBXFileReference> source) {
         xcodeProject->fileReferences.push_back(source);
     });
-    frameworksGroup->visit([&](std::shared_ptr<PBXFileReference> source) {
+    frameworksGroup->Visit([&](std::shared_ptr<PBXFileReference> source) {
         xcodeProject->fileReferences.push_back(source);
     });
     xcodeProject->fileReferences.push_back(productReference);
@@ -890,25 +890,25 @@ std::string getFilename(const std::string& path)
     return std::get<1>(FileSystem::split(path));
 }
 
-void printObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
+void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
 {
-    constexpr bool isSingleLine = true;
+    constexpr bool IsSingleLine = true;
 
-    printer.beginSection("PBXBuildFile");
+    printer.BeginSection("PBXBuildFile");
     auto printPBXBuildFile = [&](
         const std::vector<std::shared_ptr<PBXBuildFile>>& files,
         const std::string& comments) {
         for (auto & f : files) {
             auto & buildFile = *f;
-            printer.beginKeyValue(stringifyUUID(
+            printer.BeginKeyValue(StringifyUUID(
                 buildFile.uuid,
                 getFilename(buildFile.fileRef->path) + " in " + comments));
-                printer.beginObject(isSingleLine);
-                printer.printKeyValue("isa", buildFile.isa());
-                printer.printKeyValue("fileRef",
-                    stringifyUUID(buildFile.fileRef->uuid, getFilename(buildFile.fileRef->path)));
-                printer.endObject();
-            printer.endKeyValue();
+                printer.BeginObject(IsSingleLine);
+                printer.PrintKeyValue("isa", buildFile.isa());
+                printer.PrintKeyValue("fileRef",
+                    StringifyUUID(buildFile.fileRef->uuid, getFilename(buildFile.fileRef->path)));
+                printer.EndObject();
+            printer.EndKeyValue();
         }
     };
     for (auto & phase : xcodeProject.sourcesBuildPhases) {
@@ -917,233 +917,233 @@ void printObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
     for (auto & phase : xcodeProject.frameworkBuildPhases) {
         printPBXBuildFile(phase->files, phase->comments());
     }
-    printer.endSection();
+    printer.EndSection();
 
-    printer.beginSection("PBXCopyFilesBuildPhase");
+    printer.BeginSection("PBXCopyFilesBuildPhase");
     for (auto & phase : xcodeProject.copyFilesBuildPhases) {
-        printer.beginKeyValue(stringifyUUID(phase->uuid, phase->comments()));
-            printer.beginObject();
-            printer.printKeyValue("isa", phase->isa());
-            printer.printKeyValue("buildActionMask", phase->buildActionMask);
-            printer.printKeyValue("dstPath", phase->dstPath);
-            printer.printKeyValue("dstSubfolderSpec", phase->dstSubfolderSpec);
-            printer.printKeyValue("files", phase->files);
-            printer.printKeyValue("runOnlyForDeploymentPostprocessing",
+        printer.BeginKeyValue(StringifyUUID(phase->uuid, phase->comments()));
+            printer.BeginObject();
+            printer.PrintKeyValue("isa", phase->isa());
+            printer.PrintKeyValue("buildActionMask", phase->buildActionMask);
+            printer.PrintKeyValue("dstPath", phase->dstPath);
+            printer.PrintKeyValue("dstSubfolderSpec", phase->dstSubfolderSpec);
+            printer.PrintKeyValue("files", phase->files);
+            printer.PrintKeyValue("runOnlyForDeploymentPostprocessing",
                 phase->runOnlyForDeploymentPostprocessing);
-            printer.endObject();
-        printer.endKeyValue();
+            printer.EndObject();
+        printer.EndKeyValue();
     }
-    printer.endSection();
+    printer.EndSection();
 
-    printer.beginSection("PBXFileReference");
+    printer.BeginSection("PBXFileReference");
     for (auto & f : xcodeProject.fileReferences) {
         auto & fileRef = *f;
-        printer.beginKeyValue(stringifyUUID(fileRef.uuid, fileRef.path));
-            printer.beginObject(isSingleLine);
-                printer.printKeyValue("isa", fileRef.isa());
+        printer.BeginKeyValue(StringifyUUID(fileRef.uuid, fileRef.path));
+            printer.BeginObject(IsSingleLine);
+                printer.PrintKeyValue("isa", fileRef.isa());
                 if (fileRef.explicitFileType) {
-                    printer.printKeyValue("explicitFileType", *fileRef.explicitFileType);
+                    printer.PrintKeyValue("explicitFileType", *fileRef.explicitFileType);
                 }
                 if (fileRef.includeInIndex) {
-                    printer.printKeyValue("includeInIndex", *fileRef.includeInIndex);
+                    printer.PrintKeyValue("includeInIndex", *fileRef.includeInIndex);
                 }
                 if (fileRef.lastKnownFileType) {
-                    printer.printKeyValue("lastKnownFileType", *fileRef.lastKnownFileType);
+                    printer.PrintKeyValue("lastKnownFileType", *fileRef.lastKnownFileType);
                 }
                 if (!FileSystem::getDirectoryName(fileRef.path).empty()) {
-                    printer.printKeyValue("name", FileSystem::getBaseName(fileRef.path));
+                    printer.PrintKeyValue("name", FileSystem::getBaseName(fileRef.path));
                 }
-                printer.printKeyValue("path", fileRef.path);
-                printer.printKeyValue("sourceTree", fileRef.sourceTree);
-            printer.endObject();
-        printer.endKeyValue();
+                printer.PrintKeyValue("path", fileRef.path);
+                printer.PrintKeyValue("sourceTree", fileRef.sourceTree);
+            printer.EndObject();
+        printer.EndKeyValue();
     }
-    printer.endSection();
+    printer.EndSection();
 
-    printer.beginSection("PBXFrameworksBuildPhase");
+    printer.BeginSection("PBXFrameworksBuildPhase");
     for (auto & phase : xcodeProject.frameworkBuildPhases) {
-        printer.beginKeyValue(stringifyUUID(phase->uuid, phase->comments()));
-            printer.beginObject();
-                printer.printKeyValue("isa", phase->isa());
-                printer.printKeyValue("buildActionMask", phase->buildActionMask);
-                printer.printKeyValue("files", toFileListString(*phase));
-                printer.printKeyValue("runOnlyForDeploymentPostprocessing",
+        printer.BeginKeyValue(StringifyUUID(phase->uuid, phase->comments()));
+            printer.BeginObject();
+                printer.PrintKeyValue("isa", phase->isa());
+                printer.PrintKeyValue("buildActionMask", phase->buildActionMask);
+                printer.PrintKeyValue("files", ToFileListString(*phase));
+                printer.PrintKeyValue("runOnlyForDeploymentPostprocessing",
                     phase->runOnlyForDeploymentPostprocessing);
-            printer.endObject();
-        printer.endKeyValue();
+            printer.EndObject();
+        printer.EndKeyValue();
     }
-    printer.endSection();
+    printer.EndSection();
 
-    printer.beginSection("PBXGroup");
+    printer.BeginSection("PBXGroup");
     for (auto & group : xcodeProject.groups) {
-        printer.beginKeyValue(group->getUuidWithComment());
-            printer.beginObject();
-                printer.printKeyValue("isa", group->isa());
-                printer.printKeyValue("children", group->getChildrenString());
+        printer.BeginKeyValue(group->GetUuidWithComment());
+            printer.BeginObject();
+                printer.PrintKeyValue("isa", group->isa());
+                printer.PrintKeyValue("children", group->GetChildrenString());
                 if (group->name) {
-                    printer.printKeyValue("name", *group->name);
+                    printer.PrintKeyValue("name", *group->name);
                 }
                 if (group->path) {
-                    printer.printKeyValue("path", *group->path);
+                    printer.PrintKeyValue("path", *group->path);
                 }
-                printer.printKeyValue("sourceTree", group->getSourceTree());
-            printer.endObject();
-        printer.endKeyValue();
+                printer.PrintKeyValue("sourceTree", group->GetSourceTree());
+            printer.EndObject();
+        printer.EndKeyValue();
     }
-    printer.endSection();
+    printer.EndSection();
 
-    printer.beginSection("PBXNativeTarget");
+    printer.BeginSection("PBXNativeTarget");
     for (auto & target : xcodeProject.nativeTargets) {
-        printer.beginKeyValue(stringifyUUID(target->uuid, target->name));
-            printer.beginObject();
-                printer.printKeyValue("isa", target->isa());
-                printer.printKeyValue("buildConfigurationList", stringifyUUID(
+        printer.BeginKeyValue(StringifyUUID(target->uuid, target->name));
+            printer.BeginObject();
+                printer.PrintKeyValue("isa", target->isa());
+                printer.PrintKeyValue("buildConfigurationList", StringifyUUID(
                     target->buildConfigurationList->uuid,
                     "Build configuration list for "
                     + target->isa()
                     + ' '
-                    + encodeDoubleQuotes(target->name)));
-                printer.printKeyValue("buildPhases", target->getBuildPhasesString());
-                printer.printKeyValue("buildRules", target->buildRules);
-                printer.printKeyValue("dependencies", target->dependencies);
-                printer.printKeyValue("name", target->name);
-                printer.printKeyValue("productName", target->productName);
-                printer.printKeyValue("productReference",
-                    stringifyUUID(target->productReference->uuid, target->productReference->path));
-                printer.printKeyValue("productType", target->productType);
-            printer.endObject();
-        printer.endKeyValue();
+                    + EncodeDoubleQuotes(target->name)));
+                printer.PrintKeyValue("buildPhases", target->GetBuildPhasesString());
+                printer.PrintKeyValue("buildRules", target->buildRules);
+                printer.PrintKeyValue("dependencies", target->dependencies);
+                printer.PrintKeyValue("name", target->name);
+                printer.PrintKeyValue("productName", target->productName);
+                printer.PrintKeyValue("productReference",
+                    StringifyUUID(target->productReference->uuid, target->productReference->path));
+                printer.PrintKeyValue("productType", target->productType);
+            printer.EndObject();
+        printer.EndKeyValue();
     }
-    printer.endSection();
+    printer.EndSection();
 
-    printer.beginSection("PBXProject");
+    printer.BeginSection("PBXProject");
     for (auto & project : xcodeProject.projects) {
-        printer.beginKeyValue(stringifyUUID(project->uuid, "Project object"));
-            printer.beginObject();
-                printer.printKeyValue("isa", project->isa());
-                printer.printKeyValue("attributes", [&] {
-                    printer.beginObject();
+        printer.BeginKeyValue(StringifyUUID(project->uuid, "Project object"));
+            printer.BeginObject();
+                printer.PrintKeyValue("isa", project->isa());
+                printer.PrintKeyValue("attributes", [&] {
+                    printer.BeginObject();
                     for (auto & pair : project->attributes) {
                         if (pair.second.is<std::string>()) {
-                            printer.printKeyValue(pair.first, pair.second.as<std::string>());
+                            printer.PrintKeyValue(pair.first, pair.second.as<std::string>());
                         }
                         else if (pair.second.is<std::vector<XcodeTargetAttribute>>()) {
                             auto & targetAttributes = pair.second.as<std::vector<XcodeTargetAttribute>>();
-                            printer.printKeyValue(pair.first, [&] {
-                                printer.beginObject();
+                            printer.PrintKeyValue(pair.first, [&] {
+                                printer.BeginObject();
                                 for (auto & targetAttribute : targetAttributes) {
-                                    printer.beginKeyValue(targetAttribute.target->uuid);
-                                        printer.beginObject();
+                                    printer.BeginKeyValue(targetAttribute.target->uuid);
+                                        printer.BeginObject();
                                             if (targetAttribute.CreatedOnToolsVersion) {
-                                                printer.printKeyValue("CreatedOnToolsVersion",
+                                                printer.PrintKeyValue("CreatedOnToolsVersion",
                                                     *targetAttribute.CreatedOnToolsVersion);
                                             }
                                             if (targetAttribute.DevelopmentTeam) {
-                                                printer.printKeyValue("DevelopmentTeam",
+                                                printer.PrintKeyValue("DevelopmentTeam",
                                                     *targetAttribute.DevelopmentTeam);
                                             }
                                             if (targetAttribute.TestTargetID) {
-                                                printer.printKeyValue("TestTargetID",
+                                                printer.PrintKeyValue("TestTargetID",
                                                     *targetAttribute.TestTargetID);
                                             }
-                                        printer.endObject();
-                                    printer.endKeyValue();
+                                        printer.EndObject();
+                                    printer.EndKeyValue();
                                 }
-                                printer.endObject();
+                                printer.EndObject();
                             });
                         }
                     }
-                    printer.endObject();
+                    printer.EndObject();
                 });
-                printer.printKeyValue("buildConfigurationList", stringifyUUID(
+                printer.PrintKeyValue("buildConfigurationList", StringifyUUID(
                     project->buildConfigurationList->uuid,
                     "Build configuration list for PBXProject "
-                        + encodeDoubleQuotes(xcodeProject.name)));
-                printer.printKeyValue("compatibilityVersion", project->compatibilityVersion);
-                printer.printKeyValue("developmentRegion", project->developmentRegion);
-                printer.printKeyValue("hasScannedForEncodings", project->hasScannedForEncodings);
-                printer.printKeyValue("knownRegions", project->knownRegions);
-                printer.printKeyValue("mainGroup", project->mainGroup->uuid);
-                printer.printKeyValue("productRefGroup",
-                    stringifyUUID(project->productRefGroup->uuid, project->productRefGroup->name));
-                printer.printKeyValue("projectDirPath", project->projectDirPath);
-                printer.printKeyValue("projectRoot", project->projectRoot);
-                printer.printKeyValue("targets", project->getTargetsString());
-            printer.endObject();
-        printer.endKeyValue();
+                        + EncodeDoubleQuotes(xcodeProject.name)));
+                printer.PrintKeyValue("compatibilityVersion", project->compatibilityVersion);
+                printer.PrintKeyValue("developmentRegion", project->developmentRegion);
+                printer.PrintKeyValue("hasScannedForEncodings", project->hasScannedForEncodings);
+                printer.PrintKeyValue("knownRegions", project->knownRegions);
+                printer.PrintKeyValue("mainGroup", project->mainGroup->uuid);
+                printer.PrintKeyValue("productRefGroup",
+                    StringifyUUID(project->productRefGroup->uuid, project->productRefGroup->name));
+                printer.PrintKeyValue("projectDirPath", project->projectDirPath);
+                printer.PrintKeyValue("projectRoot", project->projectRoot);
+                printer.PrintKeyValue("targets", project->GetTargetsString());
+            printer.EndObject();
+        printer.EndKeyValue();
     }
-    printer.endSection();
+    printer.EndSection();
 
-    printer.beginSection("PBXSourcesBuildPhase");
+    printer.BeginSection("PBXSourcesBuildPhase");
     for (auto & phase : xcodeProject.sourcesBuildPhases) {
-        printer.beginKeyValue(stringifyUUID(phase->uuid, phase->comments()));
-            printer.beginObject();
-                printer.printKeyValue("isa", phase->isa());
-                printer.printKeyValue("buildActionMask", phase->buildActionMask);
-                printer.printKeyValue("files", toFileListString(*phase));
-                printer.printKeyValue("runOnlyForDeploymentPostprocessing",
+        printer.BeginKeyValue(StringifyUUID(phase->uuid, phase->comments()));
+            printer.BeginObject();
+                printer.PrintKeyValue("isa", phase->isa());
+                printer.PrintKeyValue("buildActionMask", phase->buildActionMask);
+                printer.PrintKeyValue("files", ToFileListString(*phase));
+                printer.PrintKeyValue("runOnlyForDeploymentPostprocessing",
                     phase->runOnlyForDeploymentPostprocessing);
-            printer.endObject();
-        printer.endKeyValue();
+            printer.EndObject();
+        printer.EndKeyValue();
     }
-    printer.endSection();
+    printer.EndSection();
 
-    printer.beginSection("XCBuildConfiguration");
+    printer.BeginSection("XCBuildConfiguration");
     for (auto & config : xcodeProject.buildConfigurations) {
-        printer.printKeyValue(stringifyUUID(config->uuid, config->name), [&] {
-            printer.beginObject();
-                printer.printKeyValue("isa", config->isa());
-                printer.printKeyValue("buildSettings", [&] {
-                    printObject(printer, config->buildSettings);
+        printer.PrintKeyValue(StringifyUUID(config->uuid, config->name), [&] {
+            printer.BeginObject();
+                printer.PrintKeyValue("isa", config->isa());
+                printer.PrintKeyValue("buildSettings", [&] {
+                    PrintObject(printer, config->buildSettings);
                 });
-                printer.printKeyValue("name", config->name);
-            printer.endObject();
+                printer.PrintKeyValue("name", config->name);
+            printer.EndObject();
         });
     }
-    printer.endSection();
+    printer.EndSection();
 
-    printer.beginSection("XCConfigurationList");
+    printer.BeginSection("XCConfigurationList");
     for (auto & configurationList : xcodeProject.configurationLists) {
-        printer.beginKeyValue(stringifyUUID(
+        printer.BeginKeyValue(StringifyUUID(
             configurationList->uuid,
-            "Build configuration list for PBXProject " + encodeDoubleQuotes(xcodeProject.name)));
-            printer.beginObject();
-                printer.printKeyValue("isa", configurationList->isa());
-                printer.printKeyValue("buildConfigurations",
-                    configurationList->getBuildConfigurationsString());
-                printer.printKeyValue("defaultConfigurationIsVisible",
+            "Build configuration list for PBXProject " + EncodeDoubleQuotes(xcodeProject.name)));
+            printer.BeginObject();
+                printer.PrintKeyValue("isa", configurationList->isa());
+                printer.PrintKeyValue("buildConfigurations",
+                    configurationList->GetBuildConfigurationsString());
+                printer.PrintKeyValue("defaultConfigurationIsVisible",
                     configurationList->defaultConfigurationIsVisible);
                 if (configurationList->defaultConfigurationName) {
-                    printer.printKeyValue("defaultConfigurationName",
+                    printer.PrintKeyValue("defaultConfigurationName",
                         *configurationList->defaultConfigurationName);
                 }
-            printer.endObject();
-        printer.endKeyValue();
+            printer.EndObject();
+        printer.EndKeyValue();
     }
-    printer.endSection();
+    printer.EndSection();
 }
 
-std::string generatePbxproj(const XcodeProject& xcodeProject)
+std::string GeneratePbxproj(const XcodeProject& xcodeProject)
 {
     std::stringstream stream;
     stream << "// !$*UTF8*$!\n";
 
     XcodePrinter printer(stream);
-    printer.beginObject();
-    printer.printKeyValue("archiveVersion", xcodeProject.archiveVersion);
-    printer.printKeyValue("classes", [&] {
-        printer.beginObject();
-        printer.endObject();
+    printer.BeginObject();
+    printer.PrintKeyValue("archiveVersion", xcodeProject.archiveVersion);
+    printer.PrintKeyValue("classes", [&] {
+        printer.BeginObject();
+        printer.EndObject();
     });
-    printer.printKeyValue("objectVersion", xcodeProject.objectVersion);
-    printer.printKeyValue("objects", [&] {
-        printer.beginObject();
-        printObjects(printer, xcodeProject);
-        printer.endObject();
+    printer.PrintKeyValue("objectVersion", xcodeProject.objectVersion);
+    printer.PrintKeyValue("objects", [&] {
+        printer.BeginObject();
+        PrintObjects(printer, xcodeProject);
+        printer.EndObject();
     });
-    printer.printKeyValue("rootObject",
-        stringifyUUID(xcodeProject.rootObject->uuid, "Project object"));
-    printer.endObject();
+    printer.PrintKeyValue("rootObject",
+        StringifyUUID(xcodeProject.rootObject->uuid, "Project object"));
+    printer.EndObject();
 
     stream << "\n";
     return stream.str();
@@ -1151,7 +1151,7 @@ std::string generatePbxproj(const XcodeProject& xcodeProject)
 
 } // unnamed namespace
 
-GeneratorError Xcode::generateXcodeProject(const CompileOptions& options)
+GeneratorError Xcode::GenerateXcodeProject(const CompileOptions& options)
 {
     namespace FileSystem = somera::FileSystem;
 
@@ -1173,7 +1173,7 @@ GeneratorError Xcode::generateXcodeProject(const CompileOptions& options)
         FileSystem::createDirectories(xcworkspacePath);
     }
 
-    auto xcodeProject = createXcodeProject(options);
+    auto xcodeProject = CreateXcodeProject(options);
     {
         const auto pbxprojPath = FileSystem::join(
             xcodeprojPath, "project.pbxproj");
@@ -1181,7 +1181,7 @@ GeneratorError Xcode::generateXcodeProject(const CompileOptions& options)
         if (!stream) {
             return GeneratorError("Error: Cannot open.");
         }
-        stream << generatePbxproj(*xcodeProject);
+        stream << GeneratePbxproj(*xcodeProject);
     }
     {
         const auto xcworkspacedataPath = FileSystem::join(
@@ -1191,7 +1191,7 @@ GeneratorError Xcode::generateXcodeProject(const CompileOptions& options)
             return GeneratorError("Error: Cannot open.");
         }
         auto xcodeprojName = std::get<1>(FileSystem::split(xcodeprojPath));
-        stream << generateXCWorkSpaceData(xcodeprojName);
+        stream << GenerateXCWorkSpaceData(xcodeprojName);
     }
     return {};
 }
