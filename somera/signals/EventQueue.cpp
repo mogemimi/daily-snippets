@@ -7,7 +7,7 @@
 namespace somera {
 
 EventQueue::EventQueue()
-    : signalBody(std::move(std::make_shared<SignalBody>()))
+    : signalBody(std::make_shared<SignalBody>())
 {}
 
 Connection EventQueue::Connect(std::function<void(const Any&)> const& slot)

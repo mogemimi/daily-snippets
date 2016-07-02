@@ -112,7 +112,7 @@ Connection IOService::ScheduleTask(std::function<void()> func)
 
     auto body = std::make_unique<ConnectionEventLoop>(this, listener.id);
     Connection connection(std::move(body));
-    return std::move(connection);
+    return connection;
 }
 
 bool IOService::IsConnected(int connectionId) const

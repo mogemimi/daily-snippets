@@ -37,7 +37,7 @@ std::string UnsafeToFormatString(char const* format, std::va_list arg)
     assert(result.back() == '\0');
     result.resize(length);
 #endif
-    return std::move(result);
+    return result;
 }
 
 } // unnamed namespace
@@ -52,14 +52,14 @@ std::string StringHelper::toLower(const std::string& source)
 {
     std::string output = source;
     std::transform(output.begin(), output.end(), output.begin(), ::tolower);
-    return std::move(output);
+    return output;
 }
 
 std::string StringHelper::toUpper(const std::string& source)
 {
     std::string output = source;
     std::transform(output.begin(), output.end(), output.begin(), ::toupper);
-    return std::move(output);
+    return output;
 }
 
 std::string StringHelper::replace(
@@ -76,7 +76,7 @@ std::string StringHelper::replace(
         result.replace(start, from.length(), to);
         start += to.length();
     }
-    return std::move(result);
+    return result;
 }
 
 std::vector<std::string>
@@ -90,7 +90,7 @@ StringHelper::split(const std::string& source, char separator)
         start = end + 1;
     }
     tokens.push_back(source.substr(start));
-    return std::move(tokens);
+    return tokens;
 }
 
 std::vector<std::string>
@@ -104,7 +104,7 @@ StringHelper::split(const std::string& source, const std::string& separator)
         start = end + separator.size();
     }
     tokens.push_back(source.substr(start));
-    return std::move(tokens);
+    return tokens;
 }
 
 std::string StringHelper::trimRight(const std::string& source, char separator)
@@ -113,7 +113,7 @@ std::string StringHelper::trimRight(const std::string& source, char separator)
     std::string result(
         std::begin(source),
         std::find_if(std::rbegin(source), std::rend(source), func).base());
-    return std::move(result);
+    return result;
 }
 
 std::string StringHelper::trimLeft(const std::string& source, char separator)
@@ -122,7 +122,7 @@ std::string StringHelper::trimLeft(const std::string& source, char separator)
     std::string result(
         std::find_if(std::begin(source), std::end(source), func),
         std::end(source));
-    return std::move(result);
+    return result;
 }
 
 std::string StringHelper::trimRight(
@@ -133,7 +133,7 @@ std::string StringHelper::trimRight(
     std::string result(
         std::begin(source),
         std::find_if(std::rbegin(source), std::rend(source), func).base());
-    return std::move(result);
+    return result;
 }
 
 std::string StringHelper::trimLeft(
@@ -144,7 +144,7 @@ std::string StringHelper::trimLeft(
     std::string result(
         std::find_if(std::begin(source), std::end(source), func),
         std::end(source));
-    return std::move(result);
+    return result;
 }
 
 std::string StringHelper::format(char const* formatText, ...)
@@ -153,7 +153,7 @@ std::string StringHelper::format(char const* formatText, ...)
     va_start(arg, formatText);
     auto result = UnsafeToFormatString(formatText, arg);
     va_end(arg);
-    return std::move(result);
+    return result;
 }
 
 } // namespace somera

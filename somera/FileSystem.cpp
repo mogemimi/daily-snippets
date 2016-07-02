@@ -277,7 +277,7 @@ std::string FileSystem::join(const std::string& path1, const std::string& path2)
         }
     }
     result += path2;
-    return std::move(result);
+    return result;
 }
 
 std::string FileSystem::getBaseName(const std::string& path)
@@ -312,7 +312,7 @@ FileSystem::split(const std::string& path)
     } else {
         std::get<1>(result) = path;
     }
-    return std::move(result);
+    return result;
 }
 
 std::tuple<std::string, std::string>
@@ -326,7 +326,7 @@ FileSystem::splitExtension(const std::string& path)
     } else {
         std::get<0>(result) = path;
     }
-    return std::move(result);
+    return result;
 }
 
 //bool FileSystem::isAbsolute(const std::string& path)
@@ -375,7 +375,7 @@ std::string FileSystem::normalize(const std::string& path)
         }
         fullPath = FileSystem::join(fullPath, current);
     }
-    return std::move(fullPath);
+    return fullPath;
 }
 
 std::string
@@ -407,7 +407,7 @@ FileSystem::relative(const std::string& path, const std::string& start)
     if (result.empty()) {
         result = '.';
     }
-    return std::move(result);
+    return result;
 }
 
 std::string FileSystem::getCurrentDirectory()
@@ -534,12 +534,12 @@ std::error_code FileSystem::rename(const std::string& oldname, const std::string
     if (!FileSystem::exists(oldname)) {
         // error: Cannot find the file.
         std::error_code err {0, std::generic_category()};
-        return std::move(err);
+        return err;
     }
     if (::rename(oldname.c_str(), newname.c_str()) != 0) {
         // Error renaming file
         std::error_code err {0, std::generic_category()};
-        return std::move(err);
+        return err;
     }
     // Yay, rename succeeded!
     return {};

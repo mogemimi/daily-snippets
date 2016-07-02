@@ -49,7 +49,7 @@ EndPoint EndPoint::CreateFromV4(const std::string& internetAddress, uint16_t por
                 *reinterpret_cast<in_addr_t*>(host->h_addr_list[0]);
         }
     }
-    return std::move(endPoint);
+    return endPoint;
 }
 
 EndPoint EndPoint::CreateFromV6(uint16_t port, uint32_t scopeId)
@@ -61,7 +61,7 @@ EndPoint EndPoint::CreateFromV6(uint16_t port, uint32_t scopeId)
     v6.sin6_family = ToAddressFamilyPOSIX(endPoint.family);
     v6.sin6_port = htons(port);
     v6.sin6_scope_id = scopeId;
-    return std::move(endPoint);
+    return endPoint;
 }
 
 EndPoint EndPoint::CreateFromAddressStorage(const ::sockaddr_storage& storage)
@@ -78,7 +78,7 @@ EndPoint EndPoint::CreateFromAddressStorage(const ::sockaddr_storage& storage)
         endPoint.family = AddressFamily::InterNetworkV6;
         endPoint.address.asV6 = *reinterpret_cast<const ::sockaddr_in6*>(&storage);
     }
-    return std::move(endPoint);
+    return endPoint;
 }
 
 AddressViewPOSIX EndPoint::GetAddressViewPOSIX() const
@@ -87,13 +87,13 @@ AddressViewPOSIX EndPoint::GetAddressViewPOSIX() const
         AddressViewPOSIX view;
         view.data = reinterpret_cast<const ::sockaddr*>(&address.asV4);
         view.size = sizeof(address.asV4);
-        return std::move(view);
+        return view;
     }
     assert(family == AddressFamily::InterNetworkV6);
     AddressViewPOSIX view;
     view.data = reinterpret_cast<const ::sockaddr*>(&address.asV6);
     view.size = sizeof(address.asV6);
-    return std::move(view);
+    return view;
 }
 
 std::string EndPoint::GetAddressNumber() const

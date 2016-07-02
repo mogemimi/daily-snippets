@@ -32,14 +32,14 @@ std::string Error::What() const noexcept
         }
         what += *line;
     }
-    return std::move(what);
+    return what;
 }
 
 Error MakeError(const std::string& description)
 {
     Error error;
     error.description = description;
-    return std::move(error);
+    return error;
 }
 
 } // namespace somera

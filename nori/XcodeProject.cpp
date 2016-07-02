@@ -186,7 +186,7 @@ struct PBXGroup final : public XcodeObject {
                 result.push_back(stringifyUUID(file->uuid, file->path));
             }
         }
-        return std::move(result);
+        return result;
     }
 
     void visit(const std::function<void(std::shared_ptr<PBXFileReference>)>& func) const
@@ -220,7 +220,7 @@ struct PBXNativeTarget final : public XcodeObject {
         for (auto & phase : buildPhases) {
             result.push_back(stringifyUUID(phase->uuid, phase->comments()));
         }
-        return std::move(result);
+        return result;
     }
 };
 
@@ -244,7 +244,7 @@ struct PBXProject final : public XcodeObject {
         for (auto & target : targets) {
             result.push_back(stringifyUUID(target->uuid, target->name));
         }
-        return std::move(result);
+        return result;
     }
 
     void addAttribute(const std::string& key, const std::string& value)
@@ -297,7 +297,7 @@ std::vector<std::string> toFileListString(const BuildPhase& phase)
             buildFile->uuid,
             buildFile->fileRef->path + " in " + phase.comments()));
     }
-    return std::move(result);
+    return result;
 }
 
 struct XCBuildConfiguration final : public XcodeObject {
@@ -345,7 +345,7 @@ struct XCConfigurationList final : public XcodeObject {
             result.push_back(stringifyUUID(
                 buildConfig->uuid, buildConfig->name));
         }
-        return std::move(result);
+        return result;
     }
 };
 
@@ -375,7 +375,7 @@ public:
         for (int i = 0; i < tabs; ++i) {
             spaces += "\t";
         }
-        return std::move(spaces);
+        return spaces;
     }
 
     void beginKeyValue(const std::string& key)
@@ -618,17 +618,17 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
     const auto sourceGroup = [&] {
         auto group = std::make_shared<PBXGroup>();
         group->name = "Source";
-        return std::move(group);
+        return group;
     }();
     const auto frameworksGroup = [&] {
         auto group = std::make_shared<PBXGroup>();
         group->name = "Frameworks";
-        return std::move(group);
+        return group;
     }();
     const auto productsGroup = [&] {
         auto group = std::make_shared<PBXGroup>();
         group->name = "Products";
-        return std::move(group);
+        return group;
     }();
     const auto mainGroup = [&] {
         auto group = std::make_shared<PBXGroup>();
@@ -637,7 +637,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
             group->children.push_back(frameworksGroup);
         }
         group->children.push_back(productsGroup);
-        return std::move(group);
+        return group;
     }();
 
     const auto productReference = [&] {
@@ -647,7 +647,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
         fileRef->path = options.productName;
         fileRef->sourceTree = "BUILT_PRODUCTS_DIR";
         productsGroup->children.push_back(fileRef);
-        return std::move(fileRef);
+        return fileRef;
     }();
 
     for (auto & source : options.sources) {
@@ -674,7 +674,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
             auto group = std::make_shared<PBXGroup>();
             group->name = directory;
             sourceGroup->children.push_back(group);
-            return std::move(group);
+            return group;
         };
         const auto group = getGroup();
         group->children.push_back(fileRef);
@@ -710,7 +710,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
         });
         config->addBuildSettings("MTL_ENABLE_DEBUG_INFO", "YES");
         config->addBuildSettings("ONLY_ACTIVE_ARCH", "YES");
-        return std::move(config);
+        return config;
     } ();
     const auto buildConfigurationRelease = [&] {
         auto config = std::make_shared<XCBuildConfiguration>();
@@ -721,19 +721,19 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
         config->addBuildSettings("ENABLE_NS_ASSERTIONS", "NO");
         config->addBuildSettings("ENABLE_STRICT_OBJC_MSGSEND", "YES");
         config->addBuildSettings("MTL_ENABLE_DEBUG_INFO", "NO");
-        return std::move(config);
+        return config;
     }();
     const auto buildConfigurationTargetDebug = [&] {
         auto config = std::make_shared<XCBuildConfiguration>();
         config->name = "Debug";
         config->addBuildSettings("PRODUCT_NAME", "\"$(TARGET_NAME)\"");
-        return std::move(config);
+        return config;
     }();
     const auto buildConfigurationTargetRelease = [&] {
         auto config = std::make_shared<XCBuildConfiguration>();
         config->name = "Release";
         config->addBuildSettings("PRODUCT_NAME", "\"$(TARGET_NAME)\"");
-        return std::move(config);
+        return config;
     }();
 
     const auto configurationListForProject = [&] {
@@ -742,7 +742,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
         configurationList->buildConfigurations.push_back(buildConfigurationRelease);
         configurationList->defaultConfigurationIsVisible = "0";
         configurationList->defaultConfigurationName = "Release";
-        return std::move(configurationList);
+        return configurationList;
     }();
     const auto configurationListForNativeTarget = [&] {
         auto configurationList = std::make_shared<XCConfigurationList>();
@@ -750,7 +750,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
         configurationList->buildConfigurations.push_back(buildConfigurationTargetRelease);
         configurationList->defaultConfigurationIsVisible = "0";
         configurationList->defaultConfigurationName = "Release";
-        return std::move(configurationList);
+        return configurationList;
     }();
 
     const auto sourcesBuildPhase = [&] {
@@ -764,7 +764,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
                 phase->files.push_back(std::move(file));
             }
         });
-        return std::move(phase);
+        return phase;
     }();
 
     const auto frameworksBuildPhase = [&] {
@@ -776,7 +776,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
             file->fileRef = source;
             phase->files.push_back(std::move(file));
         });
-        return std::move(phase);
+        return phase;
     }();
 
     const auto copyFilesBuildPhase = [&] {
@@ -785,7 +785,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
         phase->dstPath = "/usr/share/man/man1/";
         phase->dstSubfolderSpec = "0";
         phase->runOnlyForDeploymentPostprocessing = "1";
-        return std::move(phase);
+        return phase;
     }();
 
     const auto nativeTarget = [&] {
@@ -798,7 +798,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
         target->productName = options.productName;
         target->productReference = productReference;
         target->productType = "\"com.apple.product-type.tool\"";
-        return std::move(target);
+        return target;
     }();
 
     const auto pbxProject = [&] {
@@ -827,7 +827,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
             targetAttributes.push_back(std::move(attribute));
         }
         project->addAttribute("TargetAttributes", std::move(targetAttributes));
-        return std::move(project);
+        return project;
     }();
 
     auto xcodeProject = std::make_shared<XcodeProject>();
@@ -882,7 +882,7 @@ std::shared_ptr<XcodeProject> createXcodeProject(const CompileOptions& options)
             return cost(*a) >= cost(*b);
         });
 
-    return std::move(xcodeProject);
+    return xcodeProject;
 }
 
 std::string getFilename(const std::string& path)

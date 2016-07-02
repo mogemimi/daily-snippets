@@ -32,7 +32,7 @@ std::string newGuid() noexcept
         dist(random),
         dist(random),
         dist(random));
-    return std::move(id);
+    return id;
 }
 
 struct MSBuildProject {
@@ -133,7 +133,7 @@ public:
         for (size_t i = 1; i < stack.size(); ++i) {
             spaces += "  ";
         }
-        return std::move(spaces);
+        return spaces;
     }
 
     void startElement(const std::string& name)
