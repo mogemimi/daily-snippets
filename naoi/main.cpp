@@ -28,6 +28,11 @@ void setupCommandLineParser(CommandLineParser & parser)
 
 void refactorSourceCode(const std::string& path)
 {
+    if (FileSystem::isDirectory(path)) {
+        std::cerr << "error: " << path << " is directory, not text file." << std::endl;
+        return;
+    }
+
     std::ifstream input(path);
     if (!input) {
         return;
