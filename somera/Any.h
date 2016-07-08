@@ -64,7 +64,7 @@ public:
         if (!is<T>()) {
 #ifdef _HAS_EXCEPTIONS
             using BadAnyCast = std::runtime_error;
-            throw BadAnyCast;
+            throw BadAnyCast("BadAnyCast");
 #endif
         }
         assert(is<T>());
@@ -81,7 +81,7 @@ public:
         if (!is<T>()) {
 #ifdef _HAS_EXCEPTIONS
             using BadAnyCast = std::runtime_error;
-            throw BadAnyCast;
+            throw BadAnyCast("BadAnyCast");
 #endif
         }
         assert(is<T>());

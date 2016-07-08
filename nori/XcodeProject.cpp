@@ -5,6 +5,7 @@
 #include "somera/FileSystem.h"
 #include "somera/Optional.h"
 #include "somera/StringHelper.h"
+#include <algorithm>
 #include <cassert>
 #include <ctime>
 #include <fstream>
@@ -433,7 +434,9 @@ public:
 
     void BeginObject(bool singleLine = false)
     {
-        settingsStack.push_back(XcodePrinterSettings{singleLine});
+        XcodePrinterSettings settings;
+        settings.isSingleLine = singleLine;
+        settingsStack.push_back(std::move(settings));
         stream << "{";
         if (!IsSingleLine()) {
             stream << "\n";
@@ -459,7 +462,9 @@ public:
 
     void BeginSection(const std::string& sectionIn)
     {
-        settingsStack.push_back(XcodePrinterSettings{false});
+        XcodePrinterSettings settings;
+        settings.isSingleLine = false;
+        settingsStack.push_back(std::move(settings));
         this->section = sectionIn;
         stream << "\n";
         stream << "/* Begin " << section << " section */\n";

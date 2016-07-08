@@ -1,6 +1,7 @@
 // Copyright (c) 2015 mogemimi. Distributed under the MIT license.
 
 #include "FileSystem.h"
+#include <algorithm>
 #include <cassert>
 #include <vector>
 
@@ -9,11 +10,11 @@
 #endif
 
 #ifdef SOMERA_IS_WINDOWS
-
+#include <experimental/filesystem>
+#include <Windows.h>
 #else
 #include "somera/Defer.h"
 #include <array>
-#include <algorithm>
 #include <cstdio>
 #include <dirent.h>
 #include <sys/types.h>
@@ -31,16 +32,16 @@ std::string::size_type findFirstOfSlash(
     assert(first != std::string::npos);
     auto index = path.find_first_of('/', first);
 //#if defined(SOMERA_IS_WINDOWS)
-        const auto windowsIndex = path.find_first_of('\\', first);
-        if (index != std::string::npos) {
-            if (windowsIndex != std::string::npos) {
-                index = std::min(index, windowsIndex);
-            }
+    const auto windowsIndex = path.find_first_of('\\', first);
+    if (index != std::string::npos) {
+        if (windowsIndex != std::string::npos) {
+            index = std::min(index, windowsIndex);
         }
-        else if (windowsIndex != std::string::npos) {
-            assert(index == std::string::npos);
-            index = windowsIndex;
-        }
+    }
+    else if (windowsIndex != std::string::npos) {
+        assert(index == std::string::npos);
+        index = windowsIndex;
+    }
 //#endif
     if (index == 0) {
         return index + 1;
@@ -414,7 +415,18 @@ std::string FileSystem::getCurrentDirectory()
 {
 #ifdef SOMERA_IS_WINDOWS
     // See https://msdn.microsoft.com/en-us/library/windows/desktop/aa364934.aspx
-    //GetCurrentDirectory
+    auto bufferSize = GetCurrentDirectory(0, nullptr);
+    if (bufferSize <= 0) {
+        return {};
+    }
+    std::vector<char> cwd(bufferSize + 1, 0);
+    bufferSize = GetCurrentDirectory(cwd.size(), cwd.data());
+    assert(!cwd.empty());
+    assert(cwd.size() == (bufferSize + 1));
+    if (bufferSize <= 0) {
+        return {};
+    }
+    return cwd.data();
 #else
     char cwd[2048];
     if (getcwd(cwd, sizeof(cwd)) != nullptr) {
@@ -426,9 +438,11 @@ std::string FileSystem::getCurrentDirectory()
 
 bool FileSystem::createDirectory(const std::string& path)
 {
-#ifdef SOMERA_IS_WINDOWS
-#else
     assert(!path.empty());
+#ifdef SOMERA_IS_WINDOWS
+    namespace fs = std::experimental::filesystem;
+    return fs::create_directory(path);
+#else
     struct stat st;
     if (::stat(path.c_str(), &st) != -1) {
         return false;
@@ -439,10 +453,11 @@ bool FileSystem::createDirectory(const std::string& path)
 
 bool FileSystem::createDirectories(const std::string& path)
 {
-#ifdef SOMERA_IS_WINDOWS
-
-#else
     assert(!path.empty());
+#ifdef SOMERA_IS_WINDOWS
+    namespace fs = std::experimental::filesystem;
+    return fs::create_directories(path);
+#else
     if (path.empty()) {
         return false;
     }
@@ -470,20 +485,22 @@ bool FileSystem::createDirectories(const std::string& path)
 
 bool FileSystem::exists(const std::string& path)
 {
-#ifdef SOMERA_IS_WINDOWS
-
-#else
     assert(!path.empty());
+#ifdef SOMERA_IS_WINDOWS
+    namespace fs = std::experimental::filesystem;
+    return fs::exists(path);
+#else
     return ::access(path.c_str(), F_OK) != -1;
 #endif
 }
 
 bool FileSystem::isDirectory(const std::string& path)
 {
-#ifdef SOMERA_IS_WINDOWS
-
-#else
     assert(!path.empty());
+#ifdef SOMERA_IS_WINDOWS
+    namespace fs = std::experimental::filesystem;
+    return fs::is_directory(path);
+#else
     struct stat st;
     if (::stat(path.c_str(), &st) != 0) {
         return false;
