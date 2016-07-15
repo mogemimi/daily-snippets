@@ -302,6 +302,30 @@ std::string FileSystem::getDirectoryName(const std::string& path)
     return {};
 }
 
+std::size_t FileSystem::getFileSize(const std::string& path, std::error_code& errorCode)
+{
+    auto fp = fopen(path.c_str(), "rb");
+    if (fp == nullptr) {
+        // Error: Failed to open the file
+        errorCode.assign(errno, std::generic_category());
+        return 0;
+    }
+
+#if defined(_MSC_VER)
+    auto descriptor = _fileno(fp);
+#else
+    auto descriptor = fileno(fp);
+#endif
+    struct stat statBuf;
+    if (fstat(descriptor, &statBuf) == -1) {
+        fclose(fp);
+        errorCode.assign(errno, std::generic_category());
+        return 0;
+    }
+    fclose(fp);
+    return statBuf.st_size;
+}
+
 std::tuple<std::string, std::string>
 FileSystem::split(const std::string& path)
 {

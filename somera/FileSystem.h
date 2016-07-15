@@ -16,6 +16,10 @@ std::string getBaseName(const std::string& path);
 
 std::string getDirectoryName(const std::string& path);
 
+std::size_t getFileSize(const std::string& path);
+
+std::size_t getFileSize(const std::string& path, std::error_code& errorCode);
+
 std::tuple<std::string, std::string> split(const std::string& path);
 
 std::tuple<std::string, std::string> splitExtension(const std::string& path);
