@@ -3,12 +3,25 @@ PRODUCTNAME = textcxx
 
 HEADERS = \
     ../somera/*.h \
-    thirdparty/ConvertUTF.h
+    source/thirdparty/*.h \
+		source/*.h
 
 SOURCES = \
     ../somera/*.cpp \
-    thirdparty/ConvertUTF.c \
-    main.cpp
+    source/thirdparty/ConvertUTF.c \
+		source/ConsoleColor.cpp \
+		source/EditDistance.cpp \
+		source/Typo.cpp \
+		source/UTF8.cpp \
+		source/WordDiff.cpp \
+		source/WordSegmenter.cpp \
+    source/main.cpp
+
+ifeq ($(OS),Windows_NT)
+		SOURCES += source/SpellCheckWin.cpp
+else ($(shell uname -s),Darwin)
+		SOURCES += source/SpellCheckMac.mm
+endif
 
 xcode:
 	$(NORI) \

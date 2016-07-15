@@ -1,5 +1,9 @@
 // Copyright (c) 2016 mogemimi. Distributed under the MIT license.
 
+#include "ConsoleColor.h"
+#include "Typo.h"
+#include "WordDiff.h"
+#include "WordSegmenter.h"
 #include "somera/CommandLineParser.h"
 #include "somera/FileSystem.h"
 #include "somera/Optional.h"
@@ -23,7 +27,6 @@ void SetupCommandLineParser(CommandLineParser & parser)
     parser.setUsageText("textcxx [options ...] [C/C++ file ...]");
     parser.addArgument("-h", Flag, "Display available options");
     parser.addArgument("-help", Flag, "Display available options");
-    parser.addArgument("-no-pedantic", Flag, "Pedantic mode disabled");
 }
 
 struct Character {
@@ -134,8 +137,96 @@ bool IsSeparator(const std::string& c)
 
 void ReadTextFileWithoutPedanticMode(const std::string& path)
 {
-    auto flush = [&](std::string && word) {
-        std::cout << word << std::endl;
+    somera::TypoMan typos;
+    typos.setStrictWhiteSpace(false);
+    typos.setStrictHyphen(false);
+    typos.setStrictLetterCase(false);
+    typos.setIgnoreBritishEnglish(true);
+    typos.setMinimumWordSize(3);
+    typos.setMaxCorrectWordCount(4);
+    typos.setFoundCallback([](const somera::Typo& typo) -> void
+    {
+        const auto& word = typo.typo;
+        const auto& corrections = typo.corrections;
+        if (corrections.empty()) {
+            return;
+        }
+
+        using somera::DiffOperation;
+        using somera::TerminalColor;
+        {
+            auto & correction = corrections.front();
+            auto hunks = somera::computeDiff(word, correction);
+            constexpr int indentSpaces = 18;
+            std::stringstream fromStream;
+            for (auto & hunk : hunks) {
+                if (hunk.operation == DiffOperation::Equality) {
+                    fromStream << hunk.text;
+                }
+                else if (hunk.operation == DiffOperation::Deletion) {
+                    fromStream << somera::changeTerminalTextColor(
+                        hunk.text,
+                        TerminalColor::Black,
+                        TerminalColor::Red);
+                }
+            }
+            for (int i = indentSpaces - static_cast<int>(word.size()); i > 0; --i) {
+                fromStream << " ";
+            }
+            std::stringstream toStream;
+            for (auto & hunk : hunks) {
+                if (hunk.operation == DiffOperation::Equality) {
+                    toStream << hunk.text;
+                }
+                else if (hunk.operation == DiffOperation::Insertion) {
+                    toStream << somera::changeTerminalTextColor(
+                        hunk.text,
+                        TerminalColor::White,
+                        TerminalColor::Green);
+                }
+            }
+            for (int i = indentSpaces - static_cast<int>(correction.size()); i > 0; --i) {
+                toStream << " ";
+            }
+            std::printf("%s => %s", fromStream.str().c_str(), toStream.str().c_str());
+        }
+
+        if (corrections.size() > 1) {
+            std::printf(" (");
+            for (size_t i = 1; i < corrections.size(); ++i) {
+                if (i > 1) {
+                    std::printf(" ");
+                }
+                auto & correction = corrections[i];
+                auto hunks = somera::computeDiff(word, correction);
+                std::stringstream toStream;
+                for (auto & hunk : hunks) {
+                    if (hunk.operation == DiffOperation::Equality) {
+                        toStream << hunk.text;
+                    }
+                    else if (hunk.operation == DiffOperation::Insertion) {
+                        toStream << somera::changeTerminalTextColor(
+                            hunk.text,
+                            TerminalColor::Black,
+                            TerminalColor::Blue);
+                    }
+                }
+                std::printf("%s", toStream.str().c_str());
+            }
+            std::printf(")");
+        }
+        std::printf("\n");
+    });
+    auto onWord = [&](const std::string& sourceString) {
+        somera::TypoSource source;
+        source.file = path;
+        typos.computeFromSentence(sourceString, source);
+    };
+    auto flush = [&](std::string && text) {
+        somera::WordSegmenter segmenter;
+        segmenter.parse(text, [&](const somera::PartOfSpeech& word) {
+            onWord(word.text);
+        });
     };
     std::string word;
     ReadUTF8TextFile(path, [&](Character && character) {
@@ -145,24 +236,7 @@ void ReadTextFileWithoutPedanticMode(const std::string& path)
                 std::swap(word, temp);
                 flush(std::move(temp));
             }
-        }
-        word += character.word;
-    });
-}
-
-void ReadSourceCode(const std::string& path)
-{
-    auto flush = [&](std::string && word) {
-        std::cout << word << std::endl;
-    };
-    std::string word;
-    ReadUTF8TextFile(path, [&](Character && character) {
-        if (IsSpace(character.word)) {
-            if (!word.empty()) {
-                std::string temp;
-                std::swap(word, temp);
-                flush(std::move(temp));
-            }
+            return;
         }
         word += character.word;
     });
@@ -189,15 +263,9 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if (parser.exists("-no-pedantic")) {
-        for (auto & path : parser.getPaths()) {
-            ReadTextFileWithoutPedanticMode(path);
-        }
+    for (auto & path : parser.getPaths()) {
+        ReadTextFileWithoutPedanticMode(path);
     }
-    else {
-        for (auto & path : parser.getPaths()) {
-            ReadSourceCode(path);
-        }
-    }
+
     return 0;
 }
