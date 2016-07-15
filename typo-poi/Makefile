@@ -2,25 +2,25 @@ NORI = ../nori/bin/nori
 PRODUCTNAME = typo-poi
 
 HEADERS = \
-    ../somera/*.h \
-    source/thirdparty/*.h \
-		source/*.h
+	../somera/*.h \
+	source/thirdparty/*.h \
+	source/*.h
 
 SOURCES = \
-    ../somera/*.cpp \
-    source/thirdparty/ConvertUTF.c \
-		source/ConsoleColor.cpp \
-		source/EditDistance.cpp \
-		source/Typo.cpp \
-		source/UTF8.cpp \
-		source/WordDiff.cpp \
-		source/WordSegmenter.cpp \
-    source/main.cpp
+	../somera/*.cpp \
+	source/thirdparty/ConvertUTF.c \
+	source/ConsoleColor.cpp \
+	source/EditDistance.cpp \
+	source/Typo.cpp \
+	source/UTF8.cpp \
+	source/WordDiff.cpp \
+	source/WordSegmenter.cpp \
+	source/main.cpp
 
 ifeq ($(OS),Windows_NT)
-		SOURCES += source/SpellCheckWin.cpp
+	SOURCES += source/SpellCheckWin.cpp
 else ($(shell uname -s),Darwin)
-		SOURCES += source/SpellCheckMac.mm
+	SOURCES += source/SpellCheckMac.mm
 endif
 
 xcode:
