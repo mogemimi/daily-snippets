@@ -93,6 +93,13 @@ std::string StringifyUUID(const std::string& uuid, Optional<std::string> comment
     return stream.str();
 }
 
+std::string GenerateCommentFromFilePath(const std::string& path)
+{
+    auto baseName = FileSystem::getBaseName(path);
+    auto comment = !baseName.empty() ? baseName : path;
+    return comment;
+}
+
 struct Noncopyable {
     Noncopyable() = default;
     Noncopyable(const Noncopyable&) = delete;
@@ -184,7 +191,8 @@ struct PBXGroup final : public XcodeObject {
                 result.push_back(group->GetUuidWithComment());
             }
             else if (auto file = std::dynamic_pointer_cast<PBXFileReference>(child)) {
-                result.push_back(StringifyUUID(file->uuid, file->path));
+                auto comment = GenerateCommentFromFilePath(file->path);
+                result.push_back(StringifyUUID(file->uuid, comment));
             }
         }
         return result;
@@ -294,9 +302,9 @@ std::vector<std::string> ToFileListString(const BuildPhase& phase)
     static_assert(std::is_base_of<XcodeBuildPhase, BuildPhase>::value, "");
     std::vector<std::string> result;
     for (auto & buildFile : phase.files) {
-        result.push_back(StringifyUUID(
-            buildFile->uuid,
-            buildFile->fileRef->path + " in " + phase.comments()));
+        auto baseName = GenerateCommentFromFilePath(buildFile->fileRef->path);
+        auto comment = baseName + " in " + phase.comments();
+        result.push_back(StringifyUUID(buildFile->uuid, std::move(comment)));
     }
     return result;
 }
@@ -872,19 +880,7 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
 
     std::sort(std::begin(xcodeProject->groups), std::end(xcodeProject->groups),
         [](const std::shared_ptr<PBXGroup>& a, const std::shared_ptr<PBXGroup>& b) {
-            auto cost = [](const PBXGroup& group) {
-                int c = 0;
-                if (!group.name && !group.path) {
-                    c += 42;
-                }
-                for (auto & child : group.children) {
-                    if (child->isa() == "PBXGroup") {
-                        c += 1;
-                    }
-                }
-                return c;
-            };
-            return cost(*a) >= cost(*b);
+            return a->uuid < b->uuid;
         });
 
     return xcodeProject;
@@ -943,7 +939,7 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
     printer.BeginSection("PBXFileReference");
     for (auto & f : xcodeProject.fileReferences) {
         auto & fileRef = *f;
-        printer.BeginKeyValue(StringifyUUID(fileRef.uuid, fileRef.path));
+        printer.BeginKeyValue(StringifyUUID(fileRef.uuid, GenerateCommentFromFilePath(fileRef.path)));
             printer.BeginObject(IsSingleLine);
                 printer.PrintKeyValue("isa", fileRef.isa());
                 if (fileRef.explicitFileType) {
