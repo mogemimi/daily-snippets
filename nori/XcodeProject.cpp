@@ -563,6 +563,9 @@ std::string FindLastKnownFileType(const std::string& path) noexcept
     if (ext == "a") {
         return "archive.ar";
     }
+    if (ext == "framework") {
+        return "wrapper.framework";
+    }
     return "sourcecode";
 }
 
@@ -720,6 +723,10 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
         if ("tbd" == std::get<1>(FileSystem::splitExtension(library))) {
             ///@todo This code is bad.
             fileRef->path = FileSystem::join("usr/lib/", library);
+            fileRef->sourceTree = "SDKROOT";
+        }
+        else if ("framework" == std::get<1>(FileSystem::splitExtension(library))) {
+            fileRef->path = FileSystem::join("System/Library/Frameworks/", library);
             fileRef->sourceTree = "SDKROOT";
         }
         else {
