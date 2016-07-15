@@ -693,15 +693,14 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
         fileRef->path = source;
         fileRef->sourceTree = "\"<group>\"";
 
-        auto getGroup = [&]() -> std::shared_ptr<PBXGroup> {
-            auto directory = std::get<0>(FileSystem::split(source));
+        auto getGroup = [&](const std::string& directory) -> std::shared_ptr<PBXGroup> {
             if (directory.empty()) {
                 return sourceGroup;
             }
             auto iter = std::find_if(
                 std::begin(sourceGroup->children),
                 std::end(sourceGroup->children),
-                [&directory](const std::shared_ptr<XcodeObject>& object) {
+                [&](const std::shared_ptr<XcodeObject>& object) {
                     auto group = std::dynamic_pointer_cast<PBXGroup>(object);
                     return group && group->name && (*group->name == directory);
                 });
@@ -713,9 +712,39 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
             sourceGroup->children.push_back(group);
             return group;
         };
-        const auto group = getGroup();
+
+        const auto directory = std::get<0>(FileSystem::split(source));
+        const auto group = getGroup(directory);
         group->children.push_back(fileRef);
     }
+
+    std::sort(std::begin(sourceGroup->children), std::end(sourceGroup->children),
+        [](const std::shared_ptr<XcodeObject>& a, const std::shared_ptr<XcodeObject>& b) {
+            std::string nameA;
+            std::string nameB;
+            int costA = 0;
+            int costB = 0;
+            {
+                auto groupA = std::dynamic_pointer_cast<PBXGroup>(a);
+                if (groupA && groupA->name) {
+                    nameA = *groupA->name;
+                    costA += 1;
+                }
+
+                auto groupB = std::dynamic_pointer_cast<PBXGroup>(b);
+                if (groupB && groupB->name) {
+                    nameB = *groupB->name;
+                    costB += 1;
+                }
+            }
+            if (costA + costB >= 2) {
+                return nameA < nameB;
+            }
+            if (costA + costB >= 1) {
+                return costA > costB;
+            }
+            return a->uuid < b->uuid;
+        });
 
     for (auto & library : options.libraries) {
         auto fileRef = std::make_shared<PBXFileReference>();
