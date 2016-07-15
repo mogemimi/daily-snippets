@@ -1,0 +1,10 @@
+[cC]an
+[cC]an't
+[dD]oes
+[dD]oesn't
+[dD]on't
+[hH]ave
+[hH]aven't
+[mM]ustn't
+[sS]hould
+[sS]houldn't

@@ -16,6 +16,7 @@ xcode:
 		-o $(PRODUCTNAME) \
 		-std=c++14 \
 		-stdlib=libc++ \
+		-lAppKit.framework \
 		-I.. \
 		$(HEADERS) \
 		$(SOURCES)

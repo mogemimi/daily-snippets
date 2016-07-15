@@ -16,13 +16,14 @@ namespace StringHelper = somera::StringHelper;
 
 namespace {
 
-void setupCommandLineParser(CommandLineParser & parser)
+void SetupCommandLineParser(CommandLineParser & parser)
 {
     using somera::CommandLineArgumentType::Flag;
     using somera::CommandLineArgumentType::JoinedOrSeparate;
     parser.setUsageText("textcxx [options ...] [C/C++ file ...]");
     parser.addArgument("-h", Flag, "Display available options");
     parser.addArgument("-help", Flag, "Display available options");
+    parser.addArgument("-no-pedantic", Flag, "Pedantic mode disabled");
 }
 
 struct Character {
@@ -32,7 +33,7 @@ struct Character {
     std::size_t line;
 };
 
-void readUTF8TextFile(
+void ReadUTF8TextFile(
     const std::string& path, const std::function<void(Character&&)>& callback)
 {
     std::error_code errorCode;
@@ -97,7 +98,7 @@ void readUTF8TextFile(
     }
 }
 
-bool isSpace(const std::string& c)
+bool IsSpace(const std::string& c)
 {
     if (c.size() == 1) {
         return ::isspace(c.front()) != 0;
@@ -108,39 +109,60 @@ bool isSpace(const std::string& c)
     return false;
 }
 
-bool isSeparator(const std::string& c)
+bool IsSeparator(const std::string& c)
 {
     if (c.size() != 1) {
         return false;
     }
 
-    std::string op = "!\"#()*+,-./:<>?[\\]`~";
+    std::string separators = "!\"#()*+,-./:<>?@[\\]`~";
 #if 0
-    std::sort(std::begin(op), std::end(op));
+    std::sort(std::begin(separators), std::end(separators));
     std::cout << '"';
-    for (auto o : op) {
+    for (auto separator : separators) {
         std::string escapeCharacters = "\"\\\'";
-        if (std::binary_search(std::begin(escapeCharacters), std::end(escapeCharacters), o)) {
+        if (std::binary_search(std::begin(escapeCharacters), std::end(escapeCharacters), separator)) {
             std::cout << '\\';
         }
-        std::cout << o;
+        std::cout << separator;
     }
     std::cout << '"' << std::endl;
-    assert(std::is_sorted(std::begin(op), std::end(op)));
+    assert(std::is_sorted(std::begin(separators), std::end(separators)));
 #endif
-    return std::binary_search(std::begin(op), std::end(op), c.front());
+    return std::binary_search(std::begin(separators), std::end(separators), c.front());
 }
 
-void readSourceCode(const std::string& path)
+void ReadTextFileWithoutPedanticMode(const std::string& path)
 {
+    auto flush = [&](std::string && word) {
+        std::cout << word << std::endl;
+    };
     std::string word;
-    readUTF8TextFile(path, [&](Character && character) {
-        if (isSpace(character.word) || isSeparator(character.word)) {
+    ReadUTF8TextFile(path, [&](Character && character) {
+        if (IsSpace(character.word) || IsSeparator(character.word)) {
             if (!word.empty()) {
-                std::cout << word << std::endl;
+                std::string temp;
+                std::swap(word, temp);
+                flush(std::move(temp));
             }
-            word.clear();
-            return;
+        }
+        word += character.word;
+    });
+}
+
+void ReadSourceCode(const std::string& path)
+{
+    auto flush = [&](std::string && word) {
+        std::cout << word << std::endl;
+    };
+    std::string word;
+    ReadUTF8TextFile(path, [&](Character && character) {
+        if (IsSpace(character.word)) {
+            if (!word.empty()) {
+                std::string temp;
+                std::swap(word, temp);
+                flush(std::move(temp));
+            }
         }
         word += character.word;
     });
@@ -151,7 +173,7 @@ void readSourceCode(const std::string& path)
 int main(int argc, char *argv[])
 {
     CommandLineParser parser;
-    setupCommandLineParser(parser);
+    SetupCommandLineParser(parser);
     parser.parse(argc, argv);
 
     if (parser.hasParseError()) {
@@ -167,8 +189,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    for (auto & path : parser.getPaths()) {
-        readSourceCode(path);
+    if (parser.exists("-no-pedantic")) {
+        for (auto & path : parser.getPaths()) {
+            ReadTextFileWithoutPedanticMode(path);
+        }
+    }
+    else {
+        for (auto & path : parser.getPaths()) {
+            ReadSourceCode(path);
+        }
     }
     return 0;
 }
