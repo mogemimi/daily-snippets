@@ -514,7 +514,7 @@ std::string FindLastKnownFileType(const std::string& path) noexcept
         return "sourcecode.c.objc";
     }
     if (ext == "c") {
-        return "sourcecode.c";
+        return "sourcecode.c.c";
     }
     if (ext == "i") {
         return "sourcecode.c.c.preprocessed";
