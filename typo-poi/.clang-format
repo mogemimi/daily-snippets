@@ -1,0 +1,19 @@
+---
+# Requires clang-format version 3.7 or later
+Language: Cpp
+BasedOnStyle: LLVM
+AccessModifierOffset: -4
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: true
+BreakBeforeBraces: Stroustrup
+BreakConstructorInitializersBeforeComma: true
+DerivePointerAlignment: true
+IndentWidth: 4
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+PointerAlignment: Left
+Standard: Cpp11
+UseTab: Never
+...

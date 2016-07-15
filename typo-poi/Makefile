@@ -1,5 +1,5 @@
 NORI = ../nori/bin/nori
-PRODUCTNAME = textcxx
+PRODUCTNAME = typo-poi
 
 HEADERS = \
     ../somera/*.h \
