@@ -100,6 +100,20 @@ std::string GenerateCommentFromFilePath(const std::string& path)
     return comment;
 }
 
+bool IsUpperCase(const std::string& word)
+{
+    std::string lowerCases = "abcdefghi";
+    for (auto & c : word) {
+        if ('A' <= c && c <= 'Z') {
+            return true;
+        }
+        if ('a' <= c && c <= 'z') {
+            return false;
+        }
+    }
+    return false;
+}
+
 struct Noncopyable {
     Noncopyable() = default;
     Noncopyable(const Noncopyable&) = delete;
@@ -345,6 +359,7 @@ struct XCConfigurationList final : public XcodeObject {
     std::string isa() const noexcept override { return "XCConfigurationList"; }
     std::vector<std::shared_ptr<XCBuildConfiguration>> buildConfigurations;
     std::string defaultConfigurationIsVisible;
+    std::string targetTypeName;
     Optional<std::string> defaultConfigurationName;
 
     std::vector<std::string> GetBuildConfigurationsString() const
@@ -422,21 +437,27 @@ public:
     void PrintKeyValue(const std::string& key, const std::vector<std::string>& array)
     {
         BeginKeyValue(key);
-        stream << "(";
-        if (!IsSingleLine()) {
-            stream << "\n";
+        if (array.size() == 1 && IsUpperCase(key)) {
+            auto & value = array.front();
+            stream << value;
         }
-        ++tabs;
-        for (auto & value : array) {
-            stream << GetIndent() << value << ",";
+        else {
+            stream << "(";
             if (!IsSingleLine()) {
                 stream << "\n";
-            } else {
-                stream << " ";
             }
+            ++tabs;
+            for (auto & value : array) {
+                stream << GetIndent() << value << ",";
+                if (!IsSingleLine()) {
+                    stream << "\n";
+                } else {
+                    stream << " ";
+                }
+            }
+            --tabs;
+            stream << GetIndent() << ")";
         }
-        --tabs;
-        stream << GetIndent() << ")";
         EndKeyValue();
     }
 
@@ -700,7 +721,8 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
             ///@todo This code is bad.
             fileRef->path = FileSystem::join("usr/lib/", library);
             fileRef->sourceTree = "SDKROOT";
-        } else {
+        }
+        else {
             fileRef->path = library;
             fileRef->sourceTree = "\"<group>\"";
         }
@@ -755,6 +777,7 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
         configurationList->buildConfigurations.push_back(buildConfigurationRelease);
         configurationList->defaultConfigurationIsVisible = "0";
         configurationList->defaultConfigurationName = "Release";
+        configurationList->targetTypeName = "PBXProject";
         return configurationList;
     }();
     const auto configurationListForNativeTarget = [&] {
@@ -763,6 +786,7 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
         configurationList->buildConfigurations.push_back(buildConfigurationTargetRelease);
         configurationList->defaultConfigurationIsVisible = "0";
         configurationList->defaultConfigurationName = "Release";
+        configurationList->targetTypeName = "PBXNativeTarget";
         return configurationList;
     }();
 
@@ -880,6 +904,11 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
 
     std::sort(std::begin(xcodeProject->groups), std::end(xcodeProject->groups),
         [](const std::shared_ptr<PBXGroup>& a, const std::shared_ptr<PBXGroup>& b) {
+            return a->uuid < b->uuid;
+        });
+
+    std::sort(std::begin(xcodeProject->fileReferences), std::end(xcodeProject->fileReferences),
+        [](const std::shared_ptr<PBXFileReference>& a, const std::shared_ptr<PBXFileReference>& b) {
             return a->uuid < b->uuid;
         });
 
@@ -1001,9 +1030,9 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
                 printer.PrintKeyValue("buildConfigurationList", StringifyUUID(
                     target->buildConfigurationList->uuid,
                     "Build configuration list for "
-                    + target->isa()
-                    + ' '
-                    + EncodeDoubleQuotes(target->name)));
+                        + target->isa()
+                        + ' '
+                        + EncodeDoubleQuotes(target->name)));
                 printer.PrintKeyValue("buildPhases", target->GetBuildPhasesString());
                 printer.PrintKeyValue("buildRules", target->buildRules);
                 printer.PrintKeyValue("dependencies", target->dependencies);
@@ -1058,7 +1087,9 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
                 });
                 printer.PrintKeyValue("buildConfigurationList", StringifyUUID(
                     project->buildConfigurationList->uuid,
-                    "Build configuration list for PBXProject "
+                    "Build configuration list for "
+                        + project->isa()
+                        + ' '
                         + EncodeDoubleQuotes(xcodeProject.name)));
                 printer.PrintKeyValue("compatibilityVersion", project->compatibilityVersion);
                 printer.PrintKeyValue("developmentRegion", project->developmentRegion);
@@ -1107,7 +1138,10 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
     for (auto & configurationList : xcodeProject.configurationLists) {
         printer.BeginKeyValue(StringifyUUID(
             configurationList->uuid,
-            "Build configuration list for PBXProject " + EncodeDoubleQuotes(xcodeProject.name)));
+            "Build configuration list for "
+                + configurationList->targetTypeName
+                + ' '
+                + EncodeDoubleQuotes(xcodeProject.name)));
             printer.BeginObject();
                 printer.PrintKeyValue("isa", configurationList->isa());
                 printer.PrintKeyValue("buildConfigurations",
