@@ -93,13 +93,6 @@ std::string StringifyUUID(const std::string& uuid, Optional<std::string> comment
     return stream.str();
 }
 
-std::string GenerateCommentFromFilePath(const std::string& path)
-{
-    auto baseName = FileSystem::getBaseName(path);
-    auto comment = !baseName.empty() ? baseName : path;
-    return comment;
-}
-
 bool IsUpperCase(const std::string& word)
 {
     std::string lowerCases = "abcdefghi";
@@ -130,7 +123,7 @@ struct XcodeObject : Noncopyable {
 
 struct XcodeBuildPhase : public XcodeObject {
     virtual ~XcodeBuildPhase() = default;
-    virtual std::string comments() const noexcept = 0;
+    virtual std::string GetComment() const noexcept = 0;
 };
 
 struct XcodeTargetAttribute final {
@@ -173,6 +166,18 @@ struct PBXFileReference final : public XcodeObject {
     std::string sourceTree;
 };
 
+std::string GenerateComment(
+    const std::shared_ptr<PBXFileReference>& fileRef,
+    Optional<std::string> buildPhaseComment = somera::NullOpt)
+{
+    auto baseName = FileSystem::getBaseName(fileRef->path);
+    auto comment = !baseName.empty() ? baseName : fileRef->path;
+    if (buildPhaseComment) {
+        comment = comment + " in " + *buildPhaseComment;
+    }
+    return comment;
+}
+
 struct PBXGroup final : public XcodeObject {
     std::string isa() const noexcept override { return "PBXGroup"; }
     std::vector<std::shared_ptr<XcodeObject>> children;
@@ -205,8 +210,7 @@ struct PBXGroup final : public XcodeObject {
                 result.push_back(group->GetUuidWithComment());
             }
             else if (auto file = std::dynamic_pointer_cast<PBXFileReference>(child)) {
-                auto comment = GenerateCommentFromFilePath(file->path);
-                result.push_back(StringifyUUID(file->uuid, comment));
+                result.push_back(StringifyUUID(file->uuid, GenerateComment(file)));
             }
         }
         return result;
@@ -241,7 +245,7 @@ struct PBXNativeTarget final : public XcodeObject {
     {
         std::vector<std::string> result;
         for (auto & phase : buildPhases) {
-            result.push_back(StringifyUUID(phase->uuid, phase->comments()));
+            result.push_back(StringifyUUID(phase->uuid, phase->GetComment()));
         }
         return result;
     }
@@ -289,7 +293,7 @@ struct PBXCopyFilesBuildPhase final : public XcodeBuildPhase {
     std::string runOnlyForDeploymentPostprocessing;
     std::vector<std::string> files;
 
-    std::string comments() const noexcept override { return "CopyFiles"; }
+    std::string GetComment() const noexcept override { return "CopyFiles"; }
 };
 
 struct PBXFrameworksBuildPhase final : public XcodeBuildPhase {
@@ -298,7 +302,7 @@ struct PBXFrameworksBuildPhase final : public XcodeBuildPhase {
     std::vector<std::shared_ptr<PBXBuildFile>> files;
     std::string runOnlyForDeploymentPostprocessing;
 
-    std::string comments() const noexcept override { return "Frameworks"; }
+    std::string GetComment() const noexcept override { return "Frameworks"; }
 };
 
 struct PBXSourcesBuildPhase final : public XcodeBuildPhase {
@@ -307,21 +311,8 @@ struct PBXSourcesBuildPhase final : public XcodeBuildPhase {
     std::vector<std::shared_ptr<PBXBuildFile>> files;
     std::string runOnlyForDeploymentPostprocessing;
 
-    std::string comments() const noexcept override { return "Sources"; }
+    std::string GetComment() const noexcept override { return "Sources"; }
 };
-
-template <class BuildPhase>
-std::vector<std::string> ToFileListString(const BuildPhase& phase)
-{
-    static_assert(std::is_base_of<XcodeBuildPhase, BuildPhase>::value, "");
-    std::vector<std::string> result;
-    for (auto & buildFile : phase.files) {
-        auto baseName = GenerateCommentFromFilePath(buildFile->fileRef->path);
-        auto comment = baseName + " in " + phase.comments();
-        result.push_back(StringifyUUID(buildFile->uuid, std::move(comment)));
-    }
-    return result;
-}
 
 struct XCBuildConfiguration final : public XcodeObject {
     std::string isa() const noexcept override { return "XCBuildConfiguration"; }
@@ -461,10 +452,15 @@ public:
         EndKeyValue();
     }
 
-    void BeginObject(bool singleLine = false)
+    void BeginObject()
     {
         XcodePrinterSettings settings;
-        settings.isSingleLine = singleLine;
+        settings.isSingleLine = false;
+        BeginObject(std::move(settings));
+    }
+
+    void BeginObject(XcodePrinterSettings && settings)
+    {
         settingsStack.push_back(std::move(settings));
         stream << "{";
         if (!IsSingleLine()) {
@@ -951,43 +947,53 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
     return xcodeProject;
 }
 
-std::string getFilename(const std::string& path)
+template <class BuildPhase>
+std::vector<std::string> ToFileListString(const BuildPhase& phase)
 {
-    return std::get<1>(FileSystem::split(path));
+    static_assert(std::is_base_of<XcodeBuildPhase, BuildPhase>::value, "");
+    std::vector<std::string> result;
+    for (auto & buildFile : phase.files) {
+        result.push_back(StringifyUUID(
+            buildFile->uuid,
+            GenerateComment(buildFile->fileRef, phase.GetComment())));
+    }
+    return result;
+}
+
+void PrintPBXBuildFiles(
+    XcodePrinter & printer,
+    const std::vector<std::shared_ptr<PBXBuildFile>>& files,
+    const std::string& buildPhaseComment)
+{
+    for (auto & buildFile : files) {
+        printer.BeginKeyValue(StringifyUUID(
+            buildFile->uuid,
+            GenerateComment(buildFile->fileRef, buildPhaseComment)));
+        XcodePrinterSettings settings;
+        settings.isSingleLine = true;
+        printer.BeginObject(std::move(settings));
+        printer.PrintKeyValue("isa", buildFile->isa());
+        printer.PrintKeyValue("fileRef",
+            StringifyUUID(buildFile->fileRef->uuid, GenerateComment(buildFile->fileRef)));
+        printer.EndObject();
+        printer.EndKeyValue();
+    }
 }
 
 void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
 {
-    constexpr bool IsSingleLine = true;
-
     printer.BeginSection("PBXBuildFile");
-    auto printPBXBuildFile = [&](
-        const std::vector<std::shared_ptr<PBXBuildFile>>& files,
-        const std::string& comments) {
-        for (auto & f : files) {
-            auto & buildFile = *f;
-            printer.BeginKeyValue(StringifyUUID(
-                buildFile.uuid,
-                getFilename(buildFile.fileRef->path) + " in " + comments));
-                printer.BeginObject(IsSingleLine);
-                printer.PrintKeyValue("isa", buildFile.isa());
-                printer.PrintKeyValue("fileRef",
-                    StringifyUUID(buildFile.fileRef->uuid, getFilename(buildFile.fileRef->path)));
-                printer.EndObject();
-            printer.EndKeyValue();
-        }
-    };
     for (auto & phase : xcodeProject.sourcesBuildPhases) {
-        printPBXBuildFile(phase->files, phase->comments());
+        PrintPBXBuildFiles(printer, phase->files, phase->GetComment());
     }
     for (auto & phase : xcodeProject.frameworkBuildPhases) {
-        printPBXBuildFile(phase->files, phase->comments());
+        PrintPBXBuildFiles(printer, phase->files, phase->GetComment());
     }
     printer.EndSection();
 
     printer.BeginSection("PBXCopyFilesBuildPhase");
     for (auto & phase : xcodeProject.copyFilesBuildPhases) {
-        printer.BeginKeyValue(StringifyUUID(phase->uuid, phase->comments()));
+        printer.BeginKeyValue(StringifyUUID(phase->uuid, phase->GetComment()));
             printer.BeginObject();
             printer.PrintKeyValue("isa", phase->isa());
             printer.PrintKeyValue("buildActionMask", phase->buildActionMask);
@@ -1002,25 +1008,26 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
     printer.EndSection();
 
     printer.BeginSection("PBXFileReference");
-    for (auto & f : xcodeProject.fileReferences) {
-        auto & fileRef = *f;
-        printer.BeginKeyValue(StringifyUUID(fileRef.uuid, GenerateCommentFromFilePath(fileRef.path)));
-            printer.BeginObject(IsSingleLine);
-                printer.PrintKeyValue("isa", fileRef.isa());
-                if (fileRef.explicitFileType) {
-                    printer.PrintKeyValue("explicitFileType", *fileRef.explicitFileType);
+    for (auto & fileRef : xcodeProject.fileReferences) {
+        printer.BeginKeyValue(StringifyUUID(fileRef->uuid, GenerateComment(fileRef)));
+            XcodePrinterSettings settings;
+            settings.isSingleLine = true;
+            printer.BeginObject(std::move(settings));
+                printer.PrintKeyValue("isa", fileRef->isa());
+                if (fileRef->explicitFileType) {
+                    printer.PrintKeyValue("explicitFileType", *fileRef->explicitFileType);
                 }
-                if (fileRef.includeInIndex) {
-                    printer.PrintKeyValue("includeInIndex", *fileRef.includeInIndex);
+                if (fileRef->includeInIndex) {
+                    printer.PrintKeyValue("includeInIndex", *fileRef->includeInIndex);
                 }
-                if (fileRef.lastKnownFileType) {
-                    printer.PrintKeyValue("lastKnownFileType", *fileRef.lastKnownFileType);
+                if (fileRef->lastKnownFileType) {
+                    printer.PrintKeyValue("lastKnownFileType", *fileRef->lastKnownFileType);
                 }
-                if (!FileSystem::getDirectoryName(fileRef.path).empty()) {
-                    printer.PrintKeyValue("name", FileSystem::getBaseName(fileRef.path));
+                if (!FileSystem::getDirectoryName(fileRef->path).empty()) {
+                    printer.PrintKeyValue("name", FileSystem::getBaseName(fileRef->path));
                 }
-                printer.PrintKeyValue("path", fileRef.path);
-                printer.PrintKeyValue("sourceTree", fileRef.sourceTree);
+                printer.PrintKeyValue("path", fileRef->path);
+                printer.PrintKeyValue("sourceTree", fileRef->sourceTree);
             printer.EndObject();
         printer.EndKeyValue();
     }
@@ -1028,7 +1035,7 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
 
     printer.BeginSection("PBXFrameworksBuildPhase");
     for (auto & phase : xcodeProject.frameworkBuildPhases) {
-        printer.BeginKeyValue(StringifyUUID(phase->uuid, phase->comments()));
+        printer.BeginKeyValue(StringifyUUID(phase->uuid, phase->GetComment()));
             printer.BeginObject();
                 printer.PrintKeyValue("isa", phase->isa());
                 printer.PrintKeyValue("buildActionMask", phase->buildActionMask);
@@ -1144,7 +1151,7 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
 
     printer.BeginSection("PBXSourcesBuildPhase");
     for (auto & phase : xcodeProject.sourcesBuildPhases) {
-        printer.BeginKeyValue(StringifyUUID(phase->uuid, phase->comments()));
+        printer.BeginKeyValue(StringifyUUID(phase->uuid, phase->GetComment()));
             printer.BeginObject();
                 printer.PrintKeyValue("isa", phase->isa());
                 printer.PrintKeyValue("buildActionMask", phase->buildActionMask);
