@@ -19,7 +19,8 @@ SOURCES = \
 
 ifeq ($(OS),Windows_NT)
 	SOURCES += source/SpellCheckWin.cpp
-else ($(shell uname -s),Darwin)
+endif
+ifeq ($(shell uname -s),Darwin)
 	SOURCES += source/SpellCheckMac.mm
 endif
 
@@ -33,6 +34,11 @@ xcode:
 		-I.. \
 		$(HEADERS) \
 		$(SOURCES)
+	@xcodebuild -project $(PRODUCTNAME).xcodeproj -configuration Release
+	@mkdir -p bin
+	@cp build/Release/$(PRODUCTNAME) bin/$(PRODUCTNAME)
+
+developer-xcode:
 	@xcodebuild -project $(PRODUCTNAME).xcodeproj -configuration Release
 	@mkdir -p bin
 	@cp build/Release/$(PRODUCTNAME) bin/$(PRODUCTNAME)

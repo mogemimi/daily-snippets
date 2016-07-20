@@ -43,14 +43,16 @@ std::vector<DiffHunk> computeDiff(const std::string& text1, const std::string& t
         }
     }
 
-//    std::printf("\n");
-//    for (int row = 0; row < rows; row++) {
-//        for (int column = 0; column < columns; column++) {
-//            std::printf("%3d", mat(row, column));
-//        }
-//        std::printf("\n");
-//    }
-//    std::printf("\n");
+#if 0
+    std::printf("\n");
+    for (int row = 0; row < rows; row++) {
+        for (int column = 0; column < columns; column++) {
+            std::printf("%3d", mat(row, column));
+        }
+        std::printf("\n");
+    }
+    std::printf("\n");
+#endif
 
     std::vector<DiffHunk> hunks;
 

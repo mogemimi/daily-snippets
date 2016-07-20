@@ -1,15 +1,16 @@
 // Copyright (c) 2015 mogemimi. Distributed under the MIT license.
 
 #include "utf8.h"
-#include <codecvt>
-#include <locale>
+#include <cassert>
 #include <utility>
 
 #define USE_LLVM_CONVERTUTF 1
 #if defined(USE_LLVM_CONVERTUTF)
 #include "thirdparty/ConvertUTF.h"
 #include <vector>
-#include <cassert>
+#else
+#include <codecvt>
+#include <locale>
 #endif
 
 namespace somera {

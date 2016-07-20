@@ -41,33 +41,6 @@ double matchCharacter(uint32_t a, uint32_t b)
     return NoMatch;
 }
 
-//namespace utf8somera {
-//
-//utf8::iterator<std::string::const_iterator> begin(const std::string& s)
-//{
-//    utf8::iterator<std::string::const_iterator> it(s.begin(), s.begin(), s.end());
-//    return std::move(it);
-//}
-//
-//utf8::iterator<std::string::const_iterator> end(const std::string& s)
-//{
-//    utf8::iterator<std::string::const_iterator> it(s.end(), s.begin(), s.end());
-//    return std::move(it);
-//}
-//
-//template <typename Iterator>
-//auto distance(Iterator first, Iterator last)
-//{
-//    return utf8::distance(first.base(), last.base());
-//}
-//
-//std::size_t size(const std::string& s)
-//{
-//    return utf8::distance(s.begin(), s.end());
-//}
-//
-//} // namespace utf8somera
-
 double closestMatchDistance(const std::u32string& left, const std::u32string& right)
 {
     if (left.empty() && right.empty()) {
