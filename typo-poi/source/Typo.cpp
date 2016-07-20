@@ -46,27 +46,6 @@ std::vector<std::string> correctWord(const std::string& word, LanguageLocale loc
     return std::move(corrections);
 }
 
-bool exists(std::map<std::string, Typo>& typos, const std::string& word)
-{
-    return typos.find(word) != std::end(typos);
-}
-
-void addTypoSource(
-    std::map<std::string, Typo>& typos,
-    const std::string& word,
-    TypoSource && source)
-{
-    auto iter = typos.find(word);
-    assert(iter != std::end(typos));
-    iter->second.sources.push_back(std::move(source));
-}
-
-void addTypo(std::map<std::string, Typo>& typos, Typo && typo)
-{
-    auto word = typo.typo;
-    typos.emplace(word, std::move(typo));
-}
-
 template <class Container, typename Func>
 void eraseIf(Container & container, Func func)
 {
@@ -96,6 +75,62 @@ void sortNearly(const std::string& word, std::vector<std::string> & corrections)
 }
 
 } // unnamed namespace
+
+TypoCache::TypoCache()
+{
+    setCapacity(20);
+}
+
+bool TypoCache::exists(const std::string& misspelledWord) const
+{
+    auto iter = std::find_if(std::rbegin(typos), std::rend(typos), [&](const TypoCacheInfo& info) {
+        return info.misspelledWord == misspelledWord;
+    });
+    return (iter != std::rend(typos));
+}
+
+void TypoCache::setCapacity(size_t capacity)
+{
+    assert(capacity > 1);
+    if (capacity > typos.size()) {
+        typos.resize(capacity);
+        typos.shrink_to_fit();
+    }
+    typos.reserve(capacity);
+    assert(typos.size() <= typos.capacity());
+}
+
+void TypoCache::insert(Typo && typo)
+{
+    assert(typos.size() <= typos.capacity());
+
+    auto iter = std::find_if(std::rbegin(typos), std::rend(typos), [&](const TypoCacheInfo& info) {
+        return info.misspelledWord == typo.misspelledWord;
+    });
+
+    if (iter == std::rend(typos)) {
+        if (typos.size() > 10) {
+            std::sort(std::rbegin(typos), std::next(std::rbegin(typos), typos.size() / 3),
+                [](const TypoCacheInfo& a, const TypoCacheInfo& b) {
+                    return a.count > b.count;
+                });
+        }
+        if (typos.size() > typos.capacity()) {
+            typos.erase(std::begin(typos));
+        }
+        assert(typos.size() <= typos.capacity());
+        TypoCacheInfo cacheInfo;
+        cacheInfo.misspelledWord = std::move(typo.misspelledWord);
+        cacheInfo.count = 1;
+        typos.push_back(std::move(cacheInfo));
+    }
+    else {
+        TypoCacheInfo cacheInfo;
+        std::swap(*iter, cacheInfo);
+        cacheInfo.count++;
+        typos.erase(std::next(iter).base());
+    }
+}
 
 TypoMan::TypoMan() noexcept
     : minimumWordSize(3)
@@ -129,9 +164,7 @@ void TypoMan::computeFromSentence(
             pos.tag != somera::PartOfSpeechTag::EnglishWord) {
             return;
         }
-        if (exists(typos, word)) {
-            TypoSource source = sourceIn;
-            addTypoSource(typos, word, std::move(source));
+        if (isCacheEnabled && cache.exists(word)) {
             return;
         }
         computeFromWord(word);
@@ -154,7 +187,7 @@ void TypoMan::computeFromWord(const std::string& word)
     if (static_cast<int>(word.size()) < minimumWordSize) {
         return;
     }
-    if (exists(typos, word)) {
+    if (isCacheEnabled && cache.exists(word)) {
         return;
     }
     auto corrections = correctWord(word, LanguageLocale::en_US);
@@ -228,12 +261,14 @@ void TypoMan::computeFromWord(const std::string& word)
     }
 
     Typo typo;
-    typo.typo = word;
+    typo.misspelledWord = word;
     typo.corrections = std::move(corrections);
     if (onFoundTypo && !typo.corrections.empty()) {
         onFoundTypo(typo);
     }
-    addTypo(typos, std::move(typo));
+    if (isCacheEnabled) {
+        cache.insert(std::move(typo));
+    }
 }
 
 void TypoMan::setMinimumWordSize(int wordSize)
@@ -266,6 +301,11 @@ void TypoMan::setStrictLetterCase(bool strictLetterCase)
 void TypoMan::setIgnoreBritishEnglish(bool ignore)
 {
     this->ignoreBritishEnglish = ignore;
+}
+
+void TypoMan::setCacheEnabled(bool cacheEnabled)
+{
+    this->isCacheEnabled = cacheEnabled;
 }
 
 void TypoMan::setFoundCallback(std::function<void(const Typo&)> callback)

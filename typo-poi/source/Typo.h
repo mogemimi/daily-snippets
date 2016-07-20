@@ -11,21 +11,45 @@
 
 namespace somera {
 
-struct TypoSource {
-    std::string file;
-    //SourceRange range;
+struct SourceLocation {
+    std::string filePath;
 };
 
 struct Typo {
-    std::string typo;
+    SourceLocation location;
+    //SourceRange range;
+    std::string misspelledWord;
     std::vector<std::string> corrections;
-    std::vector<TypoSource> sources;
+};
+
+struct TypoSource {
+    SourceLocation location;
+    //SourceRange range;
+};
+
+class TypoCache final {
+public:
+    TypoCache();
+
+    bool exists(const std::string& typo) const;
+    
+    void setCapacity(size_t capacity);
+    
+    void insert(Typo && typo);
+
+private:
+    struct TypoCacheInfo {
+        std::string misspelledWord;
+        int count;
+    };
+
+    std::vector<TypoCacheInfo> typos;
 };
 
 class TypoMan final {
 private:
     somera::WordSegmenter segmenter;
-    std::map<std::string, Typo> typos;
+    TypoCache cache;
     std::function<void(const Typo&)> onFoundTypo;
     int minimumWordSize;
     int maxCorrectWordCount;
@@ -33,6 +57,7 @@ private:
     bool isStrictHyphen;
     bool isStrictLetterCase;
     bool ignoreBritishEnglish;
+    bool isCacheEnabled;
 
 public:
     TypoMan() noexcept;
@@ -55,6 +80,8 @@ public:
     void setStrictLetterCase(bool strictLetterCase);
 
     void setIgnoreBritishEnglish(bool ignore);
+    
+    void setCacheEnabled(bool cacheEnabled);
 
     void setFoundCallback(std::function<void(const Typo&)> callback);
 };
