@@ -44,6 +44,7 @@ private:
     };
 
     std::vector<TypoCacheInfo> typos;
+    std::size_t maxCacheSize;
 };
 
 class TypoMan final {

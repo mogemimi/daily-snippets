@@ -77,8 +77,9 @@ void sortNearly(const std::string& word, std::vector<std::string> & corrections)
 } // unnamed namespace
 
 TypoCache::TypoCache()
+    : maxCacheSize(20)
 {
-    setCapacity(20);
+    setCapacity(maxCacheSize);
 }
 
 bool TypoCache::exists(const std::string& misspelledWord) const
@@ -92,12 +93,16 @@ bool TypoCache::exists(const std::string& misspelledWord) const
 void TypoCache::setCapacity(size_t capacity)
 {
     assert(capacity > 1);
-    if (capacity > typos.size()) {
-        typos.resize(capacity);
+    maxCacheSize = std::max<size_t>(10, capacity);
+    if (typos.size() > maxCacheSize) {
+        typos.resize(maxCacheSize);
         typos.shrink_to_fit();
     }
-    typos.reserve(capacity);
-    assert(typos.size() <= typos.capacity());
+    if (typos.capacity() < maxCacheSize) {
+        typos.reserve(maxCacheSize);
+    }
+    assert(typos.size() <= maxCacheSize);
+    assert(typos.capacity() <= maxCacheSize);
 }
 
 void TypoCache::insert(Typo && typo)
@@ -115,7 +120,9 @@ void TypoCache::insert(Typo && typo)
                     return a.count > b.count;
                 });
         }
-        if (typos.size() > typos.capacity()) {
+        if (typos.size() >= maxCacheSize) {
+            assert(maxCacheSize > 0);
+            assert(!typos.empty());
             typos.erase(std::begin(typos));
         }
         assert(typos.size() <= typos.capacity());

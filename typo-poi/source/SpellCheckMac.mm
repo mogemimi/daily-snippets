@@ -23,10 +23,11 @@ std::string NativeSpellChecker::correctSpelling(
 
     NSSpellChecker* checker = [NSSpellChecker sharedSpellChecker];
     NSString* string = [NSString stringWithUTF8String:word.c_str()];
+    NSString* language = [NSString stringWithUTF8String:options.language.c_str()];
 
     NSString* correction = [checker correctionForWordRange:NSMakeRange(0, [string length])
         inString:string
-        language:[NSString stringWithUTF8String:options.language.c_str()]
+        language:language
         inSpellDocumentWithTag:0];
 
     if (correction != nil) {
@@ -52,19 +53,20 @@ std::vector<std::string> NativeSpellChecker::findClosestWords(
 
     NSSpellChecker* checker = [NSSpellChecker sharedSpellChecker];
     NSString* string = [NSString stringWithUTF8String:word.c_str()];
+    NSString* language = [NSString stringWithUTF8String:options.language.c_str()];
 
     NSArray<NSString*>* corrections = [checker
         guessesForWordRange:NSMakeRange(0, [string length])
         inString:string
-        language:[NSString stringWithUTF8String:options.language.c_str()]
+        language:language
         inSpellDocumentWithTag:0];
 
     std::vector<std::string> results;
     if (corrections.count > 0) {
         results.reserve(corrections.count);
     }
-    for (NSString* s in corrections) {
-        results.push_back([s UTF8String]);
+    for (NSString* correction in corrections) {
+        results.push_back([correction UTF8String]);
     }
     return results;
 }
