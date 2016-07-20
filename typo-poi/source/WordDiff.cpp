@@ -139,7 +139,7 @@ std::vector<DiffHunk> computeDiff(const std::string& text1, const std::string& t
             }
         }
     }
-    return std::move(hunks);
+    return hunks;
 }
 
 } // namespace somera

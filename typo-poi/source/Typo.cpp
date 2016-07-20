@@ -43,7 +43,7 @@ std::vector<std::string> correctWord(const std::string& word, LanguageLocale loc
         corrections.insert(std::begin(corrections), std::move(correction));
     }
     assert(!corrections.empty());
-    return std::move(corrections);
+    return corrections;
 }
 
 template <class Container, typename Func>

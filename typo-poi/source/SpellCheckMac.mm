@@ -66,7 +66,7 @@ std::vector<std::string> NativeSpellChecker::findClosestWords(
     for (NSString* s in corrections) {
         results.push_back([s UTF8String]);
     }
-    return std::move(results);
+    return results;
 }
 
 } // namespace somera

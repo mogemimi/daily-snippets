@@ -37,12 +37,12 @@ std::u32string toUtf32(const std::string& utf8)
     if (CR != conversionOK) {
         // error
         result.clear();
-        return std::move(result);
+        return result;
     }
 
     result.resize(reinterpret_cast<const char32_t*>(dest) - result.data());
     result.shrink_to_fit();
-    return std::move(result);
+    return result;
 #else
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
     return convert.from_bytes(utf8);
@@ -71,12 +71,12 @@ std::string toUtf8(const std::u32string& utf32)
     if (CR != conversionOK) {
         // error
         result.clear();
-        return std::move(result);
+        return result;
     }
 
     result.resize(reinterpret_cast<const char*>(dest) - result.data());
     result.shrink_to_fit();
-    return std::move(result);
+    return result;
 #else
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
     return convert.to_bytes(utf32);

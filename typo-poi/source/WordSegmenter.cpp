@@ -34,7 +34,7 @@ std::vector<std::u32string> splitWords(const std::u32string& text, F isSeparator
         wordBuffer.clear();
     }
 
-    return std::move(words);
+    return words;
 }
 
 bool isCompilerKeyword(const std::string& word)
@@ -390,7 +390,7 @@ std::vector<std::string> IdentifierWordSegmenter::parse(const std::string& text)
     if (!wordBuffer.empty()) {
         words.push_back(std::move(wordBuffer));
     }
-    return std::move(words);
+    return words;
 }
 
 } // namespace somera
