@@ -205,29 +205,6 @@ bool IsSpace(const std::string& c)
     return false;
 }
 
-bool IsSeparator(const std::string& c)
-{
-    if (c.size() != 1) {
-        return false;
-    }
-
-    std::string separators = "!\"#()*+,-./:<>?@[\\]`~";
-#if 0
-    std::sort(std::begin(separators), std::end(separators));
-    std::cout << '"';
-    for (auto separator : separators) {
-        std::string escapeCharacters = "\"\\\'";
-        if (std::binary_search(std::begin(escapeCharacters), std::end(escapeCharacters), separator)) {
-            std::cout << '\\';
-        }
-        std::cout << separator;
-    }
-    std::cout << '"' << std::endl;
-    assert(std::is_sorted(std::begin(separators), std::end(separators)));
-#endif
-    return std::binary_search(std::begin(separators), std::end(separators), c.front());
-}
-
 void ReadTextFileWithoutPedanticMode(somera::TypoMan & typos, const std::string& path)
 {
     auto onWord = [&](const std::string& sourceString) {
@@ -245,7 +222,7 @@ void ReadTextFileWithoutPedanticMode(somera::TypoMan & typos, const std::string&
     UTF8Chunk word;
     ReadUTF8TextFile(path, [&](UTF8Character && character) {
         currentLine += character;
-        if (IsSpace(character.buffer) || IsSeparator(character.buffer)) {
+        if (IsSpace(character.buffer)) {
             if (!word.Empty()) {
                 UTF8Chunk temp;
                 std::swap(word, temp);

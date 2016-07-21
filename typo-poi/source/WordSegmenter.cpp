@@ -11,6 +11,31 @@
 namespace somera {
 namespace {
 
+#if 0
+bool IsSeparator(const std::string& c)
+{
+    if (c.size() != 1) {
+        return false;
+    }
+
+    std::string separators = "!\"#()*+,-./:<>?@[\\]`~";
+#if 0
+    std::sort(std::begin(separators), std::end(separators));
+    std::cout << '"';
+    for (auto separator : separators) {
+        std::string escapeCharacters = "\"\\\'";
+        if (std::binary_search(std::begin(escapeCharacters), std::end(escapeCharacters), separator)) {
+            std::cout << '\\';
+        }
+        std::cout << separator;
+    }
+    std::cout << '"' << std::endl;
+    assert(std::is_sorted(std::begin(separators), std::end(separators)));
+#endif
+    return std::binary_search(std::begin(separators), std::end(separators), c.front());
+}
+#endif
+
 template <typename F>
 std::vector<std::u32string> splitWords(const std::u32string& text, F isSeparator)
 {
@@ -299,12 +324,17 @@ std::vector<std::string> IdentifierWordSegmenter::parse(const std::string& text)
     std::vector<std::string> words;
 
     const auto utf32 = toUtf32(text);
+    std::u32string wordBuffer;
 
-    std::string wordBuffer;
+    auto flush = [&] {
+        words.push_back(toUtf8(wordBuffer));
+        wordBuffer.clear();
+    };
+
     for (auto iter = std::begin(utf32); iter != std::end(utf32); ++iter) {
         const auto c = *iter;
         if (wordBuffer.empty()) {
-            wordBuffer += toUtf8(c);
+            wordBuffer += c;
             continue;
         }
 
@@ -314,81 +344,81 @@ std::vector<std::string> IdentifierWordSegmenter::parse(const std::string& text)
 
         if (startType == CharacterType::Underline) {
             if (type == CharacterType::Underline) {
-                wordBuffer += toUtf8(c);
+                wordBuffer += c;
                 continue;
             }
             else {
-                words.push_back(std::move(wordBuffer));
-                wordBuffer += toUtf8(c);
+                flush();
+                wordBuffer += c;
                 continue;
             }
         }
         else if (startType == CharacterType::Uppercase) {
             if (type == CharacterType::Lowercase) {
-                wordBuffer += toUtf8(c);
+                wordBuffer += c;
                 continue;
             }
             else if (type == CharacterType::Uppercase) {
                 if (getType(wordBuffer.back()) == CharacterType::Lowercase) {
                     assert(startType == CharacterType::Uppercase);
                     assert(type == CharacterType::Uppercase);
-                    words.push_back(std::move(wordBuffer));
-                    wordBuffer += toUtf8(c);
+                    flush();
+                    wordBuffer += c;
                     continue;
                 }
 
                 const auto nextIter = std::next(iter);
                 if (nextIter == std::end(utf32)) {
-                    wordBuffer += toUtf8(c);
+                    wordBuffer += c;
                     continue;
                 }
                 const auto nextType = getType(*nextIter);
                 if (nextType == CharacterType::Uppercase) {
-                    wordBuffer += toUtf8(c);
+                    wordBuffer += c;
                     continue;
                 }
                 if (nextType == CharacterType::Underline) {
-                    wordBuffer += toUtf8(c);
+                    wordBuffer += c;
                     continue;
                 }
                 if (nextType == CharacterType::Number) {
-                    wordBuffer += toUtf8(c);
+                    wordBuffer += c;
                     continue;
                 }
                 else {
-                    words.push_back(std::move(wordBuffer));
-                    wordBuffer += toUtf8(c);
+                    flush();
+                    wordBuffer += c;
                     continue;
                 }
             }
             else {
-                words.push_back(std::move(wordBuffer));
-                wordBuffer += toUtf8(c);
+                flush();
+                wordBuffer += c;
                 continue;
             }
         }
         else if (startType == CharacterType::Number) {
             if (type == CharacterType::Number) {
                 if (getType(wordBuffer.back()) != CharacterType::Number) {
-                    words.push_back(std::move(wordBuffer));
-                    wordBuffer += toUtf8(c);
+                    flush();
+                    wordBuffer += c;
                     continue;
                 }
                 else {
-                    wordBuffer += toUtf8(c);
+                    wordBuffer += c;
                     continue;
                 }
             }
         }
 
         if (type != getType(wordBuffer.back())) {
-            words.push_back(std::move(wordBuffer));
+            flush();
         }
-        wordBuffer += toUtf8(std::u32string(&c, 1));
+        wordBuffer += c;
     }
 
     if (!wordBuffer.empty()) {
-        words.push_back(std::move(wordBuffer));
+        flush();
     }
     return words;
 }
