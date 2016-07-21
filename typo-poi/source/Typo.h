@@ -84,6 +84,8 @@ public:
     
     void setCacheEnabled(bool cacheEnabled);
 
+    void setCacheSize(std::size_t cacheSize);
+
     void setFoundCallback(std::function<void(const Typo&)> callback);
 };
 

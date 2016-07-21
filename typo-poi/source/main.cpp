@@ -342,6 +342,7 @@ int main(int argc, char *argv[])
     typos.setMinimumWordSize(3);
     typos.setMaxCorrectWordCount(4);
     typos.setCacheEnabled(true);
+    typos.setCacheSize(100);
     typos.setFoundCallback([](const somera::Typo& typo) -> void
     {
         showTypoInConsole(typo);

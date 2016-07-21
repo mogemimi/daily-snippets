@@ -315,6 +315,12 @@ void TypoMan::setCacheEnabled(bool cacheEnabled)
     this->isCacheEnabled = cacheEnabled;
 }
 
+void TypoMan::setCacheSize(std::size_t cacheSize)
+{
+    assert(cacheSize > 0);
+    this->cache.setCapacity(cacheSize);
+}
+
 void TypoMan::setFoundCallback(std::function<void(const Typo&)> callback)
 {
     assert(callback);
