@@ -1,6 +1,6 @@
 # what-is-this-file
 
-A experimental/simple C++ lexer as a hobby.
+A file type detector.
 
 It is distributed under the [MIT License](https://opensource.org/licenses/MIT).
 
