@@ -304,12 +304,22 @@ std::string FileSystem::getDirectoryName(const std::string& path)
 
 std::size_t FileSystem::getFileSize(const std::string& path, std::error_code& errorCode)
 {
+#if defined(_MSC_VER)
+    FILE* fp = nullptr;
+    auto fopenResult = fopen_s(&fp, path.c_str(), "rb");
+    if (fp != 0) {
+        // Error: Failed to open the file
+        errorCode.assign(fopenResult, std::generic_category());
+        return 0;
+    }
+#else
     auto fp = fopen(path.c_str(), "rb");
     if (fp == nullptr) {
         // Error: Failed to open the file
         errorCode.assign(errno, std::generic_category());
         return 0;
     }
+#endif
 
 #if defined(_MSC_VER)
     auto descriptor = _fileno(fp);
@@ -543,7 +553,12 @@ FileSystem::readDirectory(const std::string& directory) noexcept
     }
 
 #ifdef SOMERA_IS_WINDOWS
-
+    std::vector<std::string> files;
+    namespace fs = std::experimental::filesystem;
+    for (auto& p : fs::directory_iterator(directory)) {
+        files.push_back(p.path().u8string());
+    }
+    return std::make_tuple(std::move(files), std::error_code{});
 #else
     ::DIR* directoryPointer = ::opendir(directory.c_str());
 
