@@ -32,9 +32,9 @@ public:
     TypoCache();
 
     bool exists(const std::string& typo) const;
-    
+
     void setCapacity(size_t capacity);
-    
+
     void insert(Typo && typo);
 
 private:
@@ -81,7 +81,7 @@ public:
     void setStrictLetterCase(bool strictLetterCase);
 
     void setIgnoreBritishEnglish(bool ignore);
-    
+
     void setCacheEnabled(bool cacheEnabled);
 
     void setCacheSize(std::size_t cacheSize);

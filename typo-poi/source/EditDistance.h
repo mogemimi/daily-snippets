@@ -3,6 +3,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace somera {
 
@@ -24,6 +25,26 @@ struct EditDistance {
     static int levenshteinDistance(
         const std::string& left,
         const std::string& right);
+
+    ///@param left UTF-8 string
+    ///@param right UTF-8 string
+    static int levenshteinDistance_ONDGreedyAlgorithm(
+        const std::string& left,
+        const std::string& right);
+
+    ///@param left UTF-8 string
+    ///@param right UTF-8 string
+    static int computeLCSLengthInLinearSpace(
+        const std::string& left,
+        const std::string& right);
+
+    ///@param left UTF-8 string
+    ///@param right UTF-8 string
+    static std::vector<int> LCS_Column(
+        const std::string& left,
+        const std::string& right,
+        std::size_t m,
+        std::size_t n);
 };
 
 } // namespace somera
