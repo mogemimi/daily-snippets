@@ -26,6 +26,82 @@ void setupCommandLineParser(CommandLineParser & parser)
     parser.addArgument("-help", Flag, "Display available options");
 }
 
+class Tokenizer;
+
+struct TokenizerResult {
+    std::shared_ptr<Tokenizer> nextTokenizer;
+    std::string errorMessage;
+};
+
+class Tokenizer {
+public:
+    virtual ~Tokenizer() = default;
+
+    virtual void Parse(
+        const std::string::const_iterator& iter,
+        const std::string::const_iterator& iterEnd,
+        TokenizerResult & result) = 0;
+};
+
+class StartTokenizer final : public Tokenizer {
+public:
+    void Parse(
+        const std::string::const_iterator& iter,
+        const std::string::const_iterator& iterEnd,
+        TokenizerResult & result) override;
+};
+
+class PreprocessorTokenizer final : public Tokenizer {
+public:
+    void Parse(
+        const std::string::const_iterator& iter,
+        const std::string::const_iterator& iterEnd,
+        TokenizerResult & result) override
+    {
+
+    }
+};
+
+void StartTokenizer::Parse(
+    const std::string::const_iterator& iter,
+    const std::string::const_iterator& iterEnd,
+    TokenizerResult & result)
+{
+    auto c = *iter;
+    if (c == '#') {
+        result.nextTokenizer = std::make_shared<PreprocessorTokenizer>();
+    }
+    else if (c == '/') {
+        auto nextIter = std::next(iter);
+        if (nextIter == iterEnd) {
+            // error
+            result.errorMessage = "Tokenize error";
+            return;
+        }
+
+        if (*nextIter == '*') {
+        }
+    }
+}
+
+class LineParser {
+public:
+    void Parse(const std::string& line)
+    {
+        auto iter = line.begin();
+        auto iterEnd = line.begin();
+        std::shared_ptr<Tokenizer> tokenizer = std::make_shared<StartTokenizer>();
+        while (iter != iterEnd) {
+            TokenizerResult result;
+            tokenizer->Parse(iter, iterEnd, result);
+            if (!result.errorMessage.empty()) {
+                // error
+                break;
+            }
+        }
+    }
+};
+
 void refactorSourceCode(const std::string& path)
 {
     if (FileSystem::isDirectory(path)) {
