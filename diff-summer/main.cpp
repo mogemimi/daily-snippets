@@ -79,6 +79,22 @@ void TestCase(const std::string& a, const std::string& b)
     std::cout
         << x << (x == y ? " == " : " != ") << y
         << "  (" << a << ", " << b << ")" << std::endl;
+
+    auto diffHunks = somera::computeDiff_ONDGreedyAlgorithm(a, b);
+
+    for (auto & hunk : diffHunks) {
+        if (hunk.operation == somera::DiffOperation::Deletion) {
+            std::cout << "-";
+        }
+        else if (hunk.operation == somera::DiffOperation::Insertion) {
+            std::cout << "+";
+        }
+        else if (hunk.operation == somera::DiffOperation::Equality) {
+            std::cout << "=";
+        }
+        std::cout << hunk.text;
+    }
+    std::cout << std::endl;
 }
 
 } // unnamed namespace

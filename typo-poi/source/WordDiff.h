@@ -20,6 +20,8 @@ struct DiffHunk {
 
 std::vector<DiffHunk> computeDiff(const std::string& text1, const std::string& text2);
 
+std::vector<DiffHunk> computeDiff_ONDGreedyAlgorithm(const std::string& text1, const std::string& text2);
+
 std::string computeLCSLinearSpace(
     const std::string& text1,
     const std::string& text2);

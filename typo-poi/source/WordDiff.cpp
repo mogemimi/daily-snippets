@@ -8,6 +8,25 @@
 #include <utility>
 
 namespace somera {
+namespace {
+
+void CompressHunks(std::vector<DiffHunk> & hunks)
+{
+    std::vector<DiffHunk> oldHunks;
+    std::swap(hunks, oldHunks);
+
+    for (auto & h : oldHunks) {
+        if (hunks.empty() || (hunks.back().operation != h.operation)) {
+            hunks.push_back(std::move(h));
+        }
+        else {
+            assert(hunks.back().operation == h.operation);
+            hunks.back().text += h.text;
+        }
+    }
+}
+
+} // unnamed namespace
 
 std::vector<DiffHunk> computeDiff(const std::string& text1, const std::string& text2)
 {
@@ -44,7 +63,7 @@ std::vector<DiffHunk> computeDiff(const std::string& text1, const std::string& t
         }
     }
 
-#if 1
+#if 0
     std::printf("\n");
     for (int row = 0; row < rows; row++) {
         for (int column = 0; column < columns; column++) {
@@ -125,21 +144,173 @@ std::vector<DiffHunk> computeDiff(const std::string& text1, const std::string& t
     }
 
     std::reverse(std::begin(hunks), std::end(hunks));
-    {
-        // merge
-        std::vector<DiffHunk> oldHunks;
-        std::swap(hunks, oldHunks);
+    CompressHunks(hunks);
+    return hunks;
+}
 
-        for (auto & h : oldHunks) {
-            if (hunks.empty() || (hunks.back().operation != h.operation)) {
-                hunks.push_back(std::move(h));
+namespace {
+
+struct Point2D {
+    int x;
+    int y;
+};
+
+struct Path {
+    std::vector<Point2D> points;
+
+    Path & operator=(const Path& other)
+    {
+        points = other.points;
+        return *this;
+    }
+
+    void insert(int x, int y)
+    {
+        Point2D p;
+        p.x = x;
+        p.y = y;
+        points.push_back(std::move(p));
+    }
+};
+
+std::vector<DiffHunk> GenerateDiffHunks(const Path& path, const std::string& text1, const std::string& text2)
+{
+    std::vector<DiffHunk> hunks;
+    auto & points = path.points;
+
+    for (size_t i = 0; (i + 1) < points.size(); ++i) {
+        auto & p0 = points[i];
+        auto & p1 = points[i + 1];
+        assert(((p0.x == p1.x) && (p0.y + 1 == p1.y))
+            || ((p0.x + 1 == p1.x) && (p0.y == p1.y))
+            || ((p0.x + 1 == p1.x) && (p0.y + 1 == p1.y)));
+        if (p0.x == p1.x) {
+            DiffHunk hunk;
+            hunk.operation = DiffOperation::Insertion;
+            hunk.text = text2[p0.y];
+            hunks.push_back(std::move(hunk));
+        }
+        else if (p0.y == p1.y) {
+            DiffHunk hunk;
+            hunk.operation = DiffOperation::Deletion;
+            hunk.text = text1[p0.x];
+            hunks.push_back(std::move(hunk));
+        }
+        else {
+            DiffHunk hunk;
+            hunk.operation = DiffOperation::Equality;
+            hunk.text = text1[p0.x];
+            hunks.push_back(std::move(hunk));
+        }
+    }
+
+    CompressHunks(hunks);
+    return hunks;
+}
+
+} // unnamed namespace
+
+std::vector<DiffHunk> computeDiff_ONDGreedyAlgorithm(const std::string& text1, const std::string& text2)
+{
+    // NOTE:
+    // This algorithm is based on Myers's An O((M+N)D) Greedy Algorithm in
+    // "An O(ND)Difference Algorithm and Its Variations",
+    // Algorithmica (1986), pages 251-266.
+
+    if (text1.empty() || text2.empty()) {
+        // NOTE: In this case, we use dynamic programming algorithm.
+        return computeDiff(text1, text2);
+    }
+
+    const auto M = static_cast<int>(text1.size());
+    const auto N = static_cast<int>(text2.size());
+
+    const auto maxD = M + N;
+    const auto offset = N;
+
+    std::vector<int> vertices(M + N + 1);
+    vertices[1 + offset] = 0;
+
+    std::vector<Path> paths(vertices.size());
+    vertices[0 + offset] = 0;
+
+    for (int d = 0; d <= maxD; ++d) {
+        for (int k = -d; k <= d; k += 2) {
+            if ((k < -N) || (M < k)) {
+                continue;
+            }
+            assert((-N <= k) && (k <= M));
+
+            const auto kOffset = k + offset;
+
+            int x = 0;
+            if ((k == -d) || (k == -N)) {
+                // NOTE: Move directly from vertex(x, y - 1) to vertex(x, y)
+                x = vertices[kOffset + 1];
+                paths[kOffset] = paths[kOffset + 1];
+            }
+            else if ((k == d) || (k == M)) {
+                // NOTE: Move directly from vertex(x - 1, y) to vertex(x, y)
+                x = vertices[kOffset - 1] + 1;
+                paths[kOffset] = paths[kOffset - 1];
+            }
+            else if (vertices[kOffset - 1] < vertices[kOffset + 1]) {
+                // NOTE: Move from vertex(k + 1) to vertex(k)
+                // vertex(k + 1) is ahead of vertex(k - 1).
+                assert(-N < k && k < M);
+                assert((k != -d) && (k != -N));
+                assert((k != d) && (k != M));
+                x = vertices[kOffset + 1];
+                paths[kOffset] = paths[kOffset + 1];
             }
             else {
-                assert(hunks.back().operation == h.operation);
-                hunks.back().text += h.text;
+                // NOTE: Move from vertex(k - 1) to vertex(k)
+                // vertex(k - 1) is ahead of vertex(k + 1).
+                assert(-N < k && k < M);
+                assert((k != -d) && (k != -N));
+                assert((k != d) && (k != M));
+                assert(vertices[kOffset - 1] >= vertices[kOffset + 1]);
+                x = vertices[kOffset - 1] + 1;
+                paths[kOffset] = paths[kOffset - 1];
+            }
+
+            // NOTE: `k` is defined from `x - y = k`.
+            int y = x - k;
+            assert(x >= 0 && y >= 0);
+
+#if !defined(NDEBUG)
+            if (d == 0) {
+                assert((x == 0) && (y == 0) && (k == 0));
+                assert(paths[kOffset].points.empty());
+            }
+#endif
+            paths[kOffset].insert(x, y);
+
+            while (x < M && y < N && text1[x] == text2[y]) {
+                // NOTE: This loop finds a possibly empty sequence
+                // of diagonal edges called a 'snake'.
+                x += 1;
+                y += 1;
+                paths[k + offset].insert(x, y);
+            }
+
+            vertices[k + offset] = x;
+            if (x >= M && y >= N) {
+                return GenerateDiffHunks(paths[kOffset], text1, text2);
             }
         }
     }
+
+    // NOTE: In this case, D must be == M + N.
+    std::vector<DiffHunk> hunks;
+    DiffHunk hunk1;
+    hunk1.operation = DiffOperation::Deletion;
+    hunk1.text = text1;
+    hunks.push_back(std::move(hunk1));
+    DiffHunk hunk2;
+    hunk2.operation = DiffOperation::Insertion;
+    hunk2.text = text2;
+    hunks.push_back(std::move(hunk2));
     return hunks;
 }
 
