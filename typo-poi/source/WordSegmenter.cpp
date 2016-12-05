@@ -312,10 +312,10 @@ CharacterType getType(char32_t c)
     return CharacterType::Other;
 }
 
-std::string toUtf8(char32_t c)
-{
-    return somera::toUtf8(std::u32string(&c, 1));
-}
+//std::string toUtf8(char32_t c)
+//{
+//    return somera::toUtf8(std::u32string(&c, 1));
+//}
 
 } // unnamed namespace
 

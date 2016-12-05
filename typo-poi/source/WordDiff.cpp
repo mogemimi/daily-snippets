@@ -150,6 +150,8 @@ std::string computeLCSLinearSpace(
     return computeLCSLinearSpace(text1, text2, text1.size(), text2.size());
 }
 
+namespace {
+
 bool includeAlph(char character, const std::string& text)
 {
     for (auto & c : text) {
@@ -170,6 +172,8 @@ std::string substring(const std::string& text, int start, int end)
     assert(start < end);
     return text.substr(start, end - start);
 }
+
+} // unnamed namespace
 
 std::string computeLCSLinearSpace(
     const std::string& text1,
@@ -233,8 +237,8 @@ std::string computeLCSLinearSpace(
         k,
         halfN);
     auto v = computeLCSLinearSpace(
-        substring(text1, k, m - 1),
-        substring(text2, halfN, n - 1),
+        substring(text1, k, static_cast<int>(m - 1)),
+        substring(text2, halfN, static_cast<int>(n - 1)),
         m - k,
         n - halfN);
 
