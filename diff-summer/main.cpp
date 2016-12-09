@@ -72,16 +72,8 @@ std::string BuildNumber()
 
 #endif
 
-void TestCase(const std::string& a, const std::string& b)
+void PrintDiff(const std::vector<somera::DiffHunk>& diffHunks)
 {
-    auto x = somera::EditDistance::levenshteinDistance(a, b);
-    auto y = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm(a, b);
-    std::cout
-        << x << (x == y ? " == " : " != ") << y
-        << "  (" << a << ", " << b << ")" << std::endl;
-
-    auto diffHunks = somera::computeDiff_ONDGreedyAlgorithm(a, b);
-
     for (auto & hunk : diffHunks) {
         if (hunk.operation == somera::DiffOperation::Deletion) {
             std::cout << "-";
@@ -95,6 +87,24 @@ void TestCase(const std::string& a, const std::string& b)
         std::cout << hunk.text;
     }
     std::cout << std::endl;
+}
+
+void TestCase(const std::string& a, const std::string& b)
+{
+    auto x = somera::EditDistance::levenshteinDistance(a, b);
+    auto y = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm(a, b);
+    std::cout
+        << x << (x == y ? " == " : " != ") << y
+        << "  (" << a << ", " << b << ")" << std::endl;
+
+    PrintDiff(somera::computeDiff(a, b));
+    PrintDiff(somera::computeDiff_ONDGreedyAlgorithm(a, b));
+}
+
+std::string Reverse(std::string && s)
+{
+    std::reverse(std::begin(s), std::end(s));
+    return s;
 }
 
 } // unnamed namespace
@@ -125,6 +135,7 @@ int main(int argc, char *argv[])
     TestCase("book", "back");
     TestCase("vertices", "indices");
     TestCase("indices", "vertices");
+    TestCase(Reverse("indices"), Reverse("vertices"));
     TestCase("vertices2", "indices");
     TestCase("vert", "ind");
     TestCase("a", "b");
@@ -133,6 +144,7 @@ int main(int argc, char *argv[])
     TestCase("aaaaa", "bbbbb");
     TestCase("AGCTCTATAGATA", "TCGCTGATAGTTTCTAAGAGAGAGCT");
     TestCase("TCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTATAGATA");
+    TestCase(Reverse("TCGCTGATAGTTTCTAAGAGAGAGCT"), Reverse("AGCTCTATAGATA"));
 
     return 0;
 }

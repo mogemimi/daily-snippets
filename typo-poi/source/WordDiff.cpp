@@ -5,6 +5,7 @@
 #include "EditDistance.h"
 #include <algorithm>
 #include <cassert>
+#include <cstdlib>
 #include <utility>
 
 namespace somera {
@@ -235,22 +236,48 @@ std::vector<DiffHunk> computeDiff_ONDGreedyAlgorithm(const std::string& text1, c
     vertices[0 + offset] = 0;
 
     for (int d = 0; d <= maxD; ++d) {
-        for (int k = -d; k <= d; k += 2) {
-            if ((k < -N) || (M < k)) {
-                continue;
-            }
+#if 1
+        const auto startK = -std::min(d, N - (((N % 2) == (d % 2)) ? 0 : 1));
+        const auto endK = std::min(d, M - (((M % 2) == (d % 2)) ? 0 : 1));
+#elif 0
+        int startK = -d;
+        if (startK < -N) {
+            startK = -(N - (((N % 2) == (d % 2)) ? 0 : 1));
+        }
+        int endK = d;
+        if (endK > M) {
+            endK = M - (((M % 2) == (d % 2)) ? 0 : 1);
+        }
+#else
+        int startK = -d;
+        while (startK < -N) {
+            startK += 2;
+        }
+        int endK = d;
+        while (endK > M) {
+            endK -= 2;
+        }
+#endif
+        assert((-N <= startK) && (endK <= M));
+        assert(std::abs(startK % 2) == (d % 2));
+        assert(std::abs(endK % 2) == (d % 2));
+
+        for (int k = startK; k <= endK; k += 2) {
             assert((-N <= k) && (k <= M));
+            assert(std::abs(k % 2) == (d % 2));
 
             const auto kOffset = k + offset;
 
             int x = 0;
-            if ((k == -d) || (k == -N)) {
+            if (k == startK) {
                 // NOTE: Move directly from vertex(x, y - 1) to vertex(x, y)
+                // NOTE: In this case, V[k - 1] is out of range.
                 x = vertices[kOffset + 1];
                 paths[kOffset] = paths[kOffset + 1];
             }
-            else if ((k == d) || (k == M)) {
+            else if (k == endK) {
                 // NOTE: Move directly from vertex(x - 1, y) to vertex(x, y)
+                // NOTE: In this case, V[k + 1] is out of range.
                 x = vertices[kOffset - 1] + 1;
                 paths[kOffset] = paths[kOffset - 1];
             }
@@ -300,6 +327,8 @@ std::vector<DiffHunk> computeDiff_ONDGreedyAlgorithm(const std::string& text1, c
             }
         }
     }
+
+    assert(false);
 
     // NOTE: In this case, D must be == M + N.
     std::vector<DiffHunk> hunks;
