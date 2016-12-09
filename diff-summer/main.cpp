@@ -133,6 +133,7 @@ int main(int argc, char *argv[])
     TestCase("sitting", "kitten");
     TestCase("kitten", "sitting");
     TestCase("book", "back");
+    TestCase("vertices", "vertex");
     TestCase("vertices", "indices");
     TestCase("indices", "vertices");
     TestCase(Reverse("indices"), Reverse("vertices"));

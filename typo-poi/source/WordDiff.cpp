@@ -262,6 +262,25 @@ std::vector<DiffHunk> computeDiff_ONDGreedyAlgorithm(const std::string& text1, c
         assert(std::abs(startK % 2) == (d % 2));
         assert(std::abs(endK % 2) == (d % 2));
 
+        // NOTE:
+        // When IMPROVE_DIFFHUNK_READABILITY is defined 1,
+        // * Diff(aa, bb) is -aa+bb
+        // * Diff(a, bbbbb) is -a+bbbbb
+        // * Diff(aaaaa, bbbbb) is -aaaaa+bbbbb
+        // 
+        // When IMPROVE_DIFFHUNK_READABILITY is defined 0,
+        // * Diff(aa, bb) is -a+b-a+b
+        // * Diff(a, bbbbb) is +b-a+bbbb
+        // * Diff(aaaaa, bbbbb) is -aaaa+b-a+bbbb
+#define IMPROVE_DIFFHUNK_READABILITY 1
+#if (IMPROVE_DIFFHUNK_READABILITY == 1)
+        const bool startKMinusOneEnabled = (-d < startK) && (-N < startK);
+        const bool endKMinusOneEnabled = (endK < d) && (endK < M);
+#else
+        constexpr bool startKMinusOneEnabled = false;
+        constexpr bool endKMinusOneEnabled = false;
+#endif
+
         for (int k = startK; k <= endK; k += 2) {
             assert((-N <= k) && (k <= M));
             assert(std::abs(k % 2) == (d % 2));
@@ -269,13 +288,13 @@ std::vector<DiffHunk> computeDiff_ONDGreedyAlgorithm(const std::string& text1, c
             const auto kOffset = k + offset;
 
             int x = 0;
-            if (k == startK) {
+            if (k == startK && !startKMinusOneEnabled) {
                 // NOTE: Move directly from vertex(x, y - 1) to vertex(x, y)
                 // NOTE: In this case, V[k - 1] is out of range.
                 x = vertices[kOffset + 1];
                 paths[kOffset] = paths[kOffset + 1];
             }
-            else if (k == endK) {
+            else if (k == endK && !endKMinusOneEnabled) {
                 // NOTE: Move directly from vertex(x - 1, y) to vertex(x, y)
                 // NOTE: In this case, V[k + 1] is out of range.
                 x = vertices[kOffset - 1] + 1;
@@ -311,6 +330,7 @@ std::vector<DiffHunk> computeDiff_ONDGreedyAlgorithm(const std::string& text1, c
                 assert(paths[kOffset].points.empty());
             }
 #endif
+
             paths[kOffset].insert(x, y);
 
             while (x < M && y < N && text1[x] == text2[y]) {
