@@ -236,31 +236,14 @@ std::vector<DiffHunk> computeDiff_ONDGreedyAlgorithm(const std::string& text1, c
     vertices[0 + offset] = 0;
 
     for (int d = 0; d <= maxD; ++d) {
-#if 1
-        const auto startK = -std::min(d, N - (((N % 2) == (d % 2)) ? 0 : 1));
-        const auto endK = std::min(d, M - (((M % 2) == (d % 2)) ? 0 : 1));
-#elif 0
-        int startK = -d;
-        if (startK < -N) {
-            startK = -(N - (((N % 2) == (d % 2)) ? 0 : 1));
-        }
-        int endK = d;
-        if (endK > M) {
-            endK = M - (((M % 2) == (d % 2)) ? 0 : 1);
-        }
-#else
-        int startK = -d;
-        while (startK < -N) {
-            startK += 2;
-        }
-        int endK = d;
-        while (endK > M) {
-            endK -= 2;
-        }
-#endif
+        const int startK = -std::min(d, (N * 2) - d);
+        const int endK = std::min(d, (M * 2) - d);
+
         assert((-N <= startK) && (endK <= M));
         assert(std::abs(startK % 2) == (d % 2));
         assert(std::abs(endK % 2) == (d % 2));
+        assert((d > N) ? (startK == -(N * 2 - d)) : (startK == -d));
+        assert((d > M) ? (endK == (M * 2 - d)) : (endK == d));
 
         // NOTE:
         // When IMPROVE_DIFFHUNK_READABILITY is defined 1,
@@ -348,19 +331,9 @@ std::vector<DiffHunk> computeDiff_ONDGreedyAlgorithm(const std::string& text1, c
         }
     }
 
-    assert(false);
-
     // NOTE: In this case, D must be == M + N.
-    std::vector<DiffHunk> hunks;
-    DiffHunk hunk1;
-    hunk1.operation = DiffOperation::Deletion;
-    hunk1.text = text1;
-    hunks.push_back(std::move(hunk1));
-    DiffHunk hunk2;
-    hunk2.operation = DiffOperation::Insertion;
-    hunk2.text = text2;
-    hunks.push_back(std::move(hunk2));
-    return hunks;
+    assert(false);
+    return {};
 }
 
 std::string computeLCSLinearSpace(

@@ -326,31 +326,14 @@ int EditDistance::levenshteinDistance_ONDGreedyAlgorithm(
     vertices[1 + offset] = 0;
 
     for (int d = 0; d <= maxD; ++d) {
-#if 1
-        const auto startK = -std::min(d, N - (((N % 2) == (d % 2)) ? 0 : 1));
-        const auto endK = std::min(d, M - (((M % 2) == (d % 2)) ? 0 : 1));
-#elif 0
-        int startK = -d;
-        if (startK < -N) {
-            startK = -(N - (((N % 2) == (d % 2)) ? 0 : 1));
-        }
-        int endK = d;
-        if (endK > M) {
-            endK = M - (((M % 2) == (d % 2)) ? 0 : 1);
-        }
-#else
-        int startK = -d;
-        while (startK < -N) {
-            startK += 2;
-        }
-        int endK = d;
-        while (endK > M) {
-            endK -= 2;
-        }
-#endif
+        const int startK = -std::min(d, (N * 2) - d);
+        const int endK = std::min(d, (M * 2) - d);
+
         assert((-N <= startK) && (endK <= M));
         assert(std::abs(startK % 2) == (d % 2));
         assert(std::abs(endK % 2) == (d % 2));
+        assert((d > N) ? (startK == -(N * 2 - d)) : (startK == -d));
+        assert((d > M) ? (endK == (M * 2 - d)) : (endK == d));
 
         for (int k = startK; k <= endK; k += 2) {
             assert((-N <= k) && (k <= M));

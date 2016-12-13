@@ -107,6 +107,29 @@ std::string Reverse(std::string && s)
     return s;
 }
 
+template <class Function>
+void measurePerformanceTime(Function f)
+{
+    using std::chrono::high_resolution_clock;
+    using std::chrono::milliseconds;
+    using std::chrono::nanoseconds;
+    using std::chrono::duration_cast;
+
+	auto start = high_resolution_clock::now();
+
+    f();
+
+	auto end = high_resolution_clock::now();
+	auto duration = duration_cast<nanoseconds>(end - start);
+
+	std::cout
+        << "Measured time (ns) : " << duration.count() << " ns" << std::endl;
+    std::cout
+        << "Measured time (sec): "
+        << duration_cast<std::chrono::duration<double>>(end - start).count()
+        << " seconds" << std::endl;
+}
+
 } // unnamed namespace
 
 int main(int argc, char *argv[])
@@ -146,6 +169,38 @@ int main(int argc, char *argv[])
     TestCase("AGCTCTATAGATA", "TCGCTGATAGTTTCTAAGAGAGAGCT");
     TestCase("TCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTATAGATA");
     TestCase(Reverse("TCGCTGATAGTTTCTAAGAGAGAGCT"), Reverse("AGCTCTATAGATA"));
+
+    measurePerformanceTime([] {
+        auto f = somera::EditDistance::levenshteinDistance;
+        f("TCGCTGATAGTTTCTAAGAGAGAGCTTCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTATAGATAAGCTCTATAGATA");
+        f("TCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTATAGATA");
+        f("TCGCTGATAGTTTCTAAGAGAGAGCTTCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTATAGATAAGCTCTATAGATA");
+        f("TCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTATAGATA");
+        f("TCGCTGATAGTTTCTAAGAGAGindicesAGCTTCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTAindicesTAGATAAGCTCTAindicesTAGATA");
+        f("TCGCTGindicesATAGTTTCTAAvertices2GAGAGAGCT", "AGCTCindicesTATAGvertices2ATA");
+        f("TCGCTGATAGTTTCTAbbbbbAGAGAGAGCTTCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTATAGATAAGCTCTbbbbbATAGATA");
+        f("TCGCTGATAGTvertices2TTCTbbbbbAAGAGAGAGCT", "AGCvertices2TCTbbbbbvertices2ATAGATA");
+        f("TCGbbbbvertices2bCTGATAGTTTCTvertices2AAGbbbbbAGAGAGCvertices2TTCGCTGAvertices2TAGTTTCTvertivertices2ces2AAGAGAGAGCT", "AGCTCTATAGATAAGCTbbvertices2bbbCTATAGATA");
+        f("TCGCTGATATCGCTGATAGTTvTCGCTGATATCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTGTTverticverticeTCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTTCGCTGATAGTTverticvertices2es2TCTAAGATCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTbbbbbGAGAGCTTCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTTCGCTGATAGTTCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTTverticvertices2es2TCTAAGAbbbbbGAGAGCTs2es2TCTAAGAbbbbbGAGAGCTerticvertices2es2TCTAAGATCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTbbbbbGAGAGCTGTTverticvertices2es2TCTAAGAbbbbbGAGAGCT", "AGCTCTATATCGCTGATAGTTverTCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTticvertices2es2TCTAAGAbbTCGCTGATAGTTverticverticeTCGCTGATAGTTverticvertices2es2TCTAAGAbbTCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTbbbGAGAGCTs2es2TCTAAGAbbbbbGAGAGCTbbbGAGAGCTTCGCTGATAGTTvertTCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTicvertices2es2TCTAAGAbbbbbGAGAGCTGATA");
+        f("TCGCTGATAGTTTCTAAGAGAbbbbbGindicesAGCTTCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTAindicesTAGATAAGCTCTAindibbbbbcesTAGATA");
+        f("TCGCTGindicesATAGTTTCTAAvertices2GAGAGAGCT", "AGCTCindicesTATAGvertices2ATA");
+    });
+
+    measurePerformanceTime([] {
+        auto f = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm;
+        f("TCGCTGATAGTTTCTAAGAGAGAGCTTCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTATAGATAAGCTCTATAGATA");
+        f("TCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTATAGATA");
+        f("TCGCTGATAGTTTCTAAGAGAGAGCTTCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTATAGATAAGCTCTATAGATA");
+        f("TCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTATAGATA");
+        f("TCGCTGATAGTTTCTAAGAGAGindicesAGCTTCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTAindicesTAGATAAGCTCTAindicesTAGATA");
+        f("TCGCTGindicesATAGTTTCTAAvertices2GAGAGAGCT", "AGCTCindicesTATAGvertices2ATA");
+        f("TCGCTGATAGTTTCTAbbbbbAGAGAGAGCTTCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTATAGATAAGCTCTbbbbbATAGATA");
+        f("TCGCTGATAGTvertices2TTCTbbbbbAAGAGAGAGCT", "AGCvertices2TCTbbbbbvertices2ATAGATA");
+        f("TCGbbbbvertices2bCTGATAGTTTCTvertices2AAGbbbbbAGAGAGCvertices2TTCGCTGAvertices2TAGTTTCTvertivertices2ces2AAGAGAGAGCT", "AGCTCTATAGATAAGCTbbvertices2bbbCTATAGATA");
+        f("TCGCTGATATCGCTGATAGTTvTCGCTGATATCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTGTTverticverticeTCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTTCGCTGATAGTTverticvertices2es2TCTAAGATCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTbbbbbGAGAGCTTCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTTCGCTGATAGTTCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTTverticvertices2es2TCTAAGAbbbbbGAGAGCTs2es2TCTAAGAbbbbbGAGAGCTerticvertices2es2TCTAAGATCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTbbbbbGAGAGCTGTTverticvertices2es2TCTAAGAbbbbbGAGAGCT", "AGCTCTATATCGCTGATAGTTverTCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTticvertices2es2TCTAAGAbbTCGCTGATAGTTverticverticeTCGCTGATAGTTverticvertices2es2TCTAAGAbbTCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTbbbGAGAGCTs2es2TCTAAGAbbbbbGAGAGCTbbbGAGAGCTTCGCTGATAGTTvertTCGCTGATAGTTverticvertices2es2TCTAAGAbbbbbGAGAGCTicvertices2es2TCTAAGAbbbbbGAGAGCTGATA");
+        f("TCGCTGATAGTTTCTAAGAGAbbbbbGindicesAGCTTCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTAindicesTAGATAAGCTCTAindibbbbbcesTAGATA");
+        f("TCGCTGindicesATAGTTTCTAAvertices2GAGAGAGCT", "AGCTCindicesTATAGvertices2ATA");
+    });
 
     return 0;
 }
