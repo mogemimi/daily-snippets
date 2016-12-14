@@ -151,33 +151,41 @@ std::vector<DiffHunk<char>> computeDiff(const std::string& text1, const std::str
 
 namespace {
 
-struct Point2D {
+struct Vertex final {
+    std::shared_ptr<Vertex> prev;
     int x;
     int y;
-};
 
-struct Path {
-    std::vector<Point2D> points;
-
-    Path & operator=(const Path& other)
+    Vertex(std::shared_ptr<Vertex> && prevIn, int xIn, int yIn)
+        : prev(std::move(prevIn))
+        , x(xIn)
+        , y(yIn)
     {
-        points = other.points;
-        return *this;
     }
 
-    void insert(int x, int y)
+    void PushBack(int xIn, int yIn)
     {
-        Point2D p;
-        p.x = x;
-        p.y = y;
-        points.push_back(std::move(p));
+        auto vertex = std::make_shared<Vertex>(std::move(prev), x, y);
+        prev = vertex;
+        x = xIn;
+        y = yIn;
     }
 };
 
-std::vector<DiffHunk<char>> GenerateDiffHunks(const Path& path, const std::string& text1, const std::string& text2)
+std::vector<DiffHunk<char>> GenerateDiffHunks(
+    const std::shared_ptr<Vertex>& path,
+    const std::string& text1,
+    const std::string& text2)
 {
     std::vector<DiffHunk<char>> hunks;
-    auto & points = path.points;
+
+    std::vector<Vertex> points;
+    auto iter = path;
+    while (iter != nullptr) {
+        points.push_back(*iter);
+        iter = iter->prev;
+    }
+    std::reverse(std::begin(points), std::end(points));
 
     for (size_t i = 0; (i + 1) < points.size(); ++i) {
         auto & p0 = points[i];
@@ -232,8 +240,7 @@ std::vector<DiffHunk<char>> computeDiff_ONDGreedyAlgorithm(const std::string& te
     std::vector<int> vertices(M + N + 1);
     vertices[1 + offset] = 0;
 
-    std::vector<Path> paths(vertices.size());
-    vertices[0 + offset] = 0;
+    std::vector<std::shared_ptr<Vertex>> paths(vertices.size());
 
     for (int d = 0; d <= maxD; ++d) {
         const int startK = -std::min(d, (N * 2) - d);
@@ -310,18 +317,20 @@ std::vector<DiffHunk<char>> computeDiff_ONDGreedyAlgorithm(const std::string& te
 #if !defined(NDEBUG)
             if (d == 0) {
                 assert((x == 0) && (y == 0) && (k == 0));
-                assert(paths[kOffset].points.empty());
+                assert(paths[kOffset] == nullptr);
             }
 #endif
 
-            paths[kOffset].insert(x, y);
+            auto prev = std::move(paths[kOffset]);
+            paths[kOffset] = std::make_shared<Vertex>(std::move(prev), x, y);
 
             while (x < M && y < N && text1[x] == text2[y]) {
                 // NOTE: This loop finds a possibly empty sequence
                 // of diagonal edges called a 'snake'.
                 x += 1;
                 y += 1;
-                paths[kOffset].insert(x, y);
+                assert(paths[kOffset] != nullptr);
+                paths[kOffset]->PushBack(x, y);
             }
 
             vertices[kOffset] = x;
