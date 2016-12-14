@@ -31,6 +31,15 @@ void CompressHunks(std::vector<DiffHunk<char>> & hunks)
 
 std::vector<DiffHunk<char>> computeDiff(const std::string& text1, const std::string& text2)
 {
+#if 1
+    return computeDiff_ONDGreedyAlgorithm(text1, text2);
+#else
+    return computeDiff_DynamicProgramming(text1, text2);
+#endif
+}
+
+std::vector<DiffHunk<char>> computeDiff_DynamicProgramming(const std::string& text1, const std::string& text2)
+{
     if (text1.empty() && text2.empty()) {
         return {};
     }
@@ -166,7 +175,7 @@ struct Vertex final {
     void PushBack(int xIn, int yIn)
     {
         auto vertex = std::make_shared<Vertex>(std::move(prev), x, y);
-        prev = vertex;
+        prev = std::move(vertex);
         x = xIn;
         y = yIn;
     }
@@ -227,8 +236,20 @@ std::vector<DiffHunk<char>> computeDiff_ONDGreedyAlgorithm(const std::string& te
     // Algorithmica (1986), pages 251-266.
 
     if (text1.empty() || text2.empty()) {
-        // NOTE: In this case, we use dynamic programming algorithm.
-        return computeDiff(text1, text2);
+        std::vector<DiffHunk<char>> hunks;
+        if (!text1.empty()) {
+            DiffHunk<char> hunk1;
+            hunk1.operation = DiffOperation::Deletion;
+            hunk1.text = text1;
+            hunks.push_back(std::move(hunk1));
+        }
+        else if (!text2.empty()) {
+            DiffHunk<char> hunk2;
+            hunk2.operation = DiffOperation::Insertion;
+            hunk2.text = text2;
+            hunks.push_back(std::move(hunk2));
+        }
+        return hunks;
     }
 
     const auto M = static_cast<int>(text1.size());

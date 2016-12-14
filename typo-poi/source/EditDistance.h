@@ -28,6 +28,12 @@ struct EditDistance {
 
     ///@param left UTF-8 string
     ///@param right UTF-8 string
+    static int levenshteinDistance_DynamicProgramming(
+        const std::string& left,
+        const std::string& right);
+
+    ///@param left UTF-8 string
+    ///@param right UTF-8 string
     static int levenshteinDistance_ONDGreedyAlgorithm(
         const std::string& left,
         const std::string& right);

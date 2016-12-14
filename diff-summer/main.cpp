@@ -91,7 +91,7 @@ void PrintDiff(const std::vector<somera::DiffHunk<char>>& diffHunks)
 
 void TestCase(const std::string& a, const std::string& b)
 {
-    auto x = somera::EditDistance::levenshteinDistance(a, b);
+    auto x = somera::EditDistance::levenshteinDistance_DynamicProgramming(a, b);
     auto y = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm(a, b);
     std::cout
         << x << (x == y ? " == " : " != ") << y
@@ -174,17 +174,17 @@ int main(int argc, char *argv[])
     TestCase(Reverse("TCGCTGATAGTTTCTAAGAGAGAGCT"), Reverse("AGCTCTATAGATA"));
 
     measurePerformanceTime([] {
-        auto f = somera::EditDistance::levenshteinDistance;
-//        auto f = somera::computeDiff;
-        f("AGCTCTATAGATAAGCTCTATAGATA", "AGCTCTATAGATAAGCTCTATAGATA");
-        f("AGCTCTATAGAAGCAGCTCATAGATAAGCTCTATAGATATCTATAGAT", "AGCTCTATAGATAAGCAGCTCTATAGATAAGCTCTATAGATATCTATAGATA");
+//        auto f = somera::EditDistance::levenshteinDistance_DynamicProgramming;
+        auto f = somera::computeDiff_DynamicProgramming;
+        f("xxxxxxxxxxxxxxxxxxxxxx", "AGCTCTATAGATAAGCTCTATAGATA");
+        f("AGCTCTATAGAAGCAGCTCATAGATAAGCTCTATAGATATCTATAGAT", "xxxxxxxxxxxxxxxxxxxxxx");
     });
 
     measurePerformanceTime([] {
-        auto f = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm;
-//        auto f = somera::computeDiff_ONDGreedyAlgorithm;
-        f("AGCTCTATAGATAAGCTCTATAGATA", "AGCTCTATAGATAAGCTCTATAGATA");
-        f("AGCTCTATAGAAGCAGCTCATAGATAAGCTCTATAGATATCTATAGAT", "AGCTCTATAGATAAGCAGCTCTATAGATAAGCTCTATAGATATCTATAGATA");
+//        auto f = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm;
+        auto f = somera::computeDiff_ONDGreedyAlgorithm;
+        f("xxxxxxxxxxxxxxxxxxxxxx", "AGCTCTATAGATAAGCTCTATAGATA");
+        f("AGCTCTATAGAAGCAGCTCATAGATAAGCTCTATAGATATCTATAGAT", "xxxxxxxxxxxxxxxxxxxxxx");
     });
 
     return 0;

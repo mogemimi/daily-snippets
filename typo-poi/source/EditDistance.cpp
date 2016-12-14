@@ -240,6 +240,15 @@ double EditDistance::jaroWinklerDistance(const std::string& left, const std::str
 
 int EditDistance::levenshteinDistance(const std::string& left, const std::string& right)
 {
+#if 1
+    return levenshteinDistance_ONDGreedyAlgorithm(left, right);
+#else
+    return levenshteinDistance_DynamicProgramming(left, right);
+#endif
+}
+
+int EditDistance::levenshteinDistance_DynamicProgramming(const std::string& left, const std::string& right)
+{
     const auto rows = static_cast<int>(left.size()) + 1;
     const auto columns = static_cast<int>(right.size()) + 1;
 
