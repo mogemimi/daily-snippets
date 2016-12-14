@@ -11,25 +11,25 @@
 namespace somera {
 namespace {
 
-void CompressHunks(std::vector<DiffHunk> & hunks)
+void CompressHunks(std::vector<DiffHunk<char>> & hunks)
 {
-    std::vector<DiffHunk> oldHunks;
+    std::vector<DiffHunk<char>> oldHunks;
     std::swap(hunks, oldHunks);
 
-    for (auto & h : oldHunks) {
-        if (hunks.empty() || (hunks.back().operation != h.operation)) {
-            hunks.push_back(std::move(h));
+    for (auto & hunk : oldHunks) {
+        if (hunks.empty() || (hunks.back().operation != hunk.operation)) {
+            hunks.push_back(std::move(hunk));
         }
         else {
-            assert(hunks.back().operation == h.operation);
-            hunks.back().text += h.text;
+            assert(hunks.back().operation == hunk.operation);
+            hunks.back().text += hunk.text;
         }
     }
 }
 
 } // unnamed namespace
 
-std::vector<DiffHunk> computeDiff(const std::string& text1, const std::string& text2)
+std::vector<DiffHunk<char>> computeDiff(const std::string& text1, const std::string& text2)
 {
     if (text1.empty() && text2.empty()) {
         return {};
@@ -75,7 +75,7 @@ std::vector<DiffHunk> computeDiff(const std::string& text1, const std::string& t
     std::printf("\n");
 #endif
 
-    std::vector<DiffHunk> hunks;
+    std::vector<DiffHunk<char>> hunks;
 
     int row = rows - 1;
     int column = columns - 1;
@@ -90,7 +90,7 @@ std::vector<DiffHunk> computeDiff(const std::string& text1, const std::string& t
         if (longestCommonSubsequence
             && (*longestCommonSubsequence == mat(row, column))
             && (text1[row - 1] == text2[column - 1])) {
-            DiffHunk hunk;
+            DiffHunk<char> hunk;
             hunk.text = text1[row - 1];
             hunk.operation = DiffOperation::Equality;
             hunks.push_back(std::move(hunk));
@@ -104,7 +104,7 @@ std::vector<DiffHunk> computeDiff(const std::string& text1, const std::string& t
         if ((text1[row - 1] == text2[column - 1])
             && (equality < deletion)
             && (equality < insertion)) {
-            DiffHunk hunk;
+            DiffHunk<char> hunk;
             hunk.text = text1[row - 1];
             hunk.operation = DiffOperation::Equality;
             hunks.push_back(std::move(hunk));
@@ -113,14 +113,14 @@ std::vector<DiffHunk> computeDiff(const std::string& text1, const std::string& t
             longestCommonSubsequence = mat(row, column);
         }
         else if (deletion < insertion) {
-            DiffHunk hunk;
+            DiffHunk<char> hunk;
             hunk.text = text1[row - 1];
             hunk.operation = DiffOperation::Deletion;
             hunks.push_back(std::move(hunk));
             --row;
         }
         else {
-            DiffHunk hunk;
+            DiffHunk<char> hunk;
             hunk.text = text2[column - 1];
             hunk.operation = DiffOperation::Insertion;
             hunks.push_back(std::move(hunk));
@@ -129,7 +129,7 @@ std::vector<DiffHunk> computeDiff(const std::string& text1, const std::string& t
     }
 
     while (column > 0) {
-        DiffHunk hunk;
+        DiffHunk<char> hunk;
         hunk.text = text2[column - 1];
         hunk.operation = DiffOperation::Insertion;
         hunks.push_back(std::move(hunk));
@@ -137,7 +137,7 @@ std::vector<DiffHunk> computeDiff(const std::string& text1, const std::string& t
     }
 
     while (row > 0) {
-        DiffHunk hunk;
+        DiffHunk<char> hunk;
         hunk.text = text1[row - 1];
         hunk.operation = DiffOperation::Deletion;
         hunks.push_back(std::move(hunk));
@@ -174,9 +174,9 @@ struct Path {
     }
 };
 
-std::vector<DiffHunk> GenerateDiffHunks(const Path& path, const std::string& text1, const std::string& text2)
+std::vector<DiffHunk<char>> GenerateDiffHunks(const Path& path, const std::string& text1, const std::string& text2)
 {
-    std::vector<DiffHunk> hunks;
+    std::vector<DiffHunk<char>> hunks;
     auto & points = path.points;
 
     for (size_t i = 0; (i + 1) < points.size(); ++i) {
@@ -186,19 +186,19 @@ std::vector<DiffHunk> GenerateDiffHunks(const Path& path, const std::string& tex
             || ((p0.x + 1 == p1.x) && (p0.y == p1.y))
             || ((p0.x + 1 == p1.x) && (p0.y + 1 == p1.y)));
         if (p0.x == p1.x) {
-            DiffHunk hunk;
+            DiffHunk<char> hunk;
             hunk.operation = DiffOperation::Insertion;
             hunk.text = text2[p0.y];
             hunks.push_back(std::move(hunk));
         }
         else if (p0.y == p1.y) {
-            DiffHunk hunk;
+            DiffHunk<char> hunk;
             hunk.operation = DiffOperation::Deletion;
             hunk.text = text1[p0.x];
             hunks.push_back(std::move(hunk));
         }
         else {
-            DiffHunk hunk;
+            DiffHunk<char> hunk;
             hunk.operation = DiffOperation::Equality;
             hunk.text = text1[p0.x];
             hunks.push_back(std::move(hunk));
@@ -211,7 +211,7 @@ std::vector<DiffHunk> GenerateDiffHunks(const Path& path, const std::string& tex
 
 } // unnamed namespace
 
-std::vector<DiffHunk> computeDiff_ONDGreedyAlgorithm(const std::string& text1, const std::string& text2)
+std::vector<DiffHunk<char>> computeDiff_ONDGreedyAlgorithm(const std::string& text1, const std::string& text2)
 {
     // NOTE:
     // This algorithm is based on Myers's An O((M+N)D) Greedy Algorithm in
@@ -321,10 +321,10 @@ std::vector<DiffHunk> computeDiff_ONDGreedyAlgorithm(const std::string& text1, c
                 // of diagonal edges called a 'snake'.
                 x += 1;
                 y += 1;
-                paths[k + offset].insert(x, y);
+                paths[kOffset].insert(x, y);
             }
 
-            vertices[k + offset] = x;
+            vertices[kOffset] = x;
             if (x >= M && y >= N) {
                 return GenerateDiffHunks(paths[kOffset], text1, text2);
             }
