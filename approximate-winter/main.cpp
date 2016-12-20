@@ -39,18 +39,27 @@ int SizeHash(const std::string& word)
 
 uint32_t HistogramHashing(const std::string& word)
 {
-    // # is number 0 to 9.
-    // @ is symbols and other characters.
+    // NOTE:
+    // '#' is number 0 to 9.
+    // '@' is symbols and other characters.
     //
     //   ABCDEFGHIJKLMNOPQRSTUVWXYZ#@
     //   abcdefghijklmnopqrstuvwxyz#@
     // 0b0000000000000000000000000000
 
-    // Example: Blade Runner
+    // Example:
+    //   Histogram of "Blade Runner"
+    //
+    //       *        *   *
+    //   ** **      * *   *  *
+    //   ABCDEFGHIJKLMNOPQRSTUVWXYZ#@
+    //   abcdefghijklmnopqrstuvwxyz#@
+    //
+    //   Hash of "Blade Runner" from histogram
     //
     //   ABCDEFGHIJKLMNOPQRSTUVWXYZ#@
     //   abcdefghijklmnopqrstuvwxyz#@
-    // 0b0101100000010100010000000000
+    // 0b1101100000010100010010000000
 
     constexpr int alphabetCount = 25;
     constexpr int alphabetOffset = 2;
@@ -77,6 +86,7 @@ uint32_t HistogramHashing(const std::string& word)
 
 void TestCase_HistogramHashing()
 {
+    // NOTE:
     //       ABCDEFGHIJKLMNOPQRSTUVWXYZ#@
     //       abcdefghijklmnopqrstuvwxyz#@
     assert(0b0000000000000000000000000000 == HistogramHashing(""));
