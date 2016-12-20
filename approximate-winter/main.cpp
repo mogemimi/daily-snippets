@@ -37,7 +37,7 @@ int SizeHash(const std::string& word)
     return static_cast<int>(word.size());
 }
 
-uint32_t HistogramHashing(const std::string& word)
+uint32_t HistogramHashing_Alphabet(const std::string& word)
 {
     // NOTE:
     // '#' is number 0 to 9.
@@ -82,6 +82,49 @@ uint32_t HistogramHashing(const std::string& word)
         }
     }
     return hash;
+}
+
+uint32_t HistogramHashing_SortByLetterFrequency(const std::string& word)
+{
+    // NOTE:
+    // '#' is number 0 to 9.
+    // '@' is symbols and other characters.
+    //
+    //   JQXZWKVFBYGHMDPUCLTRONSAIE#@
+    //   jqxzwkvfbyghmdpucltronsaie#@
+    // 0b0000000000000000000000000000
+
+    std::array<int, 128> offsets = {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 
+        1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 4, 19, 11, 
+        14, 2, 20, 17, 16, 3, 27, 22, 10, 15, 6, 7, 13, 26, 8, 5, 9, 
+        12, 21, 23, 25, 18, 24, 0, 0, 0, 0, 0, 0, 4, 19, 11, 14, 2, 
+        20, 17, 16, 3, 27, 22, 10, 15, 6, 7, 13, 26, 8, 5, 9, 12, 21, 
+        23, 25, 18, 24, 0, 0, 0, 0, 0
+    };
+
+    uint32_t hash = 0;
+    for (auto & c : word) {
+        if (0 <= c && c <= 127) {
+            auto offset = offsets[c];
+            hash |= (1 << offset);
+        }
+        else {
+            hash |= (1 << 0);
+        }
+    }
+    return hash;
+}
+
+uint32_t HistogramHashing(const std::string& word)
+{
+#if 1
+    return HistogramHashing_Alphabet(word);
+#else
+    return HistogramHashing_SortByLetterFrequency(word);
+#endif
 }
 
 void TestCase_HistogramHashing()
@@ -135,7 +178,6 @@ void SpellCheck_SizeHashing_Internal(
             corrections.push_back(word);
         }
     }
-    exaxtMatching = false;
 }
 
 std::vector<std::string> SpellCheck_Innocent(
@@ -245,9 +287,33 @@ std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold(
         });
 }
 
-void Print(const std::vector<std::string>& corrections)
+template <typename SpellCheckFunc, typename Dictionary>
+void Print(
+    const SpellCheckFunc& spellCheck,
+    const std::string& inputWord,
+    const Dictionary& dictionary)
 {
-    std::cout << "{";
+    auto corrections = spellCheck(inputWord, dictionary);
+    if (corrections.empty()) {
+        std::cout << "'" << inputWord << "' is not found." << std::endl;
+        return;
+    }
+
+    if (corrections.size() == 1) {
+        auto distance = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm(inputWord, corrections.front());
+        if (distance == 0) {
+            std::cout << "'" << inputWord << "' is found. (exact match)" << std::endl;
+            return;
+        }
+    }
+
+    std::stable_sort(std::begin(corrections), std::end(corrections), [&](const std::string& a, const std::string& b) {
+        auto distanceA = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm(inputWord, a);
+        auto distanceB = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm(inputWord, b);
+        return distanceA < distanceB;
+    });
+
+    std::cout << "'" << inputWord << "' Did you mean {";
     bool comma = false;
     for (auto & word : corrections) {
         if (comma) {
@@ -324,6 +390,96 @@ void measurePerformanceTime(Function f)
         << " seconds" << std::endl;
 }
 
+void PrintLetterFrequency(const std::vector<std::string>& dictionary)
+{
+    std::map<char, int> counts;
+
+    int maxCount = 0;
+    for (auto & word : dictionary) {
+        for (auto & c : word) {
+            auto iter = counts.find(c);
+            if (iter == std::end(counts)) {
+                counts.emplace(c, 0);
+                continue;
+            }
+            ++iter->second;
+            maxCount = std::max(maxCount, iter->second);
+        }
+    }
+
+    for (auto & pair : counts) {
+        auto character = pair.first;
+        auto count = pair.second;
+        std::cout << character << ": " << count << std::endl;
+    }
+
+    // NOTE: https://en.wikipedia.org/wiki/Letter_frequency
+    std::vector<char> characters;
+    for (char c = 'a'; c <= 'z'; ++c) {
+        characters.push_back(c);
+        auto iter = counts.find(c);
+        if (iter == std::end(counts)) {
+            counts.emplace(c, 0);
+        }
+    }
+    std::stable_sort(std::begin(characters), std::end(characters), [&](char a, char b) {
+        return counts[a] < counts[b];
+    });
+
+    std::cout << "characters: ";
+    for (auto & c : characters) {
+        std::cout << c;
+    }
+    std::cout << std::endl;
+
+    std::array<int, 128> offsets;
+    constexpr int alphabetCount = 26;
+    constexpr int maxOffset = (alphabetCount + 2) - 1;
+    for (char c = 0; c >= 0 && c <= 127; ++c) {
+        assert('A' < 'Z');
+        assert('a' < 'z');
+        assert('0' < '9');
+        if ('A' <= c && c <= 'Z') {
+            assert('a' > 'A');
+            auto lowerCase = c + ('a' - 'A');
+            auto iter = std::find(std::begin(characters), std::end(characters), lowerCase);
+            assert(iter != std::end(characters));
+            auto index = std::distance(std::begin(characters), iter);
+            offsets[c] = maxOffset - static_cast<int>(index);
+        }
+        else if ('a' <= c && c <= 'z') {
+            auto iter = std::find(std::begin(characters), std::end(characters), c);
+            assert(iter != std::end(characters));
+            auto index = std::distance(std::begin(characters), iter);
+            offsets[c] = maxOffset - static_cast<int>(index);
+        }
+        else if ('0' <= c && c <= '9') {
+            offsets[c] = 1;
+        }
+        else {
+            offsets[c] = 0;
+        }
+        assert(0 <= offsets[c] && offsets[c] <= maxOffset);
+    }
+
+    std::cout << "std::array<int, 128> offsets = {\n";
+    bool comma = false;
+    int linebreakCount = 0;
+    for (auto & offset : offsets) {
+        if (comma) {
+            std::cout << ", ";
+        }
+        if (linebreakCount > 16) {
+            std::cout << "\n";
+            linebreakCount = 0;
+        }
+        std::cout << offset;
+        comma = true;
+        ++linebreakCount;
+    }
+    std::cout << "\n};" << std::endl;
+}
+
 } // unnamed namespace
 
 int main(int argc, char *argv[])
@@ -370,21 +526,35 @@ int main(int argc, char *argv[])
         iter->second.push_back(word);
     });
 
+//    PrintLetterFrequency(dictionary);
+
     std::cout << "dictionary words: " << dictionary.size() << std::endl;
     std::cout << "hash indices: " << hashedDictionary.size() << std::endl;
     std::cout << "------------------" << std::endl;
 
+    std::vector<std::string> inputWords = {
+        "defered",
+        "deferred",
+        "accepteable",
+        "beleive",
+        "drunkenes",
+        "existance",
+        "foriegn",
+        "greatful",
+        "wether",
+        "weather",
+        "whether",
+        "revelant",
+        "relavent",
+        "relevant",
+    };
+
     measurePerformanceTime([&] {
         auto spellCheck = SpellCheck_Innocent;
         auto & dict = dictionary;
-        Print(spellCheck("defered", dict));
-        Print(spellCheck("deferred", dict));
-        Print(spellCheck("accepteable", dict));
-        Print(spellCheck("beleive", dict));
-        Print(spellCheck("drunkenes", dict));
-        Print(spellCheck("existance", dict));
-        Print(spellCheck("foriegn", dict));
-        Print(spellCheck("greatful", dict));
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
     });
 
     std::cout << "------------------" << std::endl;
@@ -392,14 +562,9 @@ int main(int argc, char *argv[])
     measurePerformanceTime([&] {
         auto spellCheck = SpellCheck_SizeHashing;
         auto & dict = dictionary;
-        Print(spellCheck("defered", dict));
-        Print(spellCheck("deferred", dict));
-        Print(spellCheck("accepteable", dict));
-        Print(spellCheck("beleive", dict));
-        Print(spellCheck("drunkenes", dict));
-        Print(spellCheck("existance", dict));
-        Print(spellCheck("foriegn", dict));
-        Print(spellCheck("greatful", dict));
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
     });
 
     std::cout << "------------------" << std::endl;
@@ -407,14 +572,9 @@ int main(int argc, char *argv[])
     measurePerformanceTime([&] {
         auto spellCheck = SpellCheck_HistogramHashinging;
         auto & dict = hashedDictionary;
-        Print(spellCheck("defered", dict));
-        Print(spellCheck("deferred", dict));
-        Print(spellCheck("accepteable", dict));
-        Print(spellCheck("beleive", dict));
-        Print(spellCheck("drunkenes", dict));
-        Print(spellCheck("existance", dict));
-        Print(spellCheck("foriegn", dict));
-        Print(spellCheck("greatful", dict));
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
     });
 
     std::cout << "------------------" << std::endl;
@@ -422,14 +582,9 @@ int main(int argc, char *argv[])
     measurePerformanceTime([&] {
         auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold;
         auto & dict = hashedDictionary;
-        Print(spellCheck("defered", dict));
-        Print(spellCheck("deferred", dict));
-        Print(spellCheck("accepteable", dict));
-        Print(spellCheck("beleive", dict));
-        Print(spellCheck("drunkenes", dict));
-        Print(spellCheck("existance", dict));
-        Print(spellCheck("foriegn", dict));
-        Print(spellCheck("greatful", dict));
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
     });
 
     return 0;
