@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <array>
+#include <unordered_map>
 
 #include <iomanip>
 
@@ -27,84 +28,267 @@ void SetupCommandLineParser(CommandLineParser & parser)
     parser.addArgument("-h", Type::Flag, "Display available options");
     parser.addArgument("-help", Type::Flag, "Display available options");
     parser.addArgument("-v", Type::Flag, "Display version");
+    parser.addArgument("-dict", Type::JoinedOrSeparate, "Dictionary file path");
+    parser.addArgument("-unittest", Type::JoinedOrSeparate, "Run unit tests");
 }
 
-#if 0
-
-int getBuildMonth()
+int SizeHash(const std::string& word)
 {
-    // NOTE: __DATE__ is "Mmm dd yyyy"
-    if (std::strncmp(__DATE__, "Jan", 3) == 0) { return 1; }
-    if (std::strncmp(__DATE__, "F", 1) == 0) { return 2; }
-    if (std::strncmp(__DATE__, "Mar", 3) == 0) { return 3; }
-    if (std::strncmp(__DATE__, "Ap", 2) == 0) { return 4; }
-    if (std::strncmp(__DATE__, "May", 3) == 0) { return 5; }
-    if (std::strncmp(__DATE__, "Jun", 3) == 0) { return 6; }
-    if (std::strncmp(__DATE__, "Jul", 3) == 0) { return 7; }
-    if (std::strncmp(__DATE__, "Au", 2) == 0) { return 8; }
-    if (std::strncmp(__DATE__, "S", 1) == 0) { return 9; }
-    if (std::strncmp(__DATE__, "O", 1) == 0) { return 10; }
-    if (std::strncmp(__DATE__, "N", 1) == 0) { return 11; }
-    return 12;
+    return static_cast<int>(word.size());
 }
 
-int getBuildDay()
+uint32_t HistogramHashing(const std::string& word)
 {
-    // NOTE: __DATE__ is "Mmm dd yyyy"
-    int day = (__DATE__[5] - '0');
-    if (__DATE__[4] >= '0') {
-        day += ((__DATE__[4] - '0') * 10);
+    // # is number 0 to 9.
+    // @ is symbols and other characters.
+    //
+    //   ABCDEFGHIJKLMNOPQRSTUVWXYZ#@
+    //   abcdefghijklmnopqrstuvwxyz#@
+    // 0b0000000000000000000000000000
+
+    // Example: Blade Runner
+    //
+    //   ABCDEFGHIJKLMNOPQRSTUVWXYZ#@
+    //   abcdefghijklmnopqrstuvwxyz#@
+    // 0b0101100000010100010000000000
+
+    constexpr int alphabetCount = 25;
+    constexpr int alphabetOffset = 2;
+    constexpr int numberOffset = 1;
+    constexpr int symbolsOffset = 0;
+
+    uint32_t hash = 0;
+    for (auto & c : word) {
+        if (65 <= c && c <= 90) {
+            hash |= (1 << (alphabetCount - (c - 65) + alphabetOffset));
+        }
+        else if (97 <= c && c <= 122) {
+            hash |= (1 << (alphabetCount - (c - 97) + alphabetOffset));
+        }
+        else if (48 <= c && c <= 57) {
+            hash |= (1 << numberOffset);
+        }
+        else {
+            hash |= (1 << symbolsOffset);
+        }
     }
-    return day;
+    return hash;
 }
 
-std::string BuildNumber()
+void TestCase_HistogramHashing()
 {
-    // http://stackoverflow.com/questions/11697820/how-to-use-date-and-time-predefined-macros-in-as-two-integers-then-stri
-
-    std::stringstream ss;
-    ss << std::setfill('0') << std::setw(2) << getBuildMonth();
-    ss << '-';
-    ss << std::setfill('0') << std::setw(2) << getBuildDay();
-
-    return ss.str();
+    //       ABCDEFGHIJKLMNOPQRSTUVWXYZ#@
+    //       abcdefghijklmnopqrstuvwxyz#@
+    assert(0b0000000000000000000000000000 == HistogramHashing(""));
+    assert(0b1000000000000000000000000000 == HistogramHashing("a"));
+    assert(0b1000000000000000000000000000 == HistogramHashing("A"));
+    assert(0b1000000000000000000000000000 == HistogramHashing("aA"));
+    assert(0b1000000000000000000000000000 == HistogramHashing("Aa"));
+    assert(0b1000000000000000000000000000 == HistogramHashing("aa"));
+    assert(0b1000000000000000000000000000 == HistogramHashing("AA"));
+    assert(0b1111111000000000000000011100 == HistogramHashing("ABCDEFGxyz"));
+    assert(0b0000000000000011100000000010 == HistogramHashing("OPQ42"));
+    assert(0b0001000000000110000100000001 == HistogramHashing("Don't"));
+    assert(0b1000000000000000000000000000 == HistogramHashing("A"));
+    assert(0b0100000000000000000000000000 == HistogramHashing("B"));
+    assert(0b0010000000000000000000000000 == HistogramHashing("C"));
+    assert(0b0001000000000000000000000000 == HistogramHashing("D"));
+    assert(0b0000100000000000000000000000 == HistogramHashing("E"));
+    assert(0b0000010000000000000000000000 == HistogramHashing("F"));
+    assert(0b0000001000000000000000000000 == HistogramHashing("G"));
+    assert(0b0000000100000000000000000000 == HistogramHashing("H"));
 }
 
-#endif
-
-void PrintDiff(const std::vector<somera::DiffHunk<char>>& diffHunks)
+void SpellCheck_SizeHashing_Internal(
+    const std::string& input,
+    const std::vector<std::string>& dictionary,
+    std::vector<std::string> & corrections,
+    bool & exaxtMatching,
+    const std::function<int(const std::string&, const std::string&)>& levenshteinDistance,
+    int inputHash,
+    int threshold)
 {
-    for (auto & hunk : diffHunks) {
-        if (hunk.operation == somera::DiffOperation::Deletion) {
-            std::cout << "-";
+    for (auto & word : dictionary) {
+        const auto wordHash = SizeHash(word);
+        if (std::abs(wordHash - inputHash) >= threshold) {
+            continue;
         }
-        else if (hunk.operation == somera::DiffOperation::Insertion) {
-            std::cout << "+";
+        auto distance = levenshteinDistance(input, word);
+        if (distance == 0) {
+            // exaxt matching
+            corrections.clear();
+            corrections.push_back(word);
+            exaxtMatching = true;
+            break;
         }
-        else if (hunk.operation == somera::DiffOperation::Equality) {
-            std::cout << "=";
+        else if (distance < threshold) {
+            corrections.push_back(word);
         }
-        std::cout << hunk.text;
     }
-    std::cout << std::endl;
+    exaxtMatching = false;
 }
 
-void TestCase(const std::string& a, const std::string& b)
+std::vector<std::string> SpellCheck_Innocent(
+    const std::string& input,
+    const std::vector<std::string>& dictionary)
 {
-    auto x = somera::EditDistance::levenshteinDistance_DynamicProgramming(a, b);
-    auto y = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm(a, b);
-    std::cout
-        << x << (x == y ? " == " : " != ") << y
-        << "  (" << a << ", " << b << ")" << std::endl;
-
-    PrintDiff(somera::computeDiff(a, b));
-    PrintDiff(somera::computeDiff_ONDGreedyAlgorithm(a, b));
+    const auto threshold = 3;
+    std::vector<std::string> corrections;
+    
+    for (auto & word : dictionary) {
+        auto func = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm;
+        auto distance = func(input, word);
+        if (distance == 0) {
+            // exaxt matching
+            corrections.clear();
+            corrections.push_back(word);
+            break;
+        }
+        else if (distance < threshold) {
+            corrections.push_back(word);
+        }
+    }
+    return corrections;
 }
 
-std::string Reverse(std::string && s)
+std::vector<std::string> SpellCheck_SizeHashing(
+    const std::string& input,
+    const std::vector<std::string>& dictionary)
 {
-    std::reverse(std::begin(s), std::end(s));
-    return s;
+    const auto inputHash = SizeHash(input);
+    const auto threshold = 3;
+    
+    std::vector<std::string> corrections;
+    
+    bool exactMatching = false;
+    SpellCheck_SizeHashing_Internal(
+        input,
+        dictionary,
+        corrections,
+        exactMatching,
+        somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm,
+        inputHash,
+        threshold);
+
+    return corrections;
+}
+
+std::vector<std::string> SpellCheck_HistogramHashinging_Internal(
+    const std::string& input,
+    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary,
+    const std::function<int(const std::string&, const std::string&)>& levenshteinDistance)
+{
+    const auto inputSizeHash = SizeHash(input);
+    const auto threshold = 3;
+    
+    std::vector<std::string> corrections;
+    
+    const int maxHashLength = 28;
+    const auto inputHistogramHashing = HistogramHashing(input);
+
+    for (int i = 0; i <= maxHashLength; ++i) {
+        const uint32_t bitmask = ((static_cast<uint32_t>(1) << i) >> 1);
+        const uint32_t xorBits = inputHistogramHashing ^ bitmask;
+        
+        auto iter = hashedDictionary.find(xorBits);
+        if (iter == std::end(hashedDictionary)) {
+            continue;
+        }
+        const auto& dictionary = iter->second;
+
+        bool exactMatching = false;
+        SpellCheck_SizeHashing_Internal(
+            input,
+            dictionary,
+            corrections,
+            exactMatching,
+            levenshteinDistance,
+            inputSizeHash,
+            threshold);
+        if (exactMatching) {
+            break;
+        }
+    }
+    return corrections;
+}
+
+std::vector<std::string> SpellCheck_HistogramHashinging(
+    const std::string& input,
+    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary)
+{
+    return SpellCheck_HistogramHashinging_Internal(
+        input,
+        hashedDictionary,
+        somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm);
+}
+
+std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold(
+    const std::string& input,
+    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary)
+{
+    const auto threshold = 3;
+    return SpellCheck_HistogramHashinging_Internal(
+        input,
+        hashedDictionary,
+        [threshold](const std::string& a, const std::string& b) {
+            return somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
+        });
+}
+
+void Print(const std::vector<std::string>& corrections)
+{
+    std::cout << "{";
+    bool comma = false;
+    for (auto & word : corrections) {
+        if (comma) {
+            std::cout << ", ";
+        }
+        std::cout << word;
+        comma = true;
+    }
+    std::cout << "}" << std::endl;
+}
+
+void ReadDictionaryFile(
+    const std::string& path,
+    const std::function<void(const std::string&)>& callback)
+{
+    std::error_code errorCode;
+    const auto fileSize = somera::FileSystem::getFileSize(path, errorCode);
+
+    if (errorCode) {
+        std::cerr << "error: Cannot found the file. " << path << std::endl;
+        return;
+    }
+    if (fileSize >= std::numeric_limits<int32_t>::max()) {
+        // TODO: We cannot read a file larger than 2GB.
+        std::cerr << "error: File is too large to read. " << path << std::endl;
+        return;
+    }
+
+    std::ifstream input(path, std::ios::binary);
+    if (!input) {
+        return;
+    }
+
+    std::istreambuf_iterator<char> start(input);
+    std::istreambuf_iterator<char> end;
+
+    std::string word;
+    for (; start != end; ++start) {
+        auto c = *start;
+        if (c == '\r' || c == '\n' || c == '\0') {
+            if (!word.empty()) {
+                callback(word);
+            }
+            word.clear();
+            continue;
+        }
+        word += c;
+    }
+    if (!word.empty()) {
+        callback(word);
+    }
 }
 
 template <class Function>
@@ -124,10 +308,10 @@ void measurePerformanceTime(Function f)
 
 	std::cout
         << "Measured time (ns) : " << duration.count() << " ns" << std::endl;
-//    std::cout
-//        << "Measured time (sec): "
-//        << duration_cast<std::chrono::duration<double>>(end - start).count()
-//        << " seconds" << std::endl;
+    std::cout
+        << "Measured time (sec): "
+        << duration_cast<std::chrono::duration<double>>(end - start).count()
+        << " seconds" << std::endl;
 }
 
 } // unnamed namespace
@@ -147,44 +331,95 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    TestCase("", "");
-    TestCase("", "a");
-    TestCase("a", "");
-    TestCase("a", "a");
-    TestCase("sitting", "sitting");
-    TestCase("kitten", "kitten");
-    TestCase("sitting", "kitten");
-    TestCase("kitten", "sitting");
-    TestCase("book", "back");
-    TestCase("xc", "xxc");
-    TestCase("xxc", "xc");
-    TestCase("vertex", "index");
-    TestCase("vertices", "vertex");
-    TestCase("vertices", "indices");
-    TestCase("indices", "vertices");
-    TestCase(Reverse("indices"), Reverse("vertices"));
-    TestCase("vertices2", "indices");
-    TestCase("vert", "ind");
-    TestCase("a", "b");
-    TestCase("aa", "bb");
-    TestCase("a", "bbbbb");
-    TestCase("aaaaa", "bbbbb");
-    TestCase("AGCTCTATAGATA", "TCGCTGATAGTTTCTAAGAGAGAGCT");
-    TestCase("TCGCTGATAGTTTCTAAGAGAGAGCT", "AGCTCTATAGATA");
-    TestCase(Reverse("TCGCTGATAGTTTCTAAGAGAGAGCT"), Reverse("AGCTCTATAGATA"));
+    if (parser.getValue("-unittest")) {
+        TestCase_HistogramHashing();
+        return 0;
+    }
 
-    measurePerformanceTime([] {
-//        auto f = somera::EditDistance::levenshteinDistance_DynamicProgramming;
-        auto f = somera::computeDiff_DynamicProgramming;
-        f("xxxxxxxxxxxxxxxxxxxxxx", "AGCTCTATAGATAAGCTCTATAGATA");
-        f("AGCTCTATAGAAGCAGCTCATAGATAAGCTCTATAGATATCTATAGAT", "xxxxxxxxxxxxxxxxxxxxxx");
+    if (!parser.getValue("-dict")) {
+        std::cout << "Please specify the dictionary file path with `-dict` option." << std::endl;
+        return 1;
+    }
+
+    auto dictionarySourcePath = *parser.getValue("-dict");
+
+    std::vector<std::string> dictionary;
+    std::unordered_map<uint32_t, std::vector<std::string>> hashedDictionary;
+
+    ReadDictionaryFile(dictionarySourcePath, [&](const std::string& word) {
+        dictionary.push_back(word);
+        
+        auto histogramHash = HistogramHashing(word);
+        auto iter = hashedDictionary.find(histogramHash);
+        if (iter == std::end(hashedDictionary)) {
+            std::vector<std::string> dict;
+            hashedDictionary.emplace(histogramHash, std::move(dict));
+            iter = hashedDictionary.find(histogramHash);
+        }
+        assert(iter != std::end(hashedDictionary));
+        iter->second.push_back(word);
     });
 
-    measurePerformanceTime([] {
-//        auto f = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm;
-        auto f = somera::computeDiff_ONDGreedyAlgorithm;
-        f("xxxxxxxxxxxxxxxxxxxxxx", "AGCTCTATAGATAAGCTCTATAGATA");
-        f("AGCTCTATAGAAGCAGCTCATAGATAAGCTCTATAGATATCTATAGAT", "xxxxxxxxxxxxxxxxxxxxxx");
+    std::cout << "dictionary words: " << dictionary.size() << std::endl;
+    std::cout << "hash indices: " << hashedDictionary.size() << std::endl;
+    std::cout << "------------------" << std::endl;
+
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_Innocent;
+        auto & dict = dictionary;
+        Print(spellCheck("defered", dict));
+        Print(spellCheck("deferred", dict));
+        Print(spellCheck("accepteable", dict));
+        Print(spellCheck("beleive", dict));
+        Print(spellCheck("drunkenes", dict));
+        Print(spellCheck("existance", dict));
+        Print(spellCheck("foriegn", dict));
+        Print(spellCheck("greatful", dict));
+    });
+
+    std::cout << "------------------" << std::endl;
+
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_SizeHashing;
+        auto & dict = dictionary;
+        Print(spellCheck("defered", dict));
+        Print(spellCheck("deferred", dict));
+        Print(spellCheck("accepteable", dict));
+        Print(spellCheck("beleive", dict));
+        Print(spellCheck("drunkenes", dict));
+        Print(spellCheck("existance", dict));
+        Print(spellCheck("foriegn", dict));
+        Print(spellCheck("greatful", dict));
+    });
+
+    std::cout << "------------------" << std::endl;
+
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_HistogramHashinging;
+        auto & dict = hashedDictionary;
+        Print(spellCheck("defered", dict));
+        Print(spellCheck("deferred", dict));
+        Print(spellCheck("accepteable", dict));
+        Print(spellCheck("beleive", dict));
+        Print(spellCheck("drunkenes", dict));
+        Print(spellCheck("existance", dict));
+        Print(spellCheck("foriegn", dict));
+        Print(spellCheck("greatful", dict));
+    });
+
+    std::cout << "------------------" << std::endl;
+
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold;
+        auto & dict = hashedDictionary;
+        Print(spellCheck("defered", dict));
+        Print(spellCheck("deferred", dict));
+        Print(spellCheck("accepteable", dict));
+        Print(spellCheck("beleive", dict));
+        Print(spellCheck("drunkenes", dict));
+        Print(spellCheck("existance", dict));
+        Print(spellCheck("foriegn", dict));
+        Print(spellCheck("greatful", dict));
     });
 
     return 0;
