@@ -60,7 +60,29 @@ uint32_t HistogramHashing_Alphabet(const std::string& word)
     //   ABCDEFGHIJKLMNOPQRSTUVWXYZ#@
     //   abcdefghijklmnopqrstuvwxyz#@
     // 0b1101100000010100010010000000
+#if 1
+    constexpr int offsets[128] = {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 
+        1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 27, 26, 25, 
+        24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 
+        7, 6, 5, 4, 3, 2, 0, 0, 0, 0, 0, 0, 27, 26, 25, 24, 23, 
+        22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 
+        5, 4, 3, 2, 0, 0, 0, 0, 0
+    };
 
+    uint32_t hash = 0;
+    for (auto & c : word) {
+        if (0 <= c && c <= 127) {
+            auto offset = offsets[c];
+            hash |= (1 << offset);
+        }
+        else {
+            hash |= (1 << 0);
+        }
+    }
+#else
     constexpr int alphabetCount = 25;
     constexpr int alphabetOffset = 2;
     constexpr int numberOffset = 1;
@@ -81,54 +103,47 @@ uint32_t HistogramHashing_Alphabet(const std::string& word)
             hash |= (1 << symbolsOffset);
         }
     }
+#endif
     return hash;
 }
 
-uint32_t HistogramHashing_SortByLetterFrequency(const std::string& word)
+uint32_t HistogramHashing_CyclicN(const std::string& word, uint32_t bitCount)
 {
-    // NOTE:
-    // '#' is number 0 to 9.
-    // '@' is symbols and other characters.
-    //
-    //   JQXZWKVFBYGHMDPUCLTRONSAIE#@
-    //   jqxzwkvfbyghmdpucltronsaie#@
-    // 0b0000000000000000000000000000
-
-    std::array<int, 128> offsets = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 
-        1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 4, 19, 11, 
-        14, 2, 20, 17, 16, 3, 27, 22, 10, 15, 6, 7, 13, 26, 8, 5, 9, 
-        12, 21, 23, 25, 18, 24, 0, 0, 0, 0, 0, 0, 4, 19, 11, 14, 2, 
-        20, 17, 16, 3, 27, 22, 10, 15, 6, 7, 13, 26, 8, 5, 9, 12, 21, 
-        23, 25, 18, 24, 0, 0, 0, 0, 0
-    };
-
     uint32_t hash = 0;
     for (auto & c : word) {
-        if (0 <= c && c <= 127) {
-            auto offset = offsets[c];
-            hash |= (1 << offset);
-        }
-        else {
-            hash |= (1 << 0);
-        }
+        hash |= (1 << (static_cast<uint32_t>(c) % bitCount));
     }
     return hash;
 }
 
-uint32_t HistogramHashing(const std::string& word)
+uint32_t HistogramHashing_Cyclic32(const std::string& word)
 {
-#if 1
-    return HistogramHashing_Alphabet(word);
-#else
-    return HistogramHashing_SortByLetterFrequency(word);
-#endif
+    return HistogramHashing_CyclicN(word, 32);
+}
+
+uint32_t HistogramHashing_Cyclic16(const std::string& word)
+{
+    return HistogramHashing_CyclicN(word, 16);
+}
+
+uint32_t HistogramHashing_Cyclic8(const std::string& word)
+{
+    return HistogramHashing_CyclicN(word, 8);
+}
+
+uint32_t HistogramHashing_Accumulate(const std::string& word)
+{
+    uint32_t hash = 0;
+    for (auto & c : word) {
+        hash += static_cast<uint32_t>(c);
+    }
+    return hash;
 }
 
 void TestCase_HistogramHashing()
 {
+    auto HistogramHashing = HistogramHashing_Alphabet;
+
     // NOTE:
     //       ABCDEFGHIJKLMNOPQRSTUVWXYZ#@
     //       abcdefghijklmnopqrstuvwxyz#@
@@ -152,7 +167,7 @@ void TestCase_HistogramHashing()
     assert(0b0000000100000000000000000000 == HistogramHashing("H"));
 }
 
-void SpellCheck_SizeHashing_Internal(
+void SpellCheck_Internal(
     const std::string& input,
     const std::vector<std::string>& dictionary,
     std::vector<std::string> & corrections,
@@ -162,10 +177,12 @@ void SpellCheck_SizeHashing_Internal(
     int threshold)
 {
     for (auto & word : dictionary) {
+#if 0
         const auto wordHash = SizeHash(word);
         if (std::abs(wordHash - inputHash) >= threshold) {
             continue;
         }
+#endif
         auto distance = levenshteinDistance(input, word);
         if (distance == 0) {
             // exaxt matching
@@ -203,40 +220,25 @@ std::vector<std::string> SpellCheck_Innocent(
     return corrections;
 }
 
-std::vector<std::string> SpellCheck_SizeHashing(
-    const std::string& input,
-    const std::vector<std::string>& dictionary)
-{
-    const auto inputHash = SizeHash(input);
-    const auto threshold = 3;
-    
+struct SearchResult {
     std::vector<std::string> corrections;
-    
-    bool exactMatching = false;
-    SpellCheck_SizeHashing_Internal(
-        input,
-        dictionary,
-        corrections,
-        exactMatching,
-        somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm,
-        inputHash,
-        threshold);
+    bool exactMatching;
+};
 
-    return corrections;
-}
-
-std::vector<std::string> SpellCheck_HistogramHashinging_Internal(
+SearchResult SpellCheck_HistogramHashinging_Internal(
     const std::string& input,
     const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary,
-    const std::function<int(const std::string&, const std::string&)>& levenshteinDistance)
+    const std::function<int(const std::string&, const std::string&)>& levenshteinDistance,
+    const std::function<uint32_t(const std::string&)>& histogramHashing,
+    const int maxHashLength)
 {
     const auto inputSizeHash = SizeHash(input);
     const auto threshold = 3;
     
-    std::vector<std::string> corrections;
-    
-    const int maxHashLength = 28;
-    const auto inputHistogramHashing = HistogramHashing(input);
+    SearchResult result;
+    result.exactMatching = false;
+
+    const auto inputHistogramHashing = histogramHashing(input);
 
     for (int i = 0; i <= maxHashLength; ++i) {
         const uint32_t bitmask = ((static_cast<uint32_t>(1) << i) >> 1);
@@ -249,7 +251,146 @@ std::vector<std::string> SpellCheck_HistogramHashinging_Internal(
         const auto& dictionary = iter->second;
 
         bool exactMatching = false;
-        SpellCheck_SizeHashing_Internal(
+        SpellCheck_Internal(
+            input,
+            dictionary,
+            result.corrections,
+            exactMatching,
+            levenshteinDistance,
+            inputSizeHash,
+            threshold);
+        if (exactMatching) {
+            result.exactMatching = true;
+            break;
+        }
+    }
+    return result;
+}
+
+std::vector<std::string> SpellCheck_HistogramHashinging(
+    const std::string& input,
+    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary)
+{
+    return SpellCheck_HistogramHashinging_Internal(
+        input,
+        hashedDictionary,
+        somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm,
+        HistogramHashing_Alphabet,
+        28).corrections;
+}
+
+std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold(
+    const std::string& input,
+    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary)
+{
+    const auto threshold = 3;
+    return SpellCheck_HistogramHashinging_Internal(
+        input,
+        hashedDictionary,
+        [threshold](const std::string& a, const std::string& b) {
+            return somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
+        },
+        HistogramHashing_Alphabet,
+        28).corrections;
+}
+
+std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold_Cyclic32(
+    const std::string& input,
+    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary)
+{
+    const auto threshold = 3;
+    return SpellCheck_HistogramHashinging_Internal(
+        input,
+        hashedDictionary,
+        [threshold](const std::string& a, const std::string& b) {
+            return somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
+        },
+        HistogramHashing_Cyclic32,
+        32).corrections;
+}
+
+std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold_Cyclic16(
+    const std::string& input,
+    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary)
+{
+    const auto threshold = 3;
+    return SpellCheck_HistogramHashinging_Internal(
+        input,
+        hashedDictionary,
+        [threshold](const std::string& a, const std::string& b) {
+            return somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
+        },
+        HistogramHashing_Cyclic16,
+        16).corrections;
+}
+
+std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold_Cyclic8(
+    const std::string& input,
+    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary)
+{
+    const auto threshold = 3;
+    return SpellCheck_HistogramHashinging_Internal(
+        input,
+        hashedDictionary,
+        [threshold](const std::string& a, const std::string& b) {
+            return somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
+        },
+        HistogramHashing_Cyclic8,
+        8).corrections;
+}
+
+std::vector<std::string> SpellCheck_AccumulateHashing(
+    const std::string& input,
+    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary)
+{
+    const auto inputSizeHash = SizeHash(input);
+    const auto threshold = 3;
+    
+    auto levenshteinDistance = [threshold](const std::string& a, const std::string& b) {
+        return somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
+    };
+    
+    std::vector<std::string> corrections;
+    
+    const uint32_t searchRange = 128;
+    const auto inputHistogramHashing = HistogramHashing_Accumulate(input);
+
+    std::vector<uint32_t> hashes;
+    for (uint32_t i = 0; i <= searchRange; ++i) {
+        for (int k = 0; k < 2; ++k) {
+            uint32_t hash = 0;
+            if (k == 0) {
+                hash = inputHistogramHashing + i;
+                assert(inputHistogramHashing <= hash);
+            }
+            else {
+                if (i == 0) {
+                    hash = 0;
+                }
+                else if (inputHistogramHashing > i) {
+                    hash = inputHistogramHashing - i;
+                    assert(inputHistogramHashing >= hash);
+                }
+                else {
+                    hash = 0;
+                }
+            }
+            if (hash == 0) {
+                continue;
+            }
+            hashes.push_back(hash);
+        }
+    }
+
+    for (auto hash : hashes) {
+        auto iter = hashedDictionary.find(hash);
+        if (iter == std::end(hashedDictionary)) {
+            continue;
+        }
+        const auto& dictionary = iter->second;
+
+        bool exactMatching = false;
+        SpellCheck_Internal(
             input,
             dictionary,
             corrections,
@@ -264,27 +405,133 @@ std::vector<std::string> SpellCheck_HistogramHashinging_Internal(
     return corrections;
 }
 
-std::vector<std::string> SpellCheck_HistogramHashinging(
+std::vector<std::string> SpellCheck_SizeHashing(
     const std::string& input,
-    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary)
+    const std::unordered_map<int, std::vector<std::string>>& hashedDictionary)
 {
-    return SpellCheck_HistogramHashinging_Internal(
-        input,
-        hashedDictionary,
-        somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm);
+    const auto inputSizeHash = SizeHash(input);
+    const auto threshold = 3;
+    
+    auto levenshteinDistance = [threshold](const std::string& a, const std::string& b) {
+        return somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
+    };
+    
+    std::vector<std::string> corrections;
+
+    const int searchRange = 1;
+
+    std::vector<int> hashes;
+    for (int i = 0; i <= searchRange; ++i) {
+        for (int k = 0; k < 2; ++k) {
+            int hash = 0;
+            if (k == 0) {
+                hash = inputSizeHash + i;
+                assert(inputSizeHash <= hash);
+            }
+            else {
+                if (i == 0) {
+                    hash = 0;
+                }
+                else if (inputSizeHash > i) {
+                    hash = inputSizeHash - i;
+                    assert(inputSizeHash >= hash);
+                }
+                else {
+                    hash = 0;
+                }
+            }
+            if (hash == 0) {
+                continue;
+            }
+            hashes.push_back(hash);
+        }
+    }
+
+    for (auto hash : hashes) {
+        auto iter = hashedDictionary.find(hash);
+        if (iter == std::end(hashedDictionary)) {
+            continue;
+        }
+        const auto& dictionary = iter->second;
+
+        bool exactMatching = false;
+        SpellCheck_Internal(
+            input,
+            dictionary,
+            corrections,
+            exactMatching,
+            levenshteinDistance,
+            inputSizeHash,
+            threshold);
+        if (exactMatching) {
+            break;
+        }
+    }
+    return corrections;
 }
 
-std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold(
+std::vector<std::string> SpellCheck_SizeAndHistogram(
     const std::string& input,
-    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary)
+    const std::unordered_map<int, std::unordered_map<uint32_t, std::vector<std::string>>>& hashedDictionary2)
 {
-    const auto threshold = 3;
-    return SpellCheck_HistogramHashinging_Internal(
-        input,
-        hashedDictionary,
-        [threshold](const std::string& a, const std::string& b) {
-            return somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
-        });
+    const auto inputSizeHash = SizeHash(input);
+
+    std::vector<std::string> corrections;
+
+    const int searchRange = 1;
+
+    std::vector<int> hashes;
+    for (int i = 0; i <= searchRange; ++i) {
+        for (int k = 0; k < 2; ++k) {
+            int hash = 0;
+            if (k == 0) {
+                hash = inputSizeHash + i;
+                assert(inputSizeHash <= hash);
+            }
+            else {
+                if (i == 0) {
+                    hash = 0;
+                }
+                else if (inputSizeHash > i) {
+                    hash = inputSizeHash - i;
+                    assert(inputSizeHash >= hash);
+                }
+                else {
+                    hash = 0;
+                }
+            }
+            if (hash == 0) {
+                continue;
+            }
+            hashes.push_back(hash);
+        }
+    }
+
+    for (auto hash : hashes) {
+        auto iter = hashedDictionary2.find(hash);
+        if (iter == std::end(hashedDictionary2)) {
+            continue;
+        }
+        const auto& hashedDictionary = iter->second;
+
+        auto result = SpellCheck_HistogramHashinging_Internal(
+            input,
+            hashedDictionary,
+            somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm,
+            HistogramHashing_Alphabet,
+            28);
+
+        if (result.exactMatching) {
+            corrections = std::move(result.corrections);
+            break;
+        }
+        
+        // NOTE: merging
+        for (auto & c : result.corrections) {
+            corrections.push_back(std::move(c));
+        }
+    }
+    return corrections;
 }
 
 template <typename SpellCheckFunc, typename Dictionary>
@@ -511,25 +758,125 @@ int main(int argc, char *argv[])
 
     std::vector<std::string> dictionary;
     std::unordered_map<uint32_t, std::vector<std::string>> hashedDictionary;
+    std::unordered_map<uint32_t, std::vector<std::string>> hashedDictionary_Accumulate;
+    std::unordered_map<int, std::vector<std::string>> hashedDictionary_Size;
+    std::unordered_map<int, std::unordered_map<uint32_t, std::vector<std::string>>> hashedDictionary_SizeAndSignature;
+    std::unordered_map<uint32_t, std::vector<std::string>> hashedDictionary_Cyclic32;
+    std::unordered_map<uint32_t, std::vector<std::string>> hashedDictionary_Cyclic16;
+    std::unordered_map<uint32_t, std::vector<std::string>> hashedDictionary_Cyclic8;
 
     ReadDictionaryFile(dictionarySourcePath, [&](const std::string& word) {
         dictionary.push_back(word);
         
-        auto histogramHash = HistogramHashing(word);
-        auto iter = hashedDictionary.find(histogramHash);
-        if (iter == std::end(hashedDictionary)) {
-            std::vector<std::string> dict;
-            hashedDictionary.emplace(histogramHash, std::move(dict));
-            iter = hashedDictionary.find(histogramHash);
+        {
+            auto histogramHash = HistogramHashing_Alphabet(word);
+            auto iter = hashedDictionary.find(histogramHash);
+            if (iter == std::end(hashedDictionary)) {
+                std::vector<std::string> dict;
+                hashedDictionary.emplace(histogramHash, std::move(dict));
+                iter = hashedDictionary.find(histogramHash);
+            }
+            assert(iter != std::end(hashedDictionary));
+            iter->second.push_back(word);
         }
-        assert(iter != std::end(hashedDictionary));
-        iter->second.push_back(word);
+        {
+            auto histogramHash = HistogramHashing_Accumulate(word);
+            auto iter = hashedDictionary_Accumulate.find(histogramHash);
+            if (iter == std::end(hashedDictionary_Accumulate)) {
+                std::vector<std::string> dict;
+                hashedDictionary_Accumulate.emplace(histogramHash, std::move(dict));
+                iter = hashedDictionary_Accumulate.find(histogramHash);
+            }
+            assert(iter != std::end(hashedDictionary_Accumulate));
+            iter->second.push_back(word);
+        }
+        {
+            auto histogramHash = HistogramHashing_Accumulate(word);
+            auto iter = hashedDictionary_Accumulate.find(histogramHash);
+            if (iter == std::end(hashedDictionary_Accumulate)) {
+                std::vector<std::string> dict;
+                hashedDictionary_Accumulate.emplace(histogramHash, std::move(dict));
+                iter = hashedDictionary_Accumulate.find(histogramHash);
+            }
+            assert(iter != std::end(hashedDictionary_Accumulate));
+            iter->second.push_back(word);
+        }
+        {
+            auto histogramHash = HistogramHashing_Cyclic32(word);
+            auto iter = hashedDictionary_Cyclic32.find(histogramHash);
+            if (iter == std::end(hashedDictionary_Cyclic32)) {
+                std::vector<std::string> dict;
+                hashedDictionary_Cyclic32.emplace(histogramHash, std::move(dict));
+                iter = hashedDictionary_Cyclic32.find(histogramHash);
+            }
+            assert(iter != std::end(hashedDictionary_Cyclic32));
+            iter->second.push_back(word);
+        }
+        {
+            auto histogramHash = HistogramHashing_Cyclic16(word);
+            auto iter = hashedDictionary_Cyclic16.find(histogramHash);
+            if (iter == std::end(hashedDictionary_Cyclic16)) {
+                std::vector<std::string> dict;
+                hashedDictionary_Cyclic16.emplace(histogramHash, std::move(dict));
+                iter = hashedDictionary_Cyclic16.find(histogramHash);
+            }
+            assert(iter != std::end(hashedDictionary_Cyclic16));
+            iter->second.push_back(word);
+        }
+        {
+            auto histogramHash = HistogramHashing_Cyclic8(word);
+            auto iter = hashedDictionary_Cyclic8.find(histogramHash);
+            if (iter == std::end(hashedDictionary_Cyclic8)) {
+                std::vector<std::string> dict;
+                hashedDictionary_Cyclic8.emplace(histogramHash, std::move(dict));
+                iter = hashedDictionary_Cyclic8.find(histogramHash);
+            }
+            assert(iter != std::end(hashedDictionary_Cyclic8));
+            iter->second.push_back(word);
+        }
+        {
+            auto hash = SizeHash(word);
+            auto iter = hashedDictionary_Size.find(hash);
+            if (iter == std::end(hashedDictionary_Size)) {
+                std::vector<std::string> dict;
+                hashedDictionary_Size.emplace(hash, std::move(dict));
+                iter = hashedDictionary_Size.find(hash);
+            }
+            assert(iter != std::end(hashedDictionary_Size));
+            iter->second.push_back(word);
+        }
+        {
+            auto sizeHash = SizeHash(word);
+            auto iter2 = hashedDictionary_SizeAndSignature.find(sizeHash);
+            if (iter2 == std::end(hashedDictionary_SizeAndSignature)) {
+                std::unordered_map<std::uint32_t, std::vector<std::string>> dict;
+                hashedDictionary_SizeAndSignature.emplace(sizeHash, std::move(dict));
+                iter2 = hashedDictionary_SizeAndSignature.find(sizeHash);
+            }
+            assert(iter2 != std::end(hashedDictionary_SizeAndSignature));
+            auto & histogramDictionary = iter2->second;
+        
+            auto histogramHash = HistogramHashing_Alphabet(word);
+            auto iter = histogramDictionary.find(histogramHash);
+            if (iter == std::end(histogramDictionary)) {
+                std::vector<std::string> dict;
+                histogramDictionary.emplace(histogramHash, std::move(dict));
+                iter = histogramDictionary.find(histogramHash);
+            }
+            assert(iter != std::end(histogramDictionary));
+            iter->second.push_back(word);
+        }
     });
 
 //    PrintLetterFrequency(dictionary);
 
     std::cout << "dictionary words: " << dictionary.size() << std::endl;
-    std::cout << "hash indices: " << hashedDictionary.size() << std::endl;
+    std::cout << "hash indices (Histogram): " << hashedDictionary.size() << std::endl;
+    std::cout << "hash indices (Histogram32): " << hashedDictionary_Cyclic32.size() << std::endl;
+    std::cout << "hash indices (Histogram16): " << hashedDictionary_Cyclic16.size() << std::endl;
+    std::cout << "hash indices (Histogram8): " << hashedDictionary_Cyclic8.size() << std::endl;
+    std::cout << "hash indices (Size): " << hashedDictionary_Size.size() << std::endl;
+    std::cout << "hash indices (Accumulate): " << hashedDictionary_Accumulate.size() << std::endl;
     std::cout << "------------------" << std::endl;
 
     std::vector<std::string> inputWords = {
@@ -547,25 +894,19 @@ int main(int argc, char *argv[])
         "revelant",
         "relavent",
         "relevant",
+        "enviromet",
+        "enviroment",
+        "environment",
     };
 
-    measurePerformanceTime([&] {
-        auto spellCheck = SpellCheck_Innocent;
-        auto & dict = dictionary;
-        for (auto & inputWord : inputWords) {
-            Print(spellCheck, inputWord, dict);
-        }
-    });
-
-    std::cout << "------------------" << std::endl;
-
-    measurePerformanceTime([&] {
-        auto spellCheck = SpellCheck_SizeHashing;
-        auto & dict = dictionary;
-        for (auto & inputWord : inputWords) {
-            Print(spellCheck, inputWord, dict);
-        }
-    });
+//    measurePerformanceTime([&] {
+//        auto spellCheck = SpellCheck_Innocent;
+//        auto & dict = dictionary;
+//        for (auto & inputWord : inputWords) {
+//            Print(spellCheck, inputWord, dict);
+//        }
+//    });
+//
 
     std::cout << "------------------" << std::endl;
 
@@ -582,6 +923,76 @@ int main(int argc, char *argv[])
     measurePerformanceTime([&] {
         auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold;
         auto & dict = hashedDictionary;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+
+    std::cout << "------------------" << std::endl;
+
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold;
+        auto & dict = hashedDictionary;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+
+    std::cout << "------------------" << std::endl;
+
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold_Cyclic32;
+        auto & dict = hashedDictionary_Cyclic32;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+
+    std::cout << "------------------" << std::endl;
+
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold_Cyclic16;
+        auto & dict = hashedDictionary_Cyclic16;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+
+    std::cout << "------------------" << std::endl;
+
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold_Cyclic8;
+        auto & dict = hashedDictionary_Cyclic8;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+    
+    std::cout << "------------------" << std::endl;
+
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_SizeHashing;
+        auto & dict = hashedDictionary_Size;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+
+    std::cout << "------------------" << std::endl;
+
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_AccumulateHashing;
+        auto & dict = hashedDictionary_Accumulate;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+    
+    std::cout << "------------------" << std::endl;
+
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_SizeAndHistogram;
+        auto & dict = hashedDictionary_SizeAndSignature;
         for (auto & inputWord : inputWords) {
             Print(spellCheck, inputWord, dict);
         }
