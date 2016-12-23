@@ -117,7 +117,7 @@ double closestMatchDistance(const std::u32string& left, const std::u32string& ri
 
 } // unnamed namespace
 
-double EditDistance::closestMatchFuzzyDistance(const std::string& left, const std::string& right)
+double EditDistance::closestMatchFuzzySimilarity_Boer(const std::string& left, const std::string& right)
 {
     const auto leftUtf32 = somera::toUtf32(left);
     const auto rightUtf32 = somera::toUtf32(right);
@@ -125,6 +125,18 @@ double EditDistance::closestMatchFuzzyDistance(const std::string& left, const st
     const auto maxLength = std::max(leftUtf32.size(), rightUtf32.size());
     const auto distance = closestMatchDistance(leftUtf32, rightUtf32) / maxLength;
     return std::min(std::max(distance, 0.0), 1.0);
+}
+
+double EditDistance::closestMatchFuzzySimilarity(const std::string& text1, const std::string& text2)
+{
+    if (text1.empty() && text2.empty()) {
+        return 1.0f;
+    }
+    auto lcs = computeLCSLength_DynamicProgramming(text1, text2);
+    auto maxLength = static_cast<double>(std::max(text1.size(), text2.size()));
+    assert(maxLength >= 1.0);
+    assert(maxLength != 0);
+    return static_cast<double>(lcs) / maxLength;
 }
 
 namespace {
@@ -242,6 +254,8 @@ int EditDistance::levenshteinDistance(const std::string& left, const std::string
 {
 #if 1
     return levenshteinDistance_ONDGreedyAlgorithm(left, right);
+#elif 1
+    return levenshteinDistance_DP_LinearSpace(left, right);
 #else
     return levenshteinDistance_DynamicProgramming(left, right);
 #endif
@@ -305,6 +319,38 @@ int EditDistance::levenshteinDistance_DynamicProgramming(const std::string& left
         }
     }
     return mat(rows - 1, columns - 1);
+}
+
+int EditDistance::levenshteinDistance_DP_LinearSpace(
+    const std::string& text1,
+    const std::string& text2)
+{
+    // NOTE:
+    // This algorithm is based on dynamic programming, using only linear space.
+    // It is O(N^2) time and O(N) space algorithm.
+
+    const auto rows = static_cast<int>(text1.size()) + 1;
+    const auto columns = static_cast<int>(text2.size()) + 1;
+    std::vector<int> c1(columns);
+    std::vector<int> c2(columns);
+
+    for (int i = 0; i < columns; ++i) {
+        c1[i] = i;
+    }
+
+    for (int row = 1; row < rows; row++) {
+        c2[0] = row;
+        for (int column = 1; column < columns; column++) {
+            auto minCost = std::min(c1[column], c2[column - 1]) + 1;
+            if (text1[row - 1] == text2[column - 1]) {
+                minCost = std::min(c1[column - 1], minCost);
+            }
+            c2[column] = minCost;
+        }
+        // NOTE: Use faster swap() function instead of "c1 = c2;" to faster
+        std::swap(c1, c2);
+    }
+    return c1.back();
 }
 
 int EditDistance::levenshteinDistance_ONDGreedyAlgorithm(
@@ -501,6 +547,69 @@ int EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(
         }
     }
     return M + N;
+}
+
+int EditDistance::computeLCSLength_DynamicProgramming(
+    const std::string& text1,
+    const std::string& text2)
+{
+    const auto rows = static_cast<int>(text1.size()) + 1;
+    const auto columns = static_cast<int>(text2.size()) + 1;
+
+    // NOTE:
+    // text1 = "type"
+    // text2 = "typo"
+
+    // NOTE:
+    //   _ t y p e
+    // _ 0 0 0 0 0
+    // t 0 0 0 0 0
+    // y 0 0 0 0 0
+    // p 0 0 0 0 0
+    // o 0 0 0 0 0
+
+    std::vector<int> matrix(rows * columns, 0);
+
+    const auto mat = [&matrix, rows, columns](int row, int column) -> auto& {
+        const auto index = row + rows * column;
+        assert(index < static_cast<int>(matrix.size()));
+        return matrix[index];
+    };
+
+    // NOTE:
+    //   _ t y p e
+    // _ 0 0 0 0 0
+    // t 0 0 0 0 0
+    // y 0 0 0 0 0
+    // p 0 0 0 0 0
+    // o 0 0 0 0 0
+
+    for (int row = 1; row < rows; row++) {
+        mat(row, 0) = 0;
+    }
+    for (int column = 1; column < columns; column++) {
+        mat(0, column) = 0;
+    }
+
+    // NOTE:
+    //   _ t y p e
+    // _ 0 0 0 0 0
+    // t 0 1 1 1 1
+    // y 0 1 2 2 2
+    // p 0 1 2 3 3
+    // o 0 1 2 3 3
+
+    for (int row = 1; row < rows; row++) {
+        for (int column = 1; column < columns; column++) {
+            if (text1[row - 1] == text2[column - 1]) {
+                mat(row, column) = mat(row - 1, column - 1) + 1;
+            }
+            else {
+                mat(row, column) = std::max(mat(row - 1, column), mat(row, column - 1));
+            }
+        }
+    }
+    return mat(rows - 1, columns - 1);
 }
 
 std::vector<int> EditDistance::LCS_Column(

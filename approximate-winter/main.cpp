@@ -727,6 +727,40 @@ void PrintLetterFrequency(const std::vector<std::string>& dictionary)
     std::cout << "\n};" << std::endl;
 }
 
+void TestCase_LCS()
+{
+    auto lcs = somera::EditDistance::computeLCSLength_DynamicProgramming;
+    assert(lcs("", "") == 0);
+    assert(lcs("A", "") == 0);
+    assert(lcs("", "A") == 0);
+    assert(lcs("A", "A") == 1);
+    assert(lcs("AG", "GA") == 1);
+    assert(lcs("AA", "AA") == 2);
+    assert(lcs("AGA", "GAA") == 2);
+    assert(lcs("AGCAT", "AGCAT") == 5);
+    assert(lcs("AAAAAGC", "AAAAA") == 5);
+    assert(lcs("AAAAA", "GCAAAAA") == 5);
+    assert(lcs("GCT", "AAAAAA") == 0);
+    assert(lcs("AAGGCCTTAGCT", "AAGGCCAGT") == 9);
+    assert(lcs("AAGGCCTTAGCT", "AGCTAAGGCCAGCAAGGTT") == 10);
+}
+
+void TestCase_DPLinearSpace()
+{
+    auto distance = somera::EditDistance::levenshteinDistance_DP_LinearSpace;
+    assert(distance("", "") == 0);
+    assert(distance("A", "") == 1);
+    assert(distance("", "A") == 1);
+    assert(distance("A", "A") == 0);
+    assert(distance("AG", "GA") == 2);
+    assert(distance("AA", "AA") == 0);
+    assert(distance("AGA", "GAA") == 2);
+    assert(distance("AGCAT", "AGCAT") == 0);
+    assert(distance("AAAAAGC", "AAAAA") == 2);
+    assert(distance("AAAAA", "GCAAAAA") == 2);
+    assert(distance("GCT", "AAAAAA") == 9);
+}
+
 } // unnamed namespace
 
 int main(int argc, char *argv[])
@@ -752,6 +786,26 @@ int main(int argc, char *argv[])
     if (!parser.getValue("-dict")) {
         std::cout << "Please specify the dictionary file path with `-dict` option." << std::endl;
         return 1;
+    }
+
+    {
+        TestCase_LCS();
+        TestCase_DPLinearSpace();
+
+        auto ok = [&](const std::string& a, const std::string& b) {
+            std::cout
+                << somera::EditDistance::closestMatchFuzzySimilarity(a, b)
+                << " "
+                << somera::EditDistance::closestMatchFuzzySimilarity_Boer(a, b)
+                << std::endl;
+            return somera::EditDistance::closestMatchFuzzySimilarity(a, b) == somera::EditDistance::closestMatchFuzzySimilarity_Boer(a, b);
+        };
+        ok("", "");
+        ok("AGA", "ATA");
+        ok("AAGGCCTTAGCT", "AAGGCCTTAGCT");
+        ok("deferred", "defered");
+        ok("AAGGCCTTAGCT", "AAGGCCAGT");
+        ok("AAGGCCTTAGCT", "AGCTAAGGCCAGCAAGGTT");
     }
 
     auto dictionarySourcePath = *parser.getValue("-dict");

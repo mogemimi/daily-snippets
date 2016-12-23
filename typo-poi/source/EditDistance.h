@@ -10,7 +10,13 @@ namespace somera {
 struct EditDistance {
     ///@param left UTF-8 string
     ///@param right UTF-8 string
-    static double closestMatchFuzzyDistance(
+    static double closestMatchFuzzySimilarity(
+        const std::string& left,
+        const std::string& right);
+
+    ///@param left UTF-8 string
+    ///@param right UTF-8 string
+    static double closestMatchFuzzySimilarity_Boer(
         const std::string& left,
         const std::string& right);
 
@@ -34,6 +40,12 @@ struct EditDistance {
 
     ///@param left UTF-8 string
     ///@param right UTF-8 string
+    static int levenshteinDistance_DP_LinearSpace(
+        const std::string& left,
+        const std::string& right);
+
+    ///@param left UTF-8 string
+    ///@param right UTF-8 string
     static int levenshteinDistance_ONDGreedyAlgorithm(
         const std::string& left,
         const std::string& right);
@@ -44,6 +56,12 @@ struct EditDistance {
         const std::string& left,
         const std::string& right,
         int threshold);
+
+    ///@param left UTF-8 string
+    ///@param right UTF-8 string
+    static int computeLCSLength_DynamicProgramming(
+        const std::string& left,
+        const std::string& right);
 
     ///@param left UTF-8 string
     ///@param right UTF-8 string
