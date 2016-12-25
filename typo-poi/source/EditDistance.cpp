@@ -255,7 +255,7 @@ int EditDistance::levenshteinDistance(const std::string& left, const std::string
 #if 1
     return levenshteinDistance_ONDGreedyAlgorithm(left, right);
 #elif 1
-    return levenshteinDistance_DP_LinearSpace(left, right);
+    return levenshteinDistance_DynamicProgramming_LinearSpace(left, right);
 #else
     return levenshteinDistance_DynamicProgramming(left, right);
 #endif
@@ -321,7 +321,7 @@ int EditDistance::levenshteinDistance_DynamicProgramming(const std::string& left
     return mat(rows - 1, columns - 1);
 }
 
-int EditDistance::levenshteinDistance_DP_LinearSpace(
+int EditDistance::levenshteinDistance_DynamicProgramming_LinearSpace(
     const std::string& text1,
     const std::string& text2)
 {

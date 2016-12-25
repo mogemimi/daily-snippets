@@ -40,7 +40,7 @@ struct EditDistance {
 
     ///@param left UTF-8 string
     ///@param right UTF-8 string
-    static int levenshteinDistance_DP_LinearSpace(
+    static int levenshteinDistance_DynamicProgramming_LinearSpace(
         const std::string& left,
         const std::string& right);
 

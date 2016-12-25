@@ -555,9 +555,9 @@ void Print(
     }
 
     std::stable_sort(std::begin(corrections), std::end(corrections), [&](const std::string& a, const std::string& b) {
-        auto distanceA = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm(inputWord, a);
-        auto distanceB = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm(inputWord, b);
-        return distanceA < distanceB;
+        auto similarA = somera::EditDistance::closestMatchFuzzySimilarity(inputWord, a);
+        auto similarB = somera::EditDistance::closestMatchFuzzySimilarity(inputWord, b);
+        return similarA >= similarB;
     });
 
     std::cout << "'" << inputWord << "' Did you mean {";
@@ -747,7 +747,7 @@ void TestCase_LCS()
 
 void TestCase_DPLinearSpace()
 {
-    auto distance = somera::EditDistance::levenshteinDistance_DP_LinearSpace;
+    auto distance = somera::EditDistance::levenshteinDistance_DynamicProgramming_LinearSpace;
     assert(distance("", "") == 0);
     assert(distance("A", "") == 1);
     assert(distance("", "A") == 1);
@@ -808,7 +808,8 @@ int main(int argc, char *argv[])
         ok("AAGGCCTTAGCT", "AGCTAAGGCCAGCAAGGTT");
     }
 
-    auto dictionarySourcePath = *parser.getValue("-dict");
+    //auto dictionarySourcePath = *parser.getValue("-dict");
+    auto dictionarySourcePath = "/usr/share/dict/words";
 
     std::vector<std::string> dictionary;
     std::unordered_map<uint32_t, std::vector<std::string>> hashedDictionary;
