@@ -12,6 +12,7 @@ SOURCES = \
 	../typo-poi/source/thirdparty/ConvertUTF.c \
 	../typo-poi/source/ConsoleColor.cpp \
 	../typo-poi/source/EditDistance.cpp \
+	../typo-poi/source/SpellChecker.cpp \
 	../typo-poi/source/UTF8.cpp \
 	../typo-poi/source/WordDiff.cpp \
 	../typo-poi/source/WordSegmenter.cpp \

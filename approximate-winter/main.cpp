@@ -3,6 +3,7 @@
 #include "EditDistance.h"
 #include "WordDiff.h"
 #include "WordSegmenter.h"
+#include "SpellChecker.h"
 #include "somera/CommandLineParser.h"
 #include "somera/FileSystem.h"
 #include "somera/Optional.h"
@@ -572,6 +573,35 @@ void Print(
     std::cout << "}" << std::endl;
 }
 
+template <typename SpellChecker>
+void Print(
+    const SpellChecker& spellChecker,
+    const std::string& word)
+{
+    auto result = spellChecker->Suggest(word);
+    if (result.correctlySpelled) {
+        std::cout << "'" << word << "' is found. (exact match)" << std::endl;
+        return;
+    }
+    if (result.suggestions.empty()) {
+        std::cout << "'" << word << "' is not found." << std::endl;
+        return;
+    }
+
+    auto & suggestions = result.suggestions;
+
+    std::cout << "'" << word << "' Did you mean {";
+    bool comma = false;
+    for (auto & suggestion : suggestions) {
+        if (comma) {
+            std::cout << ", ";
+        }
+        std::cout << suggestion;
+        comma = true;
+    }
+    std::cout << "}" << std::endl;
+}
+
 void ReadDictionaryFile(
     const std::string& path,
     const std::function<void(const std::string&)>& callback)
@@ -761,6 +791,169 @@ void TestCase_DPLinearSpace()
     assert(distance("GCT", "AAAAAA") == 9);
 }
 
+void TestCase_LCSGreedy()
+{
+    auto lcs = somera::EditDistance::computeLCSLength_ONDGreedyAlgorithm;
+    assert(lcs("", "") == 0);
+    assert(lcs("A", "") == 0);
+    assert(lcs("", "A") == 0);
+    assert(lcs("A", "A") == 1);
+    assert(lcs("AG", "GA") == 1);
+    assert(lcs("AA", "AA") == 2);
+    assert(lcs("AGA", "GAA") == 2);
+    assert(lcs("AGCAT", "AGCAT") == 5);
+    assert(lcs("AAAAAGC", "AAAAA") == 5);
+    assert(lcs("AAAAA", "GCAAAAA") == 5);
+    assert(lcs("GCT", "AAAAAA") == 0);
+    assert(lcs("AAGGCCTTAGCT", "AAGGCCAGT") == 9);
+    assert(lcs("AAGGCCTTAGCT", "AGCTAAGGCCAGCAAGGTT") == 10);
+}
+
+void TestCase_LevenshteinDistance_ReplacementCost1()
+{
+    auto distance = somera::EditDistance::levenshteinDistance_ReplacementCost1;
+    assert(distance("levenshtein", "meilenstein") == 4);
+    assert(distance("book", "back") == 2);
+    assert(distance("book", "book") == 0);
+    assert(distance("book", "bok") == 1);
+    assert(distance("book", "boook") == 1);
+    assert(distance("book", "bookk") == 1);
+    assert(distance("book", "bbookk") == 2);
+    assert(distance("AAATT", "AGCGA") == 4);
+    assert(distance("AAATTATGGAAGACGATC", "AGCGATATTAGGGAAGAGA") == 8);
+}
+
+void ReadWordListFile(
+    const std::string& path,
+    const std::function<void(const std::string&)>& callback)
+{
+    std::error_code errorCode;
+    const auto fileSize = somera::FileSystem::getFileSize(path, errorCode);
+
+    if (errorCode) {
+        std::cerr << "error: Cannot found the file. " << path << std::endl;
+        return;
+    }
+    if (fileSize >= std::numeric_limits<int32_t>::max()) {
+        // TODO: We cannot read a file larger than 2GB.
+        std::cerr << "error: File is too large to read. " << path << std::endl;
+        return;
+    }
+
+    std::ifstream input(path, std::ios::binary);
+    if (!input) {
+        return;
+    }
+
+    std::istreambuf_iterator<char> start(input);
+    std::istreambuf_iterator<char> end;
+
+    std::string word;
+    for (; start != end; ++start) {
+        auto c = *start;
+        if (c == '\r' || c == '\n' || c == '\0') {
+            if (!word.empty()) {
+                callback(word);
+            }
+            word.clear();
+            continue;
+        }
+        word += c;
+    }
+    if (!word.empty()) {
+        callback(word);
+    }
+}
+
+std::vector<std::pair<std::string, std::string>> GetMisspelledWordPairs()
+{
+    std::vector<std::pair<std::string, std::string>> pairs;
+    ReadWordListFile(
+        "/Volumes/marie/daily-snippets/approximate-winter/MisspelledWords.txt",
+        [&](const std::string& line) {
+            auto pairSource = somera::StringHelper::split(line, " < ");
+            if (pairSource.size() != 2) {
+                return;
+            }
+            pairs.emplace_back(pairSource.front(), pairSource.back());
+        });
+    return pairs;
+}
+
+void PrintMisspelledWordDistribution()
+{
+    auto pairs = GetMisspelledWordPairs();
+    std::sort(std::begin(pairs), std::end(pairs), [](auto & a, auto & b) {
+        auto x = somera::EditDistance::closestMatchFuzzySimilarity(a.first, a.second);
+        auto y = somera::EditDistance::closestMatchFuzzySimilarity(b.first, b.second);
+        return x < y;
+    });
+
+    for (auto & pair : pairs) {
+        auto & correction = pair.first;
+        auto & misspelled = pair.second;
+        
+        auto similarity = somera::EditDistance::closestMatchFuzzySimilarity(correction, misspelled);
+        auto distance = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm(correction, misspelled);
+        if (similarity > 0.5 && similarity < 0.85) {
+            std::cout << correction << "\t" << misspelled << "\t" << similarity << "\t" << distance << std::endl;
+        }
+    }
+
+    double compensation = 0;
+    double sum = 0;
+    double minValue = 1.0;
+    double maxValue = 0;
+    
+    constexpr int distributionCount = 20;
+    std::vector<int> distribution(distributionCount, 0);
+    int maxDistribution = 0;
+    
+    for (auto & pair : pairs) {
+        auto & correction = pair.first;
+        auto & misspelled = pair.second;
+        
+        auto similarity = somera::EditDistance::closestMatchFuzzySimilarity(correction, misspelled);
+        
+        // NOTE: Kahan summation algorithm
+        auto tmp = similarity - compensation;
+        auto velvel = sum + tmp;
+        compensation = (velvel - sum) - tmp;
+        sum = velvel;
+        
+        minValue = std::min(minValue, similarity);
+        maxValue = std::max(maxValue, similarity);
+
+        int scale = 0;
+        for (; scale < distributionCount; ++scale) {
+            constexpr auto unit = (1.0 / static_cast<double>(distributionCount));
+            const auto next = static_cast<double>(scale + 1) * unit;
+            if (similarity < next) {
+                break;
+            }
+        }
+        distribution[scale] += 1;
+        maxDistribution = std::max(maxDistribution, distribution[scale]);
+    }
+    const auto average = sum / static_cast<double>(pairs.size());
+    std::cout << "Average: " << average << std::endl;
+    std::cout << "Min: " << minValue << std::endl;
+    std::cout << "Max: " << maxValue << std::endl;
+    
+    for (int scale = 0; scale < distributionCount; ++scale) {
+        constexpr auto unit = (1.0 / static_cast<double>(distributionCount));
+        const auto first = static_cast<double>(scale) * unit;
+        const auto last = static_cast<double>(scale + 1) * unit;
+        std::printf("[%1.2lf, %1.2lf](%3d)", first, last, distribution[scale]);
+        constexpr int maxAsterisk = 50;
+        int asterisk = distribution[scale] * (maxAsterisk / static_cast<double>(maxDistribution));
+        for (int i = 0; i < asterisk; ++i) {
+            std::cout << "*";
+        }
+        std::cout << std::endl;
+    }
+}
+
 } // unnamed namespace
 
 int main(int argc, char *argv[])
@@ -790,7 +983,9 @@ int main(int argc, char *argv[])
 
     {
         TestCase_LCS();
+        TestCase_LCSGreedy();
         TestCase_DPLinearSpace();
+        TestCase_LevenshteinDistance_ReplacementCost1();
 
         auto ok = [&](const std::string& a, const std::string& b) {
             std::cout
@@ -808,8 +1003,8 @@ int main(int argc, char *argv[])
         ok("AAGGCCTTAGCT", "AGCTAAGGCCAGCAAGGTT");
     }
 
-    //auto dictionarySourcePath = *parser.getValue("-dict");
-    auto dictionarySourcePath = "/usr/share/dict/words";
+    auto dictionarySourcePath = *parser.getValue("-dict");
+    //auto dictionarySourcePath = "/usr/share/dict/words";
 
     std::vector<std::string> dictionary;
     std::unordered_map<uint32_t, std::vector<std::string>> hashedDictionary;
@@ -820,8 +1015,11 @@ int main(int argc, char *argv[])
     std::unordered_map<uint32_t, std::vector<std::string>> hashedDictionary_Cyclic16;
     std::unordered_map<uint32_t, std::vector<std::string>> hashedDictionary_Cyclic8;
 
+    auto spellChecker = somera::SpellCheckerFactory::Create();
+
     ReadDictionaryFile(dictionarySourcePath, [&](const std::string& word) {
         dictionary.push_back(word);
+        spellChecker->AddWord(word);
         
         {
             auto histogramHash = HistogramHashing_Alphabet(word);
@@ -924,6 +1122,7 @@ int main(int argc, char *argv[])
     });
 
 //    PrintLetterFrequency(dictionary);
+//    PrintMisspelledWordDistribution();
 
     std::cout << "dictionary words: " << dictionary.size() << std::endl;
     std::cout << "hash indices (Histogram): " << hashedDictionary.size() << std::endl;
@@ -952,6 +1151,10 @@ int main(int argc, char *argv[])
         "enviromet",
         "enviroment",
         "environment",
+        "that",
+        "thet",
+        "thhe",
+        "thh",
     };
 
 //    measurePerformanceTime([&] {
@@ -967,16 +1170,6 @@ int main(int argc, char *argv[])
 
     measurePerformanceTime([&] {
         auto spellCheck = SpellCheck_HistogramHashinging;
-        auto & dict = hashedDictionary;
-        for (auto & inputWord : inputWords) {
-            Print(spellCheck, inputWord, dict);
-        }
-    });
-
-    std::cout << "------------------" << std::endl;
-
-    measurePerformanceTime([&] {
-        auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold;
         auto & dict = hashedDictionary;
         for (auto & inputWord : inputWords) {
             Print(spellCheck, inputWord, dict);
@@ -1050,6 +1243,14 @@ int main(int argc, char *argv[])
         auto & dict = hashedDictionary_SizeAndSignature;
         for (auto & inputWord : inputWords) {
             Print(spellCheck, inputWord, dict);
+        }
+    });
+    
+    std::cout << "------------------" << std::endl;
+
+    measurePerformanceTime([&] {
+        for (auto & word : inputWords) {
+            Print(spellChecker, word);
         }
     });
 
