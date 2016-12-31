@@ -4,6 +4,7 @@
 
 #include "wordsegmenter.h"
 #include "somera/Optional.h"
+#include "SpellChecker.h"
 #include <functional>
 #include <map>
 #include <string>
@@ -49,6 +50,7 @@ private:
 
 class TypoMan final {
 private:
+    std::shared_ptr<somera::SpellChecker> spellChecker;
     somera::WordSegmenter segmenter;
     TypoCache cache;
     std::function<void(const Typo&)> onFoundTypo;
@@ -57,7 +59,6 @@ private:
     bool isStrictWhiteSpace;
     bool isStrictHyphen;
     bool isStrictLetterCase;
-    bool ignoreBritishEnglish;
     bool isCacheEnabled;
 
 public:
@@ -69,6 +70,8 @@ public:
     void computeFromIdentifier(const std::string& identifier);
 
     void computeFromWord(const std::string& word);
+    
+    void setSpellChecker(const std::shared_ptr<SpellChecker>& spellChecker);
 
     void setMinimumWordSize(int wordSize);
 
@@ -79,8 +82,6 @@ public:
     void setStrictHyphen(bool strictHyphen);
 
     void setStrictLetterCase(bool strictLetterCase);
-
-    void setIgnoreBritishEnglish(bool ignore);
 
     void setCacheEnabled(bool cacheEnabled);
 

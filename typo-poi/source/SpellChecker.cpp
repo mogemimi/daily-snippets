@@ -2,6 +2,7 @@
 
 #include "SpellChecker.h"
 #include "EditDistance.h"
+#include "StringHelper.h"
 #include <cassert>
 #include <cstdint>
 #include <unordered_map>
@@ -86,8 +87,6 @@ public:
     void AddWord(const std::string& word);
     
     void RemoveWord(const std::string& word);
-    
-    void IgnoreWord(const std::string& word);
 
 private:
     std::unordered_map<uint32_t, std::vector<std::string>> hashedDictionary;
@@ -107,10 +106,6 @@ void SpellCheckerSignatureHashing::AddWord(const std::string& word)
     assert(mapIter != std::end(hashedDictionary));
     
     auto & words = mapIter->second;
-    if (words.empty()) {
-        words.push_back(word);
-        return;
-    }
     auto wordsIter = std::lower_bound(std::begin(words), std::end(words), word);
     if ((wordsIter != std::end(words)) && (*wordsIter == word)) {
         // NOTE: The word already exists in a dictionary.
@@ -121,12 +116,18 @@ void SpellCheckerSignatureHashing::AddWord(const std::string& word)
 
 void SpellCheckerSignatureHashing::RemoveWord(const std::string& word)
 {
-    // TODO: Not implemented
-}
-
-void SpellCheckerSignatureHashing::IgnoreWord(const std::string& word)
-{
-    // TODO: Not implemented
+    auto signatureHash = SignatureHashingFromAsciiAlphabet(word);
+    auto mapIter = hashedDictionary.find(signatureHash);
+    if (mapIter == std::end(hashedDictionary)) {
+        return;
+    }
+    assert(mapIter != std::end(hashedDictionary));
+    
+    auto & words = mapIter->second;
+    auto wordsIter = std::lower_bound(std::begin(words), std::end(words), word);
+    if ((wordsIter != std::end(words)) && (*wordsIter == word)) {
+        words.erase(wordsIter);
+    }
 }
 
 size_t StringLength(const std::string& s)
@@ -215,8 +216,8 @@ void SortSuggestions(const std::string& word, std::vector<std::string>& suggesti
         if (similarA != similarB) {
             return similarA > similarB;
         }
-        const auto distanceA = somera::EditDistance::levenshteinDistance_ReplacementCost1(word, a);
-        const auto distanceB = somera::EditDistance::levenshteinDistance_ReplacementCost1(word, b);
+        const auto distanceA = somera::EditDistance::levenshteinDistance_DynamicProgramming_ReplacementCost1(word, a);
+        const auto distanceB = somera::EditDistance::levenshteinDistance_DynamicProgramming_ReplacementCost1(word, b);
         if (distanceA != distanceB) {
             return distanceA < distanceB;
         }
@@ -289,7 +290,9 @@ SpellCheckResult SpellCheck_SignatureHashinging_Internal(
     return result;
 }
 
-SpellCheckResult SpellCheckerSignatureHashing::Suggest(const std::string& word)
+SpellCheckResult SuggestInternal(
+    const std::string& word,
+    std::unordered_map<uint32_t, std::vector<std::string>> & hashedDictionary)
 {
     return SpellCheck_SignatureHashinging_Internal(
         word,
@@ -299,6 +302,91 @@ SpellCheckResult SpellCheckerSignatureHashing::Suggest(const std::string& word)
         },
         SignatureHashingFromAsciiAlphabet,
         28);
+}
+
+enum class LetterCase {
+    LowerCase,
+    UpperCase,
+    UpperCamelCase,
+};
+
+LetterCase GetLetterCase(const std::string& word)
+{
+    ///@todo This function doesn't support UTF-8 string.
+    bool isLowerCase = true;
+    bool isUpperCase = true;
+    bool isUpperCamelCase = true;
+    if (word.empty() || (::isupper(word.front()) == 0)) {
+        isUpperCamelCase = false;
+    }
+    for (auto c : word) {
+        if (::islower(c) != 0) {
+            isUpperCase = false;
+        }
+        if (::isupper(c) != 0) {
+            isLowerCase = false;
+        }
+    }
+    if (isLowerCase) {
+        return LetterCase::LowerCase;
+    }
+    else if (isUpperCase) {
+        return LetterCase::UpperCase;
+    }
+    else if (isUpperCamelCase) {
+        return LetterCase::UpperCamelCase;
+    }
+    return LetterCase::LowerCase;
+}
+
+#if 0
+void TestCase_GetLetterCase()
+{
+    assert(GetLetterCase("Word") == LetterCase::UpperCamelCase);
+    assert(GetLetterCase("WORD") == LetterCase::UpperCase);
+    assert(GetLetterCase("word") == LetterCase::LowerCase);
+}
+#endif
+
+void TransformLetterCase(std::string & word, LetterCase letterCase)
+{
+    switch (letterCase) {
+    case LetterCase::LowerCase:
+        for (auto & c : word) {
+            c = ::tolower(c);
+        }
+        break;
+    case LetterCase::UpperCase:
+        for (auto & c : word) {
+            c = ::toupper(c);
+        }
+        break;
+    case LetterCase::UpperCamelCase: {
+        for (auto & c : word) {
+            c = ::tolower(c);
+        }
+        if (!word.empty()) {
+            auto & c = word.front();
+            c = ::toupper(c);
+        }
+        break;
+    }
+    }
+}
+
+SpellCheckResult SpellCheckerSignatureHashing::Suggest(const std::string& word)
+{
+    std::string lowerWord = StringHelper::toLower(word);
+    auto result = SuggestInternal(lowerWord, hashedDictionary);
+    if (result.correctlySpelled) {
+        return result;
+    }
+    
+    auto letterCase = GetLetterCase(word);
+    for (auto & suggestion : result.suggestions) {
+        TransformLetterCase(suggestion, letterCase);
+    }
+    return result;
 }
 
 } // unnamed namespace

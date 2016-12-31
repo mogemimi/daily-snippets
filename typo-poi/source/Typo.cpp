@@ -13,65 +13,12 @@
 namespace somera {
 namespace {
 
-enum class LanguageLocale {
-    en_US,
-    en_UK,
-};
-
-std::vector<std::string> correctWord(const std::string& word, LanguageLocale locale)
-{
-    NativeSpellCheckOptions options;
-    options.language = [&] {
-        if (locale == LanguageLocale::en_UK) {
-            return "en_UK";
-        }
-        return "en_US";
-    }();
-
-    auto correction = somera::NativeSpellChecker::correctSpelling(word, options);
-    if (correction.empty()) {
-        return {};
-    }
-    auto corrections = somera::NativeSpellChecker::findClosestWords(word, options);
-    if (corrections.size() > 4) {
-        // NOTE:
-        // If there are too many corrections, the program uses a lot of RAM.
-        // So please should be resize the 'corrections'.
-        corrections.resize(4);
-    }
-    if (std::find(std::begin(corrections), std::end(corrections), correction) == std::end(corrections)) {
-        corrections.insert(std::begin(corrections), std::move(correction));
-    }
-    assert(!corrections.empty());
-    return corrections;
-}
-
 template <class Container, typename Func>
 void eraseIf(Container & container, Func func)
 {
     container.erase(std::remove_if(
         std::begin(container), std::end(container), func),
         std::end(container));
-}
-
-void sortNearly(const std::string& word, std::vector<std::string> & corrections)
-{
-    const auto nearly = [&](auto& a, auto& b) {
-        const auto fuzzyA = EditDistance::closestMatchFuzzyDistance(word, a);
-        const auto fuzzyB = EditDistance::closestMatchFuzzyDistance(word, b);
-        if (fuzzyA != fuzzyB) {
-            return fuzzyA > fuzzyB;
-        }
-        const auto jwA = EditDistance::jaroWinklerDistance(word, a);
-        const auto jwB = EditDistance::jaroWinklerDistance(word, b);
-        if (jwA != jwB) {
-            return jwA > jwB;
-        }
-        const auto lsA = EditDistance::levenshteinDistance(word, a);
-        const auto lsB = EditDistance::levenshteinDistance(word, b);
-        return lsA <= lsB;
-    };
-    std::sort(std::begin(corrections), std::end(corrections), nearly);
 }
 
 } // unnamed namespace
@@ -145,8 +92,9 @@ TypoMan::TypoMan() noexcept
     , isStrictWhiteSpace(true)
     , isStrictHyphen(true)
     , isStrictLetterCase(true)
-    , ignoreBritishEnglish(false)
 {
+    spellChecker = SpellCheckerFactory::Create();
+
     std::set<std::string> dictionary = {
         "jpg",
         "png",
@@ -197,23 +145,13 @@ void TypoMan::computeFromWord(const std::string& word)
     if (isCacheEnabled && cache.exists(word)) {
         return;
     }
-    auto corrections = correctWord(word, LanguageLocale::en_US);
-    if (corrections.empty()) {
+
+    auto suggestResult = spellChecker->Suggest(word);
+    if (suggestResult.suggestions.empty()) {
         return;
     }
-    if (ignoreBritishEnglish) {
-        std::vector<std::string> correctionsInUS;
-        std::swap(corrections, correctionsInUS);
-        auto correctionsInUK = correctWord(word, LanguageLocale::en_UK);
-        std::set_intersection(
-            std::begin(correctionsInUS),
-            std::end(correctionsInUS),
-            std::begin(correctionsInUK),
-            std::end(correctionsInUK),
-            std::back_inserter(corrections));
-    }
     if (!isStrictWhiteSpace) {
-        for (auto & correction : corrections) {
+        for (auto & correction : suggestResult.suggestions) {
             auto hunks = somera::computeDiff(word, correction);
             std::string filtered;
             for (auto & hunk : hunks) {
@@ -227,12 +165,12 @@ void TypoMan::computeFromWord(const std::string& word)
             }
             correction = filtered;
         }
-        eraseIf(corrections, [&](const std::string& correction) {
+        eraseIf(suggestResult.suggestions, [&](const std::string& correction) {
             return correction.empty();
         });
     }
     if (!isStrictHyphen) {
-        for (auto & correction : corrections) {
+        for (auto & correction : suggestResult.suggestions) {
             auto hunks = somera::computeDiff(word, correction);
             std::string filtered;
             for (auto & hunk : hunks) {
@@ -246,36 +184,35 @@ void TypoMan::computeFromWord(const std::string& word)
             }
             correction = filtered;
         }
-        eraseIf(corrections, [&](const std::string& correction) {
+        eraseIf(suggestResult.suggestions, [&](const std::string& correction) {
             return correction.empty();
         });
     }
     if (!isStrictLetterCase) {
-        eraseIf(corrections, [&](const std::string& correction) {
+        eraseIf(suggestResult.suggestions, [&](const std::string& correction) {
             return StringHelper::toLower(word) == StringHelper::toLower(correction);
         });
     }
 
-    std::sort(std::begin(corrections), std::end(corrections));
-    corrections.erase(
-        std::unique(std::begin(corrections), std::end(corrections)),
-        std::end(corrections));
-    sortNearly(word, corrections);
-
     assert(maxCorrectWordCount > 0);
-    if (static_cast<int>(corrections.size()) > maxCorrectWordCount) {
-        corrections.resize(maxCorrectWordCount);
+    if (static_cast<int>(suggestResult.suggestions.size()) > maxCorrectWordCount) {
+        suggestResult.suggestions.resize(maxCorrectWordCount);
     }
 
     Typo typo;
     typo.misspelledWord = word;
-    typo.corrections = std::move(corrections);
+    typo.corrections = std::move(suggestResult.suggestions);
     if (onFoundTypo && !typo.corrections.empty()) {
         onFoundTypo(typo);
     }
     if (isCacheEnabled) {
         cache.insert(std::move(typo));
     }
+}
+
+void TypoMan::setSpellChecker(const std::shared_ptr<SpellChecker>& spellCheckerIn)
+{
+    this->spellChecker = spellCheckerIn;
 }
 
 void TypoMan::setMinimumWordSize(int wordSize)
@@ -303,11 +240,6 @@ void TypoMan::setStrictHyphen(bool strictHyphen)
 void TypoMan::setStrictLetterCase(bool strictLetterCase)
 {
     this->isStrictLetterCase = strictLetterCase;
-}
-
-void TypoMan::setIgnoreBritishEnglish(bool ignore)
-{
-    this->ignoreBritishEnglish = ignore;
 }
 
 void TypoMan::setCacheEnabled(bool cacheEnabled)

@@ -4,6 +4,7 @@
 #include "WordDiff.h"
 #include "WordSegmenter.h"
 #include "SpellChecker.h"
+#include "SpellCheck.h"
 #include "somera/CommandLineParser.h"
 #include "somera/FileSystem.h"
 #include "somera/Optional.h"
@@ -811,7 +812,7 @@ void TestCase_LCSGreedy()
 
 void TestCase_LevenshteinDistance_ReplacementCost1()
 {
-    auto distance = somera::EditDistance::levenshteinDistance_ReplacementCost1;
+    auto distance = somera::EditDistance::levenshteinDistance_DynamicProgramming_ReplacementCost1;
     assert(distance("levenshtein", "meilenstein") == 4);
     assert(distance("book", "back") == 2);
     assert(distance("book", "book") == 0);
@@ -1155,6 +1156,8 @@ int main(int argc, char *argv[])
         "thet",
         "thhe",
         "thh",
+        "get",
+        "Get",
     };
 
 //    measurePerformanceTime([&] {

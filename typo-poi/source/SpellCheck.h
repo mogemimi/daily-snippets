@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "SpellChecker.h"
 #include <string>
 #include <vector>
 
@@ -24,5 +25,7 @@ struct NativeSpellChecker {
         const std::string& word,
         const NativeSpellCheckOptions& options);
 };
+
+std::shared_ptr<SpellChecker> CreateSpellCheckerMac();
 
 } // namespace somera

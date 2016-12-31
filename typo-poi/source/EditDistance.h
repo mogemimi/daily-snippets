@@ -46,7 +46,7 @@ struct EditDistance {
 
     ///@param left UTF-8 string
     ///@param right UTF-8 string
-    static int levenshteinDistance_ReplacementCost1(
+    static int levenshteinDistance_DynamicProgramming_ReplacementCost1(
         const std::string& left,
         const std::string& right);
 

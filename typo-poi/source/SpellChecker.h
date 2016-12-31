@@ -24,8 +24,6 @@ public:
     virtual void AddWord(const std::string& word) = 0;
 
     virtual void RemoveWord(const std::string& word) = 0;
-
-    virtual void IgnoreWord(const std::string& word) = 0;
 };
 
 class SpellCheckerFactory final {

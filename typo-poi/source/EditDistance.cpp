@@ -353,7 +353,7 @@ int EditDistance::levenshteinDistance_DynamicProgramming_LinearSpace(
     return c1.back();
 }
 
-int EditDistance::levenshteinDistance_ReplacementCost1(
+int EditDistance::levenshteinDistance_DynamicProgramming_ReplacementCost1(
     const std::string& text1,
     const std::string& text2)
 {

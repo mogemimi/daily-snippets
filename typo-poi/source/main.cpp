@@ -23,12 +23,12 @@ namespace {
 
 void SetupCommandLineParser(CommandLineParser & parser)
 {
-    using somera::CommandLineArgumentType::Flag;
-    using somera::CommandLineArgumentType::JoinedOrSeparate;
+    using Type = somera::CommandLineArgumentType;
     parser.setUsageText("typo-poi [options ...] [C/C++ file ...]");
-    parser.addArgument("-h", Flag, "Display available options");
-    parser.addArgument("-help", Flag, "Display available options");
-    parser.addArgument("-v", Flag, "Display version");
+    parser.addArgument("-h", Type::Flag, "Display available options");
+    parser.addArgument("-help", Type::Flag, "Display available options");
+    parser.addArgument("-v", Type::Flag, "Display version");
+    parser.addArgument("-dict", Type::JoinedOrSeparate, "Dictionary file");
 }
 
 struct UTF8Character {
@@ -114,6 +114,48 @@ private:
     somera::SourceRange byteRange;
     somera::SourceRange range;
 };
+
+void ReadDictionaryFile(
+    const std::string& path,
+    const std::function<void(const std::string&)>& callback)
+{
+    std::error_code errorCode;
+    const auto fileSize = somera::FileSystem::getFileSize(path, errorCode);
+
+    if (errorCode) {
+        std::cerr << "error: Cannot found the file. " << path << std::endl;
+        return;
+    }
+    if (fileSize >= std::numeric_limits<int32_t>::max()) {
+        // TODO: We cannot read a file larger than 2GB.
+        std::cerr << "error: File is too large to read. " << path << std::endl;
+        return;
+    }
+
+    std::ifstream input(path, std::ios::binary);
+    if (!input) {
+        return;
+    }
+
+    std::istreambuf_iterator<char> start(input);
+    std::istreambuf_iterator<char> end;
+
+    std::string word;
+    for (; start != end; ++start) {
+        auto c = *start;
+        if (c == '\r' || c == '\n' || c == '\0') {
+            if (!word.empty()) {
+                callback(word);
+            }
+            word.clear();
+            continue;
+        }
+        word += c;
+    }
+    if (!word.empty()) {
+        callback(word);
+    }
+}
 
 void ReadUTF8TextFile(
     const std::string& path, const std::function<void(UTF8Character&&)>& callback)
@@ -334,11 +376,20 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    std::vector<std::string> dictionaryPaths = parser.getValues("-dict");
+    
+    auto spellChecker = somera::SpellCheckerFactory::Create();
+    for (auto & path : dictionaryPaths) {
+        ReadDictionaryFile(path, [&](const std::string& word) {
+            spellChecker->AddWord(word);
+        });
+    }
+
     somera::TypoMan typos;
+    typos.setSpellChecker(spellChecker);
     typos.setStrictWhiteSpace(false);
     typos.setStrictHyphen(false);
     typos.setStrictLetterCase(false);
-    typos.setIgnoreBritishEnglish(true);
     typos.setMinimumWordSize(3);
     typos.setMaxCorrectWordCount(4);
     typos.setCacheEnabled(true);

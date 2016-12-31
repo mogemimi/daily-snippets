@@ -12,3 +12,11 @@ uint16_t
 uint32_t
 uint64_t
 ssize_t
+nothrow
+ifdef
+elif
+else
+endif
+undef
+define
+defined

@@ -11,6 +11,7 @@ SOURCES = \
 	source/thirdparty/ConvertUTF.c \
 	source/ConsoleColor.cpp \
 	source/EditDistance.cpp \
+	source/SpellChecker.cpp \
 	source/Typo.cpp \
 	source/UTF8.cpp \
 	source/WordDiff.cpp \

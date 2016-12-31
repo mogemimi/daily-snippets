@@ -71,4 +71,31 @@ std::vector<std::string> NativeSpellChecker::findClosestWords(
     return results;
 }
 
+class SpellCheckerMac final : public SpellChecker {
+public:
+    SpellCheckResult Suggest(const std::string& word)
+    {
+        SpellCheckResult result;
+        result.correctlySpelled = false;
+        result.suggestions = NativeSpellChecker::findClosestWords(word);
+        if (result.suggestions.empty()) {
+            result.correctlySpelled = true;
+        }
+        return result;
+    }
+    
+    void AddWord(const std::string& word)
+    {
+    }
+    
+    void RemoveWord(const std::string& word)
+    {
+    }
+};
+
+std::shared_ptr<SpellChecker> CreateSpellCheckerMac()
+{
+    return std::make_shared<SpellCheckerMac>();
+}
+
 } // namespace somera
