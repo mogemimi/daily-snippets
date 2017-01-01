@@ -129,10 +129,18 @@ double EditDistance::closestMatchFuzzySimilarity_Boer(const std::string& left, c
 
 double EditDistance::closestMatchFuzzySimilarity(const std::string& text1, const std::string& text2)
 {
+    return closestMatchFuzzySimilarity(text1, text2, static_cast<int>(text1.size() + text2.size()));
+}
+
+double EditDistance::closestMatchFuzzySimilarity(
+    const std::string& text1,
+    const std::string& text2,
+    int distanceThreshold)
+{
     if (text1.empty() && text2.empty()) {
-        return 1.0f;
+        return 1.0;
     }
-    auto lcs = computeLCSLength_DynamicProgramming(text1, text2);
+    auto lcs = computeLCSLength_ONDGreedyAlgorithm_Threshold(text1, text2, distanceThreshold);
     auto maxLength = static_cast<double>(std::max(text1.size(), text2.size()));
     assert(maxLength >= 1.0);
     assert(maxLength != 0);
@@ -511,6 +519,10 @@ int EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(
     vertices[1 + offset] = 0;
 
     for (int d = 0; d <= maxD; ++d) {
+        if (d > threshold) {
+            return d;
+        }
+
         const int startK = -std::min(d, (N * 2) - d);
         const int endK = std::min(d, (M * 2) - d);
 
@@ -519,10 +531,6 @@ int EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(
         assert(std::abs(endK % 2) == (d % 2));
         assert((d > N) ? (startK == -(N * 2 - d)) : (startK == -d));
         assert((d > M) ? (endK == (M * 2 - d)) : (endK == d));
-
-        if (d > threshold) {
-            return d;
-        }
 
         for (int k = startK; k <= endK; k += 2) {
             assert((-N <= k) && (k <= M));
@@ -654,6 +662,15 @@ int EditDistance::computeLCSLength_ONDGreedyAlgorithm(
     const std::string& text1,
     const std::string& text2)
 {
+    return computeLCSLength_ONDGreedyAlgorithm_Threshold(
+        text1, text2, static_cast<int>(text1.size() + text2.size()));
+}
+
+int EditDistance::computeLCSLength_ONDGreedyAlgorithm_Threshold(
+    const std::string& text1,
+    const std::string& text2,
+    int distanceThreshold)
+{
     // NOTE:
     // This algorithm is based on Myers's An O((M+N)D) Greedy Algorithm in
     // "An O(ND)Difference Algorithm and Its Variations",
@@ -682,6 +699,10 @@ int EditDistance::computeLCSLength_ONDGreedyAlgorithm(
     lcsLengths[1 + offset] = 0;
 
     for (int d = 0; d <= maxD; ++d) {
+        if (d > distanceThreshold) {
+            return 0;
+        }
+
         const int startK = -std::min(d, (N * 2) - d);
         const int endK = std::min(d, (M * 2) - d);
 

@@ -16,6 +16,13 @@ struct EditDistance {
 
     ///@param left UTF-8 string
     ///@param right UTF-8 string
+    static double closestMatchFuzzySimilarity(
+        const std::string& left,
+        const std::string& right,
+        int distanceThreshold);
+
+    ///@param left UTF-8 string
+    ///@param right UTF-8 string
     static double closestMatchFuzzySimilarity_Boer(
         const std::string& left,
         const std::string& right);
@@ -74,6 +81,13 @@ struct EditDistance {
     static int computeLCSLength_ONDGreedyAlgorithm(
         const std::string& left,
         const std::string& right);
+
+    ///@param left UTF-8 string
+    ///@param right UTF-8 string
+    static int computeLCSLength_ONDGreedyAlgorithm_Threshold(
+        const std::string& left,
+        const std::string& right,
+        int distanceThreshold);
 
     ///@param left UTF-8 string
     ///@param right UTF-8 string

@@ -163,6 +163,9 @@ void TypoMan::computeFromWord(const std::string& word)
                     filtered += hunk.text;
                 }
             }
+            if (filtered == word) {
+                return;
+            }
             correction = filtered;
         }
         eraseIf(suggestResult.suggestions, [&](const std::string& correction) {
@@ -181,6 +184,9 @@ void TypoMan::computeFromWord(const std::string& word)
                 if (hunk.operation != DiffOperation::Deletion) {
                     filtered += hunk.text;
                 }
+            }
+            if (filtered == word) {
+                return;
             }
             correction = filtered;
         }

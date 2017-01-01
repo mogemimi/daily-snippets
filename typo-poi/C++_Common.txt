@@ -20,3 +20,6 @@ endif
 undef
 define
 defined
+FIXME
+TODO
+NOTE
