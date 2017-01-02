@@ -397,31 +397,19 @@ SpellCheckResult SuggestLetterCase(
     const std::string& word,
     std::unordered_map<uint32_t, std::vector<std::string>> & hashedDictionary)
 {
-    std::string lowerWord = StringHelper::toLower(word);
-    auto result = SuggestInternal(lowerWord, hashedDictionary);
+    auto result = SuggestInternal(word, hashedDictionary);
     if (result.correctlySpelled) {
         return result;
     }
     
     auto letterCase = GetLetterCase(word);
     for (auto & suggestion : result.suggestions) {
-        TransformLetterCase(suggestion, letterCase);
+        auto suggestionLetterCase = GetLetterCase(suggestion);
+        if (suggestionLetterCase == LetterCase::LowerCase) {
+            TransformLetterCase(suggestion, letterCase);
+        }
     }
     return result;
-}
-
-SpellCheckResult SeparateWord(
-    const std::string& word,
-    std::unordered_map<uint32_t, std::vector<std::string>> & hashedDictionary)
-{
-    return SpellCheck_SignatureHashinging_Internal(
-        word,
-        hashedDictionary,
-        [](const std::string& a, const std::string& b) {
-            return EditDistance::levenshteinDistance_ONDGreedyAlgorithm(a, b);
-        },
-        SignatureHashingFromAsciiAlphabet,
-        28);
 }
 
 template <typename T>

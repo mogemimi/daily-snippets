@@ -1164,6 +1164,15 @@ int main(int argc, char *argv[])
         "tileset",
         "setOpacity",
         "CCCamera",
+        "isDone",
+        "xOffset",
+        "OpenGL",
+        "openGL",
+        "opengl",
+        "Opengl",
+        "cpp",
+        "Cpp",
+        "CPP",
     };
 
 //    measurePerformanceTime([&] {
@@ -1262,6 +1271,6 @@ int main(int argc, char *argv[])
             Print(spellChecker, word);
         }
     });
-
+    
     return 0;
 }

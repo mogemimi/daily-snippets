@@ -27,17 +27,41 @@ public:
     }
 };
 
-double matchCharacter(uint32_t a, uint32_t b)
+uint32_t toLowerUTF32(uint32_t c)
+{
+    return static_cast<uint32_t>(::tolower(c));
+}
+
+double matchCharacter(uint32_t misspell, uint32_t suggestion)
 {
     constexpr auto FullMatchScore = 1.0;
     constexpr auto CapitalMatchScore = 0.9;
     constexpr auto NoMatch = 0.0;
 
-    if (a == b) {
+    // NOTE:
+    //
+    // matchCharacter(a, a) == 1.0
+    // matchCharacter(a, A) == 0.9
+    // matchCharacter(A, a) == 1.0
+    // matchCharacter(A, A) == 1.0
+    //
+    // matchCharacter(b, a) == 0.0
+    // matchCharacter(b, A) == 0.0
+    // matchCharacter(B, a) == 0.0
+    // matchCharacter(B, A) == 0.0
+
+    if (misspell == suggestion) {
         return FullMatchScore;
     }
-    if (::isalpha(a) && ::isalpha(b) && (::tolower(a) == ::tolower(b))) {
-        return CapitalMatchScore;
+    if (::isupper(suggestion)) {
+        if (::toupper(misspell) == ::toupper(suggestion)) {
+            return CapitalMatchScore;
+        }
+    }
+    else {
+        if (toLowerUTF32(misspell) == suggestion) {
+            return FullMatchScore;
+        }
     }
     return NoMatch;
 }
@@ -132,6 +156,127 @@ double EditDistance::closestMatchFuzzySimilarity(const std::string& text1, const
     return closestMatchFuzzySimilarity(text1, text2, static_cast<int>(text1.size() + text2.size()));
 }
 
+namespace {
+
+double computeLCSLengthFuzzy_ONDGreedyAlgorithm_Threshold(
+    const std::string& text1,
+    const std::string& text2,
+    int distanceThreshold)
+{
+    // NOTE:
+    // This algorithm is based on Myers's An O((M+N)D) Greedy Algorithm in
+    // "An O(ND)Difference Algorithm and Its Variations",
+    // Algorithmica (1986), pages 251-266.
+
+    if (text1.empty() || text2.empty()) {
+        return 0.0;
+    }
+
+    const auto M = static_cast<int>(text1.size());
+    const auto N = static_cast<int>(text2.size());
+
+    const auto maxD = M + N;
+    const auto offset = N;
+
+    std::vector<int> vertices(M + N + 1);
+#if !defined(NDEBUG)
+    // NOTE:
+    // There is no need to initialize with the zero value for array elements,
+    // but you have to assign the zero value to `vertices[1 + offset]`.
+    std::fill(std::begin(vertices), std::end(vertices), -1);
+#endif
+    vertices[1 + offset] = 0;
+    
+    std::vector<double> lcsLengths(M + N + 1);
+    lcsLengths[1 + offset] = 0;
+
+    for (int d = 0; d <= maxD; ++d) {
+        if (d > distanceThreshold) {
+            return 0.0;
+        }
+
+        const int startK = -std::min(d, (N * 2) - d);
+        const int endK = std::min(d, (M * 2) - d);
+
+        assert((-N <= startK) && (endK <= M));
+        assert(std::abs(startK % 2) == (d % 2));
+        assert(std::abs(endK % 2) == (d % 2));
+        assert((d > N) ? (startK == -(N * 2 - d)) : (startK == -d));
+        assert((d > M) ? (endK == (M * 2 - d)) : (endK == d));
+
+        for (int k = startK; k <= endK; k += 2) {
+            assert((-N <= k) && (k <= M));
+            assert(std::abs(k % 2) == (d % 2));
+
+            const auto kOffset = k + offset;
+
+            int x = 0;
+            double lcsLength = 0.0;
+            if (k == startK) {
+                // NOTE: Move directly from vertex(x, y - 1) to vertex(x, y)
+                x = vertices[kOffset + 1];
+                lcsLength = lcsLengths[kOffset + 1];
+            }
+            else if (k == endK) {
+                // NOTE: Move directly from vertex(x - 1, y) to vertex(x, y)
+                x = vertices[kOffset - 1] + 1;
+                lcsLength = lcsLengths[kOffset - 1];
+            }
+            else if (vertices[kOffset - 1] < vertices[kOffset + 1]) {
+                // NOTE: Move from vertex(k + 1) to vertex(k)
+                // vertex(k + 1) is ahead of vertex(k - 1).
+                assert(-N < k && k < M);
+                assert((k != -d) && (k != -N));
+                assert((k != d) && (k != M));
+                x = vertices[kOffset + 1];
+                lcsLength = lcsLengths[kOffset + 1];
+            }
+            else {
+                // NOTE: Move from vertex(k - 1) to vertex(k)
+                // vertex(k - 1) is ahead of vertex(k + 1).
+                assert(-N < k && k < M);
+                assert((k != -d) && (k != -N));
+                assert((k != d) && (k != M));
+                assert(vertices[kOffset - 1] >= vertices[kOffset + 1]);
+                x = vertices[kOffset - 1] + 1;
+                lcsLength = lcsLengths[kOffset - 1];
+            }
+
+            // NOTE: `k` is defined from `x - y = k`.
+            int y = x - k;
+            assert(x >= 0 && y >= 0);
+
+#if !defined(NDEBUG)
+            if (d == 0) {
+                assert((x == 0) && (y == 0) && (k == 0));
+            }
+#endif
+
+            while (x < M && y < N) {
+                auto score = matchCharacter(text1[x], text2[y]);
+                if (score == 0.0) {
+                    break;
+                }
+                // NOTE: This loop finds a possibly empty sequence
+                // of diagonal edges called a 'snake'.
+                x += 1;
+                y += 1;
+                lcsLength += score;
+            }
+
+            if (x >= M && y >= N) {
+                return lcsLength;
+            }
+
+            vertices[kOffset] = x;
+            lcsLengths[kOffset] = lcsLength;
+        }
+    }
+    return 0.0;
+}
+
+} // unnamed namespace
+
 double EditDistance::closestMatchFuzzySimilarity(
     const std::string& text1,
     const std::string& text2,
@@ -140,11 +285,11 @@ double EditDistance::closestMatchFuzzySimilarity(
     if (text1.empty() && text2.empty()) {
         return 1.0;
     }
-    auto lcs = computeLCSLength_ONDGreedyAlgorithm_Threshold(text1, text2, distanceThreshold);
+    auto lcs = computeLCSLengthFuzzy_ONDGreedyAlgorithm_Threshold(text1, text2, distanceThreshold);
     auto maxLength = static_cast<double>(std::max(text1.size(), text2.size()));
     assert(maxLength >= 1.0);
     assert(maxLength != 0);
-    return static_cast<double>(lcs) / maxLength;
+    return lcs / maxLength;
 }
 
 namespace {
@@ -662,15 +807,6 @@ int EditDistance::computeLCSLength_ONDGreedyAlgorithm(
     const std::string& text1,
     const std::string& text2)
 {
-    return computeLCSLength_ONDGreedyAlgorithm_Threshold(
-        text1, text2, static_cast<int>(text1.size() + text2.size()));
-}
-
-int EditDistance::computeLCSLength_ONDGreedyAlgorithm_Threshold(
-    const std::string& text1,
-    const std::string& text2,
-    int distanceThreshold)
-{
     // NOTE:
     // This algorithm is based on Myers's An O((M+N)D) Greedy Algorithm in
     // "An O(ND)Difference Algorithm and Its Variations",
@@ -699,10 +835,6 @@ int EditDistance::computeLCSLength_ONDGreedyAlgorithm_Threshold(
     lcsLengths[1 + offset] = 0;
 
     for (int d = 0; d <= maxD; ++d) {
-        if (d > distanceThreshold) {
-            return 0;
-        }
-
         const int startK = -std::min(d, (N * 2) - d);
         const int endK = std::min(d, (M * 2) - d);
 

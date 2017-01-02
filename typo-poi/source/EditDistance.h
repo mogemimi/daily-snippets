@@ -84,13 +84,6 @@ struct EditDistance {
 
     ///@param left UTF-8 string
     ///@param right UTF-8 string
-    static int computeLCSLength_ONDGreedyAlgorithm_Threshold(
-        const std::string& left,
-        const std::string& right,
-        int distanceThreshold);
-
-    ///@param left UTF-8 string
-    ///@param right UTF-8 string
     static int computeLCSLengthInLinearSpace(
         const std::string& left,
         const std::string& right);
