@@ -27,12 +27,12 @@ public:
     }
 };
 
-uint32_t toLowerUTF32(uint32_t c)
+char32_t toLowerUTF32(char32_t c)
 {
-    return static_cast<uint32_t>(::tolower(c));
+    return static_cast<char32_t>(::tolower(c));
 }
 
-double matchCharacter(uint32_t misspell, uint32_t suggestion)
+double matchCharacter(char32_t misspell, char32_t suggestion)
 {
     constexpr auto FullMatchScore = 1.0;
     constexpr auto CapitalMatchScore = 0.9;

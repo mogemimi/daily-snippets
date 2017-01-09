@@ -3,6 +3,7 @@
 #include "SpellChecker.h"
 #include "EditDistance.h"
 #include "StringHelper.h"
+#include "Optional.h"
 #include <cassert>
 #include <cstdint>
 #include <unordered_map>
@@ -146,10 +147,22 @@ size_t ComputeGapSize(size_t a, size_t b)
     return b - a;
 }
 
+struct SpellSuggestion {
+    std::string word;
+    Optional<double> similarity;
+};
+
+struct SpellCheckResultInternal {
+    std::vector<SpellSuggestion> suggestions;
+    
+    ///@brief `true` if the word is correctly spelled; `false` otherwise.
+    bool correctlySpelled;
+};
+
 void SpellCheckInternal(
     const std::string& input,
     const std::vector<std::string>& dictionary,
-    std::vector<std::string> & suggestions,
+    std::vector<SpellSuggestion> & suggestions,
     bool & exaxtMatching,
     std::size_t inputWordSize,
     std::size_t & gapSizeThreshold,
@@ -165,8 +178,10 @@ void SpellCheckInternal(
         const auto similarity = EditDistance::closestMatchFuzzySimilarity(input, word, distanceThreshold);
         if (similarity == 1.0) {
             // exaxt matching
-            suggestions.clear();
-            suggestions.push_back(word);
+            SpellSuggestion suggestion;
+            suggestion.word = word;
+            suggestion.similarity = similarity;
+            suggestions.insert(std::begin(suggestions), std::move(suggestion));
             exaxtMatching = true;
             break;
         }
@@ -174,7 +189,10 @@ void SpellCheckInternal(
             similarityThreshold = std::max(similarity, similarityThreshold);
             gapSizeThreshold = std::max<std::size_t>(gapSize, 1);
             assert(similarityThreshold <= 1.0);
-            suggestions.push_back(word);
+            SpellSuggestion suggestion;
+            suggestion.word = word;
+            suggestion.similarity = similarity;
+            suggestions.push_back(std::move(suggestion));
         }
     }
 }
@@ -209,45 +227,51 @@ std::size_t ComputeSurfixLength(const std::string& a, const std::string& b)
     return surfixLength;
 }
 
-void SortSuggestions(const std::string& word, std::vector<std::string>& suggestions)
+void SortSuggestions(const std::string& word, std::vector<SpellSuggestion>& suggestions)
 {
-    std::sort(std::begin(suggestions), std::end(suggestions), [&](const std::string& a, const std::string& b) {
-        const auto similarA = somera::EditDistance::closestMatchFuzzySimilarity(word, a);
-        const auto similarB = somera::EditDistance::closestMatchFuzzySimilarity(word, b);
-        if (similarA != similarB) {
-            return similarA > similarB;
+    for (auto & suggestion : suggestions) {
+        if (!suggestion.similarity) {
+            suggestion.similarity = somera::EditDistance::closestMatchFuzzySimilarity(word, suggestion.word);
         }
-        const auto distanceA = somera::EditDistance::levenshteinDistance_DynamicProgramming_ReplacementCost1(word, a);
-        const auto distanceB = somera::EditDistance::levenshteinDistance_DynamicProgramming_ReplacementCost1(word, b);
+    }
+
+    std::sort(std::begin(suggestions), std::end(suggestions), [&](const SpellSuggestion& a, const SpellSuggestion& b) {
+        assert(a.similarity);
+        assert(b.similarity);
+        if (*a.similarity != *b.similarity) {
+            return *a.similarity > *b.similarity;
+        }
+        const auto distanceA = somera::EditDistance::levenshteinDistance_DynamicProgramming_ReplacementCost1(word, a.word);
+        const auto distanceB = somera::EditDistance::levenshteinDistance_DynamicProgramming_ReplacementCost1(word, b.word);
         if (distanceA != distanceB) {
             return distanceA < distanceB;
         }
-        const auto prefixA = ComputePrefixLength(word, a);
-        const auto prefixB = ComputePrefixLength(word, b);
+        const auto prefixA = ComputePrefixLength(word, a.word);
+        const auto prefixB = ComputePrefixLength(word, b.word);
         if (prefixA != prefixB) {
             return prefixA > prefixB;
         }
-        const auto gapA = ComputeGapSize(word.size(), a.size());
-        const auto gapB = ComputeGapSize(word.size(), b.size());
+        const auto gapA = ComputeGapSize(word.size(), a.word.size());
+        const auto gapB = ComputeGapSize(word.size(), b.word.size());
         if (gapA != gapB) {
             return gapA < gapB;
         }
-        const auto surfixA = ComputeSurfixLength(word, a);
-        const auto surfixB = ComputeSurfixLength(word, b);
+        const auto surfixA = ComputeSurfixLength(word, a.word);
+        const auto surfixB = ComputeSurfixLength(word, b.word);
         return surfixA > surfixB;
     });
 }
 
-SpellCheckResult SpellCheck_SignatureHashinging_Internal(
+SpellCheckResultInternal SpellCheck_SignatureHashinging_Internal(
     const std::string& input,
     const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary,
-    const std::function<int(const std::string&, const std::string&)>& levenshteinDistance,
     const std::function<uint32_t(const std::string&)>& histogramHashing,
-    const int maxHashLength)
+    const int maxHashLength,
+    const int distanceThreshold)
 {
     std::size_t gapSizeThreshold = 2;
 
-    SpellCheckResult result;
+    SpellCheckResultInternal result;
     result.correctlySpelled = false;
 
     const auto inputHistogramHashing = histogramHashing(input);
@@ -255,7 +279,6 @@ SpellCheckResult SpellCheck_SignatureHashinging_Internal(
 
     const auto sizeAsDouble = static_cast<double>(inputWordSize);
     double similarityThreshold = std::max((sizeAsDouble - std::min(sizeAsDouble, 2.0)) / sizeAsDouble, 0.5);
-    const auto distanceThreshold = std::min(static_cast<int>(input.size()), 10);
 
     for (int i = 0; i <= maxHashLength; ++i) {
         const uint32_t bitmask = ((static_cast<uint32_t>(1) << i) >> 1);
@@ -287,40 +310,69 @@ SpellCheckResult SpellCheck_SignatureHashinging_Internal(
     return result;
 }
 
-bool ExistWordSignatureHashingingInternal(
+Optional<SpellSuggestion> ExistWordSignatureHashingingInternal(
     const std::string& input,
     const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary)
 {
+    std::size_t gapSizeThreshold = 1;
+    const int distanceThreshold = 1;
+
+    SpellCheckResultInternal result;
+    result.correctlySpelled = false;
+
+    const auto inputWordSize = StringLength(input);
+
+    double similarityThreshold = 0.8;
+
     const auto histogramHashing = SignatureHashingFromAsciiAlphabet;
     const auto inputHistogramHashing = histogramHashing(input);
 
     auto iter = hashedDictionary.find(inputHistogramHashing);
     if (iter == std::end(hashedDictionary)) {
-        return false;
+        return NullOpt;
     }
     const auto& dictionary = iter->second;
 
+    Optional<SpellSuggestion> currentSuggestion;
+
     for (auto & word : dictionary) {
-        if ((input.size() == word.size()) && (input == word)) {
+        const auto gapSize = ComputeGapSize(StringLength(word), inputWordSize);
+        if (gapSize > gapSizeThreshold) {
+            continue;
+        }
+
+        const auto similarity = EditDistance::closestMatchFuzzySimilarity(input, word, distanceThreshold);
+        if (similarity == 1.0) {
             // exaxt matching
-            return true;
+            SpellSuggestion suggestion;
+            suggestion.word = word;
+            suggestion.similarity = similarity;
+            return suggestion;
+        }
+        else if (similarity >= similarityThreshold) {
+            similarityThreshold = std::max(similarity, similarityThreshold);
+            gapSizeThreshold = std::max<std::size_t>(gapSize, 1);
+            assert(similarityThreshold <= 1.0);
+            SpellSuggestion suggestion;
+            suggestion.word = word;
+            suggestion.similarity = similarity;
+            currentSuggestion = std::move(suggestion);
         }
     }
-    return false;
+    return currentSuggestion;
 }
 
-SpellCheckResult SuggestInternal(
+SpellCheckResultInternal SuggestInternal(
     const std::string& word,
-    std::unordered_map<uint32_t, std::vector<std::string>> & hashedDictionary)
+    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary)
 {
+    const auto distanceThreshold = std::min(static_cast<int>(word.size()), 10);
     return SpellCheck_SignatureHashinging_Internal(
         word,
         hashedDictionary,
-        [](const std::string& a, const std::string& b) {
-            return EditDistance::levenshteinDistance_ONDGreedyAlgorithm(a, b);
-        },
         SignatureHashingFromAsciiAlphabet,
-        28);
+        28,
+        distanceThreshold);
 }
 
 enum class LetterCase {
@@ -393,9 +445,9 @@ void TransformLetterCase(std::string & word, LetterCase letterCase)
     }
 }
 
-SpellCheckResult SuggestLetterCase(
+SpellCheckResultInternal SuggestLetterCase(
     const std::string& word,
-    std::unordered_map<uint32_t, std::vector<std::string>> & hashedDictionary)
+    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary)
 {
     auto result = SuggestInternal(word, hashedDictionary);
     if (result.correctlySpelled) {
@@ -404,9 +456,9 @@ SpellCheckResult SuggestLetterCase(
     
     auto letterCase = GetLetterCase(word);
     for (auto & suggestion : result.suggestions) {
-        auto suggestionLetterCase = GetLetterCase(suggestion);
+        auto suggestionLetterCase = GetLetterCase(suggestion.word);
         if (suggestionLetterCase == LetterCase::LowerCase) {
-            TransformLetterCase(suggestion, letterCase);
+            TransformLetterCase(suggestion.word, letterCase);
         }
     }
     return result;
@@ -415,48 +467,100 @@ SpellCheckResult SuggestLetterCase(
 template <typename T>
 void ResizeSuggestions(T & suggestions)
 {
-    constexpr std::size_t maxSuggestionCount = 5;
+    constexpr std::size_t maxSuggestionCount = 8;
     if (suggestions.size() > maxSuggestionCount) {
         suggestions.resize(maxSuggestionCount);
     }
+}
+
+void SeparateWords(
+    const std::string& word,
+    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary,
+    std::vector<SpellSuggestion> & suggestions)
+{
+    constexpr std::size_t prefixMinSize = 3;
+    constexpr std::size_t suffixMinSize = 3;
+    constexpr std::size_t minSize = 6;
+    static_assert(minSize >= prefixMinSize + suffixMinSize, "");
+
+    if ((word.size() < minSize) || (word.size() > 23)) {
+        return;
+    }
+
+    double maxSimilarity = 0.75;
+
+    const auto end = word.size() - (suffixMinSize - 1);
+    for (std::size_t separator = prefixMinSize; separator < end; ++separator) {
+        const auto prefix = word.substr(0, separator);
+        const auto suffix = word.substr(separator);
+
+        auto prefixSuggestion = ExistWordSignatureHashingingInternal(prefix, hashedDictionary);
+        if (!prefixSuggestion) {
+            continue;
+        }
+        auto suffixSuggestion = ExistWordSignatureHashingingInternal(suffix, hashedDictionary);
+        if (!suffixSuggestion) {
+            continue;
+        }
+
+        assert(prefixSuggestion);
+        assert(suffixSuggestion);
+        assert(prefixSuggestion->similarity);
+        assert(suffixSuggestion->similarity);
+
+        auto similarity = (*prefixSuggestion->similarity + *suffixSuggestion->similarity) / 2.0;
+        if (similarity < maxSimilarity) {
+            continue;
+        }
+        maxSimilarity = similarity;
+        
+        {
+            auto letterCase = GetLetterCase(prefix);
+            auto suggestionLetterCase = GetLetterCase(prefixSuggestion->word);
+            if (suggestionLetterCase == LetterCase::LowerCase) {
+                TransformLetterCase(prefixSuggestion->word, letterCase);
+            }
+        }
+        {
+            auto letterCase = GetLetterCase(suffix);
+            auto suggestionLetterCase = GetLetterCase(suffixSuggestion->word);
+            if (suggestionLetterCase == LetterCase::LowerCase) {
+                TransformLetterCase(suffixSuggestion->word, letterCase);
+            }
+        }
+
+        SpellSuggestion result;
+        result.word = prefixSuggestion->word + " " + suffixSuggestion->word;
+
+        suggestions.push_back(std::move(result));
+    }
+}
+
+SpellCheckResult ConvertToSpellCheckResult(SpellCheckResultInternal& spellCheck)
+{
+    SpellCheckResult result;
+    result.correctlySpelled = spellCheck.correctlySpelled;
+    for (auto & suggestion : spellCheck.suggestions) {
+        result.suggestions.push_back(suggestion.word);
+    }
+    return result;
 }
 
 SpellCheckResult SpellCheckerSignatureHashing::Suggest(const std::string& word)
 {
     auto result = SuggestLetterCase(word, hashedDictionary);
     if (result.correctlySpelled) {
-        return result;
+        SortSuggestions(word, result.suggestions);
+        ResizeSuggestions(result.suggestions);
+        return ConvertToSpellCheckResult(result);
     }
 
+    SeparateWords(word, hashedDictionary, result.suggestions);
+    
     SortSuggestions(word, result.suggestions);
     ResizeSuggestions(result.suggestions);
-
-    {
-        constexpr std::size_t prefixMinSize = 3;
-        constexpr std::size_t suffixMinSize = 3;
-        constexpr std::size_t minSize = 6;
-        static_assert(minSize >= prefixMinSize + suffixMinSize, "");
-
-        if ((word.size() < minSize) || (word.size() > 23)) {
-            return result;
-        }
-
-        const auto end = word.size() - (suffixMinSize - 1);
-        for (std::size_t separator = prefixMinSize; separator < end; ++separator) {
-            const auto prefix = word.substr(0, separator);
-            const auto suffix = word.substr(separator);
-
-            if (!ExistWordSignatureHashingingInternal(StringHelper::toLower(prefix), hashedDictionary)) {
-                continue;
-            }
-            if (!ExistWordSignatureHashingingInternal(StringHelper::toLower(suffix), hashedDictionary)) {
-                continue;
-            }
-            result.suggestions.insert(std::begin(result.suggestions), prefix + " " + suffix);
-        }
-    }
-    ResizeSuggestions(result.suggestions);
-    return result;
+    
+    return ConvertToSpellCheckResult(result);
 }
 
 } // unnamed namespace

@@ -1173,6 +1173,21 @@ int main(int argc, char *argv[])
         "cpp",
         "Cpp",
         "CPP",
+        "NewYork",
+        "New York",
+        "windowsteamblog",
+        "WindowSteamBlog",
+        "WindowsTeamBlog",
+        "GetContext",
+        "getContext",
+        "GetConext",
+        "GetCotext",
+        "GetDynamicConstantBuffer",
+        "size_type",
+        "dynamic_constant_buffer",
+        "dynamic_constat_buffer",
+        "dynaic_constnat_buffer",
+        "dynmic_constat_baffer",
     };
 
 //    measurePerformanceTime([&] {
