@@ -389,7 +389,6 @@ int main(int argc, char *argv[])
     typos.setSpellChecker(spellChecker);
     typos.setStrictWhiteSpace(false);
     typos.setStrictHyphen(false);
-    typos.setStrictLetterCase(false);
     typos.setMinimumWordSize(3);
     typos.setMaxCorrectWordCount(4);
     typos.setCacheEnabled(true);

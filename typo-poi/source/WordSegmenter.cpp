@@ -62,107 +62,8 @@ std::vector<std::u32string> splitWords(const std::u32string& text, F isSeparator
     return words;
 }
 
-bool isCompilerKeyword(const std::string& word)
-{
-    static std::unordered_set<std::string> keywords = {
-        "alignas",
-        "alignof",
-        "and",
-        "and_eq",
-        "asm",
-        "auto",
-        "bitand",
-        "bitor",
-        "bool",
-        "break",
-        "case",
-        "catch",
-        "char",
-        "char16_t",
-        "char32_t",
-        "class",
-        "compl",
-        "concept",
-        "const",
-        "constexpr",
-        "const_cast",
-        "continue",
-        "decltype",
-        "default",
-        "delete",
-        "do",
-        "double",
-        "dynamic_cast",
-        "else",
-        "enum",
-        "explicit",
-        "export",
-        "extern",
-        "false",
-        "float",
-        "for",
-        "friend",
-        "goto",
-        "if",
-        "inline",
-        "int",
-        "long",
-        "mutable",
-        "namespace",
-        "new",
-        "noexcept",
-        "not",
-        "not_eq",
-        "nullptr",
-        "operator",
-        "or",
-        "or_eq",
-        "private",
-        "protected",
-        "public",
-        "register",
-        "reinterpret_cast",
-        "requires",
-        "return",
-        "short",
-        "signed",
-        "sizeof",
-        "static",
-        "static_assert",
-        "static_cast",
-        "struct",
-        "switch",
-        "template",
-        "this",
-        "thread_local",
-        "throw",
-        "true",
-        "try",
-        "typedef",
-        "typeid",
-        "typename",
-        "union",
-        "unsigned",
-        "using",
-        "virtual",
-        "void",
-        "volatile",
-        "wchar_t",
-        "while",
-        "xor",
-        "xor_eq"
-    };
-
-    return keywords.find(word) != std::end(keywords);
-}
-
 PartOfSpeechTag findPartOfSpeechTag(const std::string& text)
 {
-    {
-        if (isCompilerKeyword(text)) {
-            return PartOfSpeechTag::CplusplusKeywords;
-        }
-    }
     {
         const std::regex re(R"([A-Z]*[a-z]+)");
         if (std::regex_match(text, re)) {
@@ -209,13 +110,16 @@ PartOfSpeechTag findPartOfSpeechTag(const std::string& text)
     return PartOfSpeechTag::Raw;
 }
 
-bool isSpace(uint32_t c)
+bool isSpace(char32_t c)
 {
     return ::isspace(c) != 0;
 }
 
-bool isAsciiSymbols(uint32_t c)
+bool isAsciiSymbols(char32_t c)
 {
+    if (c == '-' || c == '_' || c == '\'') {
+        return false;
+    }
     return (33 <= c && c <= 47)
         || (58 <= c && c <= 64)
         || (91 <= c && c <= 96)
@@ -223,13 +127,6 @@ bool isAsciiSymbols(uint32_t c)
 }
 
 } // unnamed namespace
-
-void WordSegmenter::setDictionary(const std::set<std::string>& dictionaryIn)
-{
-    for (auto & w : dictionaryIn) {
-        dictionary.insert(w);
-    }
-}
 
 void WordSegmenter::parse(
     const std::string& utf8Text,
@@ -255,13 +152,6 @@ void WordSegmenter::parse(
         pos.tag = PartOfSpeechTag::Raw;
 
         do {
-            {
-                auto iter = dictionary.find(pos.text);
-                if (iter != std::end(dictionary)) {
-                    pos.tag = PartOfSpeechTag::UserDefined;
-                    break;
-                }
-            }
             {
                 pos.tag = findPartOfSpeechTag(pos.text);
                 if (pos.tag != PartOfSpeechTag::Raw) {

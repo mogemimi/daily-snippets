@@ -14,11 +14,9 @@ enum class PartOfSpeechTag {
     EnglishWord,
     GitUrl,
     Url,
-    CplusplusKeywords,
     Integer,
     FloatNumber,
     DoxygenKeywords,
-    UserDefined,
 //    EmailAddress,
 //    Copyright,
 //    LicenseDescription,
@@ -31,12 +29,7 @@ struct PartOfSpeech {
 };
 
 class WordSegmenter {
-private:
-    std::set<std::string> dictionary;
-
 public:
-    void setDictionary(const std::set<std::string>& dictionary);
-
     void parse(
         const std::string& text,
         std::function<void(const PartOfSpeech&)> callback);

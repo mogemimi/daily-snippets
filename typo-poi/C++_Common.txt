@@ -12,7 +12,9 @@ uint16_t
 uint32_t
 uint64_t
 ssize_t
+intptr_t
 nothrow
+pragma
 ifdef
 ifndef
 elif
@@ -32,3 +34,11 @@ https
 ftp
 www
 OpenGL
+NONINFRINGEMENT
+json
+png
+jpeg
+tiff
+mp3
+xml
+

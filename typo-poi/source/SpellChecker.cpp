@@ -163,7 +163,7 @@ void SpellCheckInternal(
     const std::string& input,
     const std::vector<std::string>& dictionary,
     std::vector<SpellSuggestion> & suggestions,
-    bool & exaxtMatching,
+    bool & exactMatching,
     std::size_t inputWordSize,
     std::size_t & gapSizeThreshold,
     double & similarityThreshold,
@@ -182,7 +182,7 @@ void SpellCheckInternal(
             suggestion.word = word;
             suggestion.similarity = similarity;
             suggestions.insert(std::begin(suggestions), std::move(suggestion));
-            exaxtMatching = true;
+            exactMatching = true;
             break;
         }
         else if (similarity >= similarityThreshold) {
@@ -450,10 +450,10 @@ SpellCheckResultInternal SuggestLetterCase(
     const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary)
 {
     auto result = SuggestInternal(word, hashedDictionary);
-    if (result.correctlySpelled) {
+    if (result.suggestions.empty()) {
         return result;
     }
-    
+
     auto letterCase = GetLetterCase(word);
     for (auto & suggestion : result.suggestions) {
         auto suggestionLetterCase = GetLetterCase(suggestion.word);
@@ -465,11 +465,10 @@ SpellCheckResultInternal SuggestLetterCase(
 }
 
 template <typename T>
-void ResizeSuggestions(T & suggestions)
+void ResizeSuggestions(T & suggestions, std::size_t elementCount)
 {
-    constexpr std::size_t maxSuggestionCount = 8;
-    if (suggestions.size() > maxSuggestionCount) {
-        suggestions.resize(maxSuggestionCount);
+    if (suggestions.size() > elementCount) {
+        suggestions.resize(elementCount);
     }
 }
 
@@ -657,45 +656,95 @@ std::vector<PartOfIdentifier> parseIdentifier(const std::string& text)
     return words;
 }
 
+void ParseIdentifier(
+    const std::string& word,
+    const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary,
+    SpellCheckResultInternal & result)
+{
+    bool exactMatching = true;
+    bool misspellingFound = false;
+
+    auto parseResult = parseIdentifier(word);
+    std::vector<std::string> concatSuggestions;
+    auto concatnate = [&](const std::string& w) {
+        if (concatSuggestions.empty()) {
+            concatSuggestions.push_back(w);
+            return;
+        }
+        for (auto & concatString : concatSuggestions) {
+            concatString += w;
+        }
+    };
+
+    for (auto & p : parseResult) {
+        if (p.isSegmenter) {
+            concatnate(p.word);
+            continue;
+        }
+        auto result1 = SuggestLetterCase(p.word, hashedDictionary);
+        if (result1.correctlySpelled) {
+            concatnate(p.word);
+            misspellingFound = true;
+            continue;
+        }
+        exactMatching = false;
+        if (result1.suggestions.empty()) {
+            concatnate(p.word);
+            continue;
+        }
+        
+        misspellingFound = true;
+        SortSuggestions(p.word, result1.suggestions);
+        ResizeSuggestions(result1.suggestions, 2);
+        
+        // NOTE: Generating combinations
+        std::vector<std::string> tempSuggestions;
+        std::swap(concatSuggestions, tempSuggestions);
+        if (tempSuggestions.empty()) {
+            tempSuggestions.push_back("");
+        }
+        for (auto & cs : tempSuggestions) {
+            for (auto & ss : result1.suggestions) {
+                concatSuggestions.push_back(cs + ss.word);
+            }
+        }
+    }
+
+    if (!misspellingFound) {
+        return;
+    }
+
+    for (auto & cs : concatSuggestions) {
+        SpellSuggestion suggestion;
+        suggestion.word = cs;
+        result.suggestions.push_back(std::move(suggestion));
+    }
+    result.correctlySpelled = exactMatching;
+}
+
 SpellCheckResult SpellCheckerSignatureHashing::Suggest(const std::string& word)
 {
+    constexpr std::size_t maxSuggestions = 8;
+
     auto result = SuggestLetterCase(word, hashedDictionary);
     if (result.correctlySpelled) {
         SortSuggestions(word, result.suggestions);
-        ResizeSuggestions(result.suggestions);
+        ResizeSuggestions(result.suggestions, maxSuggestions);
+        return ConvertToSpellCheckResult(result);
+    }
+
+    ParseIdentifier(word, hashedDictionary, result);
+
+    if (result.correctlySpelled) {
+        SortSuggestions(word, result.suggestions);
+        ResizeSuggestions(result.suggestions, maxSuggestions);
         return ConvertToSpellCheckResult(result);
     }
 
     SeparateWords(word, hashedDictionary, result.suggestions);
     
-    {
-        bool exactMatching = true;
-        auto parseResult = parseIdentifier(word);
-        std::string concat;
-        for (auto & p : parseResult) {
-            if (p.isSegmenter) {
-                concat += p.word;
-                continue;
-            }
-            auto result1 = SuggestLetterCase(p.word, hashedDictionary);
-            if (result1.correctlySpelled) {
-                concat += p.word;
-                continue;
-            }
-            exactMatching = false;
-            if (!result1.suggestions.empty()) {
-                SortSuggestions(p.word, result1.suggestions);
-                concat += result1.suggestions.front().word;
-            }
-        }
-        SpellSuggestion su;
-        su.word = concat;
-        result.suggestions.push_back(std::move(su));
-        result.correctlySpelled = exactMatching;
-    }
-    
     SortSuggestions(word, result.suggestions);
-    ResizeSuggestions(result.suggestions);
+    ResizeSuggestions(result.suggestions, maxSuggestions);
 
     return ConvertToSpellCheckResult(result);
 }

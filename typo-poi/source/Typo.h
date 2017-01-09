@@ -67,8 +67,6 @@ public:
     void computeFromSentence(
         const std::string& sentence, const TypoSource& source);
 
-    void computeFromIdentifier(const std::string& identifier);
-
     void computeFromWord(const std::string& word);
     
     void setSpellChecker(const std::shared_ptr<SpellChecker>& spellChecker);
@@ -80,8 +78,6 @@ public:
     void setStrictWhiteSpace(bool strictWhiteSpace);
 
     void setStrictHyphen(bool strictHyphen);
-
-    void setStrictLetterCase(bool strictLetterCase);
 
     void setCacheEnabled(bool cacheEnabled);
 

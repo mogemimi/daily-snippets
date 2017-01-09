@@ -94,19 +94,6 @@ TypoMan::TypoMan() noexcept
     , isStrictLetterCase(true)
 {
     spellChecker = SpellCheckerFactory::Create();
-
-    std::set<std::string> dictionary = {
-        "jpg",
-        "png",
-        "mp3",
-        "ogg",
-        "json",
-        "impl",
-        "//!", // doxygen
-        "NONINFRINGEMENT", // for MIT License
-        "overrided" // => overriden
-    };
-    segmenter.setDictionary(dictionary);
 }
 
 void TypoMan::computeFromSentence(
@@ -126,14 +113,6 @@ void TypoMan::computeFromSentence(
     });
 }
 
-void TypoMan::computeFromIdentifier(const std::string& identifier)
-{
-    auto words = somera::IdentifierWordSegmenter::parse(identifier);
-    for (auto & word : words) {
-        computeFromWord(word);
-    }
-}
-
 void TypoMan::computeFromWord(const std::string& word)
 {
     if (word.empty()) {
@@ -144,6 +123,10 @@ void TypoMan::computeFromWord(const std::string& word)
     }
     if (isCacheEnabled && cache.exists(word)) {
         return;
+    }
+
+    if (word == "ssize") {
+        assert(!word.empty());
     }
 
     auto suggestResult = spellChecker->Suggest(word);
@@ -194,11 +177,6 @@ void TypoMan::computeFromWord(const std::string& word)
             return correction.empty();
         });
     }
-    if (!isStrictLetterCase) {
-        eraseIf(suggestResult.suggestions, [&](const std::string& correction) {
-            return StringHelper::toLower(word) == StringHelper::toLower(correction);
-        });
-    }
 
     assert(maxCorrectWordCount > 0);
     if (static_cast<int>(suggestResult.suggestions.size()) > maxCorrectWordCount) {
@@ -241,11 +219,6 @@ void TypoMan::setStrictWhiteSpace(bool strictWhiteSpace)
 void TypoMan::setStrictHyphen(bool strictHyphen)
 {
     this->isStrictHyphen = strictHyphen;
-}
-
-void TypoMan::setStrictLetterCase(bool strictLetterCase)
-{
-    this->isStrictLetterCase = strictLetterCase;
 }
 
 void TypoMan::setCacheEnabled(bool cacheEnabled)
