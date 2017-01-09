@@ -1188,6 +1188,12 @@ int main(int argc, char *argv[])
         "dynamic_constat_buffer",
         "dynaic_constnat_buffer",
         "dynmic_constat_baffer",
+        "uint32_t",
+        "size_t",
+        "ssize_t",
+        "std::experimental::optional::nullopt",
+        "CCAssert",
+        "GetGLContext",
     };
 
 //    measurePerformanceTime([&] {

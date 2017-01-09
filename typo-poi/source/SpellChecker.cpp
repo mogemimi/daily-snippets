@@ -528,6 +528,15 @@ void SeparateWords(
                 TransformLetterCase(suffixSuggestion->word, letterCase);
             }
         }
+        
+        auto concatWithoutSpace = prefixSuggestion->word + suffixSuggestion->word;
+        auto found = std::find_if(std::begin(suggestions), std::end(suggestions), [&](const SpellSuggestion& s) {
+            return s.word == concatWithoutSpace;
+        });
+        if (found != std::end(suggestions)) {
+            // NOTE: "accept able" and "acceptable" are duplication.
+            continue;
+        }
 
         SpellSuggestion result;
         result.word = prefixSuggestion->word + " " + suffixSuggestion->word;
@@ -546,6 +555,108 @@ SpellCheckResult ConvertToSpellCheckResult(SpellCheckResultInternal& spellCheck)
     return result;
 }
 
+enum class CharacterType {
+    Segmenter,
+    Lowercase,
+    Uppercase,
+};
+
+CharacterType getCharaterType(char32_t c)
+{
+    ///@todo Support for other Unicode characters.
+    if (u'A' <= c && c <= u'Z') {
+        return CharacterType::Uppercase;
+    }
+    if (u'a' <= c && c <= u'z') {
+        return CharacterType::Lowercase;
+    }
+    if (u'0' <= c && c <= u'9') {
+        return CharacterType::Segmenter;
+    }
+    return CharacterType::Segmenter;
+}
+
+struct PartOfIdentifier {
+    std::string word;
+    bool isSegmenter;
+};
+
+std::vector<PartOfIdentifier> parseIdentifier(const std::string& text)
+{
+    std::vector<PartOfIdentifier> words;
+    std::string wordBuffer;
+
+    auto flush = [&](bool isSegmenter) {
+        PartOfIdentifier partOfIdentifier;
+        partOfIdentifier.word = wordBuffer;
+        partOfIdentifier.isSegmenter = isSegmenter;
+        words.push_back(std::move(partOfIdentifier));
+        wordBuffer.clear();
+    };
+
+    CharacterType startType = CharacterType::Segmenter;
+
+    for (auto iter = std::begin(text); iter != std::end(text); ++iter) {
+        const auto c = *iter;
+        if (wordBuffer.empty()) {
+            wordBuffer += c;
+            startType = getCharaterType(c);
+            continue;
+        }
+
+        assert(!wordBuffer.empty());
+        const auto type = getCharaterType(c);
+
+        if (startType == CharacterType::Segmenter) {
+            if (type == CharacterType::Segmenter) {
+                wordBuffer += c;
+                continue;
+            }
+            else {
+                flush(true);
+                wordBuffer += c;
+                startType = type;
+                continue;
+            }
+        }
+        else if (startType == CharacterType::Uppercase) {
+            if (type == CharacterType::Lowercase) {
+                wordBuffer += c;
+                continue;
+            }
+            else if (type == CharacterType::Uppercase) {
+                if (getCharaterType(wordBuffer.back()) == CharacterType::Lowercase) {
+                    assert(startType == CharacterType::Uppercase);
+                    assert(type == CharacterType::Uppercase);
+                    flush(false);
+                    wordBuffer += c;
+                    startType = type;
+                    continue;
+                }
+            }
+            else {
+                flush(false);
+                wordBuffer += c;
+                startType = type;
+                continue;
+            }
+        }
+
+        if (type != getCharaterType(wordBuffer.back())) {
+            flush(startType == CharacterType::Segmenter);
+            wordBuffer += c;
+            startType = type;
+            continue;
+        }
+        wordBuffer += c;
+    }
+
+    if (!wordBuffer.empty()) {
+        flush(startType == CharacterType::Segmenter);
+    }
+    return words;
+}
+
 SpellCheckResult SpellCheckerSignatureHashing::Suggest(const std::string& word)
 {
     auto result = SuggestLetterCase(word, hashedDictionary);
@@ -557,9 +668,35 @@ SpellCheckResult SpellCheckerSignatureHashing::Suggest(const std::string& word)
 
     SeparateWords(word, hashedDictionary, result.suggestions);
     
+    {
+        bool exactMatching = true;
+        auto parseResult = parseIdentifier(word);
+        std::string concat;
+        for (auto & p : parseResult) {
+            if (p.isSegmenter) {
+                concat += p.word;
+                continue;
+            }
+            auto result1 = SuggestLetterCase(p.word, hashedDictionary);
+            if (result1.correctlySpelled) {
+                concat += p.word;
+                continue;
+            }
+            exactMatching = false;
+            if (!result1.suggestions.empty()) {
+                SortSuggestions(p.word, result1.suggestions);
+                concat += result1.suggestions.front().word;
+            }
+        }
+        SpellSuggestion su;
+        su.word = concat;
+        result.suggestions.push_back(std::move(su));
+        result.correctlySpelled = exactMatching;
+    }
+    
     SortSuggestions(word, result.suggestions);
     ResizeSuggestions(result.suggestions);
-    
+
     return ConvertToSpellCheckResult(result);
 }
 

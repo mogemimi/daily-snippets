@@ -48,8 +48,4 @@ private:
         bool recursive);
 };
 
-struct IdentifierWordSegmenter {
-    static std::vector<std::string> parse(const std::string& text);
-};
-
 } // namespace somera
