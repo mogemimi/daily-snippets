@@ -477,8 +477,8 @@ void SeparateWords(
     const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary,
     std::vector<SpellSuggestion> & suggestions)
 {
-    constexpr std::size_t prefixMinSize = 3;
-    constexpr std::size_t suffixMinSize = 3;
+    constexpr std::size_t prefixMinSize = 2;
+    constexpr std::size_t suffixMinSize = 2;
     constexpr std::size_t minSize = 6;
     static_assert(minSize >= prefixMinSize + suffixMinSize, "");
 
@@ -665,6 +665,10 @@ void ParseIdentifier(
     bool misspellingFound = false;
 
     auto parseResult = parseIdentifier(word);
+    if (parseResult.size() <= 1) {
+        return;
+    }
+
     std::vector<std::string> concatSuggestions;
     auto concatnate = [&](const std::string& w) {
         if (concatSuggestions.empty()) {

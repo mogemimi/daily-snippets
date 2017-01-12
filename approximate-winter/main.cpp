@@ -1200,6 +1200,7 @@ int main(int argc, char *argv[])
         "UTF16ToUTF32",
         "interScetPoint", // intersectPoint
         "iOS",
+        "compatibiliy",
     };
 
 //    measurePerformanceTime([&] {
