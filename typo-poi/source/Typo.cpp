@@ -125,10 +125,6 @@ void TypoMan::computeFromWord(const std::string& word)
         return;
     }
 
-    if (word == "ssize") {
-        assert(!word.empty());
-    }
-
     auto suggestResult = spellChecker->Suggest(word);
     if (suggestResult.suggestions.empty()) {
         return;
