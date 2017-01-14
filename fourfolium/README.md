@@ -1,6 +1,6 @@
 # fourfolium
 
-A experimental project for diff algorithms.
+Fast isupper/islower/tolower/toupper for UTF-32.
 It is distributed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ## Build and run
