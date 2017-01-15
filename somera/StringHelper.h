@@ -9,7 +9,11 @@
 namespace somera {
 namespace StringHelper {
 
+// NOTE: prefix match
 bool startWith(const std::string& source, const std::string& prefix);
+
+// NOTE: suffix match
+bool endWith(const std::string& source, const std::string& suffix);
 
 std::string toLower(const std::string& source);
 

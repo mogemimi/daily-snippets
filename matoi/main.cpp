@@ -7,7 +7,6 @@
 #include <iostream>
 #include <fstream>
 #include <regex>
-#include <set>
 
 using somera::CommandLineParser;
 using somera::Optional;
@@ -26,167 +25,201 @@ void setupCommandLineParser(CommandLineParser & parser)
     parser.addArgument("-help", Flag, "Display available options");
 }
 
-class Tokenizer;
+bool IsSeparator(char32_t c)
+{
+    // NOTE: Ascii characters without alphabet, numbers and [-.'].
+    std::string separators = "!\"#$%&()*+,/:;<=>?@[\\]^`{|}~";
+    assert(std::is_sorted(separators.begin(), separators.end()));
+    return std::binary_search(std::begin(separators), std::end(separators), c);
+}
 
-struct TokenizerResult {
-    std::shared_ptr<Tokenizer> nextTokenizer;
-    std::string errorMessage;
+bool IsConcatenator(char32_t c)
+{
+    std::string separators = "'-.";
+    assert(std::is_sorted(separators.begin(), separators.end()));
+    return std::binary_search(std::begin(separators), std::end(separators), c);
+}
+
+enum class PartOfSpeechTag {
+    Word,
+    Spaces,
+    Symbol,
+    GitUrl,
+    Url,
+    Integer,
+    IntegerBinary,
+    IntegerHex,
+    FloatNumber,
 };
 
 class Tokenizer {
 public:
-    virtual ~Tokenizer() = default;
-
-    virtual void Parse(
-        const std::string::const_iterator& iter,
-        const std::string::const_iterator& iterEnd,
-        TokenizerResult & result) = 0;
+    void Tokenize(
+        const std::string& str,
+        const std::function<void(const std::string&, PartOfSpeechTag)>& onToken);
 };
 
-class StartTokenizer final : public Tokenizer {
-public:
-    void Parse(
-        const std::string::const_iterator& iter,
-        const std::string::const_iterator& iterEnd,
-        TokenizerResult & result) override;
-};
-
-class PreprocessorTokenizer final : public Tokenizer {
-public:
-    void Parse(
-        const std::string::const_iterator& iter,
-        const std::string::const_iterator& iterEnd,
-        TokenizerResult & result) override
-    {
-
-    }
-};
-
-void StartTokenizer::Parse(
-    const std::string::const_iterator& iter,
-    const std::string::const_iterator& iterEnd,
-    TokenizerResult & result)
+std::vector<std::tuple<std::string, PartOfSpeechTag>> SplitBySpace(const std::string& str)
 {
-    auto c = *iter;
-    if (c == '#') {
-        result.nextTokenizer = std::make_shared<PreprocessorTokenizer>();
+    std::vector<std::tuple<std::string, PartOfSpeechTag>> tokens;
+    std::string buffer;
+    std::string separator;
+    auto flushBuffer = [&] {
+        if (!buffer.empty()) {
+            tokens.emplace_back(buffer, PartOfSpeechTag::Word);
+            buffer.clear();
+        }
+    };
+    auto flushSeparator = [&] {
+        if (!separator.empty()) {
+            tokens.emplace_back(separator, PartOfSpeechTag::Spaces);
+            separator.clear();
+        }
+    };
+
+    auto iter = str.begin();
+    auto end = str.end();
+    for (; iter != end; ++iter) {
+        auto character = *iter;
+        if (::isspace(character)) {
+            flushBuffer();
+            separator += character;
+        }
+        else {
+            flushSeparator();
+            buffer += character;
+        }
     }
-    else if (c == '/') {
-        auto nextIter = std::next(iter);
-        if (nextIter == iterEnd) {
-            // error
-            result.errorMessage = "Tokenize error";
+    assert(buffer.empty() || separator.empty());
+    flushBuffer();
+    flushSeparator();
+    return tokens;
+}
+
+void TokenizeByAsciiSymbols(
+    const std::string& str,
+    const std::function<void(const std::string&, PartOfSpeechTag)>& onToken)
+{
+    std::string buffer;
+    std::string separator;
+
+    auto flushBuffer = [&] {
+        if (buffer.empty()) {
             return;
         }
 
-        if (*nextIter == '*') {
+        auto trimRight = std::find_if(std::rbegin(buffer), std::rend(buffer),
+            [&](char32_t c){ return !IsConcatenator(c); }).base();
+
+        std::string prefix(std::begin(buffer), trimRight);
+        std::string suffix(trimRight, std::end(buffer));
+        buffer.clear();
+
+        if (std::regex_match(prefix, std::regex(R"(\d+)"))) {
+            // integer
+            onToken(prefix, PartOfSpeechTag::Integer);
         }
+        else if (std::regex_match(prefix, std::regex(R"(0x[\dA-Fa-f])"))) {
+            // hex integer
+            onToken(prefix, PartOfSpeechTag::IntegerHex);
+        }
+        else if (std::regex_match(prefix, std::regex(R"(0b[01])"))) {
+            // binary integer
+            onToken(prefix, PartOfSpeechTag::IntegerBinary);
+        }
+        else if (std::regex_match(prefix, std::regex(R"((\d*\.\d+|\d+\.\d*)f?)"))) {
+            // float number
+            onToken(prefix, PartOfSpeechTag::FloatNumber);
+        }
+        else {
+            onToken(prefix, PartOfSpeechTag::Word);
+        }
+
+        if (!suffix.empty()) {
+            onToken(suffix, PartOfSpeechTag::Symbol);
+        }
+    };
+    auto flushSeparator = [&] {
+        if (!separator.empty()) {
+            onToken(separator, PartOfSpeechTag::Spaces);
+            separator.clear();
+        }
+    };
+
+    auto iter = str.begin();
+    auto end = str.end();
+    for (; iter != end; ++iter) {
+        auto character = *iter;
+        if ((IsSeparator(character)) || (buffer.empty() && IsConcatenator(character))) {
+            flushBuffer();
+            separator += character;
+        }
+        else {
+            flushSeparator();
+            buffer += character;
+        }
+    }
+    assert(buffer.empty() || separator.empty());
+    flushBuffer();
+    flushSeparator();
+}
+
+void Tokenizer::Tokenize(
+    const std::string& str,
+    const std::function<void(const std::string&, PartOfSpeechTag)>& onToken)
+{
+    auto splitStrings = SplitBySpace(str);
+
+    for (auto & tuple : splitStrings) {
+        auto & text = std::get<0>(tuple);
+        auto & tag = std::get<1>(tuple);
+        if (tag == PartOfSpeechTag::Spaces) {
+            onToken(text, PartOfSpeechTag::Spaces);
+            continue;
+        }
+        if (std::regex_match(text, std::regex(R"(git@\w+\..+)"))) {
+            onToken(text, PartOfSpeechTag::GitUrl);
+            continue;
+        }
+        if (std::regex_match(text, std::regex(R"((http|https|ftp)://.+)"))) {
+            onToken(text, PartOfSpeechTag::Url);
+            continue;
+        }
+        TokenizeByAsciiSymbols(text, onToken);
     }
 }
 
-class LineParser {
-public:
-    void Parse(const std::string& line)
-    {
-        auto iter = line.begin();
-        auto iterEnd = line.begin();
-        std::shared_ptr<Tokenizer> tokenizer = std::make_shared<StartTokenizer>();
-        while (iter != iterEnd) {
-            TokenizerResult result;
-            tokenizer->Parse(iter, iterEnd, result);
-            if (!result.errorMessage.empty()) {
-                // error
-                break;
-            }
-        }
-    }
-};
-
-void refactorSourceCode(const std::string& path)
+bool ReadTextFile(
+    const std::string& path,
+    const std::function<void(const std::string&)>& callback)
 {
-    if (FileSystem::isDirectory(path)) {
-        std::cerr << "error: " << path << " is directory, not text file." << std::endl;
-        return;
+    std::ifstream input(path, std::ios::binary);
+    if (!input) {
+        std::cerr << "error: Cannot open the file. " << path << std::endl;
+        return false;
     }
 
-    std::ifstream input(path);
-    if (!input) {
-        return;
-    }
     std::istreambuf_iterator<char> start(input);
     std::istreambuf_iterator<char> end;
-    std::string text(start, end);
-    input.close();
 
-    std::ofstream output(path, std::ios::out | std::ios::trunc);
-    if (!output) {
-        return;
-    }
-
-    std::vector<std::set<std::string>> includeSetStack;
-    includeSetStack.push_back(std::set<std::string>{});
-
-    auto lines = StringHelper::split(text, '\n');
-    const auto lastLine = lines.back();
-    lines.pop_back();
-    text.clear();
-    for (const auto& line : lines) {
-        using StringHelper::trimLeft;
-        using StringHelper::trimRight;
-        std::string chunk;
-        chunk = trimRight(trimRight(line, ' '), '\t');
-        chunk = trimLeft(trimLeft(chunk, ' '), '\t');
-
-        if (!StringHelper::startWith(chunk, "#include")) {
-            if (StringHelper::startWith(chunk, "#if")) {
-                includeSetStack.push_back(std::set<std::string>{});
+    std::string word;
+    for (; start != end; ++start) {
+        auto c = *start;
+        if (c == '\0') {
+            if (!word.empty()) {
+                callback(word);
             }
-            else if (StringHelper::startWith(chunk, "#elif")
-                || StringHelper::startWith(chunk, "#else")) {
-                if (includeSetStack.empty()) {
-                    std::cout << "Warning: preprocessor mismatch" << std::endl;
-                }
-                if (!includeSetStack.empty()) {
-                    includeSetStack.pop_back();
-                }
-                includeSetStack.push_back(std::set<std::string>{});
-            }
-            else if (StringHelper::startWith(chunk, "#endif")) {
-                if (includeSetStack.empty()) {
-                    std::cout << "Warning: preprocessor mismatch" << std::endl;
-                }
-                if (!includeSetStack.empty()) {
-                    includeSetStack.pop_back();
-                }
-            }
-            text += line;
-            text += '\n';
+            word.clear();
             continue;
         }
-
-        auto findInclude = [&includeSetStack](const std::string& headerPath) -> bool {
-            for (const auto& includes : includeSetStack) {
-                auto iter = includes.find(headerPath);
-                if (iter != std::end(includes)) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        if (!findInclude(chunk)) {
-            text += line;
-            text += '\n';
-            assert(!includeSetStack.empty());
-            auto & includes = includeSetStack.back();
-            includes.emplace(std::move(chunk));
-            continue;
-        }
-        std::cout << "Found the dup: '" << chunk << "' at " << path << std::endl;
+        word += c;
     }
-    text += lastLine;
-
-    output << text;
+    if (!word.empty()) {
+        // TODO: The word must be a UTF-8 encoded string but this function
+        // does not validate that the word is UTF-8 string.
+        callback(word);
+    }
+    return true;
 }
 
 } // unnamed namespace
@@ -210,8 +243,21 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    Tokenizer tokenizer;
     for (auto & path : parser.getPaths()) {
-        refactorSourceCode(path);
+        auto onToken = [&](const std::string& token, PartOfSpeechTag tag) {
+            if (tag != PartOfSpeechTag::Word) {
+                return;
+            }
+            std::cout << "[TOKEN]" << token << std::endl;
+        };
+        auto readText = [&](const std::string& line) {
+            tokenizer.Tokenize(line, onToken);
+        };
+        if (!ReadTextFile(path, readText)) {
+            std::cerr << "error: no input file" << std::endl;
+            return 1;
+        }
     }
 
     return 0;

@@ -48,6 +48,17 @@ bool StringHelper::startWith(const std::string& text, const std::string& prefix)
         && (text.compare(0, prefix.size(), prefix) == 0);
 }
 
+bool StringHelper::endWith(const std::string& text, const std::string& suffix)
+{
+    if (suffix.empty()) {
+        return true;
+    }
+    if (text.size() < suffix.size()) {
+        return false;
+    }
+    return (text.compare(text.size() - suffix.size(), suffix.size(), suffix) == 0);
+}
+
 std::string StringHelper::toLower(const std::string& source)
 {
     std::string output = source;
