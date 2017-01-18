@@ -16,7 +16,7 @@
 namespace {
 
 struct UnicodeCharacterData {
-    char32_t codeValue;
+    char32_t codePoint;
     std::string characterName;
     std::string generalCategory;
     std::string canonicalCombiningClasses;
@@ -33,7 +33,7 @@ struct UnicodeCharacterData {
     std::experimental::optional<char32_t> titlecaseMapping;
 };
 
-std::experimental::optional<char32_t> ToCodeValueFromHexString(const std::string& s)
+std::experimental::optional<char32_t> ToCodePointFromHexString(const std::string& s)
 {
     if (s.empty()) {
         return std::experimental::nullopt;
@@ -63,7 +63,7 @@ void PrintStat(const std::vector<UnicodeCharacterData>& datas)
         if (data.generalCategory == "Ll") {
             lower++;
         }
-        maxCodePoint = std::max(maxCodePoint, static_cast<int>(data.codeValue));
+        maxCodePoint = std::max(maxCodePoint, static_cast<int>(data.codePoint));
     }
 
     std::cout
@@ -92,7 +92,7 @@ std::vector<UnicodeCharacterData> ReadUnicodeDataFile(const std::string& path)
             continue;
         }
         UnicodeCharacterData data;
-        data.codeValue = *ToCodeValueFromHexString(words[0]);
+        data.codePoint = *ToCodePointFromHexString(words[0]);
         data.characterName = words[1];
         data.generalCategory = words[2];
         data.canonicalCombiningClasses = words[3];
@@ -104,9 +104,9 @@ std::vector<UnicodeCharacterData> ReadUnicodeDataFile(const std::string& path)
         data.mirrored = words[9];
         data.unicode_1_0_name = words[10];
         data.commentField10646 = words[11];
-        data.uppercaseMapping = ToCodeValueFromHexString(words[12]);
-        data.lowercaseMapping = ToCodeValueFromHexString(words[13]);
-        data.titlecaseMapping = ToCodeValueFromHexString(words[14]);
+        data.uppercaseMapping = ToCodePointFromHexString(words[12]);
+        data.lowercaseMapping = ToCodePointFromHexString(words[13]);
+        data.titlecaseMapping = ToCodePointFromHexString(words[14]);
         datas.push_back(std::move(data));
     }
     return datas;
@@ -152,7 +152,7 @@ void GenerateUnicodeCapitalizationTable(const std::vector<UnicodeCharacterData>&
     std::unordered_map<char32_t, std::size_t> indices;
 
     for (auto & data : unicodeDatas) {
-        if (data.codeValue < 128) {
+        if (data.codePoint < 128) {
             continue;
         }
 
@@ -162,7 +162,7 @@ void GenerateUnicodeCapitalizationTable(const std::vector<UnicodeCharacterData>&
             }
 
             UnicodeCapitalDesc desc;
-            desc.upperCase = data.codeValue;
+            desc.upperCase = data.codePoint;
             desc.lowerCase = *data.lowercaseMapping;
             capitalDescs.push_back(desc);
         }
@@ -172,7 +172,7 @@ void GenerateUnicodeCapitalizationTable(const std::vector<UnicodeCharacterData>&
             }
 
             UnicodeCapitalDesc desc;
-            desc.lowerCase = data.codeValue;
+            desc.lowerCase = data.codePoint;
             desc.upperCase = *data.uppercaseMapping;
             capitalDescs.push_back(desc);
         }
@@ -521,13 +521,13 @@ void PerformanceTest(const std::vector<UnicodeCharacterData>& unicodeDatas)
     for (auto & data : unicodeDatas) {
         if (data.generalCategory == "Lu") {
             UnicodeCapitalDesc desc;
-            desc.upperCase = data.codeValue;
+            desc.upperCase = data.codePoint;
             desc.lowerCase = *data.lowercaseMapping;
             capitalDescs.push_back(desc);
         }
         else if (data.generalCategory == "Ll") {
             UnicodeCapitalDesc desc;
-            desc.lowerCase = data.codeValue;
+            desc.lowerCase = data.codePoint;
             desc.upperCase = *data.uppercaseMapping;
             capitalDescs.push_back(desc);
         }
@@ -570,15 +570,15 @@ void PerformanceTest(const std::vector<UnicodeCharacterData>& unicodeDatas)
     for (auto & data : unicodeDatas) {
         if (data.generalCategory == "Lu") {
             UnicodeCapitalDesc2 desc;
-            desc.character = data.codeValue;
-            desc.upperCase = data.codeValue;
+            desc.character = data.codePoint;
+            desc.upperCase = data.codePoint;
             desc.lowerCase = *data.lowercaseMapping;
             capitalDescs2.push_back(desc);
         }
         else if (data.generalCategory == "Ll") {
             UnicodeCapitalDesc2 desc;
-            desc.character = data.codeValue;
-            desc.lowerCase = data.codeValue;
+            desc.character = data.codePoint;
+            desc.lowerCase = data.codePoint;
             desc.upperCase = *data.uppercaseMapping;
             capitalDescs2.push_back(desc);
         }
@@ -611,7 +611,7 @@ void PerformanceTest(const std::vector<UnicodeCharacterData>& unicodeDatas)
     std::u32string testData;
     for (int i = 0; i < 50; ++i) {
         for (auto & data : unicodeDatas) {
-            testData.push_back(data.codeValue);
+            testData.push_back(data.codePoint);
         }
     }
     for (int i = 0; i < 1000; ++i) {
@@ -672,7 +672,7 @@ void PrintLowerCharacters(char32_t from, char32_t to, const std::vector<UnicodeC
         }
         
         auto iter = std::find_if(std::begin(unicodeDatas), std::end(unicodeDatas), [&](auto & a) {
-            return a.codeValue == c;
+            return a.codePoint == c;
         });
 
         if (iter == std::end(unicodeDatas)) {
@@ -710,7 +710,7 @@ void PrintUpperCharacters(char32_t from, char32_t to, const std::vector<UnicodeC
         }
         
         auto iter = std::find_if(std::begin(unicodeDatas), std::end(unicodeDatas), [&](auto & a) {
-            return a.codeValue == c;
+            return a.codePoint == c;
         });
 
         if (iter == std::end(unicodeDatas)) {
@@ -739,7 +739,7 @@ void GenerateUnicodeCapitalizationTable2(
 {
     std::vector<UnicodeCapitalDesc2> capitalDescs;
     for (auto & data : unicodeDatas) {
-        if (data.codeValue <= 0x024F) {
+        if (data.codePoint <= 0x024F) {
             continue;
         }
         
@@ -748,8 +748,8 @@ void GenerateUnicodeCapitalizationTable2(
                 continue;
             }
             UnicodeCapitalDesc2 desc;
-            desc.character = data.codeValue;
-            desc.upperCase = data.codeValue;
+            desc.character = data.codePoint;
+            desc.upperCase = data.codePoint;
             desc.lowerCase = *data.lowercaseMapping;
             capitalDescs.push_back(desc);
         }
@@ -758,8 +758,8 @@ void GenerateUnicodeCapitalizationTable2(
                 continue;
             }
             UnicodeCapitalDesc2 desc;
-            desc.character = data.codeValue;
-            desc.lowerCase = data.codeValue;
+            desc.character = data.codePoint;
+            desc.lowerCase = data.codePoint;
             desc.upperCase = *data.uppercaseMapping;
             capitalDescs.push_back(desc);
         }
@@ -846,7 +846,7 @@ std::vector<char32_t> ExtractUnicodeCodePointStringsFromTextFile(const std::stri
     
     for (auto & s : splits) {
         if (std::regex_match(s, std::regex(R"(U\+[\dA-Fa-f]{4})"))) {
-            auto codePoint = *ToCodeValueFromHexString(s.substr(2, 4));
+            auto codePoint = *ToCodePointFromHexString(s.substr(2, 4));
             codePoints.push_back(codePoint);
         }
     }
@@ -933,6 +933,96 @@ void PrintExtractedUnicodeCodePointStringsFromTextFile(const std::string& filePa
     }
 }
 
+struct LetterCaseMapping {
+    std::experimental::optional<char32_t> uppercase;
+    std::experimental::optional<char32_t> lowercase;
+    std::experimental::optional<char32_t> titlecase;
+};
+
+std::unordered_map<char32_t, LetterCaseMapping>
+CreateLetterCaseMap(const std::vector<UnicodeCharacterData>& unicodeDatas)
+{
+    std::unordered_map<char32_t, LetterCaseMapping> letterCaseMap;
+    for (auto & data : unicodeDatas) {
+        if (data.generalCategory == "Lu") {
+            LetterCaseMapping mapping;
+            mapping.uppercase = data.codePoint;
+            mapping.lowercase = data.lowercaseMapping;
+            mapping.titlecase = data.titlecaseMapping;
+            letterCaseMap.emplace(data.codePoint, std::move(mapping));
+        }
+        else if (data.generalCategory == "Ll") {
+            LetterCaseMapping mapping;
+            mapping.uppercase = data.uppercaseMapping;
+            mapping.lowercase = data.codePoint;
+            mapping.titlecase = data.titlecaseMapping;
+            letterCaseMap.emplace(data.codePoint, std::move(mapping));
+        }
+        else if (data.generalCategory == "Lt") {
+            LetterCaseMapping mapping;
+            mapping.uppercase = data.uppercaseMapping;
+            mapping.lowercase = data.lowercaseMapping;
+            mapping.titlecase = data.codePoint;
+            letterCaseMap.emplace(data.codePoint, std::move(mapping));
+        }
+    }
+    return letterCaseMap;
+}
+
+bool IsLowercase(char32_t c, const std::unordered_map<char32_t, LetterCaseMapping>& map)
+{
+    auto iter = map.find(c);
+    if (iter == std::end(map)) {
+        return false;
+    }
+    return iter->second.lowercase && (*iter->second.lowercase == c);
+}
+
+char32_t ToLowercase(char32_t c, const std::unordered_map<char32_t, LetterCaseMapping>& map)
+{
+    auto iter = map.find(c);
+    if (iter == std::end(map) || !iter->second.lowercase) {
+        return c;
+    }
+    return *iter->second.lowercase;
+}
+
+bool IsUppercase(char32_t c, const std::unordered_map<char32_t, LetterCaseMapping>& map)
+{
+    auto iter = map.find(c);
+    if (iter == std::end(map)) {
+        return false;
+    }
+    return iter->second.uppercase && (*iter->second.uppercase == c);
+}
+
+char32_t ToUppercase(char32_t c, const std::unordered_map<char32_t, LetterCaseMapping>& map)
+{
+    auto iter = map.find(c);
+    if (iter == std::end(map) || !iter->second.uppercase) {
+        return c;
+    }
+    return *iter->second.uppercase;
+}
+
+bool IsTitlecase(char32_t c, const std::unordered_map<char32_t, LetterCaseMapping>& map)
+{
+    auto iter = map.find(c);
+    if (iter == std::end(map)) {
+        return false;
+    }
+    return iter->second.titlecase && (*iter->second.titlecase == c);
+}
+
+char32_t ToTitlecase(char32_t c, const std::unordered_map<char32_t, LetterCaseMapping>& map)
+{
+    auto iter = map.find(c);
+    if (iter == std::end(map) || !iter->second.titlecase) {
+        return c;
+    }
+    return *iter->second.titlecase;
+}
+
 } // unnamed namespace
 
 int main(int argc, char *argv[])
@@ -943,6 +1033,16 @@ int main(int argc, char *argv[])
 
     auto codePoints = ExtractUnicodeCodePointStringsFromTextFile(
         "CommonlyUsedUnicodeCharacters.md");
+
+    auto letterCaseMap = CreateLetterCaseMap(unicodeDatas);
+
+//    std::cout << std::boolalpha << IsLowercase(U'\U00000041', letterCaseMap) << std::endl;
+//    std::cout << std::boolalpha << IsLowercase(U'\U00000061', letterCaseMap) << std::endl;
+//
+    std::cout << ToLowercase(U'\U00000041', letterCaseMap) << std::endl;
+    std::cout << ToLowercase(U'\U00000061', letterCaseMap) << std::endl;
+    std::cout << ToUppercase(U'\U00000041', letterCaseMap) << std::endl;
+    std::cout << ToUppercase(U'\U00000061', letterCaseMap) << std::endl;
 
 //    PerformanceTest(unicodeDatas);
 //    GenerateUnicodeCapitalizationTable(unicodeDatas);
