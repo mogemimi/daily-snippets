@@ -1,6 +1,6 @@
 // Copyright (c) 2015 mogemimi. Distributed under the MIT license.
 
-#include "editdistance.h"
+#include "EditDistance.h"
 #include "utf8.h"
 #include <algorithm>
 #include <array>
@@ -186,7 +186,7 @@ double computeLCSLengthFuzzy_ONDGreedyAlgorithm_Threshold(
     std::fill(std::begin(vertices), std::end(vertices), -1);
 #endif
     vertices[1 + offset] = 0;
-    
+
     std::vector<double> lcsLengths(M + N + 1);
     lcsLengths[1 + offset] = 0;
 
@@ -500,7 +500,7 @@ int EditDistance::levenshteinDistance_DynamicProgramming_LinearSpace(
             }
             c2[column] = minCost;
         }
-        // NOTE: Use faster swap() function instead of "c1 = c2;" to faster
+        // NOTE: Use std::swap() function instead of "c1 = c2" to assign faster.
         std::swap(c1, c2);
     }
     return c1.back();
@@ -830,7 +830,7 @@ int EditDistance::computeLCSLength_ONDGreedyAlgorithm(
     std::fill(std::begin(vertices), std::end(vertices), -1);
 #endif
     vertices[1 + offset] = 0;
-    
+
     std::vector<int> lcsLengths(M + N + 1);
     lcsLengths[1 + offset] = 0;
 
