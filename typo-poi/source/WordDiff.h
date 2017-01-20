@@ -30,6 +30,10 @@ std::vector<DiffHunk<char>> computeDiff_DynamicProgramming(
 std::vector<DiffHunk<char>> computeDiff_ONDGreedyAlgorithm(
     const std::string& text1,
     const std::string& text2);
+    
+std::vector<DiffHunk<char>> computeDiff_LinearSpace(
+    const std::string& text1,
+    const std::string& text2);
 
 std::string computeLCSLinearSpace(
     const std::string& text1,

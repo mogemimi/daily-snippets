@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <utility>
+#include <functional>
 
 namespace somera {
 namespace {
@@ -379,6 +380,253 @@ std::vector<DiffHunk<char>> computeDiff_ONDGreedyAlgorithm(const std::string& te
     // NOTE: In this case, D must be == M + N.
     assert(false);
     return {};
+}
+
+namespace {
+
+std::vector<int> computeLevenshteinColumn(
+    const std::string& text1,
+    const std::string& text2,
+    const std::size_t start1,
+    const std::size_t size1,
+    const std::size_t start2,
+    const std::size_t size2,
+    const bool reversedIteration = false)
+{
+    // NOTE:
+    // This algorithm is based on dynamic programming, using only linear space.
+    // It is O(N^2) time and O(N) space algorithm.
+
+    assert(!text2.empty());
+    assert(size2 > 0);
+    assert((start2 + size2) <= text2.size());
+    const auto columns = static_cast<int>(size2) + 1;
+    assert(columns > 0);
+    std::vector<int> c1(columns);
+    std::vector<int> c2(columns);
+
+    for (int i = 0; i < columns; ++i) {
+        c1[i] = i;
+    }
+
+    if (size1 == 0) {
+        return c1;
+    }
+
+    assert(!text1.empty());
+    assert(size1 > 0);
+    assert((start1 + size1) <= text1.size());
+    const auto rows = static_cast<int>(size1) + 1;
+
+    std::function<bool(int, int)> equal;
+    if (!reversedIteration) {
+        equal = [&](int a, int b) -> bool {
+            return text1[a + start1] == text2[b + start2];
+        };
+    }
+    else {
+        equal = [&](int a, int b) -> bool {
+            assert(size1 > 0);
+            assert(size2 > 0);
+            return text1[(start1 + size1 - 1) - a] == text2[(start2 + size2 - 1) - b];
+        };
+    }
+
+    for (int row = 1; row < rows; row++) {
+        c2[0] = row;
+        for (int column = 1; column < columns; column++) {
+            auto minCost = std::min(c1[column], c2[column - 1]) + 1;
+            if (equal(row - 1, column - 1)) {
+                minCost = std::min(c1[column - 1], minCost);
+            }
+            c2[column] = minCost;
+        }
+        // NOTE: Use std::swap() function instead of "c1 = c2" to assign faster.
+        std::swap(c1, c2);
+    }
+    return c1;
+}
+
+struct SubstringRange {
+    size_t start1;
+    size_t size1;
+    size_t start2;
+    size_t size2;
+};
+
+DiffHunk<char> MakeDiffHunk(char text, DiffOperation operation)
+{
+    DiffHunk<char> hunk;
+    hunk.text = text;
+    hunk.operation = operation;
+    return hunk;
+}
+
+} // unnamed namespace
+
+std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, const std::string& text2)
+{
+    // NOTE:
+    // This algorithm is based on Hirschberg's linear-space LCS algorithm in
+    // "A linear space algorithm for computing maximal common subsequences",
+    // Communications of the ACM, Volume 18 Issue 6, June 1975, pages 341-343
+
+    if (text2.empty()) {
+        std::vector<DiffHunk<char>> hunks;
+        if (!text1.empty()) {
+            DiffHunk<char> hunk1;
+            hunk1.operation = DiffOperation::Deletion;
+            hunk1.text = text1;
+            hunks.push_back(std::move(hunk1));
+        }
+        return hunks;
+    }
+
+    assert(!text2.empty());
+
+    std::vector<size_t> vertices(text2.size());
+    std::vector<SubstringRange> stack;
+    
+    {
+        SubstringRange param;
+        param.start1 = 0;
+        param.size1 = text1.size();
+        param.start2 = 0;
+        param.size2 = text2.size();
+        stack.push_back(std::move(param));
+    }
+
+    while (!stack.empty()) {
+        auto param = std::move(stack.back());
+        stack.pop_back();
+
+        assert((param.start1 + param.size1) <= text1.size());
+        assert((param.start2 + param.size2) <= text2.size());
+
+        if ((param.size1 == 1) && (param.size2 == 1)) {
+            vertices[param.start2] = param.start1;
+            continue;
+        }
+
+        if (param.size2 == 1) {
+            size_t k = 0;
+            for (; k < param.size1; ++k) {
+                if (text1[param.start1 + k] == text2[param.start2]) {
+                    break;
+                }
+            }
+            vertices[param.start2] = param.start1 + k;
+            continue;
+        }
+
+        if (param.size1 == 0) {
+            for (size_t i = 0; i < param.size2; ++i) {
+                vertices[param.start2 + i] = param.start1;
+            }
+            continue;
+        }
+        if (param.size1 == 1) {
+            size_t y = param.start1;
+            for (size_t i = 0; i < param.size2; ++i) {
+                vertices[param.start2 + i] = y;
+                if (text1[param.start1] == text2[param.start2 + i]) {
+                    ++y;
+                }
+            }
+            continue;
+        }
+
+        assert(param.size1 >= 1);
+        assert(param.size2 >= 1);
+
+        const auto sizeOverTwo = param.size2 / 2;
+        const auto centerX = param.start2 + sizeOverTwo;
+        auto leftColumn = computeLevenshteinColumn(
+            text2,
+            text1,
+            param.start2,
+            sizeOverTwo,
+            param.start1,
+            param.size1,
+            false);
+        auto rightColumn = computeLevenshteinColumn(
+            text2,
+            text1,
+            centerX,
+            param.size2 - sizeOverTwo,
+            param.start1,
+            param.size1,
+            true);
+
+        assert(leftColumn.size() == rightColumn.size());
+        assert(leftColumn.size() >= 2);
+
+        size_t k = 0;
+        int minVertex = std::numeric_limits<int>::max();
+        for (size_t i = 1; i < leftColumn.size(); ++i) {
+            auto c = leftColumn[i] + rightColumn[rightColumn.size() - i];
+            if (c < minVertex) {
+                minVertex = c;
+                k = i - 1;
+            }
+        }
+        vertices[centerX - 1] = param.start1 + k;
+
+        {
+            SubstringRange newParam;
+            newParam.start1 = param.start1;
+            newParam.size1 = k + 1;
+            newParam.start2 = param.start2;
+            newParam.size2 = sizeOverTwo;
+            assert(newParam.size1 <= param.size1);
+            assert(newParam.size2 <= param.size2);
+            assert(newParam.size1 > 0);
+            assert(newParam.size2 > 0);
+            stack.push_back(std::move(newParam));
+        }
+        {
+            SubstringRange newParam;
+            newParam.start1 = param.start1 + (k + 1);
+            newParam.size1 = param.size1 - (k + 1);
+            newParam.start2 = centerX;
+            newParam.size2 = param.size2 - sizeOverTwo;
+            assert(newParam.size1 <= param.size1);
+            assert(newParam.size2 <= param.size2);
+            stack.push_back(std::move(newParam));
+        }
+    }
+
+    std::vector<DiffHunk<char>> hunks;
+    size_t y = 0;
+    for (size_t x = 0; x < vertices.size(); ++x) {
+        for (; (y < vertices[x]) && (y < text1.size()); ++y) {
+            hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Deletion));
+        }
+        if ((x + 1 < vertices.size()) && ((vertices[x] + 1) == vertices[x + 1])) {
+            if (text1[y] == text2[x]) {
+                // NOTE: equality
+                hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Equality));
+            }
+            else {
+                // NOTE: substition
+                hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Deletion));
+                hunks.push_back(MakeDiffHunk(text2[x], DiffOperation::Insertion));
+            }
+            ++y;
+        }
+        else if (((x + 1) >= vertices.size()) && (text1[y] == text2[x])) {
+            hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Equality));
+            ++y;
+        }
+        else if (((x + 1) >= vertices.size()) || (vertices[x] == vertices[x + 1])) {
+            hunks.push_back(MakeDiffHunk(text2[x], DiffOperation::Insertion));
+        }
+    }
+    for (; y < text1.size(); ++y) {
+        hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Deletion));
+    }
+    CompressHunks(hunks);
+    return hunks;
 }
 
 std::string computeLCSLinearSpace(
