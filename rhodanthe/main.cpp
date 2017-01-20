@@ -78,26 +78,46 @@ std::vector<int> computeLevenshteinColumn(
     return c1;
 }
 
-struct Param {
+struct SubstringRange {
     size_t start1;
     size_t size1;
     size_t start2;
     size_t size2;
 };
 
+DiffHunk<char> MakeDiffHunk(char text, DiffOperation operation)
+{
+    DiffHunk<char> hunk;
+    hunk.text = text;
+    hunk.operation = operation;
+    return hunk;
+}
+
 std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, const std::string& text2)
 {
-    if (text1.empty() || text2.empty()) {
-        // TODO: Not implemented
-        assert(false && "TODO");
-        return {};
+    // NOTE:
+    // This algorithm is based on Hirschberg's linear-space LCS algorithm in
+    // "A linear space algorithm for computing maximal common subsequences",
+    // Communications of the ACM, Volume 18 Issue 6, June 1975, pages 341-343
+
+    if (text2.empty()) {
+        std::vector<DiffHunk<char>> hunks;
+        if (!text1.empty()) {
+            DiffHunk<char> hunk1;
+            hunk1.operation = DiffOperation::Deletion;
+            hunk1.text = text1;
+            hunks.push_back(std::move(hunk1));
+        }
+        return hunks;
     }
 
-    std::vector<size_t> vertices(text2.size(), 0);
-    std::vector<Param> stack;
+    assert(!text2.empty());
+
+    std::vector<size_t> vertices(text2.size());
+    std::vector<SubstringRange> stack;
     
     {
-        Param param;
+        SubstringRange param;
         param.start1 = 0;
         param.size1 = text1.size();
         param.start2 = 0;
@@ -112,30 +132,41 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
         assert((param.start1 + param.size1) <= text1.size());
         assert((param.start2 + param.size2) <= text2.size());
 
-        if (param.size1 == 0) {
-            vertices[param.start2] = param.start1;
-            continue;
-        }
-        if (param.size2 == 0) {
+        if ((param.size1 == 1) && (param.size2 == 1)) {
             vertices[param.start2] = param.start1;
             continue;
         }
 
-//        if ((param.start1 == param.end1) && (param.start2 == param.end2)) {
-//            vertices[param.start2] = param.start1;
-//            continue;
-//        }
-//
-//        if (param.start1 == param.end1) {
-//            for (size_t i = param.start2; i < param.end2; ++i) {
-//                vertices[i] = param.start1;
-//            }
-//            continue;
-//        }
-//        if (param.start2 == param.end2) {
-//            vertices[param.start2] = param.start1;
-//            continue;
-//        }
+        if (param.size2 == 1) {
+            size_t k = 0;
+            for (; k < param.size1; ++k) {
+                if (text1[param.start1 + k] == text2[param.start2]) {
+                    break;
+                }
+            }
+            vertices[param.start2] = param.start1 + k;
+            continue;
+        }
+
+        if (param.size1 == 0) {
+            for (size_t i = 0; i < param.size2; ++i) {
+                vertices[param.start2 + i] = param.start1;
+            }
+            continue;
+        }
+        if (param.size1 == 1) {
+            size_t y = param.start1;
+            for (size_t i = 0; i < param.size2; ++i) {
+                vertices[param.start2 + i] = y;
+                if (text1[param.start1] == text2[param.start2 + i]) {
+                    ++y;
+                }
+            }
+            continue;
+        }
+
+        assert(param.size1 >= 1);
+        assert(param.size2 >= 1);
 
         const auto sizeOverTwo = param.size2 / 2;
         const auto centerX = param.start2 + sizeOverTwo;
@@ -165,25 +196,27 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
             auto c = leftColumn[i] + rightColumn[rightColumn.size() - i];
             if (c < minVertex) {
                 minVertex = c;
-                k = i;
+                k = i - 1;
             }
         }
         vertices[centerX - 1] = param.start1 + k;
 
         {
-            Param newParam;
+            SubstringRange newParam;
             newParam.start1 = param.start1;
-            newParam.size1 = k;
+            newParam.size1 = k + 1;
             newParam.start2 = param.start2;
             newParam.size2 = sizeOverTwo;
             assert(newParam.size1 <= param.size1);
             assert(newParam.size2 <= param.size2);
+            assert(newParam.size1 > 0);
+            assert(newParam.size2 > 0);
             stack.push_back(std::move(newParam));
         }
         {
-            Param newParam;
-            newParam.start1 = k;
-            newParam.size1 = param.size1 - k;
+            SubstringRange newParam;
+            newParam.start1 = param.start1 + (k + 1);
+            newParam.size1 = param.size1 - (k + 1);
             newParam.start2 = centerX;
             newParam.size2 = param.size2 - sizeOverTwo;
             assert(newParam.size1 <= param.size1);
@@ -192,100 +225,32 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
         }
     }
 
-#if 1
-    // NOTE: Show LCS string
-    std::cout << "LCS = ";
-    for (size_t x = 0; x < vertices.size(); ++x) {
-        size_t y = vertices[x];
-        if (text1[y] == text2[x]) {
-            std::cout << text1[y];
-        }
-    }
-    std::cout << std::endl;
-#endif
-
-    for (size_t x = 0; x < vertices.size(); ++x) {
-        size_t y = vertices[x];
-        if (text1[y] == text2[x]) {
-            std::cout << "[=] " << text1[y] << std::endl;
-        }
-        else {
-            std::cout << "[-] " << text1[y] << std::endl;
-            std::cout << "[+] " << text2[x] << std::endl;
-        }
-    }
-    std::cout << std::endl;
-
     std::vector<DiffHunk<char>> hunks;
-
-//    int row = rows - 1;
-//    int column = columns - 1;
-//    Optional<int> longestCommonSubsequence;
-//
-//    while ((row > 0) && (column > 0)) {
-//        // edit costs
-//        const auto deletion = mat(row - 1, column);
-//        const auto insertion = mat(row, column - 1);
-//        const auto equality = mat(row - 1, column - 1);
-//
-//        if (longestCommonSubsequence
-//            && (*longestCommonSubsequence == mat(row, column))
-//            && (text1[row - 1] == text2[column - 1])) {
-//            DiffHunk<char> hunk;
-//            hunk.text = text1[row - 1];
-//            hunk.operation = DiffOperation::Equality;
-//            hunks.push_back(std::move(hunk));
-//            --row;
-//            --column;
-//            continue;
-//        }
-//
-//        longestCommonSubsequence = NullOpt;
-//
-//        if ((text1[row - 1] == text2[column - 1])
-//            && (equality < deletion)
-//            && (equality < insertion)) {
-//            DiffHunk<char> hunk;
-//            hunk.text = text1[row - 1];
-//            hunk.operation = DiffOperation::Equality;
-//            hunks.push_back(std::move(hunk));
-//            --row;
-//            --column;
-//            longestCommonSubsequence = mat(row, column);
-//        }
-//        else if (deletion < insertion) {
-//            DiffHunk<char> hunk;
-//            hunk.text = text1[row - 1];
-//            hunk.operation = DiffOperation::Deletion;
-//            hunks.push_back(std::move(hunk));
-//            --row;
-//        }
-//        else {
-//            DiffHunk<char> hunk;
-//            hunk.text = text2[column - 1];
-//            hunk.operation = DiffOperation::Insertion;
-//            hunks.push_back(std::move(hunk));
-//            --column;
-//        }
-//    }
-//
-//    while (column > 0) {
-//        DiffHunk<char> hunk;
-//        hunk.text = text2[column - 1];
-//        hunk.operation = DiffOperation::Insertion;
-//        hunks.push_back(std::move(hunk));
-//        --column;
-//    }
-//
-//    while (row > 0) {
-//        DiffHunk<char> hunk;
-//        hunk.text = text1[row - 1];
-//        hunk.operation = DiffOperation::Deletion;
-//        hunks.push_back(std::move(hunk));
-//        --row;
-//    }
-//
-//    std::reverse(std::begin(hunks), std::end(hunks));
+    size_t y = 0;
+    for (size_t x = 0; x < vertices.size(); ++x) {
+        for (; (y < vertices[x]) && (y < text1.size()); ++y) {
+            hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Deletion));
+        }
+        if ((x + 1 < vertices.size()) && ((vertices[x] + 1) == vertices[x + 1])) {
+            if (text1[y] == text2[x]) {
+                // NOTE: equality
+                hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Equality));
+            }
+            else {
+                // NOTE: substition
+                hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Deletion));
+                hunks.push_back(MakeDiffHunk(text2[x], DiffOperation::Insertion));
+            }
+            ++y;
+        }
+        else if (((x + 1) >= vertices.size()) && (text1[y] == text2[x])) {
+            // NOTE: suffix match
+            hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Equality));
+        }
+        else if (((x + 1) >= vertices.size()) || (vertices[x] == vertices[x + 1])) {
+            hunks.push_back(MakeDiffHunk(text2[x], DiffOperation::Insertion));
+        }
+    }
     return hunks;
 }
 
@@ -332,26 +297,45 @@ int main(int argc, char *argv[])
 //        std::string b = "E";
 //        PrintTable(a, b, 0, a.size(), 0, b.size());
 //    }
+//    {
+//        std::string a = "kjihgf";
+//        std::string b = "kjiHeDcbA";
+//        PrintTable(a, b, 0, a.size(), 0, b.size());
+//    }
+//    {
+//        std::string a = "AbcDeHijk";
+//        std::string b = "abcdefghijk";
+//        PrintTable(a, b, 0, a.size(), 0, b.size());
+//    }
 
-    {
-        std::string a = "kjihgf";
-        std::string b = "kjiHeDcbA";
-        PrintTable(a, b, 0, a.size(), 0, b.size());
-    }
+        std::string text1 = "AbcDeHijk";
+        std::string text2 = "abcdefghijk";
+//        std::string text1 = "AbAbabABababababAbababAbababAbabsdhej";
+//        std::string text2 = "bABabbbABabABABbabababAbabAbABAbbAbb";
+//        std::string text1 = "b";
+//        std::string text2 = "ab";
+//        std::string text1 = "c";
+//        std::string text2 = "abcde";
+//        std::string text1 = "a";
+//        std::string text2 = "ab";
+//        std::string text1 = "";
+//        std::string text2 = "a";
+//        std::string text1 = "ab";
+//        std::string text2 = "abCD";
+//        std::string text1 = "abCD";
+//        std::string text2 = "CD";
+        PrintTable(text1, text2, 0, text1.size(), 0, text2.size());
 
-    std::string a = "AbcDeHijk";
-    std::string b = "abcdefghijk";
-    PrintTable(a, b, 0, a.size(), 0, b.size());
-
-//    std::string b = "AbcDeHijk";
-//    std::string a = "fghijk";
-//    std::reverse(b.begin(), b.end());
-//    std::reverse(a.begin(), a.end());
-//    PrintTable(a, b, 0, a.size() - 1, 0, b.size() - 1);
-
-    auto diff = computeDiff_LinearSpace(a, b);
+    auto diff = computeDiff_LinearSpace(text1, text2);
     for (auto & d : diff) {
-        std::cout << static_cast<int>(d.operation) << " " << d.text << std::endl;
+        std::cout << (d.operation == DiffOperation::Equality ? "[=]" : (d.operation == DiffOperation::Deletion) ? "[-]" : "[+]") << " " << d.text << std::endl;
     }
+
+    std::cout << std::endl;
+    for (auto & d : diff) {
+        std::cout << (d.operation == DiffOperation::Equality ? "=" : (d.operation == DiffOperation::Deletion) ? "-" : "+");
+    }
+    std::cout << std::endl;
+
     return 0;
 }

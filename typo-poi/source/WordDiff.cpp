@@ -11,10 +11,25 @@
 namespace somera {
 namespace {
 
+void SortHunks(std::vector<DiffHunk<char>> & hunks)
+{
+    for (size_t k = 0; k < hunks.size(); ++k) {
+        for (size_t i = 1 + (k % 2); i < hunks.size(); i += 2) {
+            auto & a = hunks[i - 1];
+            auto & b = hunks[i];
+            if ((a.operation == DiffOperation::Insertion) && (b.operation == DiffOperation::Deletion)) {
+                std::swap(a, b);
+            }
+        }
+    }
+}
+
 void CompressHunks(std::vector<DiffHunk<char>> & hunks)
 {
     std::vector<DiffHunk<char>> oldHunks;
     std::swap(hunks, oldHunks);
+
+    SortHunks(oldHunks);
 
     for (auto & hunk : oldHunks) {
         if (hunks.empty() || (hunks.back().operation != hunk.operation)) {
