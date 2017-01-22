@@ -484,7 +484,7 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
 
     assert(!text2.empty());
 
-    std::vector<size_t> vertices(text2.size());
+    std::vector<size_t> vertices(text2.size() + 1);
     std::vector<SubstringRange> stack;
     
     {
@@ -505,6 +505,14 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
 
         if ((param.size1 == 1) && (param.size2 == 1)) {
             vertices[param.start2] = param.start1;
+            vertices[param.start2 + 1] = param.start1 + 1;
+            continue;
+        }
+
+        if (param.size1 == 0) {
+            for (size_t i = 0; i <= param.size2; ++i) {
+                vertices[param.start2 + i] = param.start1;
+            }
             continue;
         }
 
@@ -516,23 +524,19 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
                 }
             }
             vertices[param.start2] = param.start1 + k;
+            vertices[param.start2 + 1] = param.start1 + std::min(k + 1, param.size1);
             continue;
         }
 
-        if (param.size1 == 0) {
-            for (size_t i = 0; i < param.size2; ++i) {
-                vertices[param.start2 + i] = param.start1;
-            }
-            continue;
-        }
         if (param.size1 == 1) {
             size_t y = param.start1;
             for (size_t i = 0; i < param.size2; ++i) {
                 vertices[param.start2 + i] = y;
                 if (text1[param.start1] == text2[param.start2 + i]) {
-                    ++y;
+                    y = std::min(y + 1, param.start1 + param.size1);
                 }
             }
+            vertices[param.start2 + param.size2] = y;
             continue;
         }
 
@@ -563,11 +567,11 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
 
         size_t k = 0;
         int minVertex = std::numeric_limits<int>::max();
-        for (size_t i = 1; i < leftColumn.size(); ++i) {
-            auto c = leftColumn[i] + rightColumn[rightColumn.size() - i];
+        for (size_t i = 0; i < leftColumn.size(); ++i) {
+            auto c = leftColumn[i] + rightColumn[rightColumn.size() - (i + 1)];
             if (c < minVertex) {
                 minVertex = c;
-                k = i - 1;
+                k = i;
             }
         }
         vertices[centerX - 1] = param.start1 + k;
@@ -575,19 +579,18 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
         {
             SubstringRange newParam;
             newParam.start1 = param.start1;
-            newParam.size1 = k + 1;
+            newParam.size1 = k;
             newParam.start2 = param.start2;
             newParam.size2 = sizeOverTwo;
             assert(newParam.size1 <= param.size1);
             assert(newParam.size2 <= param.size2);
-            assert(newParam.size1 > 0);
             assert(newParam.size2 > 0);
             stack.push_back(std::move(newParam));
         }
         {
             SubstringRange newParam;
-            newParam.start1 = param.start1 + (k + 1);
-            newParam.size1 = param.size1 - (k + 1);
+            newParam.start1 = param.start1 + k;
+            newParam.size1 = param.size1 - k;
             newParam.start2 = centerX;
             newParam.size2 = param.size2 - sizeOverTwo;
             assert(newParam.size1 <= param.size1);
@@ -596,13 +599,24 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
         }
     }
 
+#ifndef NDEBUG
+    {
+        size_t prev = 0;
+        for (auto & v : vertices) {
+            assert(v >= prev);
+            assert(v <= text1.size());
+            prev = v;
+        }
+    }
+#endif
+
     std::vector<DiffHunk<char>> hunks;
     size_t y = 0;
-    for (size_t x = 0; x < vertices.size(); ++x) {
-        for (; (y < vertices[x]) && (y < text1.size()); ++y) {
+    for (size_t x = 0; (x + 1) < vertices.size(); ++x) {
+        for (; ((y + 1) < vertices[x + 1]) && (y < text1.size()); ++y) {
             hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Deletion));
         }
-        if ((x + 1 < vertices.size()) && ((vertices[x] + 1) == vertices[x + 1])) {
+        if ((x + 1 < vertices.size()) && ((y + 1) == vertices[x + 1])) {
             if (text1[y] == text2[x]) {
                 // NOTE: equality
                 hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Equality));
@@ -613,12 +627,9 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
                 hunks.push_back(MakeDiffHunk(text2[x], DiffOperation::Insertion));
             }
             ++y;
+            continue;
         }
-        else if (((x + 1) >= vertices.size()) && (text1[y] == text2[x])) {
-            hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Equality));
-            ++y;
-        }
-        else if (((x + 1) >= vertices.size()) || (vertices[x] == vertices[x + 1])) {
+        if (((x + 1) >= vertices.size()) || (vertices[x] == vertices[x + 1])) {
             hunks.push_back(MakeDiffHunk(text2[x], DiffOperation::Insertion));
         }
     }

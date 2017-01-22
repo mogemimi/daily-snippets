@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <cassert>
 #include <functional>
+#include <random>
 
 namespace {
 
@@ -44,20 +45,35 @@ using namespace somera;
 //    std::cout << std::endl;
 //}
 
-bool EqualDiff(const std::vector<DiffHunk<char>>& a, const std::vector<DiffHunk<char>>& b)
+bool IsDiffValid(
+    const std::vector<DiffHunk<char>>& hunks,
+    const std::string& a,
+    const std::string& b)
 {
-    if (a.size() != b.size()) {
-        return false;
-    }
-    for (size_t i = 0; i < a.size(); ++i) {
-        if (a[i].operation != b[i].operation) {
-            return false;
+    std::string x;
+    std::string y;
+    for (auto & hunk : hunks) {
+        if (hunk.operation == DiffOperation::Equality) {
+            x += hunk.text;
+            y += hunk.text;
         }
-        if (a[i].text != b[i].text) {
-            return false;
+        else if (hunk.operation == DiffOperation::Deletion) {
+            x += hunk.text;
+        }
+        else if (hunk.operation == DiffOperation::Insertion) {
+            y += hunk.text;
         }
     }
-    return true;
+    return (x == a) && (y == b);
+}
+
+size_t GetEditScriptCount(const std::vector<DiffHunk<char>>& hunks)
+{
+    size_t count = 0;
+    for (auto & hunk : hunks) {
+        count += hunk.text.size();
+    }
+    return count;
 }
 
 void PrintDiff(const std::vector<DiffHunk<char>>& diff)
@@ -85,7 +101,39 @@ int main(int argc, char *argv[])
     pairs.emplace_back("abbbb", "a");
     pairs.emplace_back("c", "abcde");
     pairs.emplace_back("AbcDeHijk", "abcdefghijk");
+    pairs.emplace_back("a", "bb");
+    pairs.emplace_back("aa", "bbb");
+    pairs.emplace_back("aaa", "bbbb");
+    pairs.emplace_back("aaaa", "bbbbb");
+    pairs.emplace_back("a", "b");
+    pairs.emplace_back("aa", "b");
+    pairs.emplace_back("aaa", "bb");
+    pairs.emplace_back("aaaa", "bbb");
+    pairs.emplace_back("aaaaa", "bbbb");
+    pairs.emplace_back("bAbabABab", "bABabABABbaba");
     pairs.emplace_back("AbAbabABababababAbababAbababAbabsdhej", "bABabbbABabABABbabababAbabAbABAbbAbb");
+    pairs.emplace_back(
+        "cbdbFbcaFEbcFEdEaddEdEbdaEEEEcdEbbFFccdFdbEFFFbcEbaFFEcabFbFEccccFFdadbcdcaFFEdEFaFFdE",
+        "bccafedefcdcdbdcadcbdaaeedbfbcecefbbcfcfcbfbeebdedeedbfddbaadcccdfbabfffffdcfbfffedafb");
+
+#if 0
+    std::mt19937 random(10000);
+    for (int k = 0; k < 50; ++k) {
+        std::string x;
+        std::string y;
+        for (int i = 0; i < 1000; ++i) {
+            auto a = "abcdEF";
+            auto b = "abcdef";
+            if (random() % 3 == 0) {
+                x += a[random() % 6];
+            }
+            if (random() % 3 == 0) {
+                y += b[random() % 6];
+            }
+        }
+        pairs.emplace_back(x, y);
+    }
+#endif
 
     for (auto & p : pairs) {
         auto & text1 = p.first;
@@ -94,7 +142,9 @@ int main(int argc, char *argv[])
         auto b = computeDiff_DynamicProgramming(text1, text2);
         auto c = computeDiff_ONDGreedyAlgorithm(text1, text2);
 
-        auto result = EqualDiff(a, b) && EqualDiff(a, c);
+        auto result = IsDiffValid(a, text1, text2) &&
+            (GetEditScriptCount(a) ==GetEditScriptCount(b)) &&
+            (GetEditScriptCount(a) ==GetEditScriptCount(c));
         std::cout << std::boolalpha << result << std::endl;
         
         if (!result) {
@@ -104,6 +154,11 @@ int main(int argc, char *argv[])
             std::cout << std::endl;
             PrintDiff(c);
             std::cout << std::endl;
+
+            std::cout << "Shortes Edit Script:" << std::endl;
+            std::cout << GetEditScriptCount(a) << std::endl;
+            std::cout << GetEditScriptCount(b) << std::endl;
+            std::cout << GetEditScriptCount(c) << std::endl;
         }
     }
 
