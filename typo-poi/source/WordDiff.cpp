@@ -502,12 +502,7 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
 
         assert((param.start1 + param.size1) <= text1.size());
         assert((param.start2 + param.size2) <= text2.size());
-
-        if ((param.size1 == 1) && (param.size2 == 1)) {
-            vertices[param.start2] = param.start1;
-            vertices[param.start2 + 1] = param.start1 + 1;
-            continue;
-        }
+        assert(param.size2 > 0);
 
         if (param.size1 == 0) {
             for (size_t i = 0; i <= param.size2; ++i) {
@@ -540,8 +535,8 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
             continue;
         }
 
-        assert(param.size1 >= 1);
-        assert(param.size2 >= 1);
+        assert(param.size1 >= 2);
+        assert(param.size2 >= 2);
 
         const auto sizeOverTwo = param.size2 / 2;
         const auto centerX = param.start2 + sizeOverTwo;
@@ -599,7 +594,7 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
         }
     }
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) && defined(DEBUG)
     {
         size_t prev = 0;
         for (auto & v : vertices) {

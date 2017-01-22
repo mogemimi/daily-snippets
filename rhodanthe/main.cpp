@@ -76,17 +76,27 @@ size_t GetEditScriptCount(const std::vector<DiffHunk<char>>& hunks)
     return count;
 }
 
+size_t GetLCSLength(const std::vector<DiffHunk<char>>& hunks)
+{
+    size_t count = 0;
+    for (auto & hunk : hunks) {
+        if (hunk.operation == DiffOperation::Equality) {
+            count += hunk.text.size();
+        }
+    }
+    return count;
+}
+
 void PrintDiff(const std::vector<DiffHunk<char>>& diff)
 {
     for (auto & d : diff) {
         std::cout << (d.operation == DiffOperation::Equality ? "[=]" : (d.operation == DiffOperation::Deletion) ? "[-]" : "[+]")
             << " " << d.text << std::endl;
     }
+    std::cout << std::endl;
 }
 
-} // unnamed namespace
-
-int main(int argc, char *argv[])
+void TestCases()
 {
     std::vector<std::pair<std::string, std::string>> pairs;
     pairs.emplace_back("abCD", "CD");
@@ -116,7 +126,8 @@ int main(int argc, char *argv[])
         "cbdbFbcaFEbcFEdEaddEdEbdaEEEEcdEbbFFccdFdbEFFFbcEbaFFEcabFbFEccccFFdadbcdcaFFEdEFaFFdE",
         "bccafedefcdcdbdcadcbdaaeedbfbcecefbbcfcfcbfbeebdedeedbfddbaadcccdfbabfffffdcfbfffedafb");
 
-#if 0
+#if 1
+    // Random test case generator
     std::mt19937 random(10000);
     for (int k = 0; k < 50; ++k) {
         std::string x;
@@ -143,24 +154,35 @@ int main(int argc, char *argv[])
         auto c = computeDiff_ONDGreedyAlgorithm(text1, text2);
 
         auto result = IsDiffValid(a, text1, text2) &&
-            (GetEditScriptCount(a) ==GetEditScriptCount(b)) &&
-            (GetEditScriptCount(a) ==GetEditScriptCount(c));
+            (GetEditScriptCount(a) == GetEditScriptCount(b)) &&
+            (GetEditScriptCount(a) == GetEditScriptCount(c)) &&
+            (GetLCSLength(a) == GetLCSLength(b)) &&
+            (GetLCSLength(a) == GetLCSLength(c));
         std::cout << std::boolalpha << result << std::endl;
         
         if (!result) {
             PrintDiff(a);
-            std::cout << std::endl;
             PrintDiff(b);
-            std::cout << std::endl;
             PrintDiff(c);
             std::cout << std::endl;
-
             std::cout << "Shortes Edit Script:" << std::endl;
             std::cout << GetEditScriptCount(a) << std::endl;
             std::cout << GetEditScriptCount(b) << std::endl;
             std::cout << GetEditScriptCount(c) << std::endl;
         }
     }
+}
+
+} // unnamed namespace
+
+int main(int argc, char *argv[])
+{
+    TestCases();
+
+//    auto text1 = "dxffffyzaABaaaaaaaaaaaaaaCbcdOPQffffabcaaaaaaaaaadeffffffff";
+//    auto text2 = "eAaaaaaaaafffBCdxzOPffffaaaaaaaaffabcdaaaaaaaefffffffeQabcffffffffdfffffffyz";
+//    PrintDiff(computeDiff_LinearSpace(text1, text2));
+//    PrintDiff(computeDiff_DynamicProgramming(text1, text2));
 
     return 0;
 }
