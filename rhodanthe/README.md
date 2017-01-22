@@ -1,6 +1,6 @@
 # rhodanthe
 
-Fast isupper/islower/tolower/toupper for UTF-32.
+Measuring performance about SES (Shortest Edit Script)/DIff algorithms
 It is distributed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ## Build and run

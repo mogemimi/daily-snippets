@@ -173,11 +173,96 @@ void TestCases()
     }
 }
 
+template <class Function>
+void measurePerformanceTime(Function f)
+{
+    using std::chrono::high_resolution_clock;
+    using std::chrono::milliseconds;
+    using std::chrono::nanoseconds;
+    using std::chrono::duration_cast;
+
+	auto start = high_resolution_clock::now();
+
+    f();
+
+	auto end = high_resolution_clock::now();
+	auto duration = duration_cast<nanoseconds>(end - start);
+
+	std::cout
+        << "Measured time (ns) : " << duration.count() << " ns" << std::endl;
+    std::cout
+        << "Measured time (sec): "
+        << duration_cast<std::chrono::duration<double>>(end - start).count()
+        << " seconds" << std::endl;
+}
+
+void PerformanceTest()
+{
+    std::vector<std::pair<std::string, std::string>> pairs;
+
+    // NOTE: (k = 100, i <= 10000)
+    // computeDiff_DynamicProgramming
+    // Measured time (ns) : 92631244844 ns
+    // Measured time (sec): 92.6312 seconds
+    // computeDiff_ONDGreedyAlgorithm
+    // Measured time (ns) : 392679788818 ns
+    // Measured time (sec): 392.68 seconds
+    // computeDiff_LinearSpace
+    // Measured time (ns) : 137508316370 ns
+    // Measured time (sec): 137.508 seconds
+
+    std::mt19937 random(10000);
+    for (int k = 0; k < 10; ++k) {
+        std::string x;
+        std::string y;
+        for (int i = 0; i < 2000; ++i) {
+            std::string a = "abcdefghIJK";
+            std::string b = "abcdefghXYZ";
+            if (random() % 3 == 0) {
+                x += a[random() % a.size()];
+            }
+            if (random() % 3 == 0) {
+                y += b[random() % b.size()];
+            }
+        }
+        pairs.emplace_back(x, y);
+    }
+
+    size_t dummy = 0;
+    measurePerformanceTime([&] {
+        for (auto & p : pairs) {
+            auto & text1 = p.first;
+            auto & text2 = p.second;
+            auto b = computeDiff_DynamicProgramming(text1, text2);
+            dummy += b.size();
+        }
+    });
+
+    measurePerformanceTime([&] {
+        for (auto & p : pairs) {
+            auto & text1 = p.first;
+            auto & text2 = p.second;
+            auto c = computeDiff_ONDGreedyAlgorithm(text1, text2);
+            dummy += c.size();
+        }
+    });
+
+    measurePerformanceTime([&] {
+        for (auto & p : pairs) {
+            auto & text1 = p.first;
+            auto & text2 = p.second;
+            auto a = computeDiff_LinearSpace(text1, text2);
+            dummy += a.size();
+        }
+    });
+}
+
 } // unnamed namespace
 
 int main(int argc, char *argv[])
 {
     TestCases();
+    PerformanceTest();
 
 //    auto text1 = "dxffffyzaABaaaaaaaaaaaaaaCbcdOPQffffabcaaaaaaaaaadeffffffff";
 //    auto text2 = "eAaaaaaaaafffBCdxzOPffffaaaaaaaaffabcdaaaaaaaefffffffeQabcffffffffdfffffffyz";
