@@ -317,10 +317,10 @@ int main(int argc, char *argv[])
     TestCases();
     PerformanceTest();
 
-//    std::string text1 = "AbcDeHijk";
-//    std::string text2 = "abcdefghijk";
+    std::string text1 = "AbcDeHijk";
+    std::string text2 = "abcdefghijk";
 //    PrintDiff(computeDiff_LinearSpace(text1, text2));
-//    PrintDiff(computeDiff_WeavingLinearSpace(text1, text2));
+    PrintDiff(computeDiff_WeavingLinearSpace(text1, text2));
 //    PrintDiff(computeDiff_DynamicProgramming(text1, text2));
 
     return 0;

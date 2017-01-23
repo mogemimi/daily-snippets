@@ -571,34 +571,16 @@ namespace {
 
 long weaving_edist(long * frame, const char t[], const long n, const char p[], const long m)
 {
-	long col, row;
-	long del, ins, repl; // del = delete from pattern, downward; ins = insert to pattern, rightward
-	long warp_start, warp_last;
-
 	const int lcs_switch = 1;
 
-#ifdef SNAKE_HEADS
-	long snake[n+m+1];
-	long tail;
-	const long dist_max = 64;
-	const long num_heads_max = dist_max * dist_max;
-	struct {
-		long warpix, head, tail;
-	} snake_heads[num_heads_max];
-	long num_heads = 0;
-#endif // SNAKE_HEADS
-
-	if (frame == NULL)
-		return n+m+1;
-
-#ifdef SNAKE_HEADS
-	for(long i = 0; i < n+m+1; i++) {
-		snake[i] = -1;
-	}
-#endif
+	if (frame == nullptr) {
+		return n + m + 1;
+    }
 
 	for (long depth = 0; depth < n + m - 1; depth++) {
-		if ( depth < m ) {
+        long warp_start;
+        long warp_last;
+		if (depth < m) {
 			warp_start = m - depth;
 		} else {
 			warp_start = depth - (m - 2);
@@ -608,30 +590,22 @@ long weaving_edist(long * frame, const char t[], const long n, const char p[], c
 		} else {
 			warp_last = ((n-1) << 1) + m - depth;
 		}
-		//printf("depth %ld (%ld, %ld):\n", depth, warp_start, warp_last);
 		for (long warpix = warp_start; warpix <= warp_last; warpix += 2) {
-			/*
-			if (warpix < 0 || warpix > n + m + 1) {
-				printf("warp value error: %ld\n", warpix);
-				//fflush(stdout);
-			}
-			*/
-			col = (depth + warpix - m)>>1;
-			row = (depth - warpix + m)>>1;
+			const auto col = (depth + warpix - m) >> 1;
+			const auto row = (depth - warpix + m) >> 1;
 
-			//printf("%ld = (%ld, %ld), ", warpix, col, row);
-			del = frame[warpix+1] + 1;
-			ins = frame[warpix-1] + 1;
-			repl = frame[warpix];
-			//printf(" %ld, %ld (%ld) [%ld,%ld] %c|%c : %ld/%ld/%ld+%ld ",
-			//		depth, warpix, warpix-m, col,row,t[col],p[row], del,ins, frame[warpix], (t[col] != p[row]));
-			if ( t[col] == p[row] ) {
+            // NOTE: del = delete from pattern, downward; ins = insert to pattern, rightward
+			auto del = frame[warpix+1] + 1;
+			auto ins = frame[warpix-1] + 1;
+			auto repl = frame[warpix];
+			if (t[col] == p[row]) {
 				if (del < ins && del < repl) {
 					repl = del;
 				} else if ( ins < del && ins < repl ) {
 					repl = ins;
 				}
-			} else /* ( t[col] != p[row] ) */ {
+			} else {
+                assert(t[col] != p[row]);
 				repl += 1;
 				if (del <= ins && (lcs_switch || del < repl) ) {
 					repl = del;
@@ -639,72 +613,10 @@ long weaving_edist(long * frame, const char t[], const long n, const char p[], c
 					repl = ins;
 				}
 			}
-			//printf("-> %ld\n", repl);
-			//
-#ifdef SNAKE_HEADS
-			if (std::abs(warpix - ((m+n)>>1)) < (dist_max>>1) ) {
-				if ( t[col] == p[row] ) {
-					if ( snake[warpix] == -1 )
-						snake[warpix] = depth; // start the snake
-					// else
-					//  continue the snake
-				} else { // finish the snake on character mismatch
-					if ( snake[warpix] != -1 ) {
-						tail = snake[warpix];
-						snake[warpix] = -1;
-						if ( num_heads < num_heads_max ) {
-							//printf("snake head %ld (%ld), %ld -> %ld\n", warpix, warpix-m, tail, depth);
-							snake_heads[num_heads].head = depth;
-							snake_heads[num_heads].tail = tail;
-							snake_heads[num_heads].warpix = warpix;
-							num_heads++;
-						}
-					}
-				}
-				if ( (t[col] == p[row]) &&
-						((depth >= m && warpix == warp_start) || (depth >= n && warpix == warp_last)) ) {
-					// finish the snake on the warp end
-					if ( snake[warpix] != -1 ) {
-						tail = snake[warpix];
-						if ( num_heads < num_heads_max ) {
-							//printf("snake head %ld (%ld), %ld -> %ld\n", warpix, warpix-m, tail, depth);
-							snake_heads[num_heads].head = depth + 2;
-							snake_heads[num_heads].tail = tail;
-							snake_heads[num_heads].warpix = warpix;
-							num_heads++;
-						}
-					}
-				}
-			}
-#endif
-			//
+
 			frame[warpix] = repl;
-#ifdef DEBUG_TABLE
-			debug_table[m*col + row] = repl;
-#endif
 		}
-#ifdef SNAKE_HEADS
-		for(long i = 0; i < n+m+1; i ++) {
-			if ( ((depth + i) & 1) == 0 && (warp_start <= i && i <= warp_last) )
-				if ( snake[i] == -1 )
-					printf(".");
-				else
-					printf("+");
-			else
-				printf(" ");
-		}
-		printf("\n");
-#endif
 	}
-
-#ifdef SNAKE_HEADS
-	for(long i = 0; i < num_heads; i ++) {
-		printf("snake head %ld (%ld), [%ld, %ld)\n",
-				snake_heads[i].warpix, snake_heads[i].warpix-m, snake_heads[i].tail, snake_heads[i].head);
-	}
-	printf("\n");
-#endif
-
 	return frame[n];
 }
 
