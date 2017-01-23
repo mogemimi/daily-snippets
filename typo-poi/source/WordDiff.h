@@ -14,6 +14,12 @@ enum class DiffOperation {
 };
 
 template <typename T>
+struct DiffEdit {
+    T character;
+    DiffOperation operation;
+};
+
+template <typename T>
 struct DiffHunk {
     std::basic_string<T> text;
     DiffOperation operation;
@@ -30,8 +36,20 @@ std::vector<DiffHunk<char>> computeDiff_DynamicProgramming(
 std::vector<DiffHunk<char>> computeDiff_ONDGreedyAlgorithm(
     const std::string& text1,
     const std::string& text2);
-    
+
 std::vector<DiffHunk<char>> computeDiff_LinearSpace(
+    const std::string& text1,
+    const std::string& text2);
+
+std::vector<DiffEdit<char>> computeShortestEditScript_DynamicProgramming(
+    const std::string& text1,
+    const std::string& text2);
+
+std::vector<DiffEdit<char>> computeShortestEditScript_ONDGreedyAlgorithm(
+    const std::string& text1,
+    const std::string& text2);
+
+std::vector<DiffEdit<char>> computeShortestEditScript_LinearSpace(
     const std::string& text1,
     const std::string& text2);
 

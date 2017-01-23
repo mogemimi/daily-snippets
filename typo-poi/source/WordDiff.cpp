@@ -12,49 +12,19 @@
 namespace somera {
 namespace {
 
-void SortHunks(std::vector<DiffHunk<char>> & hunks)
+DiffEdit<char> MakeDiffEdit(char character, DiffOperation operation)
 {
-    for (size_t k = 0; k < hunks.size(); ++k) {
-        for (size_t i = 1 + (k % 2); i < hunks.size(); i += 2) {
-            auto & a = hunks[i - 1];
-            auto & b = hunks[i];
-            if ((a.operation == DiffOperation::Insertion) && (b.operation == DiffOperation::Deletion)) {
-                std::swap(a, b);
-            }
-        }
-    }
-}
-
-void CompressHunks(std::vector<DiffHunk<char>> & hunks)
-{
-    std::vector<DiffHunk<char>> oldHunks;
-    std::swap(hunks, oldHunks);
-
-    SortHunks(oldHunks);
-
-    for (auto & hunk : oldHunks) {
-        if (hunks.empty() || (hunks.back().operation != hunk.operation)) {
-            hunks.push_back(std::move(hunk));
-        }
-        else {
-            assert(hunks.back().operation == hunk.operation);
-            hunks.back().text += hunk.text;
-        }
-    }
+    DiffEdit<char> edit;
+    edit.character = character;
+    edit.operation = operation;
+    return edit;
 }
 
 } // unnamed namespace
 
-std::vector<DiffHunk<char>> computeDiff(const std::string& text1, const std::string& text2)
-{
-#if 1
-    return computeDiff_ONDGreedyAlgorithm(text1, text2);
-#else
-    return computeDiff_DynamicProgramming(text1, text2);
-#endif
-}
-
-std::vector<DiffHunk<char>> computeDiff_DynamicProgramming(const std::string& text1, const std::string& text2)
+std::vector<DiffEdit<char>> computeShortestEditScript_DynamicProgramming(
+    const std::string& text1,
+    const std::string& text2)
 {
     if (text1.empty() && text2.empty()) {
         return {};
@@ -100,7 +70,7 @@ std::vector<DiffHunk<char>> computeDiff_DynamicProgramming(const std::string& te
     std::printf("\n");
 #endif
 
-    std::vector<DiffHunk<char>> hunks;
+    std::vector<DiffEdit<char>> edits;
 
     int row = rows - 1;
     int column = columns - 1;
@@ -115,10 +85,7 @@ std::vector<DiffHunk<char>> computeDiff_DynamicProgramming(const std::string& te
         if (longestCommonSubsequence
             && (*longestCommonSubsequence == mat(row, column))
             && (text1[row - 1] == text2[column - 1])) {
-            DiffHunk<char> hunk;
-            hunk.text = text1[row - 1];
-            hunk.operation = DiffOperation::Equality;
-            hunks.push_back(std::move(hunk));
+            edits.push_back(MakeDiffEdit(text1[row - 1], DiffOperation::Equality));
             --row;
             --column;
             continue;
@@ -129,49 +96,32 @@ std::vector<DiffHunk<char>> computeDiff_DynamicProgramming(const std::string& te
         if ((text1[row - 1] == text2[column - 1])
             && (equality < deletion)
             && (equality < insertion)) {
-            DiffHunk<char> hunk;
-            hunk.text = text1[row - 1];
-            hunk.operation = DiffOperation::Equality;
-            hunks.push_back(std::move(hunk));
+            edits.push_back(MakeDiffEdit(text1[row - 1], DiffOperation::Equality));
             --row;
             --column;
             longestCommonSubsequence = mat(row, column);
         }
         else if (deletion < insertion) {
-            DiffHunk<char> hunk;
-            hunk.text = text1[row - 1];
-            hunk.operation = DiffOperation::Deletion;
-            hunks.push_back(std::move(hunk));
+            edits.push_back(MakeDiffEdit(text1[row - 1], DiffOperation::Deletion));
             --row;
         }
         else {
-            DiffHunk<char> hunk;
-            hunk.text = text2[column - 1];
-            hunk.operation = DiffOperation::Insertion;
-            hunks.push_back(std::move(hunk));
+            edits.push_back(MakeDiffEdit(text2[column - 1], DiffOperation::Insertion));
             --column;
         }
     }
 
     while (column > 0) {
-        DiffHunk<char> hunk;
-        hunk.text = text2[column - 1];
-        hunk.operation = DiffOperation::Insertion;
-        hunks.push_back(std::move(hunk));
+        edits.push_back(MakeDiffEdit(text2[column - 1], DiffOperation::Insertion));
         --column;
     }
-
     while (row > 0) {
-        DiffHunk<char> hunk;
-        hunk.text = text1[row - 1];
-        hunk.operation = DiffOperation::Deletion;
-        hunks.push_back(std::move(hunk));
+        edits.push_back(MakeDiffEdit(text1[row - 1], DiffOperation::Deletion));
         --row;
     }
 
-    std::reverse(std::begin(hunks), std::end(hunks));
-    CompressHunks(hunks);
-    return hunks;
+    std::reverse(std::begin(edits), std::end(edits));
+    return edits;
 }
 
 namespace {
@@ -197,12 +147,12 @@ struct Vertex final {
     }
 };
 
-std::vector<DiffHunk<char>> GenerateDiffHunks(
+std::vector<DiffEdit<char>> GenerateDiffEdits(
     const std::shared_ptr<Vertex>& path,
     const std::string& text1,
     const std::string& text2)
 {
-    std::vector<DiffHunk<char>> hunks;
+    std::vector<DiffEdit<char>> edits;
 
     std::vector<Vertex> points;
     auto iter = path;
@@ -219,32 +169,23 @@ std::vector<DiffHunk<char>> GenerateDiffHunks(
             || ((p0.x + 1 == p1.x) && (p0.y == p1.y))
             || ((p0.x + 1 == p1.x) && (p0.y + 1 == p1.y)));
         if (p0.x == p1.x) {
-            DiffHunk<char> hunk;
-            hunk.operation = DiffOperation::Insertion;
-            hunk.text = text2[p0.y];
-            hunks.push_back(std::move(hunk));
+            edits.push_back(MakeDiffEdit(text2[p0.y], DiffOperation::Insertion));
         }
         else if (p0.y == p1.y) {
-            DiffHunk<char> hunk;
-            hunk.operation = DiffOperation::Deletion;
-            hunk.text = text1[p0.x];
-            hunks.push_back(std::move(hunk));
+            edits.push_back(MakeDiffEdit(text1[p0.x], DiffOperation::Deletion));
         }
         else {
-            DiffHunk<char> hunk;
-            hunk.operation = DiffOperation::Equality;
-            hunk.text = text1[p0.x];
-            hunks.push_back(std::move(hunk));
+            edits.push_back(MakeDiffEdit(text1[p0.x], DiffOperation::Equality));
         }
     }
-
-    CompressHunks(hunks);
-    return hunks;
+    return edits;
 }
 
 } // unnamed namespace
 
-std::vector<DiffHunk<char>> computeDiff_ONDGreedyAlgorithm(const std::string& text1, const std::string& text2)
+std::vector<DiffEdit<char>> computeShortestEditScript_ONDGreedyAlgorithm(
+    const std::string& text1,
+    const std::string& text2)
 {
     // NOTE:
     // This algorithm is based on Myers's An O((M+N)D) Greedy Algorithm in
@@ -252,20 +193,14 @@ std::vector<DiffHunk<char>> computeDiff_ONDGreedyAlgorithm(const std::string& te
     // Algorithmica (1986), pages 251-266.
 
     if (text1.empty() || text2.empty()) {
-        std::vector<DiffHunk<char>> hunks;
-        if (!text1.empty()) {
-            DiffHunk<char> hunk1;
-            hunk1.operation = DiffOperation::Deletion;
-            hunk1.text = text1;
-            hunks.push_back(std::move(hunk1));
+        std::vector<DiffEdit<char>> edits;
+        for (const auto& c : text1) {
+            edits.push_back(MakeDiffEdit(c, DiffOperation::Deletion));
         }
-        else if (!text2.empty()) {
-            DiffHunk<char> hunk2;
-            hunk2.operation = DiffOperation::Insertion;
-            hunk2.text = text2;
-            hunks.push_back(std::move(hunk2));
+        for (const auto& c : text2) {
+            edits.push_back(MakeDiffEdit(c, DiffOperation::Insertion));
         }
-        return hunks;
+        return edits;
     }
 
     const auto M = static_cast<int>(text1.size());
@@ -372,7 +307,7 @@ std::vector<DiffHunk<char>> computeDiff_ONDGreedyAlgorithm(const std::string& te
 
             vertices[kOffset] = x;
             if (x >= M && y >= N) {
-                return GenerateDiffHunks(paths[kOffset], text1, text2);
+                return GenerateDiffEdits(paths[kOffset], text1, text2);
             }
         }
     }
@@ -454,17 +389,11 @@ struct SubstringRange {
     size_t size2;
 };
 
-DiffHunk<char> MakeDiffHunk(char text, DiffOperation operation)
-{
-    DiffHunk<char> hunk;
-    hunk.text = text;
-    hunk.operation = operation;
-    return hunk;
-}
-
 } // unnamed namespace
 
-std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, const std::string& text2)
+std::vector<DiffEdit<char>> computeShortestEditScript_LinearSpace(
+    const std::string& text1,
+    const std::string& text2)
 {
     // NOTE:
     // This algorithm is based on Hirschberg's linear-space LCS algorithm in
@@ -472,14 +401,11 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
     // Communications of the ACM, Volume 18 Issue 6, June 1975, pages 341-343
 
     if (text2.empty()) {
-        std::vector<DiffHunk<char>> hunks;
-        if (!text1.empty()) {
-            DiffHunk<char> hunk1;
-            hunk1.operation = DiffOperation::Deletion;
-            hunk1.text = text1;
-            hunks.push_back(std::move(hunk1));
+        std::vector<DiffEdit<char>> edits;
+        for (const auto& c : text1) {
+            edits.push_back(MakeDiffEdit(c, DiffOperation::Deletion));
         }
-        return hunks;
+        return edits;
     }
 
     assert(!text2.empty());
@@ -605,34 +531,119 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(const std::string& text1, co
     }
 #endif
 
-    std::vector<DiffHunk<char>> hunks;
+    std::vector<DiffEdit<char>> edits;
     size_t y = 0;
     for (size_t x = 0; (x + 1) < vertices.size(); ++x) {
         for (; ((y + 1) < vertices[x + 1]) && (y < text1.size()); ++y) {
-            hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Deletion));
+            edits.push_back(MakeDiffEdit(text1[y], DiffOperation::Deletion));
         }
         if ((x + 1 < vertices.size()) && ((y + 1) == vertices[x + 1])) {
             if (text1[y] == text2[x]) {
                 // NOTE: equality
-                hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Equality));
+                edits.push_back(MakeDiffEdit(text1[y], DiffOperation::Equality));
             }
             else {
                 // NOTE: substition
-                hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Deletion));
-                hunks.push_back(MakeDiffHunk(text2[x], DiffOperation::Insertion));
+                edits.push_back(MakeDiffEdit(text1[y], DiffOperation::Deletion));
+                edits.push_back(MakeDiffEdit(text2[x], DiffOperation::Insertion));
             }
             ++y;
             continue;
         }
         if (((x + 1) >= vertices.size()) || (vertices[x] == vertices[x + 1])) {
-            hunks.push_back(MakeDiffHunk(text2[x], DiffOperation::Insertion));
+            edits.push_back(MakeDiffEdit(text2[x], DiffOperation::Insertion));
         }
     }
     for (; y < text1.size(); ++y) {
-        hunks.push_back(MakeDiffHunk(text1[y], DiffOperation::Deletion));
+        edits.push_back(MakeDiffEdit(text1[y], DiffOperation::Deletion));
     }
-    CompressHunks(hunks);
+    return edits;
+}
+
+namespace {
+
+void SortHunks(std::vector<DiffEdit<char>> & edits)
+{
+    for (size_t k = 0; k < edits.size(); ++k) {
+        bool swapped = false;
+        for (size_t i = 1 + (k % 2); i < edits.size(); i += 2) {
+            auto & a = edits[i - 1];
+            auto & b = edits[i];
+            if ((a.operation == DiffOperation::Insertion) && (b.operation == DiffOperation::Deletion)) {
+                std::swap(a, b);
+                swapped = true;
+            }
+            else if ((a.character == b.character) && (a.operation < b.operation)) {
+                static_assert(DiffOperation::Deletion < DiffOperation::Equality, "");
+                static_assert(DiffOperation::Equality < DiffOperation::Insertion, "");
+                std::swap(a, b);
+                swapped = true;
+            }
+        }
+        if (!swapped) {
+            break;
+        }
+    }
+}
+
+std::vector<DiffHunk<char>> ToDiffHunk(const std::vector<DiffEdit<char>>& edits)
+{
+    std::vector<DiffHunk<char>> hunks;
+    for (const auto& edit : edits) {
+        if (hunks.empty() || (hunks.back().operation != edit.operation)) {
+            DiffHunk<char> hunk;
+            hunk.text = edit.character;
+            hunk.operation = edit.operation;
+            hunks.push_back(std::move(hunk));
+        }
+        else {
+            assert(hunks.back().operation == edit.operation);
+            hunks.back().text += edit.character;
+        }
+    }
     return hunks;
+}
+
+} // unnamed namespace
+
+std::vector<DiffHunk<char>> computeDiff(
+    const std::string& text1,
+    const std::string& text2)
+{
+#if 1
+    return computeDiff_LinearSpace(text1, text2);
+#elif 1
+    return computeDiff_ONDGreedyAlgorithm(text1, text2);
+#else
+    return computeDiff_DynamicProgramming(text1, text2);
+#endif
+}
+
+std::vector<DiffHunk<char>> computeDiff_DynamicProgramming(
+    const std::string& text1,
+    const std::string& text2)
+{
+    auto editScript = computeShortestEditScript_DynamicProgramming(text1, text2);
+    SortHunks(editScript);
+    return ToDiffHunk(editScript);
+}
+
+std::vector<DiffHunk<char>> computeDiff_ONDGreedyAlgorithm(
+    const std::string& text1,
+    const std::string& text2)
+{
+    auto editScript = computeShortestEditScript_ONDGreedyAlgorithm(text1, text2);
+    SortHunks(editScript);
+    return ToDiffHunk(editScript);
+}
+
+std::vector<DiffHunk<char>> computeDiff_LinearSpace(
+    const std::string& text1,
+    const std::string& text2)
+{
+    auto editScript = computeShortestEditScript_LinearSpace(text1, text2);
+    SortHunks(editScript);
+    return ToDiffHunk(editScript);
 }
 
 std::string computeLCSLinearSpace(

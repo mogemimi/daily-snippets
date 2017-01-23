@@ -264,8 +264,8 @@ int main(int argc, char *argv[])
     TestCases();
     PerformanceTest();
 
-//    auto text1 = "dxffffyzaABaaaaaaaaaaaaaaCbcdOPQffffabcaaaaaaaaaadeffffffff";
-//    auto text2 = "eAaaaaaaaafffBCdxzOPffffaaaaaaaaffabcdaaaaaaaefffffffeQabcffffffffdfffffffyz";
+//    auto text1 = "getStrechFuntion";
+//    auto text2 = "getStretchFunction";
 //    PrintDiff(computeDiff_LinearSpace(text1, text2));
 //    PrintDiff(computeDiff_DynamicProgramming(text1, text2));
 
