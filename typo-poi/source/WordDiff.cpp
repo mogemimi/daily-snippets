@@ -429,14 +429,10 @@ std::vector<DiffEdit<char>> computeShortestEditScript_LinearSpace(
         assert((param.start1 + param.size1) <= text1.size());
         assert((param.start2 + param.size2) <= text2.size());
 
-        if (param.size1 == 0) {
+        if ((param.size1 == 0) || (param.size2 == 0)) {
             for (size_t i = 0; i <= param.size2; ++i) {
                 vertices[param.start2 + i] = param.start1;
             }
-            continue;
-        }
-        if (param.size2 == 0) {
-            vertices[param.start2] = param.start1;
             continue;
         }
         if (param.size2 == 1) {
@@ -704,14 +700,10 @@ std::vector<DiffEdit<char>> computeShortestEditScript_WeaveingLinearSpace(
         assert((param.start1 + param.size1) <= text1.size());
         assert((param.start2 + param.size2) <= text2.size());
 
-        if (param.size1 == 0) {
+        if ((param.size1 == 0) || (param.size2 == 0)) {
             for (size_t i = 0; i <= param.size2; ++i) {
                 vertices[param.start2 + i] = param.start1;
             }
-            continue;
-        }
-        if (param.size2 == 0) {
-            vertices[param.start2] = param.start1;
             continue;
         }
         if (param.size2 == 1) {
