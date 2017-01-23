@@ -102,6 +102,17 @@ void TestCases()
     pairs.emplace_back("abCD", "CD");
     pairs.emplace_back("ab", "abCD");
     pairs.emplace_back("", "a");
+    pairs.emplace_back("", "aa");
+    pairs.emplace_back("", "aaa");
+    pairs.emplace_back("", "aaaa");
+    pairs.emplace_back("", "aaaaa");
+    pairs.emplace_back("", "aaaaaa");
+    pairs.emplace_back("a", "");
+    pairs.emplace_back("aa", "");
+    pairs.emplace_back("aaa", "");
+    pairs.emplace_back("aaaa", "");
+    pairs.emplace_back("aaaaa", "");
+    pairs.emplace_back("aaaaaa", "");
     pairs.emplace_back("a", "ab");
     pairs.emplace_back("b", "ab");
     pairs.emplace_back("a", "");
@@ -159,7 +170,7 @@ void TestCases()
             (GetLCSLength(a) == GetLCSLength(b)) &&
             (GetLCSLength(a) == GetLCSLength(c));
         std::cout << std::boolalpha << result << std::endl;
-        
+
         if (!result) {
             PrintDiff(a);
             PrintDiff(b);
@@ -181,14 +192,14 @@ void measurePerformanceTime(Function f)
     using std::chrono::nanoseconds;
     using std::chrono::duration_cast;
 
-	auto start = high_resolution_clock::now();
+    auto start = high_resolution_clock::now();
 
     f();
 
-	auto end = high_resolution_clock::now();
-	auto duration = duration_cast<nanoseconds>(end - start);
+    auto end = high_resolution_clock::now();
+    auto duration = duration_cast<nanoseconds>(end - start);
 
-	std::cout
+    std::cout
         << "Measured time (ns) : " << duration.count() << " ns" << std::endl;
     std::cout
         << "Measured time (sec): "
@@ -200,7 +211,7 @@ void PerformanceTest()
 {
     std::vector<std::pair<std::string, std::string>> pairs;
 
-    // NOTE: (k = 100, i <= 10000)
+    // NOTE: (k = 100, i < 10000)
     // computeDiff_DynamicProgramming
     // Measured time (ns) : 92631244844 ns
     // Measured time (sec): 92.6312 seconds
@@ -211,11 +222,22 @@ void PerformanceTest()
     // Measured time (ns) : 137508316370 ns
     // Measured time (sec): 137.508 seconds
 
+    // NOTE: k = 1, i < 46000, btw 46000 * 46000 < INT_MAX (= 2147483647)
+    // computeDiff_DynamicProgramming
+    // Measured time (ns) : 39871655248 ns
+    // Measured time (sec): 39.8717 seconds
+    // computeDiff_ONDGreedyAlgorithm
+    // Measured time (ns) : 160120198829 ns
+    // Measured time (sec): 160.12 seconds
+    // computeDiff_LinearSpace
+    // Measured time (ns) : 36818988005 ns
+    // Measured time (sec): 36.819 seconds
+
     std::mt19937 random(10000);
-    for (int k = 0; k < 10; ++k) {
+    for (int k = 0; k < 1; ++k) {
         std::string x;
         std::string y;
-        for (int i = 0; i < 2000; ++i) {
+        for (int i = 0; i < 46000; ++i) {
             std::string a = "abcdefghIJK";
             std::string b = "abcdefghXYZ";
             if (random() % 3 == 0) {
@@ -264,10 +286,10 @@ int main(int argc, char *argv[])
     TestCases();
     PerformanceTest();
 
-//    auto text1 = "getStrechFuntion";
-//    auto text2 = "getStretchFunction";
-//    PrintDiff(computeDiff_LinearSpace(text1, text2));
-//    PrintDiff(computeDiff_DynamicProgramming(text1, text2));
+    auto text1 = "aabb";
+    auto text2 = "abcd";
+    PrintDiff(computeDiff_LinearSpace(text1, text2));
+    PrintDiff(computeDiff_DynamicProgramming(text1, text2));
 
     return 0;
 }

@@ -319,13 +319,16 @@ std::vector<DiffEdit<char>> computeShortestEditScript_ONDGreedyAlgorithm(
 
 namespace {
 
-std::vector<int> computeLevenshteinColumn(
+// NOTE: Returns output as the `c1` vector reference.
+void computeLevenshteinColumn(
     const std::string& text1,
     const std::string& text2,
     const std::size_t start1,
     const std::size_t size1,
     const std::size_t start2,
     const std::size_t size2,
+    std::vector<size_t> & c1,
+    std::vector<size_t> & c2,
     const bool reversedIteration = false)
 {
     // NOTE:
@@ -335,41 +338,41 @@ std::vector<int> computeLevenshteinColumn(
     assert(!text2.empty());
     assert(size2 > 0);
     assert((start2 + size2) <= text2.size());
-    const auto columns = static_cast<int>(size2) + 1;
+    const auto columns = size2 + 1;
     assert(columns > 0);
-    std::vector<int> c1(columns);
-    std::vector<int> c2(columns);
+    c1.resize(columns);
+    c2.resize(columns);
 
-    for (int i = 0; i < columns; ++i) {
+    for (size_t i = 0; i < columns; ++i) {
         c1[i] = i;
     }
 
     if (size1 == 0) {
-        return c1;
+        return;
     }
 
     assert(!text1.empty());
     assert(size1 > 0);
     assert((start1 + size1) <= text1.size());
-    const auto rows = static_cast<int>(size1) + 1;
+    const auto rows = size1 + 1;
 
-    std::function<bool(int, int)> equal;
+    std::function<bool(size_t, size_t)> equal;
     if (!reversedIteration) {
-        equal = [&](int a, int b) -> bool {
+        equal = [&](size_t a, size_t b) -> bool {
             return text1[a + start1] == text2[b + start2];
         };
     }
     else {
-        equal = [&](int a, int b) -> bool {
+        equal = [&](size_t a, size_t b) -> bool {
             assert(size1 > 0);
             assert(size2 > 0);
-            return text1[(start1 + size1 - 1) - a] == text2[(start2 + size2 - 1) - b];
+            return text1[(start1 + size1) - (1 + a)] == text2[(start2 + size2) - (1 + b)];
         };
     }
 
-    for (int row = 1; row < rows; row++) {
+    for (size_t row = 1; row < rows; row++) {
         c2[0] = row;
-        for (int column = 1; column < columns; column++) {
+        for (size_t column = 1; column < columns; column++) {
             auto minCost = std::min(c1[column], c2[column - 1]) + 1;
             if (equal(row - 1, column - 1)) {
                 minCost = std::min(c1[column - 1], minCost);
@@ -379,7 +382,6 @@ std::vector<int> computeLevenshteinColumn(
         // NOTE: Use std::swap() function instead of "c1 = c2" to assign faster.
         std::swap(c1, c2);
     }
-    return c1;
 }
 
 struct SubstringRange {
@@ -400,16 +402,6 @@ std::vector<DiffEdit<char>> computeShortestEditScript_LinearSpace(
     // "A linear space algorithm for computing maximal common subsequences",
     // Communications of the ACM, Volume 18 Issue 6, June 1975, pages 341-343
 
-    if (text2.empty()) {
-        std::vector<DiffEdit<char>> edits;
-        for (const auto& c : text1) {
-            edits.push_back(MakeDiffEdit(c, DiffOperation::Deletion));
-        }
-        return edits;
-    }
-
-    assert(!text2.empty());
-
     std::vector<size_t> vertices(text2.size() + 1);
     std::vector<SubstringRange> stack;
 
@@ -422,13 +414,20 @@ std::vector<DiffEdit<char>> computeShortestEditScript_LinearSpace(
         stack.push_back(std::move(param));
     }
 
+    std::vector<size_t> forwardColumn;
+    std::vector<size_t> reverseColumn;
+    std::vector<size_t> bufferColumn;
+
+    forwardColumn.reserve(text1.size() + 1);
+    reverseColumn.reserve(text1.size() + 1);
+    bufferColumn.reserve(text1.size() + 1);
+
     while (!stack.empty()) {
         auto param = std::move(stack.back());
         stack.pop_back();
 
         assert((param.start1 + param.size1) <= text1.size());
         assert((param.start2 + param.size2) <= text2.size());
-        assert(param.size2 > 0);
 
         if (param.size1 == 0) {
             for (size_t i = 0; i <= param.size2; ++i) {
@@ -436,7 +435,10 @@ std::vector<DiffEdit<char>> computeShortestEditScript_LinearSpace(
             }
             continue;
         }
-
+        if (param.size2 == 0) {
+            vertices[param.start2] = param.start1;
+            continue;
+        }
         if (param.size2 == 1) {
             size_t k = 0;
             for (; k < param.size1; ++k) {
@@ -448,7 +450,6 @@ std::vector<DiffEdit<char>> computeShortestEditScript_LinearSpace(
             vertices[param.start2 + 1] = param.start1 + std::min(k + 1, param.size1);
             continue;
         }
-
         if (param.size1 == 1) {
             size_t y = param.start1;
             for (size_t i = 0; i < param.size2; ++i) {
@@ -466,36 +467,42 @@ std::vector<DiffEdit<char>> computeShortestEditScript_LinearSpace(
 
         const auto sizeOverTwo = param.size2 / 2;
         const auto centerX = param.start2 + sizeOverTwo;
-        auto leftColumn = computeLevenshteinColumn(
+        computeLevenshteinColumn(
             text2,
             text1,
             param.start2,
             sizeOverTwo,
             param.start1,
             param.size1,
+            forwardColumn,
+            bufferColumn,
             false);
-        auto rightColumn = computeLevenshteinColumn(
+        computeLevenshteinColumn(
             text2,
             text1,
             centerX,
             param.size2 - sizeOverTwo,
             param.start1,
             param.size1,
+            reverseColumn,
+            bufferColumn,
             true);
 
-        assert(leftColumn.size() == rightColumn.size());
-        assert(leftColumn.size() >= 2);
+        assert(forwardColumn.size() == reverseColumn.size());
+        assert(forwardColumn.size() >= 2);
+        assert(forwardColumn.capacity() == text1.size() + 1);
+        assert(reverseColumn.capacity() == text1.size() + 1);
+        assert(bufferColumn.capacity() == text1.size() + 1);
 
         size_t k = 0;
-        int minVertex = std::numeric_limits<int>::max();
-        for (size_t i = 0; i < leftColumn.size(); ++i) {
-            auto c = leftColumn[i] + rightColumn[rightColumn.size() - (i + 1)];
+        size_t minVertex = std::numeric_limits<size_t>::max();
+        for (size_t i = 0; i < forwardColumn.size(); ++i) {
+            auto c = forwardColumn[i] + reverseColumn[reverseColumn.size() - (i + 1)];
             if (c < minVertex) {
                 minVertex = c;
                 k = i;
             }
         }
-        vertices[centerX - 1] = param.start1 + k;
 
         {
             SubstringRange newParam;
