@@ -569,6 +569,369 @@ std::vector<DiffEdit<char>> computeShortestEditScript_LinearSpace(
 
 namespace {
 
+long weaving_edist(long * frame, const char t[], const long n, const char p[], const long m)
+{
+	long col, row;
+	long del, ins, repl; // del = delete from pattern, downward; ins = insert to pattern, rightward
+	long warp_start, warp_last;
+
+	const int lcs_switch = 1;
+
+#ifdef SNAKE_HEADS
+	long snake[n+m+1];
+	long tail;
+	const long dist_max = 64;
+	const long num_heads_max = dist_max * dist_max;
+	struct {
+		long warpix, head, tail;
+	} snake_heads[num_heads_max];
+	long num_heads = 0;
+#endif // SNAKE_HEADS
+
+	if (frame == NULL)
+		return n+m+1;
+
+#ifdef SNAKE_HEADS
+	for(long i = 0; i < n+m+1; i++) {
+		snake[i] = -1;
+	}
+#endif
+
+	for (long depth = 0; depth < n + m - 1; depth++) {
+		if ( depth < m ) {
+			warp_start = m - depth;
+		} else {
+			warp_start = depth - (m - 2);
+		}
+		if (depth < n) {
+			warp_last = depth + m;
+		} else {
+			warp_last = ((n-1) << 1) + m - depth;
+		}
+		//printf("depth %ld (%ld, %ld):\n", depth, warp_start, warp_last);
+		for (long warpix = warp_start; warpix <= warp_last; warpix += 2) {
+			/*
+			if (warpix < 0 || warpix > n + m + 1) {
+				printf("warp value error: %ld\n", warpix);
+				//fflush(stdout);
+			}
+			*/
+			col = (depth + warpix - m)>>1;
+			row = (depth - warpix + m)>>1;
+
+			//printf("%ld = (%ld, %ld), ", warpix, col, row);
+			del = frame[warpix+1] + 1;
+			ins = frame[warpix-1] + 1;
+			repl = frame[warpix];
+			//printf(" %ld, %ld (%ld) [%ld,%ld] %c|%c : %ld/%ld/%ld+%ld ",
+			//		depth, warpix, warpix-m, col,row,t[col],p[row], del,ins, frame[warpix], (t[col] != p[row]));
+			if ( t[col] == p[row] ) {
+				if (del < ins && del < repl) {
+					repl = del;
+				} else if ( ins < del && ins < repl ) {
+					repl = ins;
+				}
+			} else /* ( t[col] != p[row] ) */ {
+				repl += 1;
+				if (del <= ins && (lcs_switch || del < repl) ) {
+					repl = del;
+				} else if ( ins < del && (lcs_switch || ins < repl) ) {
+					repl = ins;
+				}
+			}
+			//printf("-> %ld\n", repl);
+			//
+#ifdef SNAKE_HEADS
+			if (std::abs(warpix - ((m+n)>>1)) < (dist_max>>1) ) {
+				if ( t[col] == p[row] ) {
+					if ( snake[warpix] == -1 )
+						snake[warpix] = depth; // start the snake
+					// else
+					//  continue the snake
+				} else { // finish the snake on character mismatch
+					if ( snake[warpix] != -1 ) {
+						tail = snake[warpix];
+						snake[warpix] = -1;
+						if ( num_heads < num_heads_max ) {
+							//printf("snake head %ld (%ld), %ld -> %ld\n", warpix, warpix-m, tail, depth);
+							snake_heads[num_heads].head = depth;
+							snake_heads[num_heads].tail = tail;
+							snake_heads[num_heads].warpix = warpix;
+							num_heads++;
+						}
+					}
+				}
+				if ( (t[col] == p[row]) &&
+						((depth >= m && warpix == warp_start) || (depth >= n && warpix == warp_last)) ) {
+					// finish the snake on the warp end
+					if ( snake[warpix] != -1 ) {
+						tail = snake[warpix];
+						if ( num_heads < num_heads_max ) {
+							//printf("snake head %ld (%ld), %ld -> %ld\n", warpix, warpix-m, tail, depth);
+							snake_heads[num_heads].head = depth + 2;
+							snake_heads[num_heads].tail = tail;
+							snake_heads[num_heads].warpix = warpix;
+							num_heads++;
+						}
+					}
+				}
+			}
+#endif
+			//
+			frame[warpix] = repl;
+#ifdef DEBUG_TABLE
+			debug_table[m*col + row] = repl;
+#endif
+		}
+#ifdef SNAKE_HEADS
+		for(long i = 0; i < n+m+1; i ++) {
+			if ( ((depth + i) & 1) == 0 && (warp_start <= i && i <= warp_last) )
+				if ( snake[i] == -1 )
+					printf(".");
+				else
+					printf("+");
+			else
+				printf(" ");
+		}
+		printf("\n");
+#endif
+	}
+
+#ifdef SNAKE_HEADS
+	for(long i = 0; i < num_heads; i ++) {
+		printf("snake head %ld (%ld), [%ld, %ld)\n",
+				snake_heads[i].warpix, snake_heads[i].warpix-m, snake_heads[i].tail, snake_heads[i].head);
+	}
+	printf("\n");
+#endif
+
+	return frame[n];
+}
+
+void setframe(long * frame, const long n, const long m)
+{
+	for (long i = 0; i < n + m + 1; i++) {
+		frame[i] = std::abs(m - i);  // m (pattern, left) frame
+	}
+}
+
+// NOTE: Returns output as the `c1` vector reference.
+void computeLevenshteinColumn_Weaving(
+    const std::string& text1,
+    const std::string& text2,
+    const std::size_t start1,
+    const std::size_t size1,
+    const std::size_t start2,
+    const std::size_t size2,
+    std::vector<size_t> & c1,
+    std::vector<size_t> & c2,
+    const bool reversedIteration = false)
+{
+    // NOTE:
+    // This algorithm is based on dynamic programming, using only linear space.
+    // It is O(N^2) time and O(N) space algorithm.
+
+    assert(!text2.empty());
+    assert(size2 > 0);
+    assert((start2 + size2) <= text2.size());
+    const auto columns = size2 + 1;
+    assert(columns > 0);
+    c1.resize(columns);
+    c2.resize(columns);
+
+    std::vector<long> frame;
+    frame.resize(size1 + size2 + 1);
+    setframe(frame.data(), size1, size2);
+
+    if (!reversedIteration) {
+        weaving_edist(frame.data(), text1.data() + start1, size1, text2.data() + start2, size2);
+    }
+    else {
+        std::string t1(text1.data() + start1, size1);
+        std::string t2(text2.data() + start2, size2);
+        std::reverse(t1.begin(), t1.end());
+        std::reverse(t2.begin(), t2.end());
+        weaving_edist(frame.data(), t1.data(), size1, t2.data(), size2);
+    }
+
+    for (size_t i = 0; i < columns; ++i) {
+        c1[i] = frame[(frame.size() - 1) - i];
+    }
+}
+
+} // unnamed namespace
+
+std::vector<DiffEdit<char>> computeShortestEditScript_WeaveingLinearSpace(
+    const std::string& text1,
+    const std::string& text2)
+{
+    std::vector<size_t> vertices(text2.size() + 1);
+    std::vector<SubstringRange> stack;
+
+    {
+        SubstringRange param;
+        param.start1 = 0;
+        param.size1 = text1.size();
+        param.start2 = 0;
+        param.size2 = text2.size();
+        stack.push_back(std::move(param));
+    }
+
+    std::vector<size_t> forwardColumn;
+    std::vector<size_t> reverseColumn;
+    std::vector<size_t> bufferColumn;
+
+    forwardColumn.reserve(text1.size() + 1);
+    reverseColumn.reserve(text1.size() + 1);
+    bufferColumn.reserve(text1.size() + 1);
+
+    while (!stack.empty()) {
+        auto param = std::move(stack.back());
+        stack.pop_back();
+
+        assert((param.start1 + param.size1) <= text1.size());
+        assert((param.start2 + param.size2) <= text2.size());
+
+        if (param.size1 == 0) {
+            for (size_t i = 0; i <= param.size2; ++i) {
+                vertices[param.start2 + i] = param.start1;
+            }
+            continue;
+        }
+        if (param.size2 == 0) {
+            vertices[param.start2] = param.start1;
+            continue;
+        }
+        if (param.size2 == 1) {
+            size_t k = 0;
+            for (; k < param.size1; ++k) {
+                if (text1[param.start1 + k] == text2[param.start2]) {
+                    break;
+                }
+            }
+            vertices[param.start2] = param.start1 + k;
+            vertices[param.start2 + 1] = param.start1 + std::min(k + 1, param.size1);
+            continue;
+        }
+        if (param.size1 == 1) {
+            size_t y = param.start1;
+            for (size_t i = 0; i < param.size2; ++i) {
+                vertices[param.start2 + i] = y;
+                if (text1[param.start1] == text2[param.start2 + i]) {
+                    y = std::min(y + 1, param.start1 + param.size1);
+                }
+            }
+            vertices[param.start2 + param.size2] = y;
+            continue;
+        }
+
+        assert(param.size1 >= 2);
+        assert(param.size2 >= 2);
+
+        const auto sizeOverTwo = param.size2 / 2;
+        const auto centerX = param.start2 + sizeOverTwo;
+        computeLevenshteinColumn_Weaving(
+            text2,
+            text1,
+            param.start2,
+            sizeOverTwo,
+            param.start1,
+            param.size1,
+            forwardColumn,
+            bufferColumn,
+            false);
+        computeLevenshteinColumn_Weaving(
+            text2,
+            text1,
+            centerX,
+            param.size2 - sizeOverTwo,
+            param.start1,
+            param.size1,
+            reverseColumn,
+            bufferColumn,
+            true);
+
+        assert(forwardColumn.size() == reverseColumn.size());
+        assert(forwardColumn.size() >= 2);
+        assert(forwardColumn.capacity() == text1.size() + 1);
+        assert(reverseColumn.capacity() == text1.size() + 1);
+        assert(bufferColumn.capacity() == text1.size() + 1);
+
+        size_t k = 0;
+        size_t minVertex = std::numeric_limits<size_t>::max();
+        for (size_t i = 0; i < forwardColumn.size(); ++i) {
+            auto c = forwardColumn[i] + reverseColumn[reverseColumn.size() - (i + 1)];
+            if (c < minVertex) {
+                minVertex = c;
+                k = i;
+            }
+        }
+
+        {
+            SubstringRange newParam;
+            newParam.start1 = param.start1;
+            newParam.size1 = k;
+            newParam.start2 = param.start2;
+            newParam.size2 = sizeOverTwo;
+            assert(newParam.size1 <= param.size1);
+            assert(newParam.size2 <= param.size2);
+            assert(newParam.size2 > 0);
+            stack.push_back(std::move(newParam));
+        }
+        {
+            SubstringRange newParam;
+            newParam.start1 = param.start1 + k;
+            newParam.size1 = param.size1 - k;
+            newParam.start2 = centerX;
+            newParam.size2 = param.size2 - sizeOverTwo;
+            assert(newParam.size1 <= param.size1);
+            assert(newParam.size2 <= param.size2);
+            stack.push_back(std::move(newParam));
+        }
+    }
+
+#if !defined(NDEBUG) && defined(DEBUG)
+    {
+        size_t prev = 0;
+        for (auto & v : vertices) {
+            assert(v >= prev);
+            assert(v <= text1.size());
+            prev = v;
+        }
+    }
+#endif
+
+    std::vector<DiffEdit<char>> edits;
+    size_t y = 0;
+    for (size_t x = 0; (x + 1) < vertices.size(); ++x) {
+        for (; ((y + 1) < vertices[x + 1]) && (y < text1.size()); ++y) {
+            edits.push_back(MakeDiffEdit(text1[y], DiffOperation::Deletion));
+        }
+        if ((x + 1 < vertices.size()) && ((y + 1) == vertices[x + 1])) {
+            if (text1[y] == text2[x]) {
+                // NOTE: equality
+                edits.push_back(MakeDiffEdit(text1[y], DiffOperation::Equality));
+            }
+            else {
+                // NOTE: substition
+                edits.push_back(MakeDiffEdit(text1[y], DiffOperation::Deletion));
+                edits.push_back(MakeDiffEdit(text2[x], DiffOperation::Insertion));
+            }
+            ++y;
+            continue;
+        }
+        if (((x + 1) >= vertices.size()) || (vertices[x] == vertices[x + 1])) {
+            edits.push_back(MakeDiffEdit(text2[x], DiffOperation::Insertion));
+        }
+    }
+    for (; y < text1.size(); ++y) {
+        edits.push_back(MakeDiffEdit(text1[y], DiffOperation::Deletion));
+    }
+    return edits;
+}
+
+namespace {
+
 void SortHunks(std::vector<DiffEdit<char>> & edits)
 {
     for (size_t k = 0; k < edits.size(); ++k) {
@@ -649,6 +1012,15 @@ std::vector<DiffHunk<char>> computeDiff_LinearSpace(
     const std::string& text2)
 {
     auto editScript = computeShortestEditScript_LinearSpace(text1, text2);
+    SortHunks(editScript);
+    return ToDiffHunk(editScript);
+}
+
+std::vector<DiffHunk<char>> computeDiff_WeavingLinearSpace(
+    const std::string& text1,
+    const std::string& text2)
+{
+    auto editScript = computeShortestEditScript_WeaveingLinearSpace(text1, text2);
     SortHunks(editScript);
     return ToDiffHunk(editScript);
 }

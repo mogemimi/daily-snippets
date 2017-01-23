@@ -163,23 +163,28 @@ void TestCases()
         auto a = computeDiff_LinearSpace(text1, text2);
         auto b = computeDiff_DynamicProgramming(text1, text2);
         auto c = computeDiff_ONDGreedyAlgorithm(text1, text2);
+        auto d = computeDiff_WeavingLinearSpace(text1, text2);
 
         auto result = IsDiffValid(a, text1, text2) &&
             (GetEditScriptCount(a) == GetEditScriptCount(b)) &&
             (GetEditScriptCount(a) == GetEditScriptCount(c)) &&
+            (GetEditScriptCount(a) == GetEditScriptCount(d)) &&
             (GetLCSLength(a) == GetLCSLength(b)) &&
-            (GetLCSLength(a) == GetLCSLength(c));
+            (GetLCSLength(a) == GetLCSLength(c)) &&
+            (GetLCSLength(a) == GetLCSLength(d));
         std::cout << std::boolalpha << result << std::endl;
 
         if (!result) {
             PrintDiff(a);
             PrintDiff(b);
             PrintDiff(c);
+            PrintDiff(d);
             std::cout << std::endl;
             std::cout << "Shortes Edit Script:" << std::endl;
             std::cout << GetEditScriptCount(a) << std::endl;
             std::cout << GetEditScriptCount(b) << std::endl;
             std::cout << GetEditScriptCount(c) << std::endl;
+            std::cout << GetEditScriptCount(d) << std::endl;
         }
     }
 }
@@ -224,20 +229,37 @@ void PerformanceTest()
 
     // NOTE: k = 1, i < 46000, btw 46000 * 46000 < INT_MAX (= 2147483647)
     // computeDiff_DynamicProgramming
-    // Measured time (ns) : 39871655248 ns
-    // Measured time (sec): 39.8717 seconds
+    // Measured time (ns) : 41782002335 ns
+    // Measured time (sec): 41.782 seconds
     // computeDiff_ONDGreedyAlgorithm
-    // Measured time (ns) : 160120198829 ns
-    // Measured time (sec): 160.12 seconds
+    // Measured time (ns) : 159242225383 ns
+    // Measured time (sec): 159.242 seconds
     // computeDiff_LinearSpace
-    // Measured time (ns) : 36818988005 ns
-    // Measured time (sec): 36.819 seconds
+    // Measured time (ns) : 36663023867 ns
+    // Measured time (sec): 36.663 seconds
+    // computeDiff_WeavingLinearSpace
+    // Measured time (ns) : 5907292422 ns
+    // Measured time (sec): 5.90729 seconds
+
+    // NOTE: k = 10, i < 5000
+    // computeDiff_DynamicProgramming
+    // Measured time (ns) : 2759831585 ns
+    // Measured time (sec): 2.75983 seconds
+    // computeDiff_ONDGreedyAlgorithm
+    // Measured time (ns) : 13060874448 ns
+    // Measured time (sec): 13.0609 seconds
+    // computeDiff_LinearSpace
+    // Measured time (ns) : 4450071900 ns
+    // Measured time (sec): 4.45007 seconds
+    // computeDiff_WeavingLinearSpace
+    // Measured time (ns) : 735983596 ns
+    // Measured time (sec): 0.735984 seconds
 
     std::mt19937 random(10000);
-    for (int k = 0; k < 1; ++k) {
+    for (int k = 0; k < 10; ++k) {
         std::string x;
         std::string y;
-        for (int i = 0; i < 46000; ++i) {
+        for (int i = 0; i < 5000; ++i) {
             std::string a = "abcdefghIJK";
             std::string b = "abcdefghXYZ";
             if (random() % 3 == 0) {
@@ -277,6 +299,15 @@ void PerformanceTest()
             dummy += a.size();
         }
     });
+
+    measurePerformanceTime([&] {
+        for (auto & p : pairs) {
+            auto & text1 = p.first;
+            auto & text2 = p.second;
+            auto a = computeDiff_WeavingLinearSpace(text1, text2);
+            dummy += a.size();
+        }
+    });
 }
 
 } // unnamed namespace
@@ -286,10 +317,11 @@ int main(int argc, char *argv[])
     TestCases();
     PerformanceTest();
 
-    auto text1 = "aabb";
-    auto text2 = "abcd";
-    PrintDiff(computeDiff_LinearSpace(text1, text2));
-    PrintDiff(computeDiff_DynamicProgramming(text1, text2));
+//    std::string text1 = "AbcDeHijk";
+//    std::string text2 = "abcdefghijk";
+//    PrintDiff(computeDiff_LinearSpace(text1, text2));
+//    PrintDiff(computeDiff_WeavingLinearSpace(text1, text2));
+//    PrintDiff(computeDiff_DynamicProgramming(text1, text2));
 
     return 0;
 }
