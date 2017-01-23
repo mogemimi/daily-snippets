@@ -229,7 +229,7 @@ std::vector<DiffEdit<char>> computeShortestEditScript_ONDGreedyAlgorithm(
         // * Diff(aa, bb) is -aa+bb
         // * Diff(a, bbbbb) is -a+bbbbb
         // * Diff(aaaaa, bbbbb) is -aaaaa+bbbbb
-        // 
+        //
         // When IMPROVE_DIFFHUNK_READABILITY is defined 0,
         // * Diff(aa, bb) is -a+b-a+b
         // * Diff(a, bbbbb) is +b-a+bbbb
@@ -412,7 +412,7 @@ std::vector<DiffEdit<char>> computeShortestEditScript_LinearSpace(
 
     std::vector<size_t> vertices(text2.size() + 1);
     std::vector<SubstringRange> stack;
-    
+
     {
         SubstringRange param;
         param.start1 = 0;

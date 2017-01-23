@@ -10,7 +10,7 @@ namespace somera {
 
 struct SpellCheckResult {
     std::vector<std::string> suggestions;
-    
+
     ///@brief `true` if the word is correctly spelled; `false` otherwise.
     bool correctlySpelled;
 };

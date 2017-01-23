@@ -68,7 +68,7 @@ public:
         const std::string& sentence, const TypoSource& source);
 
     void computeFromWord(const std::string& word);
-    
+
     void setSpellChecker(const std::shared_ptr<SpellChecker>& spellChecker);
 
     void setMinimumWordSize(int wordSize);

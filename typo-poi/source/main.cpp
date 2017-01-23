@@ -377,7 +377,7 @@ int main(int argc, char *argv[])
     }
 
     std::vector<std::string> dictionaryPaths = parser.getValues("-dict");
-    
+
     auto spellChecker = somera::SpellCheckerFactory::Create();
     for (auto & path : dictionaryPaths) {
         ReadDictionaryFile(path, [&](const std::string& word) {

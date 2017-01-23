@@ -37,12 +37,12 @@ uint32_t SignatureHashingFromAsciiAlphabet(const std::string& word)
 #if 1
     constexpr int offsets[128] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 
-        1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 27, 26, 25, 
-        24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 
-        7, 6, 5, 4, 3, 2, 0, 0, 0, 0, 0, 0, 27, 26, 25, 24, 23, 
-        22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 27, 26, 25,
+        24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8,
+        7, 6, 5, 4, 3, 2, 0, 0, 0, 0, 0, 0, 27, 26, 25, 24, 23,
+        22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6,
         5, 4, 3, 2, 0, 0, 0, 0, 0
     };
 
@@ -84,9 +84,9 @@ uint32_t SignatureHashingFromAsciiAlphabet(const std::string& word)
 class SpellCheckerSignatureHashing final : public SpellChecker {
 public:
     SpellCheckResult Suggest(const std::string& word);
-    
+
     void AddWord(const std::string& word);
-    
+
     void RemoveWord(const std::string& word);
 
 private:
@@ -105,7 +105,7 @@ void SpellCheckerSignatureHashing::AddWord(const std::string& word)
         mapIter = hashedDictionary.find(signatureHash);
     }
     assert(mapIter != std::end(hashedDictionary));
-    
+
     auto & words = mapIter->second;
     auto wordsIter = std::lower_bound(std::begin(words), std::end(words), word);
     if ((wordsIter != std::end(words)) && (*wordsIter == word)) {
@@ -123,7 +123,7 @@ void SpellCheckerSignatureHashing::RemoveWord(const std::string& word)
         return;
     }
     assert(mapIter != std::end(hashedDictionary));
-    
+
     auto & words = mapIter->second;
     auto wordsIter = std::lower_bound(std::begin(words), std::end(words), word);
     if ((wordsIter != std::end(words)) && (*wordsIter == word)) {
@@ -154,7 +154,7 @@ struct SpellSuggestion {
 
 struct SpellCheckResultInternal {
     std::vector<SpellSuggestion> suggestions;
-    
+
     ///@brief `true` if the word is correctly spelled; `false` otherwise.
     bool correctlySpelled;
 };
@@ -283,7 +283,7 @@ SpellCheckResultInternal SpellCheck_SignatureHashinging_Internal(
     for (int i = 0; i <= maxHashLength; ++i) {
         const uint32_t bitmask = ((static_cast<uint32_t>(1) << i) >> 1);
         const uint32_t xorBits = inputHistogramHashing ^ bitmask;
-        
+
         auto iter = hashedDictionary.find(xorBits);
         if (iter == std::end(hashedDictionary)) {
             continue;
@@ -291,7 +291,7 @@ SpellCheckResultInternal SpellCheck_SignatureHashinging_Internal(
         const auto& dictionary = iter->second;
 
         bool exactMatching = false;
-        
+
         SpellCheckInternal(
             input,
             dictionary,
@@ -512,7 +512,7 @@ void SeparateWords(
             continue;
         }
         maxSimilarity = similarity;
-        
+
         {
             auto letterCase = GetLetterCase(prefix);
             auto suggestionLetterCase = GetLetterCase(prefixSuggestion->word);
@@ -527,7 +527,7 @@ void SeparateWords(
                 TransformLetterCase(suffixSuggestion->word, letterCase);
             }
         }
-        
+
         auto concatWithoutSpace = prefixSuggestion->word + suffixSuggestion->word;
         auto found = std::find_if(std::begin(suggestions), std::end(suggestions), [&](const SpellSuggestion& s) {
             return s.word == concatWithoutSpace;
@@ -696,11 +696,11 @@ void ParseIdentifier(
             concatnate(p.word);
             continue;
         }
-        
+
         misspellingFound = true;
         SortSuggestions(p.word, result1.suggestions);
         ResizeSuggestions(result1.suggestions, 2);
-        
+
         // NOTE: Generating combinations
         std::vector<std::string> tempSuggestions;
         std::swap(concatSuggestions, tempSuggestions);
@@ -746,7 +746,7 @@ SpellCheckResult SpellCheckerSignatureHashing::Suggest(const std::string& word)
     }
 
     SeparateWords(word, hashedDictionary, result.suggestions);
-    
+
     SortSuggestions(word, result.suggestions);
     ResizeSuggestions(result.suggestions, maxSuggestions);
 
