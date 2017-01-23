@@ -255,11 +255,25 @@ void PerformanceTest()
     // Measured time (ns) : 735983596 ns
     // Measured time (sec): 0.735984 seconds
 
+    // NOTE: k = 100000, i < 20
+    // computeDiff_DynamicProgramming
+    // Measured time (ns) : 857451980 ns
+    // Measured time (sec): 0.857452 seconds
+    // computeDiff_ONDGreedyAlgorithm
+    // Measured time (ns) : 3071924040 ns
+    // Measured time (sec): 3.07192 seconds
+    // computeDiff_LinearSpace
+    // Measured time (ns) : 1686588532 ns
+    // Measured time (sec): 1.68659 seconds
+    // computeDiff_WeavingLinearSpace
+    // Measured time (ns) : 1460913501 ns
+    // Measured time (sec): 1.46091 seconds
+
     std::mt19937 random(10000);
-    for (int k = 0; k < 10; ++k) {
+    for (int k = 0; k < 100000; ++k) {
         std::string x;
         std::string y;
-        for (int i = 0; i < 5000; ++i) {
+        for (int i = 0; i < 20; ++i) {
             std::string a = "abcdefghIJK";
             std::string b = "abcdefghXYZ";
             if (random() % 3 == 0) {
@@ -317,11 +331,11 @@ int main(int argc, char *argv[])
     TestCases();
     PerformanceTest();
 
-    std::string text1 = "AbcDeHijk";
-    std::string text2 = "abcdefghijk";
-//    PrintDiff(computeDiff_LinearSpace(text1, text2));
-    PrintDiff(computeDiff_WeavingLinearSpace(text1, text2));
-//    PrintDiff(computeDiff_DynamicProgramming(text1, text2));
+//    std::string text1 = "AbcDeHijk";
+//    std::string text2 = "abcdefghijk";
+////    PrintDiff(computeDiff_LinearSpace(text1, text2));
+//    PrintDiff(computeDiff_WeavingLinearSpace(text1, text2));
+////    PrintDiff(computeDiff_DynamicProgramming(text1, text2));
 
     return 0;
 }

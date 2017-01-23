@@ -565,58 +565,53 @@ std::vector<DiffEdit<char>> computeShortestEditScript_LinearSpace(
 
 namespace {
 
-long weaving_edist(long * frame, const char t[], const long n, const char p[], const long m)
+void weaving_edist(long * frame, const char t[], const long n, const char p[], const long m)
 {
-	const int lcs_switch = 1;
-
-	if (frame == nullptr) {
-		return n + m + 1;
-    }
+    assert(frame != nullptr);
 
 	for (long depth = 0; depth < n + m - 1; depth++) {
-        long warp_start;
-        long warp_last;
-		if (depth < m) {
-			warp_start = m - depth;
-		} else {
-			warp_start = depth - (m - 2);
-		}
-		if (depth < n) {
-			warp_last = depth + m;
-		} else {
-			warp_last = ((n-1) << 1) + m - depth;
-		}
-		for (long warpix = warp_start; warpix <= warp_last; warpix += 2) {
-			const auto col = (depth + warpix - m) >> 1;
-			const auto row = (depth - warpix + m) >> 1;
+        const auto warpStart = (depth < m)
+            ? m - depth
+            : depth - (m - 2);
+
+        const auto warpEnd = (depth < n)
+            ? depth + m
+            : ((n - 1) * 2) + m - depth;
+
+		for (long warpIndex = warpStart; warpIndex <= warpEnd; warpIndex += 2) {
+			const auto col = (depth + warpIndex - m) >> 1;
+			const auto row = (depth - warpIndex + m) >> 1;
 
             // NOTE: del = delete from pattern, downward; ins = insert to pattern, rightward
-			auto del = frame[warpix+1] + 1;
-			auto ins = frame[warpix-1] + 1;
-			auto repl = frame[warpix];
+			const auto del = frame[warpIndex + 1] + 1;
+			const auto ins = frame[warpIndex - 1] + 1;
+			auto repl = frame[warpIndex];
 			if (t[col] == p[row]) {
 				if (del < ins && del < repl) {
 					repl = del;
-				} else if ( ins < del && ins < repl ) {
+				}
+                else if (ins < del && ins < repl) {
 					repl = ins;
 				}
-			} else {
+			}
+            else {
                 assert(t[col] != p[row]);
+                constexpr bool lcsSwitch = true;
 				repl += 1;
-				if (del <= ins && (lcs_switch || del < repl) ) {
+				if (del <= ins && (lcsSwitch || del < repl)) {
 					repl = del;
-				} else if ( ins < del && (lcs_switch || ins < repl) ) {
+				}
+                else if (ins < del && (lcsSwitch || ins < repl)) {
 					repl = ins;
 				}
 			}
 
-			frame[warpix] = repl;
+			frame[warpIndex] = repl;
 		}
 	}
-	return frame[n];
 }
 
-void setframe(long * frame, const long n, const long m)
+void fillFrame(long * frame, const long n, const long m)
 {
 	for (long i = 0; i < n + m + 1; i++) {
 		frame[i] = std::abs(m - i);  // m (pattern, left) frame
@@ -649,7 +644,7 @@ void computeLevenshteinColumn_Weaving(
 
     std::vector<long> frame;
     frame.resize(size1 + size2 + 1);
-    setframe(frame.data(), size1, size2);
+    fillFrame(frame.data(), size1, size2);
 
     if (!reversedIteration) {
         weaving_edist(frame.data(), text1.data() + start1, size1, text2.data() + start2, size2);
