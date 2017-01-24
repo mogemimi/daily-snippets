@@ -207,7 +207,7 @@ std::vector<std::string> SpellCheck_Innocent(
     std::vector<std::string> corrections;
     
     for (auto & word : dictionary) {
-        auto func = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm;
+        auto func = somera::levenshteinDistance_ONDGreedyAlgorithm;
         auto distance = func(input, word);
         if (distance == 0) {
             // exaxt matching
@@ -276,7 +276,7 @@ std::vector<std::string> SpellCheck_HistogramHashinging(
     return SpellCheck_HistogramHashinging_Internal(
         input,
         hashedDictionary,
-        somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm,
+        somera::levenshteinDistance_ONDGreedyAlgorithm,
         HistogramHashing_Alphabet,
         28).corrections;
 }
@@ -290,7 +290,7 @@ std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold(
         input,
         hashedDictionary,
         [threshold](const std::string& a, const std::string& b) {
-            return somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
+            return somera::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
         },
         HistogramHashing_Alphabet,
         28).corrections;
@@ -305,7 +305,7 @@ std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold_Cyclic32(
         input,
         hashedDictionary,
         [threshold](const std::string& a, const std::string& b) {
-            return somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
+            return somera::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
         },
         HistogramHashing_Cyclic32,
         32).corrections;
@@ -320,7 +320,7 @@ std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold_Cyclic16(
         input,
         hashedDictionary,
         [threshold](const std::string& a, const std::string& b) {
-            return somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
+            return somera::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
         },
         HistogramHashing_Cyclic16,
         16).corrections;
@@ -335,7 +335,7 @@ std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold_Cyclic8(
         input,
         hashedDictionary,
         [threshold](const std::string& a, const std::string& b) {
-            return somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
+            return somera::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
         },
         HistogramHashing_Cyclic8,
         8).corrections;
@@ -349,7 +349,7 @@ std::vector<std::string> SpellCheck_AccumulateHashing(
     const auto threshold = 3;
     
     auto levenshteinDistance = [threshold](const std::string& a, const std::string& b) {
-        return somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
+        return somera::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
     };
     
     std::vector<std::string> corrections;
@@ -415,7 +415,7 @@ std::vector<std::string> SpellCheck_SizeHashing(
     const auto threshold = 3;
     
     auto levenshteinDistance = [threshold](const std::string& a, const std::string& b) {
-        return somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
+        return somera::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
     };
     
     std::vector<std::string> corrections;
@@ -519,7 +519,7 @@ std::vector<std::string> SpellCheck_SizeAndHistogram(
         auto result = SpellCheck_HistogramHashinging_Internal(
             input,
             hashedDictionary,
-            somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm,
+            somera::levenshteinDistance_ONDGreedyAlgorithm,
             HistogramHashing_Alphabet,
             28);
 
@@ -549,7 +549,7 @@ void Print(
     }
 
     if (corrections.size() == 1) {
-        auto distance = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm(inputWord, corrections.front());
+        auto distance = somera::levenshteinDistance_ONDGreedyAlgorithm(inputWord, corrections.front());
         if (distance == 0) {
             std::cout << "'" << inputWord << "' is found. (exact match)" << std::endl;
             return;
@@ -557,8 +557,8 @@ void Print(
     }
 
     std::stable_sort(std::begin(corrections), std::end(corrections), [&](const std::string& a, const std::string& b) {
-        auto similarA = somera::EditDistance::closestMatchFuzzySimilarity(inputWord, a);
-        auto similarB = somera::EditDistance::closestMatchFuzzySimilarity(inputWord, b);
+        auto similarA = somera::closestMatchFuzzySimilarity(inputWord, a);
+        auto similarB = somera::closestMatchFuzzySimilarity(inputWord, b);
         return similarA >= similarB;
     });
 
@@ -760,7 +760,7 @@ void PrintLetterFrequency(const std::vector<std::string>& dictionary)
 
 void TestCase_LCS()
 {
-    auto lcs = somera::EditDistance::computeLCSLength_DynamicProgramming;
+    auto lcs = somera::computeLCSLength_DynamicProgramming;
     assert(lcs("", "") == 0);
     assert(lcs("A", "") == 0);
     assert(lcs("", "A") == 0);
@@ -778,7 +778,7 @@ void TestCase_LCS()
 
 void TestCase_DPLinearSpace()
 {
-    auto distance = somera::EditDistance::levenshteinDistance_DynamicProgramming_LinearSpace;
+    auto distance = somera::levenshteinDistance_DynamicProgramming_LinearSpace;
     assert(distance("", "") == 0);
     assert(distance("A", "") == 1);
     assert(distance("", "A") == 1);
@@ -794,7 +794,7 @@ void TestCase_DPLinearSpace()
 
 void TestCase_LCSGreedy()
 {
-    auto lcs = somera::EditDistance::computeLCSLength_ONDGreedyAlgorithm;
+    auto lcs = somera::computeLCSLength_ONDGreedyAlgorithm;
     assert(lcs("", "") == 0);
     assert(lcs("A", "") == 0);
     assert(lcs("", "A") == 0);
@@ -812,7 +812,7 @@ void TestCase_LCSGreedy()
 
 void TestCase_LevenshteinDistance_ReplacementCost1()
 {
-    auto distance = somera::EditDistance::levenshteinDistance_DynamicProgramming_ReplacementCost1;
+    auto distance = somera::levenshteinDistance_DynamicProgramming_ReplacementCost1;
     assert(distance("levenshtein", "meilenstein") == 4);
     assert(distance("book", "back") == 2);
     assert(distance("book", "book") == 0);
@@ -885,8 +885,8 @@ void PrintMisspelledWordDistribution()
 {
     auto pairs = GetMisspelledWordPairs();
     std::sort(std::begin(pairs), std::end(pairs), [](auto & a, auto & b) {
-        auto x = somera::EditDistance::closestMatchFuzzySimilarity(a.first, a.second);
-        auto y = somera::EditDistance::closestMatchFuzzySimilarity(b.first, b.second);
+        auto x = somera::closestMatchFuzzySimilarity(a.first, a.second);
+        auto y = somera::closestMatchFuzzySimilarity(b.first, b.second);
         return x < y;
     });
 
@@ -894,8 +894,8 @@ void PrintMisspelledWordDistribution()
         auto & correction = pair.first;
         auto & misspelled = pair.second;
         
-        auto similarity = somera::EditDistance::closestMatchFuzzySimilarity(correction, misspelled);
-        auto distance = somera::EditDistance::levenshteinDistance_ONDGreedyAlgorithm(correction, misspelled);
+        auto similarity = somera::closestMatchFuzzySimilarity(correction, misspelled);
+        auto distance = somera::levenshteinDistance_ONDGreedyAlgorithm(correction, misspelled);
         if (similarity > 0.5 && similarity < 0.85) {
             std::cout << correction << "\t" << misspelled << "\t" << similarity << "\t" << distance << std::endl;
         }
@@ -914,7 +914,7 @@ void PrintMisspelledWordDistribution()
         auto & correction = pair.first;
         auto & misspelled = pair.second;
         
-        auto similarity = somera::EditDistance::closestMatchFuzzySimilarity(correction, misspelled);
+        auto similarity = somera::closestMatchFuzzySimilarity(correction, misspelled);
         
         // NOTE: Kahan summation algorithm
         auto tmp = similarity - compensation;
@@ -990,11 +990,11 @@ int main(int argc, char *argv[])
 
         auto ok = [&](const std::string& a, const std::string& b) {
             std::cout
-                << somera::EditDistance::closestMatchFuzzySimilarity(a, b)
+                << somera::closestMatchFuzzySimilarity(a, b)
                 << " "
-                << somera::EditDistance::closestMatchFuzzySimilarity_Boer(a, b)
+                << somera::closestMatchFuzzySimilarity_Boer(a, b)
                 << std::endl;
-            return somera::EditDistance::closestMatchFuzzySimilarity(a, b) == somera::EditDistance::closestMatchFuzzySimilarity_Boer(a, b);
+            return somera::closestMatchFuzzySimilarity(a, b) == somera::closestMatchFuzzySimilarity_Boer(a, b);
         };
         ok("", "");
         ok("AGA", "ATA");

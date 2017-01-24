@@ -979,7 +979,7 @@ std::string computeLCSLinearSpace(
         return "";
     }
 
-    std::vector<int> C1 = EditDistance::LCS_Column(text1, text2, m, n / 2);
+    std::vector<int> C1 = LCS_Column(text1, text2, m, n / 2);
     std::vector<int> P1(m + 1);
 
     for (int i = 0; i <= static_cast<int>(m); ++i) {

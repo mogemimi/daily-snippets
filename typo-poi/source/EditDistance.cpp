@@ -141,7 +141,7 @@ double closestMatchDistance(const std::u32string& left, const std::u32string& ri
 
 } // unnamed namespace
 
-double EditDistance::closestMatchFuzzySimilarity_Boer(const std::string& left, const std::string& right)
+double closestMatchFuzzySimilarity_Boer(const std::string& left, const std::string& right)
 {
     const auto leftUtf32 = somera::toUtf32(left);
     const auto rightUtf32 = somera::toUtf32(right);
@@ -151,7 +151,7 @@ double EditDistance::closestMatchFuzzySimilarity_Boer(const std::string& left, c
     return std::min(std::max(distance, 0.0), 1.0);
 }
 
-double EditDistance::closestMatchFuzzySimilarity(const std::string& text1, const std::string& text2)
+double closestMatchFuzzySimilarity(const std::string& text1, const std::string& text2)
 {
     return closestMatchFuzzySimilarity(text1, text2, static_cast<int>(text1.size() + text2.size()));
 }
@@ -277,7 +277,7 @@ double computeLCSLengthFuzzy_ONDGreedyAlgorithm_Threshold(
 
 } // unnamed namespace
 
-double EditDistance::closestMatchFuzzySimilarity(
+double closestMatchFuzzySimilarity(
     const std::string& text1,
     const std::string& text2,
     int distanceThreshold)
@@ -380,7 +380,7 @@ int getCommonPrefixLength(const std::string& left, const std::string& right)
 
 } // unnamed namespace
 
-double EditDistance::jaroWinklerDistance(const std::string& left, const std::string& right)
+double jaroWinklerDistance(const std::string& left, const std::string& right)
 {
     if (left.empty() || right.empty()) {
         return 0;
@@ -403,7 +403,7 @@ double EditDistance::jaroWinklerDistance(const std::string& left, const std::str
     return jaroDistance + prefix * weight * (1 - jaroDistance);
 }
 
-int EditDistance::levenshteinDistance(const std::string& left, const std::string& right)
+int levenshteinDistance(const std::string& left, const std::string& right)
 {
 #if 1
     return levenshteinDistance_ONDGreedyAlgorithm(left, right);
@@ -414,7 +414,7 @@ int EditDistance::levenshteinDistance(const std::string& left, const std::string
 #endif
 }
 
-int EditDistance::levenshteinDistance_DynamicProgramming(const std::string& left, const std::string& right)
+int levenshteinDistance_DynamicProgramming(const std::string& left, const std::string& right)
 {
     const auto rows = static_cast<int>(left.size()) + 1;
     const auto columns = static_cast<int>(right.size()) + 1;
@@ -474,7 +474,7 @@ int EditDistance::levenshteinDistance_DynamicProgramming(const std::string& left
     return mat(rows - 1, columns - 1);
 }
 
-int EditDistance::levenshteinDistance_DynamicProgramming_LinearSpace(
+int levenshteinDistance_DynamicProgramming_LinearSpace(
     const std::string& text1,
     const std::string& text2)
 {
@@ -506,7 +506,7 @@ int EditDistance::levenshteinDistance_DynamicProgramming_LinearSpace(
     return c1.back();
 }
 
-int EditDistance::levenshteinDistance_DynamicProgramming_ReplacementCost1(
+int levenshteinDistance_DynamicProgramming_ReplacementCost1(
     const std::string& text1,
     const std::string& text2)
 {
@@ -540,7 +540,7 @@ int EditDistance::levenshteinDistance_DynamicProgramming_ReplacementCost1(
     return c1.back();
 }
 
-int EditDistance::levenshteinDistance_ONDGreedyAlgorithm(
+int levenshteinDistance_ONDGreedyAlgorithm(
     const std::string& text1, const std::string& text2)
 {
     // NOTE:
@@ -636,7 +636,7 @@ int EditDistance::levenshteinDistance_ONDGreedyAlgorithm(
     return M + N;
 }
 
-int EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(
+int levenshteinDistance_ONDGreedyAlgorithm_Threshold(
     const std::string& text1, const std::string& text2, int threshold)
 {
     // NOTE:
@@ -736,7 +736,7 @@ int EditDistance::levenshteinDistance_ONDGreedyAlgorithm_Threshold(
     return M + N;
 }
 
-int EditDistance::computeLCSLength_DynamicProgramming(
+int computeLCSLength_DynamicProgramming(
     const std::string& text1,
     const std::string& text2)
 {
@@ -803,7 +803,7 @@ int EditDistance::computeLCSLength_DynamicProgramming(
     return mat(rows - 1, columns - 1);
 }
 
-int EditDistance::computeLCSLength_ONDGreedyAlgorithm(
+int computeLCSLength_ONDGreedyAlgorithm(
     const std::string& text1,
     const std::string& text2)
 {
@@ -911,7 +911,7 @@ int EditDistance::computeLCSLength_ONDGreedyAlgorithm(
     return 0;
 }
 
-std::vector<int> EditDistance::LCS_Column(
+std::vector<int> LCS_Column(
     const std::string& x,
     const std::string& y,
     std::size_t m,
@@ -963,7 +963,7 @@ std::vector<int> EditDistance::LCS_Column(
 #endif
 }
 
-int EditDistance::computeLCSLengthInLinearSpace(const std::string& left, const std::string& right)
+int computeLCSLengthInLinearSpace(const std::string& left, const std::string& right)
 {
     auto lcsColumn = LCS_Column(left, right, (int)left.size(), (int)right.size());
     auto lcsLength = lcsColumn.back();

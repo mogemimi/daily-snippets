@@ -175,7 +175,7 @@ void SpellCheckInternal(
             continue;
         }
 
-        const auto similarity = EditDistance::closestMatchFuzzySimilarity(input, word, distanceThreshold);
+        const auto similarity = closestMatchFuzzySimilarity(input, word, distanceThreshold);
         if (similarity == 1.0) {
             // exaxt matching
             SpellSuggestion suggestion;
@@ -231,7 +231,7 @@ void SortSuggestions(const std::string& word, std::vector<SpellSuggestion>& sugg
 {
     for (auto & suggestion : suggestions) {
         if (!suggestion.similarity) {
-            suggestion.similarity = somera::EditDistance::closestMatchFuzzySimilarity(word, suggestion.word);
+            suggestion.similarity = somera::closestMatchFuzzySimilarity(word, suggestion.word);
         }
     }
 
@@ -241,8 +241,8 @@ void SortSuggestions(const std::string& word, std::vector<SpellSuggestion>& sugg
         if (*a.similarity != *b.similarity) {
             return *a.similarity > *b.similarity;
         }
-        const auto distanceA = somera::EditDistance::levenshteinDistance_DynamicProgramming_ReplacementCost1(word, a.word);
-        const auto distanceB = somera::EditDistance::levenshteinDistance_DynamicProgramming_ReplacementCost1(word, b.word);
+        const auto distanceA = somera::levenshteinDistance_DynamicProgramming_ReplacementCost1(word, a.word);
+        const auto distanceB = somera::levenshteinDistance_DynamicProgramming_ReplacementCost1(word, b.word);
         if (distanceA != distanceB) {
             return distanceA < distanceB;
         }
@@ -341,7 +341,7 @@ Optional<SpellSuggestion> ExistWordSignatureHashingingInternal(
             continue;
         }
 
-        const auto similarity = EditDistance::closestMatchFuzzySimilarity(input, word, distanceThreshold);
+        const auto similarity = closestMatchFuzzySimilarity(input, word, distanceThreshold);
         if (similarity == 1.0) {
             // exaxt matching
             SpellSuggestion suggestion;
