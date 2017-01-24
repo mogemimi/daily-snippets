@@ -277,7 +277,7 @@ struct XCBuildConfiguration final : public XcodeObject {
             return;
         }
         buildSettings.emplace_back(key, value);
-        std::sort(std::begin(buildSettings), std::end(buildSettings),
+        std::stable_sort(std::begin(buildSettings), std::end(buildSettings),
             [](const auto& a, const auto& b){ return a.first < b.first; });
     }
 
@@ -290,7 +290,7 @@ struct XCBuildConfiguration final : public XcodeObject {
             return;
         }
         buildSettings.emplace_back(key, value);
-        std::sort(std::begin(buildSettings), std::end(buildSettings),
+        std::stable_sort(std::begin(buildSettings), std::end(buildSettings),
             [](const auto& a, const auto& b){ return a.first < b.first; });
     }
 };
@@ -529,8 +529,10 @@ void SetDefaultBuildConfig(XCBuildConfiguration& config)
     config.AddBuildSettings("CLANG_WARN_DIRECT_OBJC_ISA_USAGE", "YES_ERROR");
     config.AddBuildSettings("CLANG_WARN_EMPTY_BODY", "YES");
     config.AddBuildSettings("CLANG_WARN_ENUM_CONVERSION", "YES");
+    config.AddBuildSettings("CLANG_WARN_INFINITE_RECURSION", "YES");
     config.AddBuildSettings("CLANG_WARN_INT_CONVERSION", "YES");
     config.AddBuildSettings("CLANG_WARN_OBJC_ROOT_CLASS", "YES_ERROR");
+    config.AddBuildSettings("CLANG_WARN_SUSPICIOUS_MOVE", "YES");
     config.AddBuildSettings("CLANG_WARN_UNREACHABLE_CODE", "YES");
     config.AddBuildSettings("CLANG_WARN__DUPLICATE_METHOD_MATCH", "YES");
     config.AddBuildSettings("CODE_SIGN_IDENTITY", "\"-\"");
@@ -653,7 +655,7 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
         group->children.push_back(fileRef);
     }
 
-    std::sort(std::begin(sourceGroup->children), std::end(sourceGroup->children),
+    std::stable_sort(std::begin(sourceGroup->children), std::end(sourceGroup->children),
         [](const std::shared_ptr<XcodeObject>& a, const std::shared_ptr<XcodeObject>& b) {
             std::string nameA;
             std::string nameB;
@@ -822,7 +824,7 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
         project->projectRoot = "\"\"";
         project->targets.push_back(nativeTarget);
 
-        project->AddAttribute("LastUpgradeCheck", "0710");
+        project->AddAttribute("LastUpgradeCheck", "0800");
         if (!options.author.empty()) {
             project->AddAttribute("ORGANIZATIONNAME", EncodeDoubleQuotes(options.author));
         }
@@ -873,12 +875,12 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
     xcodeProject->nativeTargets.push_back(nativeTarget);
     xcodeProject->projects.push_back(pbxProject);
 
-    std::sort(std::begin(xcodeProject->groups), std::end(xcodeProject->groups),
+    std::stable_sort(std::begin(xcodeProject->groups), std::end(xcodeProject->groups),
         [](const std::shared_ptr<PBXGroup>& a, const std::shared_ptr<PBXGroup>& b) {
             return a->GetUuid() < b->GetUuid();
         });
 
-    std::sort(std::begin(xcodeProject->fileReferences), std::end(xcodeProject->fileReferences),
+    std::stable_sort(std::begin(xcodeProject->fileReferences), std::end(xcodeProject->fileReferences),
         [](const std::shared_ptr<PBXFileReference>& a, const std::shared_ptr<PBXFileReference>& b) {
             return a->GetUuid() < b->GetUuid();
         });
