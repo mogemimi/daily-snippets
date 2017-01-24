@@ -2,43 +2,33 @@
 
 #pragma once
 
-#include <string>
 #include <functional>
-#include <vector>
-#include <set>
+#include <string>
 
 namespace somera {
 
 enum class PartOfSpeechTag {
-    Raw,
-    EnglishWord,
+    Word,
+    Spaces,
+    Symbol,
     GitUrl,
     Url,
     Integer,
+    IntegerBinary,
+    IntegerHex,
     FloatNumber,
-    DoxygenKeywords,
-//    EmailAddress,
-//    Copyright,
-//    LicenseDescription,
 };
 
 struct PartOfSpeech {
-    PartOfSpeechTag tag;
     std::string text;
-    //Range range;
+    PartOfSpeechTag tag;
 };
 
 class WordSegmenter {
 public:
-    void parse(
+    void Parse(
         const std::string& text,
         std::function<void(const PartOfSpeech&)> callback);
-
-private:
-    void parse(
-        const std::string& text,
-        std::function<void(const PartOfSpeech&)> callback,
-        bool recursive);
 };
 
 } // namespace somera

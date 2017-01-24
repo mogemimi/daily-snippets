@@ -1,7 +1,6 @@
 // Copyright (c) 2015 mogemimi. Distributed under the MIT license.
 
-#include "wordsegmenter.h"
-#include "utf8.h"
+#include "WordSegmenter.h"
 #include <cassert>
 #include <cstdint>
 #include <vector>
@@ -11,167 +10,150 @@
 namespace somera {
 namespace {
 
-#if 0
-bool IsSeparator(const std::string& c)
+bool IsSeparator(char32_t c)
 {
-    if (c.size() != 1) {
-        return false;
-    }
-
-    std::string separators = "!\"#()*+,-./:<>?@[\\]`~";
-#if 0
-    std::sort(std::begin(separators), std::end(separators));
-    std::cout << '"';
-    for (auto separator : separators) {
-        std::string escapeCharacters = "\"\\\'";
-        if (std::binary_search(std::begin(escapeCharacters), std::end(escapeCharacters), separator)) {
-            std::cout << '\\';
-        }
-        std::cout << separator;
-    }
-    std::cout << '"' << std::endl;
-    assert(std::is_sorted(std::begin(separators), std::end(separators)));
-#endif
-    return std::binary_search(std::begin(separators), std::end(separators), c.front());
-}
-#endif
-
-template <typename F>
-std::vector<std::u32string> splitWords(const std::u32string& text, F isSeparator)
-{
-    std::vector<std::u32string> words;
-    std::u32string wordBuffer;
-
-    for (const auto & c : text) {
-        if (isSeparator(c)) {
-            // skip space
-            if (!wordBuffer.empty()) {
-                words.push_back(std::move(wordBuffer));
-                wordBuffer.clear();
-            }
-            continue;
-        }
-        wordBuffer += c;
-    }
-
-    if (!wordBuffer.empty()) {
-        words.push_back(std::move(wordBuffer));
-        wordBuffer.clear();
-    }
-
-    return words;
+    // NOTE: Ascii characters without alphabet, numbers and [-'].
+    std::string separators = "!\"#$%&()*+,./:;<=>?@[\\]^`{|}~";
+    assert(std::is_sorted(separators.begin(), separators.end()));
+    return std::binary_search(std::begin(separators), std::end(separators), c);
 }
 
-PartOfSpeechTag findPartOfSpeechTag(const std::string& text)
+bool IsConcatenator(char32_t c)
 {
-    {
-        const std::regex re(R"([A-Z]*[a-z]+)");
-        if (std::regex_match(text, re)) {
-            return PartOfSpeechTag::EnglishWord;
-        }
-    }
-    {
-        const std::regex re(R"(\d+)");
-        if (std::regex_match(text, re)) {
-            return PartOfSpeechTag::Integer;
-        }
-    }
-    {
-        const std::regex re(R"((\d*\.\d+|\d+\.\d*)f?)");
-        if (std::regex_match(text, re)) {
-            return PartOfSpeechTag::FloatNumber;
-        }
-    }
-    {
-        // Contractions. For example: "don't"
-        const std::regex re(R"([A-Z]?[a-z]+n't)");
-        if (std::regex_match(text, re)) {
-            return PartOfSpeechTag::EnglishWord;
-        }
-    }
-    {
-        const std::regex re(R"(git@\w+\..+)");
-        if (std::regex_match(text, re)) {
-            return PartOfSpeechTag::GitUrl;
-        }
-    }
-    {
-        const std::regex re(R"((http|https|ftp)://.+)");
-        if (std::regex_match(text, re)) {
-            return PartOfSpeechTag::Url;
-        }
-    }
-    {
-        const std::regex re(R"((\@|\\)((f(\$|\[|\]|\{|\}))|(\$|\@|\\|\&|\~|\<|\>|\#|\%)|([a-z]{1,16})))");
-        if (std::regex_match(text, re)) {
-            return PartOfSpeechTag::DoxygenKeywords;
-        }
-    }
-    return PartOfSpeechTag::Raw;
+    std::string separators = "'-";
+    assert(std::is_sorted(separators.begin(), separators.end()));
+    return std::binary_search(std::begin(separators), std::end(separators), c);
 }
 
-bool isSpace(char32_t c)
+std::vector<std::tuple<std::string, PartOfSpeechTag>> SplitBySpace(const std::string& str)
 {
-    return ::isspace(c) != 0;
-}
-
-bool isAsciiSymbols(char32_t c)
-{
-    if (c == '-' || c == '_' || c == '\'') {
-        return false;
-    }
-    return (33 <= c && c <= 47)
-        || (58 <= c && c <= 64)
-        || (91 <= c && c <= 96)
-        || (123 <= c && c <= 126);
-}
-
-} // unnamed namespace
-
-void WordSegmenter::parse(
-    const std::string& utf8Text,
-    std::function<void(const PartOfSpeech&)> readWord)
-{
-    parse(utf8Text, readWord, true);
-}
-
-void WordSegmenter::parse(
-    const std::string& utf8Text,
-    std::function<void(const PartOfSpeech&)> readWord,
-    bool recursive)
-{
-    const auto text = toUtf32(utf8Text);
-    const auto words = splitWords(text,
-        recursive ? isSpace : isAsciiSymbols);
-
-    std::vector<std::u32string> candidates;
-
-    for (const auto& word : words) {
-        PartOfSpeech pos;
-        pos.text = toUtf8(word);
-        pos.tag = PartOfSpeechTag::Raw;
-
-        do {
-            {
-                pos.tag = findPartOfSpeechTag(pos.text);
-                if (pos.tag != PartOfSpeechTag::Raw) {
-                    break;
-                }
-            }
-        } while (0);
-
-        if (pos.tag != PartOfSpeechTag::Raw) {
-            readWord(pos);
+    std::vector<std::tuple<std::string, PartOfSpeechTag>> tokens;
+    std::string buffer;
+    std::string separator;
+    auto flushBuffer = [&] {
+        if (!buffer.empty()) {
+            tokens.emplace_back(buffer, PartOfSpeechTag::Word);
+            buffer.clear();
         }
-        else if (recursive) {
-            assert(pos.tag == PartOfSpeechTag::Raw);
-            parse(pos.text, readWord, false);
+    };
+    auto flushSeparator = [&] {
+        if (!separator.empty()) {
+            tokens.emplace_back(separator, PartOfSpeechTag::Spaces);
+            separator.clear();
+        }
+    };
+
+    auto iter = str.begin();
+    auto end = str.end();
+    for (; iter != end; ++iter) {
+        auto character = *iter;
+        if (::isspace(character)) {
+            flushBuffer();
+            separator += character;
         }
         else {
-            assert(pos.tag == PartOfSpeechTag::Raw);
-            readWord(pos);
+            flushSeparator();
+            buffer += character;
+        }
+    }
+    assert(buffer.empty() || separator.empty());
+    flushBuffer();
+    flushSeparator();
+    return tokens;
+}
+
+void TokenizeByAsciiSymbols(
+    const std::string& str,
+    std::function<void(const PartOfSpeech&)> callback)
+{
+    std::string buffer;
+    std::string separator;
+
+    auto flushBuffer = [&] {
+        if (buffer.empty()) {
+            return;
         }
 
+        auto trimRight = std::find_if(std::rbegin(buffer), std::rend(buffer),
+            [&](char32_t c){ return !IsConcatenator(c); }).base();
+
+        std::string prefix(std::begin(buffer), trimRight);
+        std::string suffix(trimRight, std::end(buffer));
+        buffer.clear();
+
+        if (std::regex_match(prefix, std::regex(R"(\d+)"))) {
+            // integer
+            callback({prefix, PartOfSpeechTag::Integer});
+        }
+        else if (std::regex_match(prefix, std::regex(R"(0x[\dA-Fa-f]+)"))) {
+            // hex integer
+            callback({prefix, PartOfSpeechTag::IntegerHex});
+        }
+        else if (std::regex_match(prefix, std::regex(R"(0b[01]+)"))) {
+            // binary integer
+            callback({prefix, PartOfSpeechTag::IntegerBinary});
+        }
+        else if (std::regex_match(prefix, std::regex(R"((\d*\.\d+|\d+\.\d*)f?)"))) {
+            // float number
+            callback({prefix, PartOfSpeechTag::FloatNumber});
+        }
+        else {
+            callback({prefix, PartOfSpeechTag::Word});
+        }
+
+        if (!suffix.empty()) {
+            callback({suffix, PartOfSpeechTag::Symbol});
+        }
+    };
+    auto flushSeparator = [&] {
+        if (!separator.empty()) {
+            callback({separator, PartOfSpeechTag::Spaces});
+            separator.clear();
+        }
+    };
+
+    auto iter = str.begin();
+    auto end = str.end();
+    for (; iter != end; ++iter) {
+        auto character = *iter;
+        if ((IsSeparator(character)) || (buffer.empty() && IsConcatenator(character))) {
+            flushBuffer();
+            separator += character;
+        }
+        else {
+            flushSeparator();
+            buffer += character;
+        }
+    }
+    assert(buffer.empty() || separator.empty());
+    flushBuffer();
+    flushSeparator();
+}
+
+} // end anonymous namespace
+
+void WordSegmenter::Parse(
+    const std::string& str,
+    std::function<void(const PartOfSpeech&)> callback)
+{
+    auto splitStrings = SplitBySpace(str);
+
+    for (auto & tuple : splitStrings) {
+        auto & text = std::get<0>(tuple);
+        auto & tag = std::get<1>(tuple);
+        if (tag == PartOfSpeechTag::Spaces) {
+            callback(PartOfSpeech{text, PartOfSpeechTag::Spaces});
+            continue;
+        }
+        if (std::regex_match(text, std::regex(R"(git@\w+\..+)"))) {
+            callback(PartOfSpeech{text, PartOfSpeechTag::GitUrl});
+            continue;
+        }
+        if (std::regex_match(text, std::regex(R"((http|https|ftp)://.+)"))) {
+            callback(PartOfSpeech{text, PartOfSpeechTag::Url});
+            continue;
+        }
+        TokenizeByAsciiSymbols(text, callback);
     }
 }
 
