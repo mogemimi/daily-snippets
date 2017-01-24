@@ -572,10 +572,10 @@ void Print(
 
 template <typename SpellChecker>
 void Print(
-    const SpellChecker& spellChecker,
+    SpellChecker & spellChecker,
     const std::string& word)
 {
-    auto result = spellChecker->Suggest(word);
+    auto result = spellChecker.Suggest(word);
     if (result.correctlySpelled) {
         std::cout << "'" << word << "' is found. (exact match)" << std::endl;
         return;
@@ -951,6 +951,90 @@ void PrintMisspelledWordDistribution()
     }
 }
 
+std::vector<std::string> tokenizeNgrams(const std::string& s, const size_t n)
+{
+    assert(n > 0);
+    std::vector<std::string> ngrams;
+    assert(n <= s.size());
+    for (size_t i = 0; (i + n) <= s.size(); ++i) {
+        auto ngram = s.substr(i, n);
+        ngrams.push_back(ngram);
+    }
+    return ngrams;
+}
+
+class SpellChecker_Ngram final {
+public:
+    SpellCheckResult Suggest(const std::string& word);
+
+    void AddWord(const std::string& word);
+
+private:
+    std::unordered_map<std::string, std::vector<std::string>> dictionary;
+    static constexpr size_t n = 3;
+};
+
+constexpr size_t SpellChecker_Ngram::n;
+
+SpellCheckResult SpellChecker_Ngram::Suggest(const std::string& word)
+{
+    SpellCheckResult result;
+    result.correctlySpelled = false;
+
+    if (word.size() < n) {
+        // TODO
+        return result;
+    }
+
+    const auto inputSizeHash = SizeHash(word);
+    const auto threshold = 3;
+
+    auto ngrams = tokenizeNgrams(word, n);
+    for (const auto& ngram : ngrams) {
+        auto iter = dictionary.find(ngram);
+        if (iter == std::end(dictionary)) {
+            continue;
+        }
+        
+        const auto& words = iter->second;
+        bool exactMatching = false;
+        SpellCheck_Internal(
+            word,
+            words,
+            result.suggestions,
+            exactMatching,
+            somera::levenshteinDistance_ONDGreedyAlgorithm,
+            inputSizeHash,
+            threshold);
+        if (exactMatching) {
+            result.correctlySpelled = exactMatching;
+            break;
+        }
+    }
+    return result;
+}
+
+void SpellChecker_Ngram::AddWord(const std::string& word)
+{
+    if (word.size() < n) {
+        // TODO
+        return;
+    }
+
+    auto ngrams = tokenizeNgrams(word, n);
+    for (const auto& ngram : ngrams) {
+        auto iter = dictionary.find(ngram);
+        if (iter == std::end(dictionary)) {
+            std::vector<std::string> words;
+            words.push_back(word);
+            dictionary.emplace(ngram, std::move(words));
+            continue;
+        }
+        auto& words = iter->second;
+        words.push_back(word);
+    }
+}
+
 } // unnamed namespace
 
 int main(int argc, char *argv[])
@@ -1013,10 +1097,12 @@ int main(int argc, char *argv[])
     std::unordered_map<uint32_t, std::vector<std::string>> hashedDictionary_Cyclic8;
 
     auto spellChecker = somera::SpellCheckerFactory::Create();
+    SpellChecker_Ngram spellChecker_Ngram;
 
     ReadDictionaryFile(dictionarySourcePath, [&](const std::string& word) {
         dictionary.push_back(word);
         spellChecker->AddWord(word);
+        spellChecker_Ngram.AddWord(word);
         
         {
             auto histogramHash = HistogramHashing_Alphabet(word);
@@ -1288,14 +1374,22 @@ int main(int argc, char *argv[])
 //            Print(spellCheck, inputWord, dict);
 //        }
 //    });
-    
-    std::cout << "------------------" << std::endl;
-
-    measurePerformanceTime([&] {
-        for (auto & word : inputWords) {
-            Print(spellChecker, word);
-        }
-    });
+//    
+//    std::cout << "------------------" << std::endl;
+//
+//    measurePerformanceTime([&] {
+//        for (auto & word : inputWords) {
+//            Print(spellChecker_Ngram, word);
+//        }
+//    });
+//    
+//    std::cout << "------------------" << std::endl;
+//
+//    measurePerformanceTime([&] {
+//        for (auto & word : inputWords) {
+//            Print(*spellChecker, word);
+//        }
+//    });
     
     return 0;
 }
