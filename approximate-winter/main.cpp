@@ -16,6 +16,7 @@
 
 #include <iomanip>
 
+using somera::SpellCheckResult;
 using somera::CommandLineParser;
 using somera::Optional;
 using somera::NullOpt;
@@ -172,7 +173,7 @@ void TestCase_HistogramHashing()
 void SpellCheck_Internal(
     const std::string& input,
     const std::vector<std::string>& dictionary,
-    std::vector<std::string> & corrections,
+    std::vector<std::string> & suggestions,
     bool & exaxtMatching,
     const std::function<int(const std::string&, const std::string&)>& levenshteinDistance,
     int inputHash,
@@ -188,13 +189,13 @@ void SpellCheck_Internal(
         auto distance = levenshteinDistance(input, word);
         if (distance == 0) {
             // exaxt matching
-            corrections.clear();
-            corrections.push_back(word);
+            suggestions.clear();
+            suggestions.push_back(word);
             exaxtMatching = true;
             break;
         }
         else if (distance < threshold) {
-            corrections.push_back(word);
+            suggestions.push_back(word);
         }
     }
 }
@@ -204,30 +205,25 @@ std::vector<std::string> SpellCheck_Innocent(
     const std::vector<std::string>& dictionary)
 {
     const auto threshold = 3;
-    std::vector<std::string> corrections;
+    std::vector<std::string> suggestions;
     
     for (auto & word : dictionary) {
         auto func = somera::levenshteinDistance_ONDGreedyAlgorithm;
         auto distance = func(input, word);
         if (distance == 0) {
             // exaxt matching
-            corrections.clear();
-            corrections.push_back(word);
+            suggestions.clear();
+            suggestions.push_back(word);
             break;
         }
         else if (distance < threshold) {
-            corrections.push_back(word);
+            suggestions.push_back(word);
         }
     }
-    return corrections;
+    return suggestions;
 }
 
-struct SearchResult {
-    std::vector<std::string> corrections;
-    bool exactMatching;
-};
-
-SearchResult SpellCheck_HistogramHashinging_Internal(
+SpellCheckResult SpellCheck_HistogramHashinging_Internal(
     const std::string& input,
     const std::unordered_map<uint32_t, std::vector<std::string>>& hashedDictionary,
     const std::function<int(const std::string&, const std::string&)>& levenshteinDistance,
@@ -237,8 +233,8 @@ SearchResult SpellCheck_HistogramHashinging_Internal(
     const auto inputSizeHash = SizeHash(input);
     const auto threshold = 3;
     
-    SearchResult result;
-    result.exactMatching = false;
+    SpellCheckResult result;
+    result.correctlySpelled = false;
 
     const auto inputHistogramHashing = histogramHashing(input);
 
@@ -256,13 +252,13 @@ SearchResult SpellCheck_HistogramHashinging_Internal(
         SpellCheck_Internal(
             input,
             dictionary,
-            result.corrections,
+            result.suggestions,
             exactMatching,
             levenshteinDistance,
             inputSizeHash,
             threshold);
         if (exactMatching) {
-            result.exactMatching = true;
+            result.correctlySpelled = true;
             break;
         }
     }
@@ -278,7 +274,7 @@ std::vector<std::string> SpellCheck_HistogramHashinging(
         hashedDictionary,
         somera::levenshteinDistance_ONDGreedyAlgorithm,
         HistogramHashing_Alphabet,
-        28).corrections;
+        28).suggestions;
 }
 
 std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold(
@@ -293,7 +289,7 @@ std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold(
             return somera::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
         },
         HistogramHashing_Alphabet,
-        28).corrections;
+        28).suggestions;
 }
 
 std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold_Cyclic32(
@@ -308,7 +304,7 @@ std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold_Cyclic32(
             return somera::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
         },
         HistogramHashing_Cyclic32,
-        32).corrections;
+        32).suggestions;
 }
 
 std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold_Cyclic16(
@@ -323,7 +319,7 @@ std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold_Cyclic16(
             return somera::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
         },
         HistogramHashing_Cyclic16,
-        16).corrections;
+        16).suggestions;
 }
 
 std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold_Cyclic8(
@@ -338,7 +334,7 @@ std::vector<std::string> SpellCheck_HistogramHashinging_ONDThreshold_Cyclic8(
             return somera::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
         },
         HistogramHashing_Cyclic8,
-        8).corrections;
+        8).suggestions;
 }
 
 std::vector<std::string> SpellCheck_AccumulateHashing(
@@ -352,7 +348,7 @@ std::vector<std::string> SpellCheck_AccumulateHashing(
         return somera::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
     };
     
-    std::vector<std::string> corrections;
+    std::vector<std::string> suggestions;
     
     const uint32_t searchRange = 128;
     const auto inputHistogramHashing = HistogramHashing_Accumulate(input);
@@ -395,7 +391,7 @@ std::vector<std::string> SpellCheck_AccumulateHashing(
         SpellCheck_Internal(
             input,
             dictionary,
-            corrections,
+            suggestions,
             exactMatching,
             levenshteinDistance,
             inputSizeHash,
@@ -404,7 +400,7 @@ std::vector<std::string> SpellCheck_AccumulateHashing(
             break;
         }
     }
-    return corrections;
+    return suggestions;
 }
 
 std::vector<std::string> SpellCheck_SizeHashing(
@@ -418,7 +414,7 @@ std::vector<std::string> SpellCheck_SizeHashing(
         return somera::levenshteinDistance_ONDGreedyAlgorithm_Threshold(a, b, threshold);
     };
     
-    std::vector<std::string> corrections;
+    std::vector<std::string> suggestions;
 
     const int searchRange = 1;
 
@@ -460,7 +456,7 @@ std::vector<std::string> SpellCheck_SizeHashing(
         SpellCheck_Internal(
             input,
             dictionary,
-            corrections,
+            suggestions,
             exactMatching,
             levenshteinDistance,
             inputSizeHash,
@@ -469,7 +465,7 @@ std::vector<std::string> SpellCheck_SizeHashing(
             break;
         }
     }
-    return corrections;
+    return suggestions;
 }
 
 std::vector<std::string> SpellCheck_SizeAndHistogram(
@@ -478,7 +474,7 @@ std::vector<std::string> SpellCheck_SizeAndHistogram(
 {
     const auto inputSizeHash = SizeHash(input);
 
-    std::vector<std::string> corrections;
+    std::vector<std::string> suggestions;
 
     const int searchRange = 1;
 
@@ -523,17 +519,17 @@ std::vector<std::string> SpellCheck_SizeAndHistogram(
             HistogramHashing_Alphabet,
             28);
 
-        if (result.exactMatching) {
-            corrections = std::move(result.corrections);
+        if (result.correctlySpelled) {
+            suggestions = std::move(result.suggestions);
             break;
         }
         
         // NOTE: merging
-        for (auto & c : result.corrections) {
-            corrections.push_back(std::move(c));
+        for (auto & c : result.suggestions) {
+            suggestions.push_back(std::move(c));
         }
     }
-    return corrections;
+    return suggestions;
 }
 
 template <typename SpellCheckFunc, typename Dictionary>
@@ -542,21 +538,21 @@ void Print(
     const std::string& inputWord,
     const Dictionary& dictionary)
 {
-    auto corrections = spellCheck(inputWord, dictionary);
-    if (corrections.empty()) {
+    auto suggestions = spellCheck(inputWord, dictionary);
+    if (suggestions.empty()) {
         std::cout << "'" << inputWord << "' is not found." << std::endl;
         return;
     }
 
-    if (corrections.size() == 1) {
-        auto distance = somera::levenshteinDistance_ONDGreedyAlgorithm(inputWord, corrections.front());
+    if (suggestions.size() == 1) {
+        auto distance = somera::levenshteinDistance_ONDGreedyAlgorithm(inputWord, suggestions.front());
         if (distance == 0) {
             std::cout << "'" << inputWord << "' is found. (exact match)" << std::endl;
             return;
         }
     }
 
-    std::stable_sort(std::begin(corrections), std::end(corrections), [&](const std::string& a, const std::string& b) {
+    std::stable_sort(std::begin(suggestions), std::end(suggestions), [&](const std::string& a, const std::string& b) {
         auto similarA = somera::closestMatchFuzzySimilarity(inputWord, a);
         auto similarB = somera::closestMatchFuzzySimilarity(inputWord, b);
         return similarA >= similarB;
@@ -564,7 +560,7 @@ void Print(
 
     std::cout << "'" << inputWord << "' Did you mean {";
     bool comma = false;
-    for (auto & word : corrections) {
+    for (auto & word : suggestions) {
         if (comma) {
             std::cout << ", ";
         }
