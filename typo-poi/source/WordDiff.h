@@ -61,14 +61,4 @@ std::vector<DiffEdit<char>> computeShortestEditScript_WeaveingLinearSpace(
     const std::string& text1,
     const std::string& text2);
 
-std::string computeLCSLinearSpace(
-    const std::string& text1,
-    const std::string& text2);
-
-std::string computeLCSLinearSpace(
-    const std::string& text1,
-    const std::string& text2,
-    std::size_t m,
-    std::size_t n);
-
 } // namespace somera
