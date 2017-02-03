@@ -31,9 +31,11 @@ struct CompileOptions {
     std::vector<std::string> libraries;
     std::vector<std::string> includeSearchPaths;
     std::vector<std::string> librarySearchPaths;
-    std::vector<std::string> flags;
+    std::vector<std::string> preprocessorDefinitions;
     std::map<std::string, std::string> buildSettings;
     std::string author;
+    bool enableCppExceptions = true;
+    bool enableCppRtti = true;
 };
 
 } // namespace somera

@@ -73,6 +73,26 @@ std::string EncodeDoubleQuotes(const std::string& comment)
     return '\"' + comment + '\"';
 }
 
+std::string EncodePath(const std::string& comment)
+{
+    bool needToAddDoubleQuotes = false;
+    for (auto c : comment) {
+        if ((c == '_') ||
+            ('a' <= c && c <= 'z') ||
+            ('A' <= c && c <= 'Z') ||
+            ('0' <= c && c <= '9')) {
+            continue;
+        }
+        needToAddDoubleQuotes = true;
+    }
+
+    if (!needToAddDoubleQuotes) {
+        return comment;
+    }
+
+    return '\"' + comment + '\"';
+}
+
 std::string StringifyUUID(const std::string& uuid, const std::string& comment)
 {
     std::stringstream stream;
@@ -561,12 +581,26 @@ void SetSearchPathsToBuildConfig(
     const CompileOptions& options)
 {
     if (!options.includeSearchPaths.empty()) {
-        config.AddBuildSettings(
-            "HEADER_SEARCH_PATHS", options.includeSearchPaths);
+        auto paths = options.includeSearchPaths;
+        for (auto & path : paths) {
+            path = EncodePath(path);
+        }
+        config.AddBuildSettings("HEADER_SEARCH_PATHS", std::move(paths));
     }
+
     if (!options.librarySearchPaths.empty()) {
-        config.AddBuildSettings(
-            "LIBRARY_SEARCH_PATHS", options.librarySearchPaths);
+        auto paths = options.librarySearchPaths;
+        for (auto & path : paths) {
+            path = EncodePath(path);
+        }
+        config.AddBuildSettings("LIBRARY_SEARCH_PATHS", std::move(paths));
+    }
+
+    if (!options.enableCppExceptions) {
+        config.AddBuildSettings("GCC_ENABLE_CPP_EXCEPTIONS", "NO");
+    }
+    if (!options.enableCppRtti) {
+        config.AddBuildSettings("GCC_ENABLE_CPP_RTTI", "NO");
     }
 
     {
@@ -703,6 +737,10 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
     }
 
     const auto buildConfigurationDebug = [&] {
+        auto definitions = options.preprocessorDefinitions;
+        definitions.push_back(EncodeDoubleQuotes("DEBUG=1"));
+        definitions.push_back(EncodeDoubleQuotes("$(inherited)"));
+    
         auto config = std::make_shared<XCBuildConfiguration>();
         config->name = "Debug";
         SetDefaultBuildConfig(*config);
@@ -712,10 +750,7 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
         config->AddBuildSettings("ENABLE_TESTABILITY", "YES");
         config->AddBuildSettings("GCC_DYNAMIC_NO_PIC", "NO");
         config->AddBuildSettings("GCC_OPTIMIZATION_LEVEL", "0");
-        config->AddBuildSettings("GCC_PREPROCESSOR_DEFINITIONS", std::vector<std::string>{
-            "\"DEBUG=1\"",
-            "\"$(inherited)\"",
-        });
+        config->AddBuildSettings("GCC_PREPROCESSOR_DEFINITIONS", definitions);
         config->AddBuildSettings("MTL_ENABLE_DEBUG_INFO", "YES");
         config->AddBuildSettings("ONLY_ACTIVE_ARCH", "YES");
         return config;
@@ -728,6 +763,9 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
         config->AddBuildSettings("DEBUG_INFORMATION_FORMAT", "\"dwarf-with-dsym\"");
         config->AddBuildSettings("ENABLE_NS_ASSERTIONS", "NO");
         config->AddBuildSettings("ENABLE_STRICT_OBJC_MSGSEND", "YES");
+        if (!options.preprocessorDefinitions.empty()) {
+            config->AddBuildSettings("GCC_PREPROCESSOR_DEFINITIONS", options.preprocessorDefinitions);
+        }
         config->AddBuildSettings("MTL_ENABLE_DEBUG_INFO", "NO");
         return config;
     }();

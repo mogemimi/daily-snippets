@@ -28,12 +28,27 @@ void setupCommandLineParser(CommandLineParser & parser)
         "Add directory to include search path");
     parser.addArgument("-L", CommandLineArgumentType::JoinedOrSeparate,
         "Add directory to library search path");
+    parser.addArgument("-D", CommandLineArgumentType::JoinedOrSeparate,
+        "Add predefined macro");
     parser.addArgument("-l", CommandLineArgumentType::JoinedOrSeparate,
         "Search the library when linking");
+    parser.addArgument("-O", CommandLineArgumentType::Flag, "Specify the optimization level");
+    parser.addArgument("-O0", CommandLineArgumentType::Flag, "Specify the optimization level");
+    parser.addArgument("-O1", CommandLineArgumentType::Flag, "Specify the optimization level");
+    parser.addArgument("-O2", CommandLineArgumentType::Flag, "Specify the optimization level");
+    parser.addArgument("-O3", CommandLineArgumentType::Flag, "Specify the optimization level");
+    parser.addArgument("-O4", CommandLineArgumentType::Flag, "Specify the optimization level");
+    parser.addArgument("-Ofast", CommandLineArgumentType::Flag, "Specify the optimization level");
+    parser.addArgument("-Os", CommandLineArgumentType::Flag, "Specify the optimization level");
+    parser.addArgument("-Oz", CommandLineArgumentType::Flag, "Specify the optimization level");
+    parser.addArgument("-Og", CommandLineArgumentType::Flag, "Specify the optimization level");
+    parser.addArgument("-W", CommandLineArgumentType::JoinedOrSeparate, "Specify a warning option");
     parser.addArgument("-fno-exceptions", CommandLineArgumentType::Flag, "no-exceptions");
+    parser.addArgument("-fno-rtti", CommandLineArgumentType::Flag, "no-rtti");
     parser.addArgument("-generator=", CommandLineArgumentType::JoinedOrSeparate,
         "The output formats to generate. Supported format\n"
         "are \"xcode\", \"msbuild\", \"cmake\", \"gyp\", or \"gn\".");
+    parser.addArgument("-c", CommandLineArgumentType::JoinedOrSeparate, "TODO");
     parser.addArgument("-o", CommandLineArgumentType::JoinedOrSeparate, "Write output to <file>");
     parser.addArgument("-generator-output=", CommandLineArgumentType::JoinedOrSeparate,
         "Generate build files under the <dir>");
@@ -134,6 +149,10 @@ int main(int argc, char *argv[])
         printVerbose("[-L] " + path);
         options.librarySearchPaths.push_back(path);
     }
+    for (auto & definition : parser.getValues("-D")) {
+        printVerbose("[-D] " + definition);
+        options.preprocessorDefinitions.push_back(definition);
+    }
     for (auto & path : parser.getValues("-l")) {
         printVerbose("[-l] " + path);
         options.libraries.push_back(path);
@@ -164,19 +183,34 @@ int main(int argc, char *argv[])
         options.buildSettings.emplace("-stdlib=", *value);
     }
 
+    options.enableCppExceptions = !parser.exists("-fno-exceptions");
+    options.enableCppRtti = !parser.exists("-fno-rtti");
+
     for (auto & path : options.includeSearchPaths) {
+        if (FileSystem::isAbsolute(path)) {
+            continue;
+        }
         path = FileSystem::relative(path, options.generatorOutputDirectory);
         printVerbose("[-I (Relative)] " + path);
     }
     for (auto & path : options.librarySearchPaths) {
+        if (FileSystem::isAbsolute(path)) {
+            continue;
+        }
         path = FileSystem::relative(path, options.generatorOutputDirectory);
         printVerbose("[-L (Relative)] " + path);
     }
     for (auto & path : options.libraries) {
+        if (FileSystem::isAbsolute(path)) {
+            continue;
+        }
         path = FileSystem::relative(path, options.generatorOutputDirectory);
         printVerbose("[-l (Relative)] " + path);
     }
     for (auto & path : options.sources) {
+        if (FileSystem::isAbsolute(path)) {
+            continue;
+        }
         path = FileSystem::relative(path, options.generatorOutputDirectory);
         printVerbose("[Path (Relative)] " + path);
     }
