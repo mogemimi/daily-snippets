@@ -13,7 +13,7 @@
 #include <fstream>
 #include <array>
 #include <unordered_map>
-
+#include <random>
 #include <iomanip>
 
 using somera::SpellCheckResult;
@@ -210,6 +210,29 @@ std::vector<std::string> SpellCheck_Innocent(
     for (auto & word : dictionary) {
         auto func = somera::levenshteinDistance_ONDGreedyAlgorithm;
         auto distance = func(input, word);
+        if (distance == 0) {
+            // exaxt matching
+            suggestions.clear();
+            suggestions.push_back(word);
+            break;
+        }
+        else if (distance < threshold) {
+            suggestions.push_back(word);
+        }
+    }
+    return suggestions;
+}
+
+std::vector<std::string> SpellCheck_Innocent_ONDThreshold(
+    const std::string& input,
+    const std::vector<std::string>& dictionary)
+{
+    const auto threshold = 3;
+    std::vector<std::string> suggestions;
+    
+    for (auto & word : dictionary) {
+        auto func = somera::levenshteinDistance_ONDGreedyAlgorithm_Threshold;
+        auto distance = func(input, word, threshold);
         if (distance == 0) {
             // exaxt matching
             suggestions.clear();
@@ -539,6 +562,7 @@ void Print(
     const Dictionary& dictionary)
 {
     auto suggestions = spellCheck(inputWord, dictionary);
+#if 0
     if (suggestions.empty()) {
         std::cout << "'" << inputWord << "' is not found." << std::endl;
         return;
@@ -568,6 +592,7 @@ void Print(
         comma = true;
     }
     std::cout << "}" << std::endl;
+#endif
 }
 
 template <typename SpellChecker>
@@ -576,6 +601,7 @@ void Print(
     const std::string& word)
 {
     auto result = spellChecker.Suggest(word);
+#if 0
     if (result.correctlySpelled) {
         std::cout << "'" << word << "' is found. (exact match)" << std::endl;
         return;
@@ -597,6 +623,7 @@ void Print(
         comma = true;
     }
     std::cout << "}" << std::endl;
+#endif
 }
 
 void ReadDictionaryFile(
@@ -1035,6 +1062,64 @@ void SpellChecker_Ngram::AddWord(const std::string& word)
     }
 }
 
+std::string RandomEditWord(const std::string& input, std::mt19937 & random)
+{
+    std::string word = input;
+
+    std::uniform_int_distribution<int> dist(0, 3);
+    auto editDistance = dist(random);
+    
+    while (editDistance > 0) {
+        if (word.size() <= 1) {
+            std::uniform_int_distribution<char> dist4('a', 'z');
+            word.push_back(dist4(random));
+            --editDistance;
+            continue;
+        }
+
+        std::uniform_int_distribution<size_t> dist2(0, word.size() - 1);
+        std::uniform_int_distribution<size_t> dist3(0, 2);
+        auto operation = dist3(random);
+        
+        if (operation == 0) {
+            word.erase(dist2(random), 1);
+        }
+        else if (operation == 1) {
+            std::uniform_int_distribution<char> dist4('a', 'z');
+            word.insert(dist2(random), 1, dist4(random));
+        }
+        else if (operation == 2) {
+            auto a = dist2(random);
+            auto b = dist2(random);
+            if (a != b) {
+                std::swap(word[a], word[b]);
+            }
+        }
+
+        assert(editDistance > 0);
+        --editDistance;
+    }
+    
+    return word;
+}
+
+std::vector<std::string> RandomInputWords(const std::vector<std::string>& dictionaryIn)
+{
+    auto dict = dictionaryIn;
+
+    std::mt19937 random(10000);
+    std::shuffle(std::begin(dict), std::end(dict), random);
+    std::vector<std::string> words;
+    
+    constexpr size_t wordCount = 100;
+
+    for (size_t i = 0; i < std::min(wordCount, dict.size()); ++i) {
+        auto word = RandomEditWord(dict[i], random);
+        words.push_back(word);
+    }
+    return words;
+}
+
 } // unnamed namespace
 
 int main(int argc, char *argv[])
@@ -1216,6 +1301,10 @@ int main(int argc, char *argv[])
     std::cout << "hash indices (Accumulate): " << hashedDictionary_Accumulate.size() << std::endl;
     std::cout << "------------------" << std::endl;
 
+
+#if 1
+    auto inputWords = RandomInputWords(dictionary);
+#else
     std::vector<std::string> inputWords = {
         "defered",
         "deferred",
@@ -1285,111 +1374,133 @@ int main(int argc, char *argv[])
         "compatibiliy",
         "woeld", // would or world
     };
+#endif
 
-//    measurePerformanceTime([&] {
-//        auto spellCheck = SpellCheck_Innocent;
-//        auto & dict = dictionary;
-//        for (auto & inputWord : inputWords) {
-//            Print(spellCheck, inputWord, dict);
-//        }
-//    });
-//
-
-//    std::cout << "------------------" << std::endl;
-//
-//    measurePerformanceTime([&] {
-//        auto spellCheck = SpellCheck_HistogramHashinging;
-//        auto & dict = hashedDictionary;
-//        for (auto & inputWord : inputWords) {
-//            Print(spellCheck, inputWord, dict);
-//        }
-//    });
-//
-//    std::cout << "------------------" << std::endl;
-//
-//    measurePerformanceTime([&] {
-//        auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold;
-//        auto & dict = hashedDictionary;
-//        for (auto & inputWord : inputWords) {
-//            Print(spellCheck, inputWord, dict);
-//        }
-//    });
-//
-//    std::cout << "------------------" << std::endl;
-//
-//    measurePerformanceTime([&] {
-//        auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold_Cyclic32;
-//        auto & dict = hashedDictionary_Cyclic32;
-//        for (auto & inputWord : inputWords) {
-//            Print(spellCheck, inputWord, dict);
-//        }
-//    });
-//
-//    std::cout << "------------------" << std::endl;
-//
-//    measurePerformanceTime([&] {
-//        auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold_Cyclic16;
-//        auto & dict = hashedDictionary_Cyclic16;
-//        for (auto & inputWord : inputWords) {
-//            Print(spellCheck, inputWord, dict);
-//        }
-//    });
-//
-//    std::cout << "------------------" << std::endl;
-//
-//    measurePerformanceTime([&] {
-//        auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold_Cyclic8;
-//        auto & dict = hashedDictionary_Cyclic8;
-//        for (auto & inputWord : inputWords) {
-//            Print(spellCheck, inputWord, dict);
-//        }
-//    });
-//    
-//    std::cout << "------------------" << std::endl;
-//
-//    measurePerformanceTime([&] {
-//        auto spellCheck = SpellCheck_SizeHashing;
-//        auto & dict = hashedDictionary_Size;
-//        for (auto & inputWord : inputWords) {
-//            Print(spellCheck, inputWord, dict);
-//        }
-//    });
-//
-//    std::cout << "------------------" << std::endl;
-//
-//    measurePerformanceTime([&] {
-//        auto spellCheck = SpellCheck_AccumulateHashing;
-//        auto & dict = hashedDictionary_Accumulate;
-//        for (auto & inputWord : inputWords) {
-//            Print(spellCheck, inputWord, dict);
-//        }
-//    });
-//    
-//    std::cout << "------------------" << std::endl;
-//
-//    measurePerformanceTime([&] {
-//        auto spellCheck = SpellCheck_SizeAndHistogram;
-//        auto & dict = hashedDictionary_SizeAndSignature;
-//        for (auto & inputWord : inputWords) {
-//            Print(spellCheck, inputWord, dict);
-//        }
-//    });
-//    
-//    std::cout << "------------------" << std::endl;
-//
-//    measurePerformanceTime([&] {
-//        for (auto & word : inputWords) {
-//            Print(spellChecker_Ngram, word);
-//        }
-//    });
-//    
-//    std::cout << "------------------" << std::endl;
-//
-//    measurePerformanceTime([&] {
-//        for (auto & word : inputWords) {
-//            Print(*spellChecker, word);
-//        }
-//    });
+    std::cout << "SpellCheck_Innocent" << std::endl;
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_Innocent;
+        auto & dict = dictionary;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
     
+    std::cout << "------------------" << std::endl;
+
+    std::cout << "SpellCheck_Innocent_ONDThreshold" << std::endl;
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_Innocent_ONDThreshold;
+        auto & dict = dictionary;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+
+    std::cout << "------------------" << std::endl;
+
+    std::cout << "SpellCheck_HistogramHashinging" << std::endl;
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_HistogramHashinging;
+        auto & dict = hashedDictionary;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+
+    std::cout << "------------------" << std::endl;
+
+    std::cout << "SpellCheck_HistogramHashinging_ONDThreshold" << std::endl;
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold;
+        auto & dict = hashedDictionary;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+
+    std::cout << "------------------" << std::endl;
+
+    std::cout << "SpellCheck_HistogramHashinging_ONDThreshold_Cyclic32" << std::endl;
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold_Cyclic32;
+        auto & dict = hashedDictionary_Cyclic32;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+
+    std::cout << "------------------" << std::endl;
+
+    std::cout << "SpellCheck_HistogramHashinging_ONDThreshold_Cyclic16" << std::endl;
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold_Cyclic16;
+        auto & dict = hashedDictionary_Cyclic16;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+
+    std::cout << "------------------" << std::endl;
+
+    std::cout << "SpellCheck_HistogramHashinging_ONDThreshold_Cyclic8" << std::endl;
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_HistogramHashinging_ONDThreshold_Cyclic8;
+        auto & dict = hashedDictionary_Cyclic8;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+    
+    std::cout << "------------------" << std::endl;
+
+    std::cout << "SpellCheck_SizeHashing" << std::endl;
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_SizeHashing;
+        auto & dict = hashedDictionary_Size;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+
+    std::cout << "------------------" << std::endl;
+
+    std::cout << "SpellCheck_AccumulateHashing" << std::endl;
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_AccumulateHashing;
+        auto & dict = hashedDictionary_Accumulate;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+    
+    std::cout << "------------------" << std::endl;
+
+    std::cout << "SpellCheck_SizeAndHistogram" << std::endl;
+    measurePerformanceTime([&] {
+        auto spellCheck = SpellCheck_SizeAndHistogram;
+        auto & dict = hashedDictionary_SizeAndSignature;
+        for (auto & inputWord : inputWords) {
+            Print(spellCheck, inputWord, dict);
+        }
+    });
+    
+    std::cout << "------------------" << std::endl;
+
+    std::cout << "spellChecker_Ngram" << std::endl;
+    measurePerformanceTime([&] {
+        for (auto & word : inputWords) {
+            Print(spellChecker_Ngram, word);
+        }
+    });
+    
+    std::cout << "------------------" << std::endl;
+
+    std::cout << "spellChecker" << std::endl;
+    measurePerformanceTime([&] {
+        for (auto & word : inputWords) {
+            Print(*spellChecker, word);
+        }
+    });
+
     return 0;
 }
