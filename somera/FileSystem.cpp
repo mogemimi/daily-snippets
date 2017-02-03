@@ -364,15 +364,16 @@ FileSystem::splitExtension(const std::string& path)
     return result;
 }
 
-//bool FileSystem::isAbsolute(const std::string& path)
-//{
-//#if defined(SOMERA_IS_WINDOWS)
-//    // See https://msdn.microsoft.com/en-us/library/bb773660.aspx
-//    //PathIsRelative()
-//#else
-//
-//#endif
-//}
+bool FileSystem::isAbsolute(const std::string& path)
+{
+    // See https://msdn.microsoft.com/en-us/library/bb773660.aspx
+    if (path.empty()) {
+        return false;
+    }
+
+    // TODO: Windows's drive (ex. 'C:' drive) and '\\[server name]'
+    return path.front() == '/';
+}
 
 std::string FileSystem::normalize(const std::string& path)
 {

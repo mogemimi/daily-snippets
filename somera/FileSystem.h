@@ -24,7 +24,7 @@ std::tuple<std::string, std::string> split(const std::string& path);
 
 std::tuple<std::string, std::string> splitExtension(const std::string& path);
 
-//std::string isAbsolute(const std::string& path);
+bool isAbsolute(const std::string& path);
 
 std::string normalize(const std::string& path);
 
