@@ -63,11 +63,6 @@ struct PBXSourcesBuildPhase;
 struct XCBuildConfiguration;
 struct XCConfigurationList;
 
-std::string EncodeComment(const std::string& comment)
-{
-    return "/* " + comment + " */";
-}
-
 std::string EncodeDoubleQuotes(const std::string& comment)
 {
     return '\"' + comment + '\"';
@@ -103,7 +98,7 @@ std::string StringifyUUID(const std::string& uuid, const std::string& comment)
     std::stringstream stream;
     stream << uuid;
     if (!comment.empty()) {
-        stream << ' ' + EncodeComment(comment);
+        stream << ' ' << "/* " << comment << " */";
     }
     return stream.str();
 }
@@ -378,6 +373,14 @@ public:
         stream << key << " = ";
     }
 
+    void BeginKeyValue(const UUIDWithComment& key)
+    {
+        if (!IsSingleLine()) {
+            stream << GetIndent();
+        }
+        stream << StringifyUUID(key.uuid, key.comment) << " = ";
+    }
+
     void EndKeyValue()
     {
         stream << ";";
@@ -399,6 +402,13 @@ public:
     {
         BeginKeyValue(key);
         stream << StringifyUUID(value.uuid, value.comment);
+        EndKeyValue();
+    }
+
+    void PrintKeyValue(const UUIDWithComment& key, const std::function<void()>& valuePrinter)
+    {
+        BeginKeyValue(key);
+        valuePrinter();
         EndKeyValue();
     }
 
@@ -1003,7 +1013,7 @@ template <typename BuildPhase>
 void PrintPBXBuildFiles(XcodePrinter & printer, const BuildPhase& phase)
 {
     for (auto & buildFile : phase.files) {
-        printer.BeginKeyValue(StringifyUUID(
+        printer.BeginKeyValue(MakeUUIDWithComment(
             buildFile->GetUuid(),
             GenerateComment(buildFile->fileRef, phase.GetComment())));
         XcodePrinterSettings settings;
@@ -1094,7 +1104,7 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
 
     printer.BeginSection("PBXCopyFilesBuildPhase");
     for (auto & phase : xcodeProject.copyFilesBuildPhases) {
-        printer.BeginKeyValue(StringifyUUID(phase->GetUuid(), phase->GetComment()));
+        printer.BeginKeyValue(MakeUUIDWithComment(phase->GetUuid(), phase->GetComment()));
             printer.BeginObject();
             printer.PrintKeyValue("isa", phase->isa());
             printer.PrintKeyValue("buildActionMask", phase->buildActionMask);
@@ -1110,7 +1120,7 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
 
     printer.BeginSection("PBXFileReference");
     for (auto & fileRef : xcodeProject.fileReferences) {
-        printer.BeginKeyValue(StringifyUUID(fileRef->GetUuid(), GenerateComment(fileRef)));
+        printer.BeginKeyValue(MakeUUIDWithComment(fileRef->GetUuid(), GenerateComment(fileRef)));
             XcodePrinterSettings settings;
             settings.isSingleLine = true;
             printer.BeginObject(std::move(settings));
@@ -1136,7 +1146,7 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
 
     printer.BeginSection("PBXFrameworksBuildPhase");
     for (auto & phase : xcodeProject.frameworkBuildPhases) {
-        printer.BeginKeyValue(StringifyUUID(phase->GetUuid(), phase->GetComment()));
+        printer.BeginKeyValue(MakeUUIDWithComment(phase->GetUuid(), phase->GetComment()));
             printer.BeginObject();
                 printer.PrintKeyValue("isa", phase->isa());
                 printer.PrintKeyValue("buildActionMask", phase->buildActionMask);
@@ -1151,7 +1161,7 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
     printer.BeginSection("PBXGroup");
     for (auto & group : xcodeProject.groups) {
         const auto pair = GetUuidWithComment(*group);
-        printer.BeginKeyValue(StringifyUUID(pair.uuid, pair.comment));
+        printer.BeginKeyValue(MakeUUIDWithComment(pair.uuid, pair.comment));
             printer.BeginObject();
                 printer.PrintKeyValue("isa", group->isa());
                 printer.PrintKeyValue("children", GetChildrenString(*group));
@@ -1169,7 +1179,7 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
 
     printer.BeginSection("PBXNativeTarget");
     for (auto & target : xcodeProject.nativeTargets) {
-        printer.BeginKeyValue(StringifyUUID(target->GetUuid(), target->name));
+        printer.BeginKeyValue(MakeUUIDWithComment(target->GetUuid(), target->name));
             printer.BeginObject();
                 printer.PrintKeyValue("isa", target->isa());
                 printer.PrintKeyValue("buildConfigurationList", MakeUUIDWithComment(
@@ -1194,7 +1204,7 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
 
     printer.BeginSection("PBXProject");
     for (auto & project : xcodeProject.projects) {
-        printer.BeginKeyValue(StringifyUUID(project->GetUuid(), "Project object"));
+        printer.BeginKeyValue(MakeUUIDWithComment(project->GetUuid(), "Project object"));
             printer.BeginObject();
                 printer.PrintKeyValue("isa", project->isa());
                 printer.PrintKeyValue("attributes", [&] {
@@ -1254,7 +1264,7 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
 
     printer.BeginSection("PBXSourcesBuildPhase");
     for (auto & phase : xcodeProject.sourcesBuildPhases) {
-        printer.BeginKeyValue(StringifyUUID(phase->GetUuid(), phase->GetComment()));
+        printer.BeginKeyValue(MakeUUIDWithComment(phase->GetUuid(), phase->GetComment()));
             printer.BeginObject();
                 printer.PrintKeyValue("isa", phase->isa());
                 printer.PrintKeyValue("buildActionMask", phase->buildActionMask);
@@ -1268,7 +1278,7 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
 
     printer.BeginSection("XCBuildConfiguration");
     for (auto & config : xcodeProject.buildConfigurations) {
-        printer.PrintKeyValue(StringifyUUID(config->GetUuid(), config->name), [&] {
+        printer.PrintKeyValue(MakeUUIDWithComment(config->GetUuid(), config->name), [&] {
             printer.BeginObject();
                 printer.PrintKeyValue("isa", config->isa());
                 printer.PrintKeyValue("buildSettings", [&] {
@@ -1282,7 +1292,7 @@ void PrintObjects(XcodePrinter & printer, const XcodeProject& xcodeProject)
 
     printer.BeginSection("XCConfigurationList");
     for (auto & configurationList : xcodeProject.configurationLists) {
-        printer.BeginKeyValue(StringifyUUID(
+        printer.BeginKeyValue(MakeUUIDWithComment(
             configurationList->GetUuid(),
             "Build configuration list for "
                 + configurationList->targetTypeName
