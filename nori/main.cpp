@@ -139,6 +139,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    const auto generator = parser.getValue("-generator=");
+
     somera::CompileOptions options;
 
     for (auto & path : parser.getValues("-I")) {
@@ -200,6 +202,38 @@ int main(int argc, char *argv[])
         path = FileSystem::relative(path, options.generatorOutputDirectory);
         printVerbose("[-L (Relative)] " + path);
     }
+    if (generator && (*generator == "xcode")) {
+        for (auto & path : options.libraries) {
+            auto extension = std::get<1>(FileSystem::splitExtension(path));
+            if (!extension.empty()) {
+                continue;
+            }
+            if (!FileSystem::getDirectoryName(path).empty()) {
+                continue;
+            }
+            for (auto & directory : options.librarySearchPaths) {
+                auto base = FileSystem::join(directory, "lib" + path);
+                auto staticLibrary = base + ".a";
+                if (FileSystem::exists(staticLibrary)) {
+                    path = staticLibrary;
+                    printVerbose("[-l (Found .a file)] " + path);
+                    break;
+                }
+                auto dynamicLibrary = base + ".dylib";
+                if (FileSystem::exists(dynamicLibrary)) {
+                    path = dynamicLibrary;
+                    printVerbose("[-l (Found .dylib file)] " + path);
+                    break;
+                }
+                printVerbose("[-l (LDFLAGS)] " + path);
+                options.otherLinkerFlags.push_back("-l" + path);
+                path.clear();
+            }
+        }
+        options.libraries.erase(
+            std::remove(std::begin(options.libraries), std::end(options.libraries), ""),
+            std::end(options.libraries));
+    }
     for (auto & path : options.libraries) {
         if (FileSystem::isAbsolute(path)) {
             continue;
@@ -217,23 +251,21 @@ int main(int argc, char *argv[])
     sortByName(options.libraries);
     sortByName(options.sources);
 
-    if (auto generator = parser.getValue("-generator=")) {
-        if (*generator == "xcode") {
-            auto error = somera::Xcode::GenerateXcodeProject(options);
-            if (error.hasError) {
-                std::cerr << error.description << std::endl;
-                return 1;
-            }
-            std::cout << "Generated." << std::endl;
+    if (generator && (*generator == "xcode")) {
+        auto error = somera::Xcode::GenerateXcodeProject(options);
+        if (error.hasError) {
+            std::cerr << error.description << std::endl;
+            return 1;
         }
-        else if (*generator == "msbuild") {
-            auto error = somera::MSBuild::GenerateMSBuildProject(options);
-            if (error.hasError) {
-                std::cerr << error.description << std::endl;
-                return 1;
-            }
-            std::cout << "Generated." << std::endl;
+        std::cout << "Generated." << std::endl;
+    }
+    else if (generator && (*generator == "msbuild")) {
+        auto error = somera::MSBuild::GenerateMSBuildProject(options);
+        if (error.hasError) {
+            std::cerr << error.description << std::endl;
+            return 1;
         }
+        std::cout << "Generated." << std::endl;
     }
 
     return 0;

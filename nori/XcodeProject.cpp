@@ -15,6 +15,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <regex>
 
 namespace somera {
 namespace {
@@ -73,17 +74,27 @@ std::string EncodeDoubleQuotes(const std::string& comment)
     return '\"' + comment + '\"';
 }
 
-std::string EncodePath(const std::string& comment)
+std::string EncodeString(const std::string& comment)
 {
+    if (comment.empty()) {
+        return "\"\"";
+    }
+
     bool needToAddDoubleQuotes = false;
     for (auto c : comment) {
         if ((c == '_') ||
+            (c == '.') ||
             ('a' <= c && c <= 'z') ||
             ('A' <= c && c <= 'Z') ||
             ('0' <= c && c <= '9')) {
             continue;
         }
         needToAddDoubleQuotes = true;
+    }
+
+    if (std::regex_match(comment, std::regex(R"([0-9A-F]{24} \/\* .+ \*\/)"))) {
+        // TODO: bad code
+        return comment;
     }
 
     if (!needToAddDoubleQuotes) {
@@ -373,7 +384,7 @@ public:
     void PrintKeyValue(const std::string& key, const std::string& value)
     {
         BeginKeyValue(key);
-        stream << value;
+        stream << EncodeString(value);
         EndKeyValue();
     }
 
@@ -389,7 +400,7 @@ public:
         BeginKeyValue(key);
         if (array.size() == 1 && IsUpperCase(key)) {
             auto & value = array.front();
-            stream << value;
+            stream << EncodeString(value);
         }
         else {
             stream << "(";
@@ -398,7 +409,7 @@ public:
             }
             ++tabs;
             for (auto & value : array) {
-                stream << GetIndent() << value << ",";
+                stream << GetIndent() << EncodeString(value) << ",";
                 if (!IsSingleLine()) {
                     stream << "\n";
                 } else {
@@ -540,8 +551,8 @@ auto find(C & container, T & value) -> decltype(std::begin(container))
 void SetDefaultBuildConfig(XCBuildConfiguration& config)
 {
     config.AddBuildSettings("ALWAYS_SEARCH_USER_PATHS", "NO");
-    config.AddBuildSettings("CLANG_CXX_LANGUAGE_STANDARD", "\"c++14\"");
-    config.AddBuildSettings("CLANG_CXX_LIBRARY", "\"libc++\"");
+    config.AddBuildSettings("CLANG_CXX_LANGUAGE_STANDARD", "c++14");
+    config.AddBuildSettings("CLANG_CXX_LIBRARY", "libc++");
     config.AddBuildSettings("CLANG_ENABLE_MODULES", "YES");
     config.AddBuildSettings("CLANG_ENABLE_OBJC_ARC", "YES");
     config.AddBuildSettings("CLANG_WARN_BOOL_CONVERSION", "YES");
@@ -555,7 +566,7 @@ void SetDefaultBuildConfig(XCBuildConfiguration& config)
     config.AddBuildSettings("CLANG_WARN_SUSPICIOUS_MOVE", "YES");
     config.AddBuildSettings("CLANG_WARN_UNREACHABLE_CODE", "YES");
     config.AddBuildSettings("CLANG_WARN__DUPLICATE_METHOD_MATCH", "YES");
-    config.AddBuildSettings("CODE_SIGN_IDENTITY", "\"-\"");
+    config.AddBuildSettings("CODE_SIGN_IDENTITY", "-");
     config.AddBuildSettings("COPY_PHASE_STRIP", "NO");
     config.AddBuildSettings("GCC_C_LANGUAGE_STANDARD", "c11");
     config.AddBuildSettings("GCC_NO_COMMON_BLOCKS", "YES");
@@ -581,19 +592,13 @@ void SetSearchPathsToBuildConfig(
     const CompileOptions& options)
 {
     if (!options.includeSearchPaths.empty()) {
-        auto paths = options.includeSearchPaths;
-        for (auto & path : paths) {
-            path = EncodePath(path);
-        }
-        config.AddBuildSettings("HEADER_SEARCH_PATHS", std::move(paths));
+        config.AddBuildSettings("HEADER_SEARCH_PATHS", options.includeSearchPaths);
     }
-
     if (!options.librarySearchPaths.empty()) {
-        auto paths = options.librarySearchPaths;
-        for (auto & path : paths) {
-            path = EncodePath(path);
-        }
-        config.AddBuildSettings("LIBRARY_SEARCH_PATHS", std::move(paths));
+        config.AddBuildSettings("LIBRARY_SEARCH_PATHS", options.librarySearchPaths);
+    }
+    if (!options.otherLinkerFlags.empty()) {
+        config.AddBuildSettings("OTHER_LDFLAGS", options.otherLinkerFlags);
     }
 
     if (!options.enableCppExceptions) {
@@ -607,14 +612,14 @@ void SetSearchPathsToBuildConfig(
         ///@todo Please refactor here
         auto iter = options.buildSettings.find("-std=");
         if (iter != std::end(options.buildSettings)) {
-            config.AddBuildSettings("CLANG_CXX_LANGUAGE_STANDARD", EncodeDoubleQuotes(iter->second));
+            config.AddBuildSettings("CLANG_CXX_LANGUAGE_STANDARD", iter->second);
         }
     }
     {
         ///@todo Please refactor here
         auto iter = options.buildSettings.find("-stdlib=");
         if (iter != std::end(options.buildSettings)) {
-            config.AddBuildSettings("CLANG_CXX_LIBRARY", EncodeDoubleQuotes(iter->second));
+            config.AddBuildSettings("CLANG_CXX_LIBRARY", iter->second);
         }
     }
 }
@@ -650,7 +655,7 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
 
     const auto productReference = [&] {
         auto fileRef = std::make_shared<PBXFileReference>();
-        fileRef->explicitFileType = "\"compiled.mach-o.executable\"";
+        fileRef->explicitFileType = "compiled.mach-o.executable";
         fileRef->includeInIndex = "0";
         fileRef->path = options.productName;
         fileRef->sourceTree = "BUILT_PRODUCTS_DIR";
@@ -662,7 +667,7 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
         auto fileRef = std::make_shared<PBXFileReference>();
         fileRef->lastKnownFileType = FindLastKnownFileType(source);
         fileRef->path = source;
-        fileRef->sourceTree = "\"<group>\"";
+        fileRef->sourceTree = "<group>";
 
         auto getGroup = [&](const std::string& directory) -> std::shared_ptr<PBXGroup> {
             if (directory.empty()) {
@@ -731,15 +736,15 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
         }
         else {
             fileRef->path = library;
-            fileRef->sourceTree = "\"<group>\"";
+            fileRef->sourceTree = "<group>";
         }
         frameworksGroup->children.push_back(fileRef);
     }
 
     const auto buildConfigurationDebug = [&] {
         auto definitions = options.preprocessorDefinitions;
-        definitions.push_back(EncodeDoubleQuotes("DEBUG=1"));
-        definitions.push_back(EncodeDoubleQuotes("$(inherited)"));
+        definitions.push_back("DEBUG=1");
+        definitions.push_back("$(inherited)");
     
         auto config = std::make_shared<XCBuildConfiguration>();
         config->name = "Debug";
@@ -760,7 +765,7 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
         config->name = "Release";
         SetDefaultBuildConfig(*config);
         SetSearchPathsToBuildConfig(*config, options);
-        config->AddBuildSettings("DEBUG_INFORMATION_FORMAT", "\"dwarf-with-dsym\"");
+        config->AddBuildSettings("DEBUG_INFORMATION_FORMAT", "dwarf-with-dsym");
         config->AddBuildSettings("ENABLE_NS_ASSERTIONS", "NO");
         config->AddBuildSettings("ENABLE_STRICT_OBJC_MSGSEND", "YES");
         if (!options.preprocessorDefinitions.empty()) {
@@ -772,13 +777,13 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
     const auto buildConfigurationTargetDebug = [&] {
         auto config = std::make_shared<XCBuildConfiguration>();
         config->name = "Debug";
-        config->AddBuildSettings("PRODUCT_NAME", "\"$(TARGET_NAME)\"");
+        config->AddBuildSettings("PRODUCT_NAME", "$(TARGET_NAME)");
         return config;
     }();
     const auto buildConfigurationTargetRelease = [&] {
         auto config = std::make_shared<XCBuildConfiguration>();
         config->name = "Release";
-        config->AddBuildSettings("PRODUCT_NAME", "\"$(TARGET_NAME)\"");
+        config->AddBuildSettings("PRODUCT_NAME", "$(TARGET_NAME)");
         return config;
     }();
 
@@ -845,26 +850,26 @@ std::shared_ptr<XcodeProject> CreateXcodeProject(const CompileOptions& options)
         target->name = options.targetName;
         target->productName = options.productName;
         target->productReference = productReference;
-        target->productType = "\"com.apple.product-type.tool\"";
+        target->productType = "com.apple.product-type.tool";
         return target;
     }();
 
     const auto pbxProject = [&] {
         auto project = std::make_shared<PBXProject>();
         project->buildConfigurationList = configurationListForProject;
-        project->compatibilityVersion = "\"Xcode 3.2\"";
+        project->compatibilityVersion = "Xcode 3.2";
         project->developmentRegion = "English";
         project->hasScannedForEncodings = "0";
         project->knownRegions = {"en"};
         project->mainGroup = mainGroup;
         project->productRefGroup = productsGroup;
-        project->projectDirPath = "\"\"";
-        project->projectRoot = "\"\"";
+        project->projectDirPath = "";
+        project->projectRoot = "";
         project->targets.push_back(nativeTarget);
 
         project->AddAttribute("LastUpgradeCheck", "0800");
         if (!options.author.empty()) {
-            project->AddAttribute("ORGANIZATIONNAME", EncodeDoubleQuotes(options.author));
+            project->AddAttribute("ORGANIZATIONNAME", options.author);
         }
 
         std::vector<XcodeTargetAttribute> targetAttributes;
@@ -990,7 +995,7 @@ std::vector<std::string> GetBuildPhasesString(const PBXNativeTarget& target)
 
 std::string GetSourceTree(const PBXGroup& group) noexcept
 {
-    return group.sourceTree ? *group.sourceTree : "\"<group>\"";
+    return group.sourceTree ? *group.sourceTree : "<group>";
 }
 
 std::string GetUuidWithComment(const PBXGroup& group)
