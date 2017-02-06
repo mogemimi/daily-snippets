@@ -1289,6 +1289,18 @@ int main(int argc, char *argv[])
         }
     });
 
+//    {
+//        double ave = 0.0;
+//        for (auto & w : dictionary) {
+//            ave += ((double)w.size()) / ((double)dictionary.size());
+//        }
+//        std::cout << "ave: " << ave << std::endl;
+//        std::sort(std::begin(dictionary), std::end(dictionary), [](auto & a, auto & b){
+//            return a.size() < b.size();
+//        });
+//        std::cout << "center: " << dictionary.at(dictionary.size() / 2).size() << std::endl;
+//    }
+
 //    PrintLetterFrequency(dictionary);
 //    PrintMisspelledWordDistribution();
 
