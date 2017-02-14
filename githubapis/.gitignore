@@ -1,0 +1,18 @@
+*.o
+*.swp
+.DS_Store
+
+## Output
+bin/
+build/
+*.xcodeproj
+
+# Visual Studio
+*.filters
+*.opensdf
+*.sdf
+*.sln
+*.vcxproj
+
+# Third party
+rapidjson
