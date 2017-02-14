@@ -41,6 +41,9 @@ HttpRequest::HttpRequest(
         if (*options.method == HttpRequestMethod::POST) {
             curl_easy_setopt(curl, CURLOPT_POST, 1);
         }
+        else if (*options.method == HttpRequestMethod::GET) {
+            curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
+        }
     }
     if (!options.headers.empty()) {
         // TODO: Please add implementation.
