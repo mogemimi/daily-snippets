@@ -1,0 +1,16 @@
+*.o
+*.swp
+.DS_Store
+
+## Output
+bin/
+build/
+*.xcodeproj
+aligndiff
+
+# Visual Studio
+*.filters
+*.opensdf
+*.sdf
+*.sln
+*.vcxproj
