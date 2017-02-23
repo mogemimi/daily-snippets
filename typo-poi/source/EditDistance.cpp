@@ -968,7 +968,7 @@ int computeLCSLengthInLinearSpace(const std::string& left, const std::string& ri
     auto lcsColumn = LCS_Column(left, right, (int)left.size(), (int)right.size());
     auto lcsLength = lcsColumn.back();
 
-#if 1
+#if 0
     std::printf("{");
     for (int i = 0; i < (int)lcsColumn.size(); ++i) {
         std::printf("%2d, ", lcsColumn[i]);
