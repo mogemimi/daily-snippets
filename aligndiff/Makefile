@@ -31,12 +31,12 @@ build:
 xcode:
 	$(NORI) \
 		-generator=xcode \
-		-o $(PRODUCTNAME) \
+		-o $(PRODUCT_NAME) \
 		$(CXXFLAGS) \
 		$(LDFLAGS) \
 		$(HEADERS) \
 		$(SOURCES) \
 		$(LDLIBS)
-	@xcodebuild -project $(PRODUCTNAME).xcodeproj -configuration Release
+	@xcodebuild -project $(PRODUCT_NAME).xcodeproj -configuration Release
 	@mkdir -p bin
-	@cp build/Release/$(PRODUCTNAME) bin/$(PRODUCTNAME)
+	@cp build/Release/$(PRODUCT_NAME) bin/$(PRODUCT_NAME)

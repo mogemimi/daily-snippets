@@ -11,16 +11,16 @@ namespace {
 void showHelpMessage()
 {
     std::printf(
-        "usage: [-h]\n"
+        "usage: [-h or other options] [strings...]\n"
         "\n"
-        "  -help                       Display available options\n"
-        "  --editdist  <string1> <string2>  Compute edit distance (called an levenshtein distance)\n"
-        "  --lcslength <string1> <string2>  Compute LCS (Longest-common subsequence) length\n"
-        "  --lcs       <string1> <string2>  Print longest-common subsequence (LCS)\n"
-        "  --ses       <string1> <string2>  Print shortest edit script (SES)\n"
-        "  --diff      <string1> <string2>  Print UNIX's 'diff' like edit script\n"
-        "  --align     <string1> <string2>  Print optimal alignment between two strings\n"
-        "  --table     <string1> <string2>  Print 'M x N' dynamic programming (DP) table\n");
+        "  -help                         Display available options\n"
+        "  -levdist <string1> <string2>  Compute levenshtein distance\n"
+        "  -lcslen  <string1> <string2>  Compute the length of \"LCS\" of two strings\n"
+        "  -lcs     <string1> <string2>  Display longest-common subsequence (LCS)\n"
+        "  -ses     <string1> <string2>  Print shortest edit script (SES)\n"
+        "  -diff    <string1> <string2>  Print UNIX's 'diff' like edit script\n"
+        "  -align   <string1> <string2>  Print optimal alignment between two strings\n"
+        "  -table   <string1> <string2>  Print 'M x N' dynamic programming table\n");
 }
 
 void printEditDist(const std::string& a, const std::string& b)
@@ -128,49 +128,49 @@ int main(int argc, const char *argv[])
         return 0;
     }
 
-    if (arg.operation == "--editdist") {
+    if (arg.operation == "-levdist") {
         if (arg.parameters.size() != 2) {
             std::fprintf(stderr, "error: please specify two strings.\n");
             return 1;
         }
         printEditDist(arg.parameters[0], arg.parameters[1]);
     }
-    else if (arg.operation == "--lcslength") {
+    else if (arg.operation == "-lcslen") {
         if (arg.parameters.size() != 2) {
             std::fprintf(stderr, "error: please specify two strings.\n");
             return 1;
         }
         printLCSLength(arg.parameters[0], arg.parameters[1]);
     }
-    else if (arg.operation == "--lcs") {
+    else if (arg.operation == "-lcs") {
         if (arg.parameters.size() != 2) {
             std::fprintf(stderr, "error: please specify two strings.\n");
             return 1;
         }
         printLCS(arg.parameters[0], arg.parameters[1]);
     }
-    else if (arg.operation == "--ses") {
+    else if (arg.operation == "-ses") {
         if (arg.parameters.size() != 2) {
             std::fprintf(stderr, "error: please specify two strings.\n");
             return 1;
         }
         printSES(arg.parameters[0], arg.parameters[1]);
     }
-    else if (arg.operation == "--diff") {
+    else if (arg.operation == "-diff") {
         if (arg.parameters.size() != 2) {
             std::fprintf(stderr, "error: please specify two strings.\n");
             return 1;
         }
         printDiff(arg.parameters[0], arg.parameters[1]);
     }
-    else if (arg.operation == "--align") {
+    else if (arg.operation == "-align") {
         if (arg.parameters.size() != 2) {
             std::fprintf(stderr, "error: please specify two strings.\n");
             return 1;
         }
         printAlign(arg.parameters[0], arg.parameters[1]);
     }
-    else if (arg.operation == "--table") {
+    else if (arg.operation == "-table") {
         if (arg.parameters.size() != 2) {
             std::fprintf(stderr, "error: please specify two strings.\n");
             return 1;

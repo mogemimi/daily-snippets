@@ -14,14 +14,15 @@ ArgumentsParseResult parseArguments(int argc, const char *argv[])
     if (argc >= 1) {
         result.executablePath = argv[0];
     }
-    for (int i = 1; i < argc; i++) {
-        auto argument = argv[i];
+    if (argc >= 2) {
+        auto argument = argv[1];
         if (argument[0] == '-') {
             result.operation = argument;
         }
-        else {
-            result.parameters.push_back(argument);
-        }
+    }
+    for (int i = 2; i < argc; i++) {
+        auto argument = argv[i];
+        result.parameters.push_back(argument);
     }
     return result;
 }
