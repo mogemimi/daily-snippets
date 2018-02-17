@@ -602,18 +602,24 @@ auto find(C & container, T & value) -> decltype(std::begin(container))
 void SetDefaultBuildConfig(XCBuildConfiguration& config)
 {
     config.AddBuildSettings("ALWAYS_SEARCH_USER_PATHS", "NO");
-    config.AddBuildSettings("CLANG_CXX_LANGUAGE_STANDARD", "c++14");
+    config.AddBuildSettings("CLANG_CXX_LANGUAGE_STANDARD", "c++17");
     config.AddBuildSettings("CLANG_CXX_LIBRARY", "libc++");
     config.AddBuildSettings("CLANG_ENABLE_MODULES", "YES");
     config.AddBuildSettings("CLANG_ENABLE_OBJC_ARC", "YES");
+    config.AddBuildSettings("CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING", "YES");
     config.AddBuildSettings("CLANG_WARN_BOOL_CONVERSION", "YES");
+    config.AddBuildSettings("CLANG_WARN_COMMA", "YES");
     config.AddBuildSettings("CLANG_WARN_CONSTANT_CONVERSION", "YES");
     config.AddBuildSettings("CLANG_WARN_DIRECT_OBJC_ISA_USAGE", "YES_ERROR");
     config.AddBuildSettings("CLANG_WARN_EMPTY_BODY", "YES");
     config.AddBuildSettings("CLANG_WARN_ENUM_CONVERSION", "YES");
     config.AddBuildSettings("CLANG_WARN_INFINITE_RECURSION", "YES");
     config.AddBuildSettings("CLANG_WARN_INT_CONVERSION", "YES");
+    config.AddBuildSettings("CLANG_WARN_NON_LITERAL_NULL_CONVERSION", "YES");
+    config.AddBuildSettings("CLANG_WARN_OBJC_LITERAL_CONVERSION", "YES");
     config.AddBuildSettings("CLANG_WARN_OBJC_ROOT_CLASS", "YES_ERROR");
+    config.AddBuildSettings("CLANG_WARN_RANGE_LOOP_ANALYSIS", "YES");
+    config.AddBuildSettings("CLANG_WARN_STRICT_PROTOTYPES", "YES");
     config.AddBuildSettings("CLANG_WARN_SUSPICIOUS_MOVE", "YES");
     config.AddBuildSettings("CLANG_WARN_UNREACHABLE_CODE", "YES");
     config.AddBuildSettings("CLANG_WARN__DUPLICATE_METHOD_MATCH", "YES");
