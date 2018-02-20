@@ -17,3 +17,5 @@ class NamedDecl;
 class VariableDecl;
 
 class Type;
+
+class Entity;

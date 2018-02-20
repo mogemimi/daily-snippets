@@ -18,8 +18,15 @@ int main()
         return 1;
     }
 
-    TypeSolver solver;
-    ASTTraverser traverser;
-    traverser.traverse(driver.ast, solver);
+    {
+        IdentifierResolver resolver;
+        ASTTraverser traverser;
+        traverser.traverse(driver.ast, resolver);
+    }
+    {
+        TypeSolver solver;
+        ASTTraverser traverser;
+        traverser.traverse(driver.ast, solver);
+    }
     return 0;
 }

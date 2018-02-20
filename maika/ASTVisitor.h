@@ -17,8 +17,12 @@ public:
 };
 
 class Entity {
-public:
+private:
     std::string name;
+
+public:
+    std::string getName() const;
+    void setName(const std::string& name);
 };
 
 class Scope final {
@@ -45,7 +49,7 @@ public:
     IdentifierResolver();
 
     std::shared_ptr<Scope> getCurrentScope();
-    void pushScope();
+    void pushScope(const std::shared_ptr<Scope>& scope);
     void popScope();
 
     void visit(FunctionDecl* decl) override;

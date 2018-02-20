@@ -81,7 +81,7 @@ void CallExpr::traverse(ASTVisitor& visitor)
 std::string CallExpr::dump(ASTDumper& dumper) const
 {
     assert(namedDecl);
-    std::string s = "(" + namedDecl->name;
+    std::string s = "(" + namedDecl->getName();
     for (const auto& arg : arguments) {
         s += " ";
         s += arg->dump(dumper);

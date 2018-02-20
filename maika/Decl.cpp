@@ -17,6 +17,21 @@ void Decl::setType(const std::shared_ptr<Type>& t)
     type = t;
 }
 
+std::string NamedDecl::getName() const
+{
+    return name;
+}
+
+std::shared_ptr<const Entity> NamedDecl::getEntity() const
+{
+    return entity;
+}
+
+void NamedDecl::setEntity(const std::shared_ptr<const Entity>& entityIn)
+{
+    entity = entityIn;
+}
+
 void NamedDecl::traverse(ASTVisitor& visitor)
 {
     visitor.visit(this);

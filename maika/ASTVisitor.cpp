@@ -61,12 +61,23 @@ std::shared_ptr<Entity> Scope::getEntity(const std::string& name) const
 void Scope::defineVariable(const std::shared_ptr<Entity>& v)
 {
     assert(v);
-    variables.emplace(v->name, v);
+    variables.emplace(v->getName(), v);
+}
+
+std::string Entity::getName() const
+{
+    return name;
+}
+
+void Entity::setName(const std::string& nameIn)
+{
+    name = nameIn;
 }
 
 IdentifierResolver::IdentifierResolver()
 {
-    pushScope();
+    auto scope = std::make_shared<Scope>();
+    pushScope(scope);
 }
 
 std::shared_ptr<Scope> IdentifierResolver::getCurrentScope()
@@ -75,9 +86,8 @@ std::shared_ptr<Scope> IdentifierResolver::getCurrentScope()
     return scopeStack.back();
 }
 
-void IdentifierResolver::pushScope()
+void IdentifierResolver::pushScope(const std::shared_ptr<Scope>& scope)
 {
-    auto scope = std::make_shared<Scope>();
     scopeStack.push_back(std::move(scope));
 }
 
@@ -89,20 +99,45 @@ void IdentifierResolver::popScope()
 
 void IdentifierResolver::visit(FunctionDecl* decl)
 {
+    auto functionName = decl->namedDecl;
+    if (functionName) {
+        auto scope = getCurrentScope();
+        auto var = std::make_shared<Entity>();
+        var->setName(functionName->getName());
+        scope->defineVariable(var);
+    }
+
+    auto scope = std::make_shared<Scope>(getCurrentScope());
+    pushScope(scope);
+
+    for (const auto& arg: decl->arguments) {
+        auto var = std::make_shared<Entity>();
+        var->setName(arg->getName());
+        scope->defineVariable(var);
+    }
 }
 
 void IdentifierResolver::visit(VariableDecl* decl)
 {
     auto scope = getCurrentScope();
+    assert(scope);
+    assert(decl->namedDecl);
 
     auto var = std::make_shared<Entity>();
-    var->name = decl->namedDecl->name;
+    var->setName(decl->namedDecl->getName());
     scope->defineVariable(var);
 }
 
 void IdentifierResolver::visit(NamedDecl* decl)
 {
-    scope
+    auto scope = getCurrentScope();
+    assert(scope);
+
+    auto entity = scope->getEntity(decl->getName());
+    if (!entity) {
+        // TODO: need to handle error
+        printf("warning: unknown identifier '%s'\n", decl->getName().c_str());
+    }
 }
 
 void TypeSolver::visit(FunctionDecl* decl)
@@ -113,8 +148,8 @@ void TypeSolver::visit(VariableDecl* decl)
 {
     assert(decl->namedDecl);
 
-    const auto typeIndex = makeTypeVariableIndex();
-    addDecl(decl->namedDecl->name, decl->namedDecl.get());
+    //const auto typeIndex = makeTypeVariableIndex();
+    addDecl(decl->namedDecl->getName(), decl->namedDecl.get());
     //printf("[%d] %s\n", static_cast<int>(typeIndex), decl->namedDecl->name.c_str());
 
     //table.emplace(decl->namedDecl->name, decl->named);
@@ -122,8 +157,8 @@ void TypeSolver::visit(VariableDecl* decl)
 
 void TypeSolver::visit(NamedDecl* namedDecl)
 {
-    const auto typeIndex = makeTypeVariableIndex();
-    addDecl(namedDecl->name, namedDecl);
+    //const auto typeIndex = makeTypeVariableIndex();
+    addDecl(namedDecl->getName(), namedDecl);
     //printf("[%d] %s\n", static_cast<int>(typeIndex), namedDecl->name.c_str());
 }
 

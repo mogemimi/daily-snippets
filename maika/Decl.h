@@ -20,8 +20,15 @@ public:
 };
 
 class NamedDecl final : public Decl {
-public:
+private:
     std::string name;
+    std::shared_ptr<const Entity> entity;
+
+public:
+    std::string getName() const;
+
+    std::shared_ptr<const Entity> getEntity() const;
+    void setEntity(const std::shared_ptr<const Entity>& entity);
 
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper&) const override;
