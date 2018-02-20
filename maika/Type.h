@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <memory>
 
 enum class BuiltinTypeKind {
@@ -21,10 +22,16 @@ enum class TypeKind {
 class Type {
 public:
     virtual ~Type() = default;
+    virtual std::string dump() const = 0;
 };
 
 class AnyType final : public Type {
 public:
+    std::string dump() const override
+    {
+        return "any";
+    }
+
     static std::shared_ptr<AnyType> make()
     {
         auto type = std::make_shared<AnyType>();
@@ -32,18 +39,59 @@ public:
     }
 };
 
-class TypeVariable final : public Type {
+class FunctionType final : public Type {
 public:
-    static std::shared_ptr<TypeVariable> make()
+    std::string dump() const override
     {
-        auto type = std::make_shared<TypeVariable>();
+        return "function()";
+    }
+
+    static std::shared_ptr<FunctionType> make()
+    {
+        auto type = std::make_shared<FunctionType>();
         return type;
     }
 };
 
+using TypeVariableIndex = uint64_t;
+
+//class TypeVariable final : public Type {
+//private:
+//    TypeVariableIndex index;
+//
+//public:
+//    std::string dump() const override
+//    {
+//        return "T(" + std::to_string(index) + ")";
+//    }
+//
+//    static std::shared_ptr<TypeVariable> make()
+//    {
+//        static TypeVariableIndex typeIndexCounter = 10000;
+//        ++typeIndexCounter;
+//
+//        auto type = std::make_shared<TypeVariable>();
+//        type->index = typeIndexCounter;
+//        return type;
+//    }
+//};
+
 class BuiltinType final : public Type {
 public:
     BuiltinTypeKind kind;
+
+    std::string dump() const override
+    {
+        switch (kind) {
+        case BuiltinTypeKind::Bool:
+            return "bool";
+        case BuiltinTypeKind::Int:
+            return "int";
+        case BuiltinTypeKind::Double:
+            return "double";
+        }
+        return "builtin";
+    }
 
     static std::shared_ptr<BuiltinType> make(BuiltinTypeKind kind)
     {

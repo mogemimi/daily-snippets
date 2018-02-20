@@ -17,7 +17,9 @@ public:
     void setType(const std::shared_ptr<Type>& t);
 };
 
-class IntegerLiteral final : public Expr {
+class IntegerLiteral final
+    : public Expr
+    , public std::enable_shared_from_this<IntegerLiteral> {
 public:
     int64_t value;
 
@@ -27,7 +29,9 @@ public:
     static std::shared_ptr<IntegerLiteral> make(int64_t v);
 };
 
-class DoubleLiteral final : public Expr {
+class DoubleLiteral final
+    : public Expr
+    , public std::enable_shared_from_this<DoubleLiteral> {
 public:
     double value;
 
@@ -37,7 +41,9 @@ public:
     static std::shared_ptr<DoubleLiteral> make(double v);
 };
 
-class BoolLiteral final : public Expr {
+class BoolLiteral final
+    : public Expr
+    , public std::enable_shared_from_this<BoolLiteral> {
 public:
     bool value;
 
@@ -47,7 +53,9 @@ public:
     static std::shared_ptr<BoolLiteral> make(bool v);
 };
 
-class CallExpr final : public Expr {
+class CallExpr final
+    : public Expr
+    , public std::enable_shared_from_this<CallExpr> {
 public:
     std::shared_ptr<NamedDecl> namedDecl;
     std::vector<std::shared_ptr<Expr>> arguments;
@@ -60,7 +68,9 @@ public:
         const std::vector<std::shared_ptr<Expr>>& a);
 };
 
-class AssignmentOperator final : public Expr {
+class AssignmentOperator final
+    : public Expr
+    , public std::enable_shared_from_this<AssignmentOperator> {
 public:
     std::shared_ptr<NamedDecl> lhs;
     std::shared_ptr<Expr> rhs;
@@ -80,7 +90,9 @@ enum class BinaryOperatorKind {
     Divide,
 };
 
-class BinaryOperator final : public Expr {
+class BinaryOperator final
+    : public Expr
+    , public std::enable_shared_from_this<BinaryOperator> {
 public:
     BinaryOperatorKind kind;
     std::shared_ptr<Expr> lhs;
@@ -95,7 +107,9 @@ public:
         const std::shared_ptr<Expr>& r);
 };
 
-class DeclRefExpr final : public Expr {
+class DeclRefExpr final
+    : public Expr
+    , public std::enable_shared_from_this<DeclRefExpr> {
 public:
     std::shared_ptr<Decl> decl;
 

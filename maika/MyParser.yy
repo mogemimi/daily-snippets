@@ -64,22 +64,23 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %token RETURN               "return"
 %token LET                  "let"
 
-%token <std::shared_ptr<NamedDecl>>               IDENTIFIER "identifier"
-%token <std::shared_ptr<IntegerLiteral>>          INTEGER "integer_literal"
-%token <std::shared_ptr<DoubleLiteral>>           DOUBLE "double_literal"
-%token <std::shared_ptr<BoolLiteral>>             BOOL "bool_literal"
-%type  <std::shared_ptr<Expr>>                    literal
-%type  <std::shared_ptr<Expr>>                    expression
-%type  <std::shared_ptr<AssignmentOperator>>      assignment_expression
-%type  <std::vector<std::shared_ptr<Stmt>>>       statements
-%type  <std::shared_ptr<Stmt>>                    statement
-%type  <std::shared_ptr<CallExpr>>                call_expression
-%type  <std::vector<std::shared_ptr<Expr>>>       expressions
-%type  <std::vector<std::shared_ptr<NamedDecl>>>  arguments
-%type  <std::shared_ptr<CompoundStmt>>            compound_statement
-%type  <std::shared_ptr<ReturnStmt>>              return_statement
-%type  <std::shared_ptr<FunctionDecl>>            function_definition
-%type  <std::shared_ptr<VariableDecl>>            variable_definition
+%token <std::shared_ptr<NamedDecl>>                 IDENTIFIER "identifier"
+%token <std::shared_ptr<IntegerLiteral>>            INTEGER "integer_literal"
+%token <std::shared_ptr<DoubleLiteral>>             DOUBLE "double_literal"
+%token <std::shared_ptr<BoolLiteral>>               BOOL "bool_literal"
+%type  <std::shared_ptr<Expr>>                      literal
+%type  <std::shared_ptr<Expr>>                      expression
+%type  <std::shared_ptr<AssignmentOperator>>        assignment_expression
+%type  <std::vector<std::shared_ptr<Stmt>>>         statements
+%type  <std::shared_ptr<Stmt>>                      statement
+%type  <std::shared_ptr<CallExpr>>                  call_expression
+%type  <std::vector<std::shared_ptr<Expr>>>         expressions
+%type  <std::vector<std::shared_ptr<ParmVarDecl>>>  parameter_variables
+%type  <std::shared_ptr<ParmVarDecl>>               parameter_variable
+%type  <std::shared_ptr<CompoundStmt>>              compound_statement
+%type  <std::shared_ptr<ReturnStmt>>                return_statement
+%type  <std::shared_ptr<FunctionDecl>>              function_definition
+%type  <std::shared_ptr<VariableDecl>>              variable_definition
 
 %%
 %start program;
@@ -89,12 +90,16 @@ program:
 | program function_definition { driver.ast.functionDecls.push_back($2); };
 
 function_definition:
-  "function" "identifier" "(" arguments ")" compound_statement { $$ = FunctionDecl::make(@$, $2, $4, $6); };
+  "function" "identifier" "(" parameter_variables ")" compound_statement { $$ = FunctionDecl::make(@$, $2, $4, $6); };
 
-arguments:
-  %empty                      { }
-| "identifier"                { $$.push_back($1); }
-| "identifier" "," arguments  { $$ = appendVector($1, $3); };
+parameter_variables:
+  %empty                                      { }
+| parameter_variable                          { $$.push_back($1); }
+| parameter_variable "," parameter_variables  { $$ = appendVector($1, $3); };
+
+parameter_variable:
+  "identifier"                  { $$ = ParmVarDecl::make(@$, $1); }
+| "identifier" ":" "identifier" { $$ = ParmVarDecl::make(@$, $1, $3); }
 
 compound_statement:
   "{" statements "}" { $$ = CompoundStmt::make($2); };

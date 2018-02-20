@@ -1,4 +1,4 @@
-function mul(a, b) {
+function mul(a: int, b: int) {
     return a * b;
 }
 

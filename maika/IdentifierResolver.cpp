@@ -36,23 +36,28 @@ void IdentifierResolver::visit(const std::shared_ptr<FunctionDecl>& decl)
     if (functionName) {
         auto scope = getCurrentScope();
         auto name = functionName->getName();
-        auto var = std::make_shared<Entity>(name, decl);
-        scope->defineVariable(var);
+        auto entity = std::make_shared<Entity>(name, decl);
+        scope->defineVariable(entity);
         if (context) {
-            context->entities.push_back(var);
+            context->entities.push_back(entity);
         }
     }
 
     auto scope = std::make_shared<Scope>(getCurrentScope());
     pushScope(scope);
+}
 
-    for (const auto& arg: decl->arguments) {
-        auto name = arg->getName();
-        auto var = std::make_shared<Entity>(name, arg);
-        scope->defineVariable(var);
-        if (context) {
-            context->entities.push_back(var);
-        }
+void IdentifierResolver::visit(const std::shared_ptr<ParmVarDecl>& decl)
+{
+    auto scope = getCurrentScope();
+    assert(scope);
+    assert(decl->name);
+
+    auto name = decl->name->getName();
+    auto entity = std::make_shared<Entity>(name, decl);
+    scope->defineVariable(entity);
+    if (context) {
+        context->entities.push_back(entity);
     }
 }
 
@@ -63,10 +68,10 @@ void IdentifierResolver::visit(const std::shared_ptr<VariableDecl>& decl)
     assert(decl->namedDecl);
 
     auto name = decl->namedDecl->getName();
-    auto var = std::make_shared<Entity>(name, decl);
-    scope->defineVariable(var);
+    auto entity = std::make_shared<Entity>(name, decl);
+    scope->defineVariable(entity);
     if (context) {
-        context->entities.push_back(var);
+        context->entities.push_back(entity);
     }
 }
 

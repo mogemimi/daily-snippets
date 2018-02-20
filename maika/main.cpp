@@ -26,14 +26,11 @@ int main()
         ASTTraverser traverser;
         traverser.traverse(driver.ast, resolver);
     }
-    for (const auto& var : context.entities) {
-        printf("Define: %s\n", var->getName().c_str());
-    }
 
+    TypeResolver typeResolver;
     {
-        TypeResolver solver;
         ASTTraverser traverser;
-        traverser.traverse(driver.ast, solver);
+        traverser.traverse(driver.ast, typeResolver);
     }
     return 0;
 }

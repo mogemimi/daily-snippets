@@ -45,7 +45,7 @@ public:
 class FunctionDecl final : public Decl, public std::enable_shared_from_this<FunctionDecl> {
 public:
     std::shared_ptr<NamedDecl> namedDecl;
-    std::vector<std::shared_ptr<NamedDecl>> arguments;
+    std::vector<std::shared_ptr<ParmVarDecl>> arguments;
     std::shared_ptr<CompoundStmt> compoundStmt;
 
     void traverse(ASTVisitor& visitor) override;
@@ -54,8 +54,26 @@ public:
     static std::shared_ptr<FunctionDecl> make(
         const yy::location& loc,
         const std::shared_ptr<NamedDecl>& n,
-        const std::vector<std::shared_ptr<NamedDecl>>& a,
+        const std::vector<std::shared_ptr<ParmVarDecl>>& a,
         const std::shared_ptr<CompoundStmt>& s);
+};
+
+class ParmVarDecl final : public Decl, public std::enable_shared_from_this<ParmVarDecl> {
+public:
+    std::shared_ptr<NamedDecl> name;
+    std::shared_ptr<NamedDecl> type;
+
+    void traverse(ASTVisitor& visitor) override;
+    std::string dump(ASTDumper& dumper) const override;
+
+    static std::shared_ptr<ParmVarDecl> make(
+        const yy::location& loc,
+        const std::shared_ptr<NamedDecl>& name);
+
+    static std::shared_ptr<ParmVarDecl> make(
+        const yy::location& loc,
+        const std::shared_ptr<NamedDecl>& name,
+        const std::shared_ptr<NamedDecl>& type);
 };
 
 class VariableDecl final : public Decl, public std::enable_shared_from_this<VariableDecl> {

@@ -19,6 +19,7 @@ void Expr::setType(const std::shared_ptr<Type>& t)
 
 void IntegerLiteral::traverse(ASTVisitor& visitor)
 {
+    visitor.visit(shared_from_this());
 }
 
 std::string IntegerLiteral::dump(ASTDumper&) const
@@ -36,6 +37,7 @@ std::shared_ptr<IntegerLiteral> IntegerLiteral::make(int64_t v)
 
 void DoubleLiteral::traverse(ASTVisitor& visitor)
 {
+    visitor.visit(shared_from_this());
 }
 
 std::string DoubleLiteral::dump(ASTDumper&) const
@@ -53,6 +55,7 @@ std::shared_ptr<DoubleLiteral> DoubleLiteral::make(double v)
 
 void BoolLiteral::traverse(ASTVisitor& visitor)
 {
+    visitor.visit(shared_from_this());
 }
 
 std::string BoolLiteral::dump(ASTDumper&) const
@@ -71,7 +74,7 @@ std::shared_ptr<BoolLiteral> BoolLiteral::make(bool v)
 void CallExpr::traverse(ASTVisitor& visitor)
 {
     assert(namedDecl);
-    visitor.visit(this);
+    visitor.visit(shared_from_this());
     namedDecl->traverse(visitor);
     for (const auto& arg : arguments) {
         arg->traverse(visitor);
@@ -104,6 +107,7 @@ void AssignmentOperator::traverse(ASTVisitor& visitor)
 {
     assert(lhs);
     assert(rhs);
+    visitor.visit(shared_from_this());
     lhs->traverse(visitor);
     rhs->traverse(visitor);
 }
@@ -130,6 +134,7 @@ void BinaryOperator::traverse(ASTVisitor& visitor)
 {
     assert(lhs);
     assert(rhs);
+    visitor.visit(shared_from_this());
     lhs->traverse(visitor);
     rhs->traverse(visitor);
 }
@@ -165,6 +170,7 @@ std::shared_ptr<BinaryOperator> BinaryOperator::make(
 void DeclRefExpr::traverse(ASTVisitor& visitor)
 {
     assert(decl);
+    visitor.visit(shared_from_this());
     decl->traverse(visitor);
 }
 

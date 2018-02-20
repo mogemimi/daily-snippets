@@ -24,6 +24,7 @@ public:
     void popScope();
 
     void visit(const std::shared_ptr<FunctionDecl>& decl) override;
+    void visit(const std::shared_ptr<ParmVarDecl>& decl) override;
     void visit(const std::shared_ptr<VariableDecl>& decl) override;
     void visit(const std::shared_ptr<NamedDecl>& decl) override;
 };

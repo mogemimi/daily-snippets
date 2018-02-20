@@ -97,7 +97,7 @@ std::string FunctionDecl::dump(ASTDumper& dumper) const
 std::shared_ptr<FunctionDecl> FunctionDecl::make(
     const yy::location& loc,
     const std::shared_ptr<NamedDecl>& n,
-    const std::vector<std::shared_ptr<NamedDecl>>& a,
+    const std::vector<std::shared_ptr<ParmVarDecl>>& a,
     const std::shared_ptr<CompoundStmt>& s)
 {
     auto decl = std::make_shared<FunctionDecl>();
@@ -105,6 +105,47 @@ std::shared_ptr<FunctionDecl> FunctionDecl::make(
     decl->namedDecl = n;
     decl->arguments = a;
     decl->compoundStmt = s;
+    return decl;
+}
+
+void ParmVarDecl::traverse(ASTVisitor& visitor)
+{
+    assert(name);
+    visitor.visit(shared_from_this());
+    name->traverse(visitor);
+}
+
+std::string ParmVarDecl::dump(ASTDumper& dumper) const
+{
+    assert(name);
+    std::string s = "(" + name->dump(dumper);
+    if (type) {
+        s += " ";
+        s += type->dump(dumper);
+    }
+    s += ")";
+    return s;
+}
+
+std::shared_ptr<ParmVarDecl> ParmVarDecl::make(
+    const yy::location& loc,
+    const std::shared_ptr<NamedDecl>& name)
+{
+    auto decl = std::make_shared<ParmVarDecl>();
+    decl->location = loc;
+    decl->name = name;
+    return decl;
+}
+
+std::shared_ptr<ParmVarDecl> ParmVarDecl::make(
+    const yy::location& loc,
+    const std::shared_ptr<NamedDecl>& name,
+    const std::shared_ptr<NamedDecl>& type)
+{
+    auto decl = std::make_shared<ParmVarDecl>();
+    decl->location = loc;
+    decl->name = name;
+    decl->type = type;
     return decl;
 }
 

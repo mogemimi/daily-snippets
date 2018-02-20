@@ -13,11 +13,18 @@ class ReturnStmt;
 // NOTE: AST::Expr
 class Expr;
 class CallExpr;
+class IntegerLiteral;
+class DoubleLiteral;
+class BoolLiteral;
+class AssignmentOperator;
+class BinaryOperator;
+class DeclRefExpr;
 
 // NOTE: AST::Decl
 class Decl;
 class FunctionDecl;
 class NamedDecl;
+class ParmVarDecl;
 class VariableDecl;
 
 // NOTE: AST::Type
