@@ -1121,7 +1121,7 @@ YY_RULE_SETUP
 case 27:
 YY_RULE_SETUP
 #line 102 "MyLexer.l"
-return yy::MyParser::make_IDENTIFIER(NamedDecl::make(yytext), loc);
+return yy::MyParser::make_IDENTIFIER(NamedDecl::make(loc, yytext), loc);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP

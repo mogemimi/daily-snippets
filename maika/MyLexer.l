@@ -98,7 +98,7 @@ blank       [ \t]
     return yy::MyParser::make_DOUBLE(DoubleLiteral::make(d), loc);
 }
 
-{identifier}    return yy::MyParser::make_IDENTIFIER(NamedDecl::make(yytext), loc);
+{identifier}    return yy::MyParser::make_IDENTIFIER(NamedDecl::make(loc, yytext), loc);
 .               driver.error(loc, "invalid character");
 <<EOF>>         return yy::MyParser::make_END(loc);
 

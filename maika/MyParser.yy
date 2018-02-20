@@ -89,7 +89,7 @@ program:
 | program function_definition { driver.ast.functionDecls.push_back($2); };
 
 function_definition:
-  "function" "identifier" "(" arguments ")" compound_statement { $$ = FunctionDecl::make($2, $4, $6); };
+  "function" "identifier" "(" arguments ")" compound_statement { $$ = FunctionDecl::make(@$, $2, $4, $6); };
 
 arguments:
   %empty                      { }
@@ -114,8 +114,8 @@ return_statement:
 | "return" expression ";" { $$ = ReturnStmt::make($2); };
 
 variable_definition:
-  "let" "identifier"                { $$ = VariableDecl::make($2); }
-| "let" "identifier" "=" expression { $$ = VariableDecl::make($2, $4); };
+  "let" "identifier"                { $$ = VariableDecl::make(@$, $2); }
+| "let" "identifier" "=" expression { $$ = VariableDecl::make(@$, $2, $4); };
 
 assignment_expression:
   "identifier" "=" expression             { $$ = AssignmentOperator::make($1, $3); }

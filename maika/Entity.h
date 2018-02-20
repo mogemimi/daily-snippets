@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 
-class Entity {
+class Entity final {
 private:
     std::weak_ptr<Decl> decl;
     std::string name;

@@ -1,6 +1,7 @@
 #include "AST.h"
+#include "Entity.h"
+#include "IdentifierResolver.h"
 #include "TypeResolver.h"
-#include "Scope.h"
 #include "MyLexer.h"
 #include "MyDriver.h"
 #include <iostream>
@@ -19,11 +20,16 @@ int main()
         return 1;
     }
 
+    IdentifierContext context;
     {
-        IdentifierResolver resolver;
+        IdentifierResolver resolver(&context);
         ASTTraverser traverser;
         traverser.traverse(driver.ast, resolver);
     }
+    for (const auto& var : context.entities) {
+        printf("Define: %s\n", var->getName().c_str());
+    }
+
     {
         TypeResolver solver;
         ASTTraverser traverser;

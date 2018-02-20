@@ -5,6 +5,7 @@
 #include "Expr.h"
 #include "Stmt.h"
 #include <cassert>
+#include <sstream>
 #include <utility>
 
 namespace {
@@ -54,10 +55,13 @@ void TypeResolver::visit(const std::shared_ptr<NamedDecl>& namedDecl)
     if (!var) {
         return;
     }
-    ASTDumper dumper;
-    printf("%s: defined at %s\n",
-        namedDecl->getName().c_str(),
-        var->getDecl()->dump(dumper).c_str());
+    std::stringstream ss;
+    ss << namedDecl->getName()
+        << "("
+        << namedDecl->getLocation()
+        << "): defined at "
+        << var->getDecl()->getLocation();
+    printf("%s\n", ss.str().c_str());
 
     //const auto typeIndex = makeTypeVariableIndex();
     addDecl(namedDecl->getName(), namedDecl);

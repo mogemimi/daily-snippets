@@ -2,6 +2,7 @@
 
 #include "ASTDumper.h"
 #include "Forward.h"
+#include "location.hh"
 #include <string>
 #include <vector>
 #include <memory>
@@ -9,11 +10,14 @@
 class Decl {
 protected:
     std::shared_ptr<Type> type;
+    yy::location location;
 
 public:
     virtual ~Decl() = default;
     virtual void traverse(ASTVisitor& visitor) = 0;
     virtual std::string dump(ASTDumper& dumper) const = 0;
+
+    yy::location getLocation() const;
 
     std::shared_ptr<Type> getType() const;
     void setType(const std::shared_ptr<Type>& t);
@@ -33,7 +37,9 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper&) const override;
 
-    static std::shared_ptr<NamedDecl> make(const std::string& v);
+    static std::shared_ptr<NamedDecl> make(
+        const yy::location& loc,
+        const std::string& v);
 };
 
 class FunctionDecl final : public Decl, public std::enable_shared_from_this<FunctionDecl> {
@@ -46,6 +52,7 @@ public:
     std::string dump(ASTDumper& dumper) const override;
 
     static std::shared_ptr<FunctionDecl> make(
+        const yy::location& loc,
         const std::shared_ptr<NamedDecl>& n,
         const std::vector<std::shared_ptr<NamedDecl>>& a,
         const std::shared_ptr<CompoundStmt>& s);
@@ -59,8 +66,11 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper& dumper) const override;
 
-    static std::shared_ptr<VariableDecl> make(const std::shared_ptr<NamedDecl>& n);
     static std::shared_ptr<VariableDecl> make(
+        const yy::location& loc,
+        const std::shared_ptr<NamedDecl>& n);
+    static std::shared_ptr<VariableDecl> make(
+        const yy::location& loc,
         const std::shared_ptr<NamedDecl>& n,
         const std::shared_ptr<Expr>& e);
 };

@@ -5,6 +5,11 @@
 #include <cassert>
 #include <utility>
 
+yy::location Decl::getLocation() const
+{
+    return location;
+}
+
 std::shared_ptr<Type> Decl::getType() const
 {
     return type;
@@ -42,9 +47,12 @@ std::string NamedDecl::dump(ASTDumper&) const
     return name;
 }
 
-std::shared_ptr<NamedDecl> NamedDecl::make(const std::string& v)
+std::shared_ptr<NamedDecl> NamedDecl::make(
+    const yy::location& loc,
+    const std::string& v)
 {
     auto decl = std::make_shared<NamedDecl>();
+    decl->location = loc;
     decl->name = v;
     return decl;
 }
@@ -87,11 +95,13 @@ std::string FunctionDecl::dump(ASTDumper& dumper) const
 }
 
 std::shared_ptr<FunctionDecl> FunctionDecl::make(
+    const yy::location& loc,
     const std::shared_ptr<NamedDecl>& n,
     const std::vector<std::shared_ptr<NamedDecl>>& a,
     const std::shared_ptr<CompoundStmt>& s)
 {
     auto decl = std::make_shared<FunctionDecl>();
+    decl->location = loc;
     decl->namedDecl = n;
     decl->arguments = a;
     decl->compoundStmt = s;
@@ -119,18 +129,23 @@ std::string VariableDecl::dump(ASTDumper& dumper) const
     return s;
 }
 
-std::shared_ptr<VariableDecl> VariableDecl::make(const std::shared_ptr<NamedDecl>& n)
+std::shared_ptr<VariableDecl> VariableDecl::make(
+    const yy::location& loc,
+    const std::shared_ptr<NamedDecl>& n)
 {
     auto decl = std::make_shared<VariableDecl>();
+    decl->location = loc;
     decl->namedDecl = n;
     return decl;
 }
 
 std::shared_ptr<VariableDecl> VariableDecl::make(
+    const yy::location& loc,
     const std::shared_ptr<NamedDecl>& n,
     const std::shared_ptr<Expr>& e)
 {
     auto decl = std::make_shared<VariableDecl>();
+    decl->location = loc;
     decl->namedDecl = n;
     decl->expr = e;
     return decl;

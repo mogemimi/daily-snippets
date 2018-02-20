@@ -6,12 +6,6 @@
 //#include <string>
 //#include <cstdint>
 //
-//struct Variant final {
-//    int64_t int64Value;
-//    double doubleValue;
-//    std::string stringValue;
-//};
-//
 //class MyLexer final : public yyFlexLexer {
 //public:
 //    explicit MyLexer(std::istream* s)

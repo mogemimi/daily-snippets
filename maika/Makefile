@@ -11,11 +11,12 @@ SOURCES = \
 	Decl.cpp \
 	Entity.cpp \
 	Expr.cpp \
-	Scope.cpp \
-	Stmt.cpp \
+	IdentifierResolver.cpp \
 	MyLexer.cpp \
 	MyDriver.cpp \
 	MyParser.cpp \
+	Scope.cpp \
+	Stmt.cpp \
 	TypeResolver.cpp \
 	main.cpp
 
