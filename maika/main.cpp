@@ -1,5 +1,6 @@
 #include "AST.h"
-#include "ASTVisitor.h"
+#include "TypeResolver.h"
+#include "Scope.h"
 #include "MyLexer.h"
 #include "MyDriver.h"
 #include <iostream>
@@ -24,7 +25,7 @@ int main()
         traverser.traverse(driver.ast, resolver);
     }
     {
-        TypeSolver solver;
+        TypeResolver solver;
         ASTTraverser traverser;
         traverser.traverse(driver.ast, solver);
     }

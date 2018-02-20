@@ -9,11 +9,14 @@ SOURCES = \
 	../somera/*.cpp \
 	ASTVisitor.cpp \
 	Decl.cpp \
+	Entity.cpp \
 	Expr.cpp \
+	Scope.cpp \
 	Stmt.cpp \
 	MyLexer.cpp \
 	MyDriver.cpp \
 	MyParser.cpp \
+	TypeResolver.cpp \
 	main.cpp
 
 COMPILER_OPTIONS = \

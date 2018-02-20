@@ -34,7 +34,7 @@ void NamedDecl::setEntity(const std::shared_ptr<const Entity>& entityIn)
 
 void NamedDecl::traverse(ASTVisitor& visitor)
 {
-    visitor.visit(this);
+    visitor.visit(shared_from_this());
 }
 
 std::string NamedDecl::dump(ASTDumper&) const
@@ -52,7 +52,7 @@ std::shared_ptr<NamedDecl> NamedDecl::make(const std::string& v)
 void FunctionDecl::traverse(ASTVisitor& visitor)
 {
     assert(compoundStmt);
-    visitor.visit(this);
+    visitor.visit(shared_from_this());
     if (namedDecl) {
         namedDecl->traverse(visitor);
     }
@@ -102,7 +102,7 @@ void VariableDecl::traverse(ASTVisitor& visitor)
 {
     assert(namedDecl);
     assert(expr);
-    visitor.visit(this);
+    visitor.visit(shared_from_this());
     namedDecl->traverse(visitor);
     expr->traverse(visitor);
 }
