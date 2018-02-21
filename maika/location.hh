@@ -42,7 +42,7 @@
 
 
 namespace yy {
-#line 46 "location.hh" // location.cc:337
+#line 46 "location.hh" // location.cc:296
   /// Abstract a location.
   class location
   {
@@ -188,5 +188,5 @@ namespace yy {
 
 
 } // yy
-#line 192 "location.hh" // location.cc:337
+#line 192 "location.hh" // location.cc:296
 #endif // !YY_YY_LOCATION_HH_INCLUDED

@@ -2,11 +2,9 @@ NORI = ../nori/bin/nori
 PRODUCTNAME = maika
 
 HEADERS = \
-	../somera/*.h \
 	*.h
 
 SOURCES = \
-	../somera/*.cpp \
 	ASTVisitor.cpp \
 	Decl.cpp \
 	Entity.cpp \

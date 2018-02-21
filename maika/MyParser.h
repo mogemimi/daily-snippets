@@ -40,7 +40,7 @@
 #ifndef YY_YY_MYPARSER_H_INCLUDED
 # define YY_YY_MYPARSER_H_INCLUDED
 // //                    "%code requires" blocks.
-#line 11 "MyParser.yy" // lalr1.cc:392
+#line 11 "MyParser.yy" // lalr1.cc:377
 
 #include "AST.h"
 #include <iostream>
@@ -48,7 +48,7 @@
 
 class MyDriver;
 
-#line 52 "MyParser.h" // lalr1.cc:392
+#line 52 "MyParser.h" // lalr1.cc:377
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -125,7 +125,7 @@ class MyDriver;
 
 
 namespace yy {
-#line 129 "MyParser.h" // lalr1.cc:392
+#line 129 "MyParser.h" // lalr1.cc:377
 
 
 
@@ -305,7 +305,6 @@ namespace yy {
       char dummy4[sizeof(std::shared_ptr<DoubleLiteral>)];
 
       // literal
-      // lvalue_expression
       // expression
       char dummy5[sizeof(std::shared_ptr<Expr>)];
 
@@ -679,7 +678,7 @@ namespace yy {
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const unsigned char yycheck_[];
+  static const signed char yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -799,8 +798,8 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 78,     ///< Last index in yytable_.
-      yynnts_ = 15,  ///< Number of nonterminal symbols.
+      yylast_ = 80,     ///< Last index in yytable_.
+      yynnts_ = 14,  ///< Number of nonterminal symbols.
       yyfinal_ = 5, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
@@ -900,8 +899,7 @@ namespace yy {
         break;
 
       case 32: // literal
-      case 35: // lvalue_expression
-      case 36: // expression
+      case 35: // expression
         value.copy< std::shared_ptr<Expr> > (other.value);
         break;
 
@@ -979,8 +977,7 @@ namespace yy {
         break;
 
       case 32: // literal
-      case 35: // lvalue_expression
-      case 36: // expression
+      case 35: // expression
         value.copy< std::shared_ptr<Expr> > (v);
         break;
 
@@ -1187,8 +1184,7 @@ namespace yy {
         break;
 
       case 32: // literal
-      case 35: // lvalue_expression
-      case 36: // expression
+      case 35: // expression
         value.template destroy< std::shared_ptr<Expr> > ();
         break;
 
@@ -1272,8 +1268,7 @@ namespace yy {
         break;
 
       case 32: // literal
-      case 35: // lvalue_expression
-      case 36: // expression
+      case 35: // expression
         value.move< std::shared_ptr<Expr> > (s.value);
         break;
 
@@ -1502,7 +1497,7 @@ namespace yy {
 
 
 } // yy
-#line 1506 "MyParser.h" // lalr1.cc:392
+#line 1501 "MyParser.h" // lalr1.cc:377
 
 
 

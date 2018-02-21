@@ -24,10 +24,11 @@ std::string comment;
 %}
 
 %option noyywrap nounput batch debug noinput
+%option nounistd never-interactive
 
 %{
 // %option c++
-// %option nounistd
+// 
 // %option yyclass="MyLexer"
 %}
 
