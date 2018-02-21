@@ -37,7 +37,6 @@ public:
     void visit(const std::shared_ptr<IntegerLiteral>& decl) override;
     void visit(const std::shared_ptr<DoubleLiteral>& decl) override;
     void visit(const std::shared_ptr<BoolLiteral>& decl) override;
-    void visit(const std::shared_ptr<AssignmentOperator>& decl) override;
     void visit(const std::shared_ptr<BinaryOperator>& decl) override;
     void visit(const std::shared_ptr<DeclRefExpr>& decl) override;
 

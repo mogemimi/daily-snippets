@@ -68,26 +68,12 @@ public:
         const std::vector<std::shared_ptr<Expr>>& args);
 };
 
-class AssignmentOperator final
-    : public Expr
-    , public std::enable_shared_from_this<AssignmentOperator> {
-public:
-    std::shared_ptr<NamedDecl> lhs;
-    std::shared_ptr<Expr> rhs;
-
-    void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper& dumper) const override;
-
-    static std::shared_ptr<AssignmentOperator> make(
-        const std::shared_ptr<NamedDecl>& l,
-        const std::shared_ptr<Expr>& r);
-};
-
 enum class BinaryOperatorKind {
     Add,
     Subtract,
     Multiply,
     Divide,
+    Assign,
 };
 
 class BinaryOperator final

@@ -7,6 +7,7 @@ function main() {
     let a = 95 / 4;
     let b = 3.1415926535;
     let c = mul(a + a, b);
+    let d = (a) = c;
     return (c + 4) * (a - 75);
 }
 

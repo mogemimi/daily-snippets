@@ -27,6 +27,10 @@ COMPILER_OPTIONS = \
 	-I.. \
 	$(SOURCES)
 
+bison:
+	@flex -o MyLexer.cpp MyLexer.l
+	@bison MyParser.yy
+
 xcode:
 	@flex -o MyLexer.cpp MyLexer.l
 	@bison MyParser.yy

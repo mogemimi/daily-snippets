@@ -69,8 +69,8 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %token <std::shared_ptr<DoubleLiteral>>             DOUBLE "double_literal"
 %token <std::shared_ptr<BoolLiteral>>               BOOL "bool_literal"
 %type  <std::shared_ptr<Expr>>                      literal
+%type  <std::shared_ptr<Expr>>                      lvalue_expression
 %type  <std::shared_ptr<Expr>>                      expression
-%type  <std::shared_ptr<AssignmentOperator>>        assignment_expression
 %type  <std::vector<std::shared_ptr<Stmt>>>         statements
 %type  <std::shared_ptr<Stmt>>                      statement
 %type  <std::shared_ptr<CallExpr>>                  call_expression
@@ -110,7 +110,6 @@ statements:
 
 statement:
   expression ";"            { $$ = $1; }
-| assignment_expression ";" { $$ = $1; }
 | return_statement          { $$ = $1; }
 | variable_definition ";"   { $$ = DeclStmt::make($1); };
 
@@ -121,10 +120,6 @@ return_statement:
 variable_definition:
   "let" "identifier"                { $$ = VariableDecl::make(@$, $2); }
 | "let" "identifier" "=" expression { $$ = VariableDecl::make(@$, $2, $4); };
-
-assignment_expression:
-  "identifier" "=" expression             { $$ = AssignmentOperator::make($1, $3); }
-| "identifier" "=" assignment_expression  { $$ = AssignmentOperator::make($1, $3); };
 
 literal:
   "integer_literal" { $$ = $1; }
@@ -139,18 +134,24 @@ expressions:
 | expression                 { $$.push_back($1); }
 | expression "," expressions { $$ = appendVector($1, $3); };
 
+%right "=";
+lvalue_expression:
+  "identifier"                      { $$ = DeclRefExpr::make($1); }
+| "(" lvalue_expression ")"         { std::swap($$, $2); };
+
 %left "+" "-";
 %left "*" "/";
 expression:
-  expression "+" expression     { $$ = BinaryOperator::make(BinaryOperatorKind::Add, $1, $3); }
-| expression "-" expression     { $$ = BinaryOperator::make(BinaryOperatorKind::Subtract, $1, $3); }
-| expression "*" expression     { $$ = BinaryOperator::make(BinaryOperatorKind::Multiply, $1, $3); }
-| expression "/" expression     { $$ = BinaryOperator::make(BinaryOperatorKind::Divide, $1, $3); }
-| "(" expression ")"            { std::swap($$, $2); }
-| "(" assignment_expression ")" { $$ = $2; }
-| "identifier"                  { $$ = DeclRefExpr::make($1); }
-| literal                       { $$ = $1; }
-| call_expression               { $$ = $1; };
+  literal                           { $$ = $1; }
+| lvalue_expression                 { $$ = $1; }
+| "(" expression ")"                { std::swap($$, $2); }
+| expression "+" expression         { $$ = BinaryOperator::make(BinaryOperatorKind::Add, $1, $3); }
+| expression "-" expression         { $$ = BinaryOperator::make(BinaryOperatorKind::Subtract, $1, $3); }
+| expression "*" expression         { $$ = BinaryOperator::make(BinaryOperatorKind::Multiply, $1, $3); }
+| expression "/" expression         { $$ = BinaryOperator::make(BinaryOperatorKind::Divide, $1, $3); }
+| call_expression                   { $$ = $1; }
+| lvalue_expression "=" expression  { $$ = BinaryOperator::make(BinaryOperatorKind::Assign, $1, $3); };
+
 %%
 
 void yy::MyParser::error(const location_type& l, const std::string& m)

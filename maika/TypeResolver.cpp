@@ -49,7 +49,6 @@ void ASTDumper2::visit(const std::shared_ptr<IntegerLiteral>& decl)
 
 void ASTDumper2::visit(const std::shared_ptr<DoubleLiteral>& decl){}
 void ASTDumper2::visit(const std::shared_ptr<BoolLiteral>& decl){}
-void ASTDumper2::visit(const std::shared_ptr<AssignmentOperator>& decl){}
 void ASTDumper2::visit(const std::shared_ptr<BinaryOperator>& decl){}
 void ASTDumper2::visit(const std::shared_ptr<DeclRefExpr>& decl){}
 

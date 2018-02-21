@@ -292,54 +292,52 @@ namespace yy {
     /// An auxiliary type to compute the largest semantic type.
     union union_type
     {
-      // assignment_expression
-      char dummy1[sizeof(std::shared_ptr<AssignmentOperator>)];
-
       // "bool_literal"
-      char dummy2[sizeof(std::shared_ptr<BoolLiteral>)];
+      char dummy1[sizeof(std::shared_ptr<BoolLiteral>)];
 
       // call_expression
-      char dummy3[sizeof(std::shared_ptr<CallExpr>)];
+      char dummy2[sizeof(std::shared_ptr<CallExpr>)];
 
       // compound_statement
-      char dummy4[sizeof(std::shared_ptr<CompoundStmt>)];
+      char dummy3[sizeof(std::shared_ptr<CompoundStmt>)];
 
       // "double_literal"
-      char dummy5[sizeof(std::shared_ptr<DoubleLiteral>)];
+      char dummy4[sizeof(std::shared_ptr<DoubleLiteral>)];
 
       // literal
+      // lvalue_expression
       // expression
-      char dummy6[sizeof(std::shared_ptr<Expr>)];
+      char dummy5[sizeof(std::shared_ptr<Expr>)];
 
       // function_definition
-      char dummy7[sizeof(std::shared_ptr<FunctionDecl>)];
+      char dummy6[sizeof(std::shared_ptr<FunctionDecl>)];
 
       // "integer_literal"
-      char dummy8[sizeof(std::shared_ptr<IntegerLiteral>)];
+      char dummy7[sizeof(std::shared_ptr<IntegerLiteral>)];
 
       // "identifier"
-      char dummy9[sizeof(std::shared_ptr<NamedDecl>)];
+      char dummy8[sizeof(std::shared_ptr<NamedDecl>)];
 
       // parameter_variable
-      char dummy10[sizeof(std::shared_ptr<ParmVarDecl>)];
+      char dummy9[sizeof(std::shared_ptr<ParmVarDecl>)];
 
       // return_statement
-      char dummy11[sizeof(std::shared_ptr<ReturnStmt>)];
+      char dummy10[sizeof(std::shared_ptr<ReturnStmt>)];
 
       // statement
-      char dummy12[sizeof(std::shared_ptr<Stmt>)];
+      char dummy11[sizeof(std::shared_ptr<Stmt>)];
 
       // variable_definition
-      char dummy13[sizeof(std::shared_ptr<VariableDecl>)];
+      char dummy12[sizeof(std::shared_ptr<VariableDecl>)];
 
       // expressions
-      char dummy14[sizeof(std::vector<std::shared_ptr<Expr>>)];
+      char dummy13[sizeof(std::vector<std::shared_ptr<Expr>>)];
 
       // parameter_variables
-      char dummy15[sizeof(std::vector<std::shared_ptr<ParmVarDecl>>)];
+      char dummy14[sizeof(std::vector<std::shared_ptr<ParmVarDecl>>)];
 
       // statements
-      char dummy16[sizeof(std::vector<std::shared_ptr<Stmt>>)];
+      char dummy15[sizeof(std::vector<std::shared_ptr<Stmt>>)];
 };
 
     /// Symbol semantic values.
@@ -418,8 +416,6 @@ namespace yy {
       /// Constructor for valueless symbols, and symbols from each type.
 
   basic_symbol (typename Base::kind_type t, const location_type& l);
-
-  basic_symbol (typename Base::kind_type t, const std::shared_ptr<AssignmentOperator> v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::shared_ptr<BoolLiteral> v, const location_type& l);
 
@@ -803,7 +799,7 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 85,     ///< Last index in yytable_.
+      yylast_ = 78,     ///< Last index in yytable_.
       yynnts_ = 15,  ///< Number of nonterminal symbols.
       yyfinal_ = 5, ///< Termination state number.
       yyterror_ = 1,
@@ -887,15 +883,11 @@ namespace yy {
   {
       switch (other.type_get ())
     {
-      case 32: // assignment_expression
-        value.copy< std::shared_ptr<AssignmentOperator> > (other.value);
-        break;
-
       case 21: // "bool_literal"
         value.copy< std::shared_ptr<BoolLiteral> > (other.value);
         break;
 
-      case 34: // call_expression
+      case 33: // call_expression
         value.copy< std::shared_ptr<CallExpr> > (other.value);
         break;
 
@@ -907,7 +899,8 @@ namespace yy {
         value.copy< std::shared_ptr<DoubleLiteral> > (other.value);
         break;
 
-      case 33: // literal
+      case 32: // literal
+      case 35: // lvalue_expression
       case 36: // expression
         value.copy< std::shared_ptr<Expr> > (other.value);
         break;
@@ -940,7 +933,7 @@ namespace yy {
         value.copy< std::shared_ptr<VariableDecl> > (other.value);
         break;
 
-      case 35: // expressions
+      case 34: // expressions
         value.copy< std::vector<std::shared_ptr<Expr>> > (other.value);
         break;
 
@@ -969,15 +962,11 @@ namespace yy {
     (void) v;
       switch (this->type_get ())
     {
-      case 32: // assignment_expression
-        value.copy< std::shared_ptr<AssignmentOperator> > (v);
-        break;
-
       case 21: // "bool_literal"
         value.copy< std::shared_ptr<BoolLiteral> > (v);
         break;
 
-      case 34: // call_expression
+      case 33: // call_expression
         value.copy< std::shared_ptr<CallExpr> > (v);
         break;
 
@@ -989,7 +978,8 @@ namespace yy {
         value.copy< std::shared_ptr<DoubleLiteral> > (v);
         break;
 
-      case 33: // literal
+      case 32: // literal
+      case 35: // lvalue_expression
       case 36: // expression
         value.copy< std::shared_ptr<Expr> > (v);
         break;
@@ -1022,7 +1012,7 @@ namespace yy {
         value.copy< std::shared_ptr<VariableDecl> > (v);
         break;
 
-      case 35: // expressions
+      case 34: // expressions
         value.copy< std::vector<std::shared_ptr<Expr>> > (v);
         break;
 
@@ -1046,13 +1036,6 @@ namespace yy {
   MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
     : Base (t)
     , value ()
-    , location (l)
-  {}
-
-  template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<AssignmentOperator> v, const location_type& l)
-    : Base (t)
-    , value (v)
     , location (l)
   {}
 
@@ -1187,15 +1170,11 @@ namespace yy {
     // Type destructor.
     switch (yytype)
     {
-      case 32: // assignment_expression
-        value.template destroy< std::shared_ptr<AssignmentOperator> > ();
-        break;
-
       case 21: // "bool_literal"
         value.template destroy< std::shared_ptr<BoolLiteral> > ();
         break;
 
-      case 34: // call_expression
+      case 33: // call_expression
         value.template destroy< std::shared_ptr<CallExpr> > ();
         break;
 
@@ -1207,7 +1186,8 @@ namespace yy {
         value.template destroy< std::shared_ptr<DoubleLiteral> > ();
         break;
 
-      case 33: // literal
+      case 32: // literal
+      case 35: // lvalue_expression
       case 36: // expression
         value.template destroy< std::shared_ptr<Expr> > ();
         break;
@@ -1240,7 +1220,7 @@ namespace yy {
         value.template destroy< std::shared_ptr<VariableDecl> > ();
         break;
 
-      case 35: // expressions
+      case 34: // expressions
         value.template destroy< std::vector<std::shared_ptr<Expr>> > ();
         break;
 
@@ -1275,15 +1255,11 @@ namespace yy {
     super_type::move(s);
       switch (this->type_get ())
     {
-      case 32: // assignment_expression
-        value.move< std::shared_ptr<AssignmentOperator> > (s.value);
-        break;
-
       case 21: // "bool_literal"
         value.move< std::shared_ptr<BoolLiteral> > (s.value);
         break;
 
-      case 34: // call_expression
+      case 33: // call_expression
         value.move< std::shared_ptr<CallExpr> > (s.value);
         break;
 
@@ -1295,7 +1271,8 @@ namespace yy {
         value.move< std::shared_ptr<DoubleLiteral> > (s.value);
         break;
 
-      case 33: // literal
+      case 32: // literal
+      case 35: // lvalue_expression
       case 36: // expression
         value.move< std::shared_ptr<Expr> > (s.value);
         break;
@@ -1328,7 +1305,7 @@ namespace yy {
         value.move< std::shared_ptr<VariableDecl> > (s.value);
         break;
 
-      case 35: // expressions
+      case 34: // expressions
         value.move< std::vector<std::shared_ptr<Expr>> > (s.value);
         break;
 
@@ -1525,7 +1502,7 @@ namespace yy {
 
 
 } // yy
-#line 1529 "MyParser.h" // lalr1.cc:392
+#line 1506 "MyParser.h" // lalr1.cc:392
 
 
 

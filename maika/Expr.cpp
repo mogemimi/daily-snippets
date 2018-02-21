@@ -103,33 +103,6 @@ std::shared_ptr<CallExpr> CallExpr::make(
     return expr;
 }
 
-void AssignmentOperator::traverse(ASTVisitor& visitor)
-{
-    assert(lhs);
-    assert(rhs);
-    visitor.visit(shared_from_this());
-    lhs->traverse(visitor);
-    rhs->traverse(visitor);
-}
-
-std::string AssignmentOperator::dump(ASTDumper& dumper) const
-{
-    assert(lhs);
-    assert(rhs);
-    std::string s = "(= " + lhs->dump(dumper) + " " + rhs->dump(dumper) + ")";
-    return s;
-}
-
-std::shared_ptr<AssignmentOperator> AssignmentOperator::make(
-    const std::shared_ptr<NamedDecl>& l,
-    const std::shared_ptr<Expr>& r)
-{
-    auto expr = std::make_shared<AssignmentOperator>();
-    expr->lhs = l;
-    expr->rhs = r;
-    return expr;
-}
-
 void BinaryOperator::traverse(ASTVisitor& visitor)
 {
     assert(lhs);
@@ -149,6 +122,7 @@ std::string BinaryOperator::dump(ASTDumper& dumper) const
         case BinaryOperatorKind::Subtract: return "-";
         case BinaryOperatorKind::Multiply: return "*";
         case BinaryOperatorKind::Divide: return "/";
+        case BinaryOperatorKind::Assign: return "=";
         }
     }();
     std::string s = "(" + k + " " + lhs->dump(dumper) + " " + rhs->dump(dumper) + ")";

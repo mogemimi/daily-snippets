@@ -16,7 +16,6 @@ public:
     virtual void visit(const std::shared_ptr<IntegerLiteral>& decl) {}
     virtual void visit(const std::shared_ptr<DoubleLiteral>& decl) {}
     virtual void visit(const std::shared_ptr<BoolLiteral>& decl) {}
-    virtual void visit(const std::shared_ptr<AssignmentOperator>& decl) {}
     virtual void visit(const std::shared_ptr<BinaryOperator>& decl) {}
     virtual void visit(const std::shared_ptr<DeclRefExpr>& decl) {}
 
