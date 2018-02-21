@@ -23,6 +23,18 @@ public:
         const std::vector<std::shared_ptr<Stmt>>& s);
 };
 
+class DeclStmt final
+    : public Stmt
+    , public std::enable_shared_from_this<DeclStmt> {
+public:
+    std::shared_ptr<Decl> decl;
+
+    void traverse(ASTVisitor& visitor) override;
+    std::string dump(ASTDumper& dumper) const override;
+
+    static std::shared_ptr<DeclStmt> make(const std::shared_ptr<Decl>& d);
+};
+
 class ReturnStmt final : public Stmt {
 public:
     std::shared_ptr<Expr> expr;

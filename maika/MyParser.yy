@@ -112,7 +112,7 @@ statement:
   expression ";"            { $$ = $1; }
 | assignment_expression ";" { $$ = $1; }
 | return_statement          { $$ = $1; }
-| variable_definition ";"   { $$ = DeclRefExpr::make($1); };
+| variable_definition ";"   { $$ = DeclStmt::make($1); };
 
 return_statement:
   "return" ";"            { $$ = ReturnStmt::make(); }
@@ -132,7 +132,7 @@ literal:
 | "bool_literal"    { $$ = $1; };
 
 call_expression:
-  "identifier" "(" expressions ")"  { $$ = CallExpr::make($1, $3); };
+  "identifier" "(" expressions ")"  { $$ = CallExpr::make(DeclRefExpr::make($1), $3); };
 
 expressions:
   %empty                     { }

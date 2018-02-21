@@ -23,7 +23,9 @@ public:
     void setType(const std::shared_ptr<Type>& t);
 };
 
-class NamedDecl final : public Decl, public std::enable_shared_from_this<NamedDecl> {
+class NamedDecl final
+    : public Decl
+    , public std::enable_shared_from_this<NamedDecl> {
 private:
     std::string name;
     std::shared_ptr<const Entity> entity;
@@ -42,7 +44,9 @@ public:
         const std::string& v);
 };
 
-class FunctionDecl final : public Decl, public std::enable_shared_from_this<FunctionDecl> {
+class FunctionDecl final
+    : public Decl
+    , public std::enable_shared_from_this<FunctionDecl> {
 public:
     std::shared_ptr<NamedDecl> namedDecl;
     std::vector<std::shared_ptr<ParmVarDecl>> arguments;
@@ -58,7 +62,9 @@ public:
         const std::shared_ptr<CompoundStmt>& s);
 };
 
-class ParmVarDecl final : public Decl, public std::enable_shared_from_this<ParmVarDecl> {
+class ParmVarDecl final
+    : public Decl
+    , public std::enable_shared_from_this<ParmVarDecl> {
 public:
     std::shared_ptr<NamedDecl> name;
     std::shared_ptr<NamedDecl> type;
@@ -76,7 +82,9 @@ public:
         const std::shared_ptr<NamedDecl>& type);
 };
 
-class VariableDecl final : public Decl, public std::enable_shared_from_this<VariableDecl> {
+class VariableDecl final
+    : public Decl
+    , public std::enable_shared_from_this<VariableDecl> {
 public:
     std::shared_ptr<NamedDecl> namedDecl;
     std::shared_ptr<Expr> expr;

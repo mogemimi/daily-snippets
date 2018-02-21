@@ -34,3 +34,25 @@ void TypeResolver::visit(const std::shared_ptr<VariableDecl>& decl)
 void TypeResolver::visit(const std::shared_ptr<NamedDecl>& decl)
 {
 }
+
+void ASTDumper2::visit(const std::shared_ptr<DeclStmt>& decl)
+{
+}
+
+void ASTDumper2::visit(const std::shared_ptr<CallExpr>& decl)
+{
+}
+
+void ASTDumper2::visit(const std::shared_ptr<IntegerLiteral>& decl)
+{
+}
+
+void ASTDumper2::visit(const std::shared_ptr<DoubleLiteral>& decl){}
+void ASTDumper2::visit(const std::shared_ptr<BoolLiteral>& decl){}
+void ASTDumper2::visit(const std::shared_ptr<AssignmentOperator>& decl){}
+void ASTDumper2::visit(const std::shared_ptr<BinaryOperator>& decl){}
+void ASTDumper2::visit(const std::shared_ptr<DeclRefExpr>& decl){}
+
+void ASTDumper2::visit(const std::shared_ptr<FunctionDecl>& decl){}
+void ASTDumper2::visit(const std::shared_ptr<ParmVarDecl>& decl){}
+void ASTDumper2::visit(const std::shared_ptr<VariableDecl>& decl){}

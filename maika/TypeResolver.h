@@ -25,3 +25,23 @@ public:
     void visit(const std::shared_ptr<VariableDecl>& decl) override;
     void visit(const std::shared_ptr<NamedDecl>& decl) override;
 };
+
+class ASTDumper2 final : public ASTVisitor {
+private:
+    std::string indent = "  ";
+
+public:
+    void visit(const std::shared_ptr<DeclStmt>& decl) override;
+
+    void visit(const std::shared_ptr<CallExpr>& decl) override;
+    void visit(const std::shared_ptr<IntegerLiteral>& decl) override;
+    void visit(const std::shared_ptr<DoubleLiteral>& decl) override;
+    void visit(const std::shared_ptr<BoolLiteral>& decl) override;
+    void visit(const std::shared_ptr<AssignmentOperator>& decl) override;
+    void visit(const std::shared_ptr<BinaryOperator>& decl) override;
+    void visit(const std::shared_ptr<DeclRefExpr>& decl) override;
+
+    void visit(const std::shared_ptr<FunctionDecl>& decl) override;
+    void visit(const std::shared_ptr<ParmVarDecl>& decl) override;
+    void visit(const std::shared_ptr<VariableDecl>& decl) override;
+};

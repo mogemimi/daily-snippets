@@ -1,6 +1,7 @@
 #include "Stmt.h"
 #include "ASTVisitor.h"
 #include "ASTDumper.h"
+#include "Decl.h"
 #include "Expr.h"
 #include <cassert>
 #include <utility>
@@ -52,6 +53,26 @@ std::shared_ptr<CompoundStmt> CompoundStmt::make(
     auto stmt = std::make_shared<CompoundStmt>();
     stmt->statements = s;
     return stmt;
+}
+
+void DeclStmt::traverse(ASTVisitor& visitor)
+{
+    assert(decl);
+    visitor.visit(shared_from_this());
+    decl->traverse(visitor);
+}
+
+std::string DeclStmt::dump(ASTDumper& dumper) const
+{
+    assert(decl);
+    return decl->dump(dumper);
+}
+
+std::shared_ptr<DeclStmt> DeclStmt::make(const std::shared_ptr<Decl>& d)
+{
+    auto expr = std::make_shared<DeclStmt>();
+    expr->decl = d;
+    return expr;
 }
 
 void ReturnStmt::traverse(ASTVisitor& visitor)

@@ -73,9 +73,9 @@ std::shared_ptr<BoolLiteral> BoolLiteral::make(bool v)
 
 void CallExpr::traverse(ASTVisitor& visitor)
 {
-    assert(namedDecl);
+    assert(callee);
     visitor.visit(shared_from_this());
-    namedDecl->traverse(visitor);
+    callee->traverse(visitor);
     for (const auto& arg : arguments) {
         arg->traverse(visitor);
     }
@@ -83,8 +83,8 @@ void CallExpr::traverse(ASTVisitor& visitor)
 
 std::string CallExpr::dump(ASTDumper& dumper) const
 {
-    assert(namedDecl);
-    std::string s = "(" + namedDecl->getName();
+    assert(callee);
+    std::string s = "(" + callee->dump(dumper);
     for (const auto& arg : arguments) {
         s += " ";
         s += arg->dump(dumper);
@@ -94,12 +94,12 @@ std::string CallExpr::dump(ASTDumper& dumper) const
 }
 
 std::shared_ptr<CallExpr> CallExpr::make(
-    const std::shared_ptr<NamedDecl>& n,
-    const std::vector<std::shared_ptr<Expr>>& a)
+    const std::shared_ptr<Expr>& fn,
+    const std::vector<std::shared_ptr<Expr>>& args)
 {
     auto expr = std::make_shared<CallExpr>();
-    expr->namedDecl = n;
-    expr->arguments = a;
+    expr->callee = fn;
+    expr->arguments = args;
     return expr;
 }
 
@@ -180,7 +180,7 @@ std::string DeclRefExpr::dump(ASTDumper& dumper) const
     return decl->dump(dumper);
 }
 
-std::shared_ptr<DeclRefExpr> DeclRefExpr::make(const std::shared_ptr<Decl>& d)
+std::shared_ptr<DeclRefExpr> DeclRefExpr::make(const std::shared_ptr<NamedDecl>& d)
 {
     auto expr = std::make_shared<DeclRefExpr>();
     expr->decl = d;

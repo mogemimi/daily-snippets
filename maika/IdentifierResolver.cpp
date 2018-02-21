@@ -30,6 +30,23 @@ void IdentifierResolver::popScope()
     scopeStack.pop_back();
 }
 
+void IdentifierResolver::visit(const std::shared_ptr<DeclRefExpr>& expr)
+{
+    auto scope = getCurrentScope();
+    assert(scope);
+
+    auto ident = expr->decl;
+    assert(ident);
+
+    auto entity = scope->getEntity(ident->getName());
+    if (!entity) {
+        // TODO: need to handle error
+        printf("warning: unknown identifier '%s'\n", ident->getName().c_str());
+        return;
+    }
+    ident->setEntity(entity);
+}
+
 void IdentifierResolver::visit(const std::shared_ptr<FunctionDecl>& decl)
 {
     auto functionName = decl->namedDecl;
@@ -73,18 +90,4 @@ void IdentifierResolver::visit(const std::shared_ptr<VariableDecl>& decl)
     if (context) {
         context->entities.push_back(entity);
     }
-}
-
-void IdentifierResolver::visit(const std::shared_ptr<NamedDecl>& decl)
-{
-    auto scope = getCurrentScope();
-    assert(scope);
-
-    auto entity = scope->getEntity(decl->getName());
-    if (!entity) {
-        // TODO: need to handle error
-        printf("warning: unknown identifier '%s'\n", decl->getName().c_str());
-        return;
-    }
-    decl->setEntity(entity);
 }

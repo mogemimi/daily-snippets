@@ -8,6 +8,7 @@ class ASTVisitor;
 // NOTE: AST::Stmt
 class Stmt;
 class CompoundStmt;
+class DeclStmt;
 class ReturnStmt;
 
 // NOTE: AST::Expr

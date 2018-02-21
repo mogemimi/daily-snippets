@@ -10,6 +10,8 @@ class ASTVisitor {
 public:
     virtual ~ASTVisitor() = default;
 
+    virtual void visit(const std::shared_ptr<DeclStmt>& decl) {}
+
     virtual void visit(const std::shared_ptr<CallExpr>& decl) {}
     virtual void visit(const std::shared_ptr<IntegerLiteral>& decl) {}
     virtual void visit(const std::shared_ptr<DoubleLiteral>& decl) {}

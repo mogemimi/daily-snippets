@@ -57,15 +57,15 @@ class CallExpr final
     : public Expr
     , public std::enable_shared_from_this<CallExpr> {
 public:
-    std::shared_ptr<NamedDecl> namedDecl;
+    std::shared_ptr<Expr> callee;
     std::vector<std::shared_ptr<Expr>> arguments;
 
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper&) const override;
 
     static std::shared_ptr<CallExpr> make(
-        const std::shared_ptr<NamedDecl>& n,
-        const std::vector<std::shared_ptr<Expr>>& a);
+        const std::shared_ptr<Expr>& fn,
+        const std::vector<std::shared_ptr<Expr>>& args);
 };
 
 class AssignmentOperator final
@@ -111,10 +111,10 @@ class DeclRefExpr final
     : public Expr
     , public std::enable_shared_from_this<DeclRefExpr> {
 public:
-    std::shared_ptr<Decl> decl;
+    std::shared_ptr<NamedDecl> decl;
 
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper& dumper) const override;
 
-    static std::shared_ptr<DeclRefExpr> make(const std::shared_ptr<Decl>& d);
+    static std::shared_ptr<DeclRefExpr> make(const std::shared_ptr<NamedDecl>& d);
 };

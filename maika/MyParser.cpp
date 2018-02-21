@@ -813,7 +813,7 @@ namespace yy {
 
   case 16:
 #line 115 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Stmt> > () = DeclRefExpr::make(yystack_[1].value.as< std::shared_ptr<VariableDecl> > ()); }
+    { yylhs.value.as< std::shared_ptr<Stmt> > () = DeclStmt::make(yystack_[1].value.as< std::shared_ptr<VariableDecl> > ()); }
 #line 818 "MyParser.cpp" // lalr1.cc:859
     break;
 
@@ -873,7 +873,7 @@ namespace yy {
 
   case 26:
 #line 135 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<CallExpr> > () = CallExpr::make(yystack_[3].value.as< std::shared_ptr<NamedDecl> > (), yystack_[1].value.as< std::vector<std::shared_ptr<Expr>> > ()); }
+    { yylhs.value.as< std::shared_ptr<CallExpr> > () = CallExpr::make(DeclRefExpr::make(yystack_[3].value.as< std::shared_ptr<NamedDecl> > ()), yystack_[1].value.as< std::vector<std::shared_ptr<Expr>> > ()); }
 #line 878 "MyParser.cpp" // lalr1.cc:859
     break;
 
