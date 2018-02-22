@@ -25,6 +25,34 @@ COMPILER_OPTIONS = \
 	-I.. \
 	$(SOURCES)
 
+format:
+	@clang-format -i \
+		AST.h \
+		ASTDumper.h \
+		ASTVisitor.cpp \
+		ASTVisitor.h \
+		Decl.cpp \
+		Decl.h \
+		Entity.cpp \
+		Entity.h \
+		Expr.cpp \
+		Expr.h \
+		Expr.cpp \
+		Expr.h \
+		Forward.h \
+		IdentifierResolver.cpp \
+		IdentifierResolver.h \
+		main.cpp \
+		MyDriver.cpp \
+		MyDriver.h \
+		Scope.cpp \
+		Scope.h \
+		Stmt.cpp \
+		Stmt.h \
+		Type.h \
+		TypeResolver.cpp \
+		TypeResolver.h
+
 bison:
 	@flex -o MyLexer.cpp MyLexer.l
 	@bison MyParser.yy
