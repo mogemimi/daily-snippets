@@ -16,13 +16,14 @@ SOURCES = \
 	Scope.cpp \
 	Stmt.cpp \
 	TypeResolver.cpp \
-	main.cpp
+	tests\DumpTest.cpp \
+	tests\main.cpp
 
 COMPILER_OPTIONS = \
 	-o $(PRODUCTNAME) \
 	-std=c++17 \
 	-stdlib=libc++ \
-	-I.. \
+	-I. \
 	$(SOURCES)
 
 format:
@@ -42,7 +43,6 @@ format:
 		Forward.h \
 		IdentifierResolver.cpp \
 		IdentifierResolver.h \
-		main.cpp \
 		MyDriver.cpp \
 		MyDriver.h \
 		Scope.cpp \
@@ -51,10 +51,12 @@ format:
 		Stmt.h \
 		Type.h \
 		TypeResolver.cpp \
-		TypeResolver.h
+		TypeResolver.h \
+		tests\DumpTest.cpp \
+		tests\main.cpp
 
 bison:
-	@flex -o MyLexer.cpp MyLexer.l
+	@flex MyLexer.l
 	@bison MyParser.yy
 
 xcode:

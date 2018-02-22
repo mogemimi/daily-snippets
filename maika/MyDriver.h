@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MyParser.h"
+#include <functional>
 #include <map>
 #include <sstream>
 #include <string>
@@ -31,16 +32,21 @@ struct Comment {
 };
 
 class MyDriver final {
+private:
+    std::function<void()> defer;
+    bool traceScanning;
+
 public:
-    AST ast;
     std::string file;
-    bool trace_scanning;
+    std::string sourceText;
+    AST ast;
     std::vector<Comment> comments;
+
+    std::tuple<std::string, bool> parseFile(const std::string& filename);
+    std::tuple<std::string, bool> parseString(const std::string& text);
 
     void scanBegin();
     void scanEnd();
-
-    std::tuple<std::string, bool> parse(const std::string& filename);
 
     void visitComment(
         const yy::location& l, CommentKind kind, const std::string& comment);

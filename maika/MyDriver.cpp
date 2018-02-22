@@ -1,19 +1,49 @@
 #include "MyDriver.h"
 #include "MyParser.h"
 
-std::tuple<std::string, bool> MyDriver::parse(const std::string& filename)
+#define YY_NO_UNISTD_H 1
+#include "MyLexer.h"
+
+std::tuple<std::string, bool> MyDriver::parseFile(const std::string& filename)
 {
-    this->trace_scanning = false;
+    this->traceScanning = false;
     this->file = filename;
+    this->sourceText.clear();
+
+    if (file.empty()) {
+        yyin = stdin;
+    }
+    else if (!(yyin = fopen(file.c_str(), "r"))) {
+        error("cannot open " + file + ": " + strerror(errno));
+        return std::make_tuple(ast.dump(), false);
+    }
+    this->defer = [] { fclose(yyin); };
+
     scanBegin();
     yy::MyParser parser(*this);
     const auto resultCode = parser.parse();
     scanEnd();
 
-    if (resultCode != 0) {
-        return std::make_tuple("", false);
-    }
-    return std::make_tuple(ast.dump(), true);
+    const auto ok = (resultCode == 0);
+    return std::make_tuple(ast.dump(), ok);
+}
+
+std::tuple<std::string, bool> MyDriver::parseString(const std::string& text)
+{
+    this->traceScanning = false;
+    this->file.clear();
+    this->sourceText = text;
+
+    auto state = yy_scan_string(sourceText.c_str());
+    this->defer = [state] { yy_delete_buffer(state); };
+
+    scanBegin();
+    yy::MyParser parser(*this);
+    const auto resultCode = parser.parse();
+    scanEnd();
+
+    const auto ok = (resultCode == 0);
+    return std::make_tuple(ast.dump(), ok);
 }
 
 void MyDriver::visitComment(

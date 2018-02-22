@@ -571,9 +571,9 @@ int yy_flex_debug = 1;
 
 static yyconst flex_int16_t yy_rule_linenum[29] =
     {   0,
-       52,   53,   58,   59,   61,   62,   63,   65,   66,   67,
-       68,   69,   70,   71,   72,   73,   74,   75,   76,   78,
-       79,   80,   81,   82,   84,   93,  102,  103
+       47,   48,   53,   54,   56,   57,   58,   60,   61,   62,
+       63,   64,   65,   66,   67,   68,   69,   70,   71,   73,
+       74,   75,   76,   77,   79,   88,   97,   98
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -587,7 +587,6 @@ char *yytext;
 #line 1 "MyLexer.l"
 #line 2 "MyLexer.l"
 #include "AST.h"
-#include "MyLexer.h"
 #include "MyDriver.h"
 #include "MyParser.h"
 
@@ -610,15 +609,11 @@ std::string comment;
 } // end of anonymous namespace
 #define YY_NO_INPUT 1
 #define YY_NO_UNISTD_H 1
-#line 30 "MyLexer.l"
-// %option c++
-// 
-// %option yyclass="MyLexer"
-#line 41 "MyLexer.l"
+#line 36 "MyLexer.l"
     // Code run each time a pattern is matched.
     #define YY_USER_ACTION  loc.columns(yyleng);
 
-#line 622 "MyLexer.cpp"
+#line 617 "MyLexer.cpp"
 
 #define INITIAL 0
 #define CSTYLE_COMMENT 1
@@ -902,14 +897,14 @@ YY_DECL
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 46 "MyLexer.l"
+#line 41 "MyLexer.l"
 
 
     // Code run each time yylex is called.
     loc.step();
 
 
-#line 913 "MyLexer.cpp"
+#line 908 "MyLexer.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -987,12 +982,12 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 52 "MyLexer.l"
+#line 47 "MyLexer.l"
 BEGIN(CSTYLE_COMMENT); comment = yytext;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 53 "MyLexer.l"
+#line 48 "MyLexer.l"
 {
     BEGIN(INITIAL);
     driver.visitComment(loc, CommentKind::C, comment + yytext);
@@ -1002,118 +997,118 @@ YY_RULE_SETUP
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 58 "MyLexer.l"
+#line 53 "MyLexer.l"
 loc.lines(yyleng); comment += yytext;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 59 "MyLexer.l"
+#line 54 "MyLexer.l"
 comment += yytext;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 61 "MyLexer.l"
+#line 56 "MyLexer.l"
 driver.visitComment(loc, CommentKind::BCPL, yytext);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 62 "MyLexer.l"
+#line 57 "MyLexer.l"
 loc.step();
 	YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 63 "MyLexer.l"
+#line 58 "MyLexer.l"
 loc.lines(yyleng); loc.step();
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 65 "MyLexer.l"
+#line 60 "MyLexer.l"
 return yy::MyParser::make_MINUS(loc);
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 66 "MyLexer.l"
+#line 61 "MyLexer.l"
 return yy::MyParser::make_PLUS(loc);
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 67 "MyLexer.l"
+#line 62 "MyLexer.l"
 return yy::MyParser::make_STAR(loc);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 68 "MyLexer.l"
+#line 63 "MyLexer.l"
 return yy::MyParser::make_SLASH(loc);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 69 "MyLexer.l"
+#line 64 "MyLexer.l"
 return yy::MyParser::make_ASSIGN(loc);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 70 "MyLexer.l"
+#line 65 "MyLexer.l"
 return yy::MyParser::make_LEFT_PARENTHESIS(loc);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 71 "MyLexer.l"
+#line 66 "MyLexer.l"
 return yy::MyParser::make_RIGHT_PARENTHESIS(loc);
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 72 "MyLexer.l"
+#line 67 "MyLexer.l"
 return yy::MyParser::make_LEFT_CURLY_BRACKET(loc);
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 73 "MyLexer.l"
+#line 68 "MyLexer.l"
 return yy::MyParser::make_RIGHT_CURLY_BRACKET(loc);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 74 "MyLexer.l"
+#line 69 "MyLexer.l"
 return yy::MyParser::make_COLON(loc);
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 75 "MyLexer.l"
+#line 70 "MyLexer.l"
 return yy::MyParser::make_SEMICOLON(loc);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 76 "MyLexer.l"
+#line 71 "MyLexer.l"
 return yy::MyParser::make_COMMA(loc);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 78 "MyLexer.l"
+#line 73 "MyLexer.l"
 return yy::MyParser::make_FUNCTION(loc);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 79 "MyLexer.l"
+#line 74 "MyLexer.l"
 return yy::MyParser::make_RETURN(loc);
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 80 "MyLexer.l"
+#line 75 "MyLexer.l"
 return yy::MyParser::make_LET(loc);
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 81 "MyLexer.l"
+#line 76 "MyLexer.l"
 return yy::MyParser::make_BOOL(BoolLiteral::make(true), loc);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 82 "MyLexer.l"
+#line 77 "MyLexer.l"
 return yy::MyParser::make_BOOL(BoolLiteral::make(false), loc);
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 84 "MyLexer.l"
+#line 79 "MyLexer.l"
 {
     errno = 0;
     const auto n = strtol(yytext, nullptr, 10);
@@ -1125,7 +1120,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 93 "MyLexer.l"
+#line 88 "MyLexer.l"
 {
     errno = 0;
     const auto d = strtod(yytext, nullptr);
@@ -1137,25 +1132,25 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 102 "MyLexer.l"
+#line 97 "MyLexer.l"
 return yy::MyParser::make_IDENTIFIER(NamedDecl::make(loc, yytext), loc);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 103 "MyLexer.l"
+#line 98 "MyLexer.l"
 driver.error(loc, "invalid character");
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(CSTYLE_COMMENT):
-#line 104 "MyLexer.l"
+#line 99 "MyLexer.l"
 return yy::MyParser::make_END(loc);
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 106 "MyLexer.l"
+#line 100 "MyLexer.l"
 ECHO;
 	YY_BREAK
-#line 1159 "MyLexer.cpp"
+#line 1154 "MyLexer.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2258,25 +2253,20 @@ void yyfree (void * ptr )
 
 /* %ok-for-header */
 
-#line 106 "MyLexer.l"
+#line 100 "MyLexer.l"
 
 
 
 void MyDriver::scanBegin()
 {
-    yy_flex_debug = trace_scanning;
-    if (file.empty () || file == "-") {
-        yyin = stdin;
-    }
-    else if (!(yyin = fopen (file.c_str (), "r")))
-    {
-        error ("cannot open " + file + ": " + strerror(errno));
-        exit (EXIT_FAILURE);
-    }
+    yy_flex_debug = this->traceScanning;
 }
 
 void MyDriver::scanEnd()
 {
-    fclose(yyin);
+    if (this->defer) {
+        this->defer();
+        this->defer = nullptr;
+    }
 }
 

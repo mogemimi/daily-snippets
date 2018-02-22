@@ -1,6 +1,5 @@
 %{
 #include "AST.h"
-#include "MyLexer.h"
 #include "MyDriver.h"
 #include "MyParser.h"
 
@@ -23,14 +22,10 @@ std::string comment;
 } // end of anonymous namespace
 %}
 
+%option header-file="MyLexer.h"
+%option outfile="MyLexer.cpp"
 %option noyywrap nounput batch debug noinput
 %option nounistd never-interactive
-
-%{
-// %option c++
-// 
-// %option yyclass="MyLexer"
-%}
 
 double      [0-9]+\.[0-9]*
 integer     [0-9]+
@@ -107,18 +102,13 @@ blank       [ \t]
 
 void MyDriver::scanBegin()
 {
-    yy_flex_debug = trace_scanning;
-    if (file.empty () || file == "-") {
-        yyin = stdin;
-    }
-    else if (!(yyin = fopen (file.c_str (), "r")))
-    {
-        error ("cannot open " + file + ": " + strerror(errno));
-        exit (EXIT_FAILURE);
-    }
+    yy_flex_debug = this->traceScanning;
 }
 
 void MyDriver::scanEnd()
 {
-    fclose(yyin);
+    if (this->defer) {
+        this->defer();
+        this->defer = nullptr;
+    }
 }
