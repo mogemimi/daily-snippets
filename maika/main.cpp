@@ -1,9 +1,9 @@
 #include "AST.h"
 #include "Entity.h"
 #include "IdentifierResolver.h"
-#include "TypeResolver.h"
-#include "MyLexer.h"
 #include "MyDriver.h"
+#include "MyLexer.h"
+#include "TypeResolver.h"
 #include <iostream>
 #include <sstream>
 
@@ -15,7 +15,8 @@ int main()
     auto [result, ok] = driver.parse(filename);
     if (ok) {
         printf("%s\n", result.c_str());
-    } else {
+    }
+    else {
         printf("parse error\n");
         return 1;
     }

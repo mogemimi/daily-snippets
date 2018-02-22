@@ -1,6 +1,6 @@
 # maika
 
-A experimental/simple C++ lexer as a hobby.
+A experimental type inference as a hobby.
 
 It is distributed under the [MIT License](https://opensource.org/licenses/MIT).
 
