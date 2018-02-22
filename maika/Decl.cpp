@@ -47,9 +47,8 @@ std::string NamedDecl::dump(ASTDumper&) const
     return name;
 }
 
-std::shared_ptr<NamedDecl> NamedDecl::make(
-    const yy::location& loc,
-    const std::string& v)
+std::shared_ptr<NamedDecl>
+NamedDecl::make(const yy::location& loc, const std::string& v)
 {
     auto decl = std::make_shared<NamedDecl>();
     decl->location = loc;
@@ -128,8 +127,7 @@ std::string ParmVarDecl::dump(ASTDumper& dumper) const
 }
 
 std::shared_ptr<ParmVarDecl> ParmVarDecl::make(
-    const yy::location& loc,
-    const std::shared_ptr<NamedDecl>& name)
+    const yy::location& loc, const std::shared_ptr<NamedDecl>& name)
 {
     auto decl = std::make_shared<ParmVarDecl>();
     decl->location = loc;
@@ -170,9 +168,8 @@ std::string VariableDecl::dump(ASTDumper& dumper) const
     return s;
 }
 
-std::shared_ptr<VariableDecl> VariableDecl::make(
-    const yy::location& loc,
-    const std::shared_ptr<NamedDecl>& n)
+std::shared_ptr<VariableDecl>
+VariableDecl::make(const yy::location& loc, const std::shared_ptr<NamedDecl>& n)
 {
     auto decl = std::make_shared<VariableDecl>();
     decl->location = loc;

@@ -6,9 +6,7 @@
 #include <cassert>
 #include <utility>
 
-Scope::Scope()
-{
-}
+Scope::Scope() {}
 
 Scope::Scope(std::shared_ptr<Scope> parentIn)
     : parent(parentIn)

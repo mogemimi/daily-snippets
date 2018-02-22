@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Forward.h"
-#include <string>
-#include <vector>
 #include <memory>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 class Scope final {
 private:

@@ -2,9 +2,9 @@
 
 #include "Forward.h"
 #include "Stmt.h"
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 class Expr : public Stmt {
 protected:
@@ -102,5 +102,6 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper& dumper) const override;
 
-    static std::shared_ptr<DeclRefExpr> make(const std::shared_ptr<NamedDecl>& d);
+    static std::shared_ptr<DeclRefExpr>
+    make(const std::shared_ptr<NamedDecl>& d);
 };

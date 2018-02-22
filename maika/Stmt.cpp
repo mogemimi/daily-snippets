@@ -1,6 +1,6 @@
 #include "Stmt.h"
-#include "ASTVisitor.h"
 #include "ASTDumper.h"
+#include "ASTVisitor.h"
 #include "Decl.h"
 #include "Expr.h"
 #include <cassert>
@@ -47,8 +47,8 @@ std::string CompoundStmt::dump(ASTDumper& dumper) const
     return s;
 }
 
-std::shared_ptr<CompoundStmt> CompoundStmt::make(
-    const std::vector<std::shared_ptr<Stmt>>& s)
+std::shared_ptr<CompoundStmt>
+CompoundStmt::make(const std::vector<std::shared_ptr<Stmt>>& s)
 {
     auto stmt = std::make_shared<CompoundStmt>();
     stmt->statements = s;

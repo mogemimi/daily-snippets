@@ -1,3 +1,13 @@
 BasedOnStyle: LLVM
-IndentWidth: 4
+AccessModifierOffset: -4
+AlignAfterOpenBracket: AlwaysBreak
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Inline
 BreakBeforeBraces: Stroustrup
+BreakBeforeInheritanceComma: true
+BreakConstructorInitializersBeforeComma: true
+BinPackArguments: false
+BinPackParameters: false
+DerivePointerAlignment: true
+IndentWidth: 4
+PointerAlignment: Left

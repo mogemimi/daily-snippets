@@ -3,9 +3,9 @@
 #include "ASTDumper.h"
 #include "Forward.h"
 #include "location.hh"
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 class Decl {
 protected:
@@ -39,9 +39,8 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper&) const override;
 
-    static std::shared_ptr<NamedDecl> make(
-        const yy::location& loc,
-        const std::string& v);
+    static std::shared_ptr<NamedDecl>
+    make(const yy::location& loc, const std::string& v);
 };
 
 class FunctionDecl final
@@ -72,9 +71,8 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper& dumper) const override;
 
-    static std::shared_ptr<ParmVarDecl> make(
-        const yy::location& loc,
-        const std::shared_ptr<NamedDecl>& name);
+    static std::shared_ptr<ParmVarDecl>
+    make(const yy::location& loc, const std::shared_ptr<NamedDecl>& name);
 
     static std::shared_ptr<ParmVarDecl> make(
         const yy::location& loc,
@@ -92,9 +90,8 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper& dumper) const override;
 
-    static std::shared_ptr<VariableDecl> make(
-        const yy::location& loc,
-        const std::shared_ptr<NamedDecl>& n);
+    static std::shared_ptr<VariableDecl>
+    make(const yy::location& loc, const std::shared_ptr<NamedDecl>& n);
     static std::shared_ptr<VariableDecl> make(
         const yy::location& loc,
         const std::shared_ptr<NamedDecl>& n,

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Forward.h"
 #include "ASTVisitor.h"
+#include "Forward.h"
 #include "Scope.h"
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 struct IdentifierContext {
     std::vector<std::shared_ptr<Entity>> entities;

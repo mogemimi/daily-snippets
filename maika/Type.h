@@ -1,17 +1,17 @@
 #pragma once
 
-#include <string>
 #include <memory>
+#include <string>
 
 enum class BuiltinTypeKind {
-    //Int32,
-    //Int64,
-    //UInt32,
-    //UInt64,
+    // Int32,
+    // Int64,
+    // UInt32,
+    // UInt64,
     Bool,
     Int,
     Double,
-    //String,
+    // String,
 };
 
 enum class TypeKind {
@@ -27,10 +27,7 @@ public:
 
 class AnyType final : public Type {
 public:
-    std::string dump() const override
-    {
-        return "any";
-    }
+    std::string dump() const override { return "any"; }
 
     static std::shared_ptr<AnyType> make()
     {
@@ -41,10 +38,7 @@ public:
 
 class FunctionType final : public Type {
 public:
-    std::string dump() const override
-    {
-        return "function()";
-    }
+    std::string dump() const override { return "function()"; }
 
     static std::shared_ptr<FunctionType> make()
     {
@@ -55,11 +49,11 @@ public:
 
 using TypeVariableIndex = uint64_t;
 
-//class TypeVariable final : public Type {
-//private:
+// class TypeVariable final : public Type {
+// private:
 //    TypeVariableIndex index;
 //
-//public:
+// public:
 //    std::string dump() const override
 //    {
 //        return "T(" + std::to_string(index) + ")";
@@ -83,12 +77,9 @@ public:
     std::string dump() const override
     {
         switch (kind) {
-        case BuiltinTypeKind::Bool:
-            return "bool";
-        case BuiltinTypeKind::Int:
-            return "int";
-        case BuiltinTypeKind::Double:
-            return "double";
+        case BuiltinTypeKind::Bool: return "bool";
+        case BuiltinTypeKind::Int: return "int";
+        case BuiltinTypeKind::Double: return "double";
         }
         return "builtin";
     }

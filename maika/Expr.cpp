@@ -125,7 +125,8 @@ std::string BinaryOperator::dump(ASTDumper& dumper) const
         case BinaryOperatorKind::Assign: return "=";
         }
     }();
-    std::string s = "(" + k + " " + lhs->dump(dumper) + " " + rhs->dump(dumper) + ")";
+    std::string s =
+        "(" + k + " " + lhs->dump(dumper) + " " + rhs->dump(dumper) + ")";
     return s;
 }
 
@@ -154,7 +155,8 @@ std::string DeclRefExpr::dump(ASTDumper& dumper) const
     return decl->dump(dumper);
 }
 
-std::shared_ptr<DeclRefExpr> DeclRefExpr::make(const std::shared_ptr<NamedDecl>& d)
+std::shared_ptr<DeclRefExpr>
+DeclRefExpr::make(const std::shared_ptr<NamedDecl>& d)
 {
     auto expr = std::make_shared<DeclRefExpr>();
     expr->decl = d;

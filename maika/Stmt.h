@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Forward.h"
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 class Stmt {
 public:
@@ -19,8 +19,8 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper& dumper) const override;
 
-    static std::shared_ptr<CompoundStmt> make(
-        const std::vector<std::shared_ptr<Stmt>>& s);
+    static std::shared_ptr<CompoundStmt>
+    make(const std::vector<std::shared_ptr<Stmt>>& s);
 };
 
 class DeclStmt final

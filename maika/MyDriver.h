@@ -1,9 +1,9 @@
 #pragma once
 
 #include "MyParser.h"
-#include <string>
-#include <sstream>
 #include <map>
+#include <sstream>
+#include <string>
 #include <tuple>
 
 enum class CommentKind {
@@ -19,7 +19,7 @@ struct Comment {
     std::string dump()
     {
         auto style = [&]() -> std::string {
-        switch (kind) {
+            switch (kind) {
             case CommentKind::BCPL: return "BCPL";
             case CommentKind::C: return "C";
             }
@@ -42,7 +42,8 @@ public:
 
     std::tuple<std::string, bool> parse(const std::string& filename);
 
-    void visitComment(const yy::location& l, CommentKind kind, const std::string& comment);
+    void visitComment(
+        const yy::location& l, CommentKind kind, const std::string& comment);
     void error(const yy::location& l, const std::string& m);
     void error(const std::string& m);
 };

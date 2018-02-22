@@ -6,10 +6,10 @@
 #include "Stmt.h"
 #include "Type.h"
 #include <cassert>
-#include <string>
-#include <vector>
 #include <memory>
+#include <string>
 #include <utility>
+#include <vector>
 
 class AST final {
 public:
@@ -20,7 +20,7 @@ public:
         ASTDumper dumper(true);
         std::string s;
         bool needToBreakLine = false;
-        for (auto & funcDecl : functionDecls) {
+        for (auto& funcDecl : functionDecls) {
             assert(funcDecl);
             if (needToBreakLine) {
                 s += "\n";
