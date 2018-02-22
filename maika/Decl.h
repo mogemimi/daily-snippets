@@ -39,8 +39,7 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper&) const override;
 
-    static std::shared_ptr<NamedDecl>
-    make(const yy::location& loc, const std::string& v);
+    static std::shared_ptr<NamedDecl> make(const yy::location& loc, const std::string& v);
 };
 
 class FunctionDecl final

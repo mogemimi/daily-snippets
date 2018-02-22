@@ -62,6 +62,11 @@ blank       [ \t]
 "*"     return yy::MyParser::make_STAR(loc);
 "/"     return yy::MyParser::make_SLASH(loc);
 "="     return yy::MyParser::make_ASSIGN(loc);
+"!"     return yy::MyParser::make_LOGICAL_NOT(loc);
+"&&"    return yy::MyParser::make_LOGICAL_AND(loc);
+"||"    return yy::MyParser::make_LOGICAL_OR(loc);
+"=="    return yy::MyParser::make_EQUAL(loc);
+"!="    return yy::MyParser::make_NOT_EQUAL(loc);
 "("     return yy::MyParser::make_LEFT_PARENTHESIS(loc);
 ")"     return yy::MyParser::make_RIGHT_PARENTHESIS(loc);
 "{"     return yy::MyParser::make_LEFT_CURLY_BRACKET(loc);
@@ -103,6 +108,7 @@ blank       [ \t]
 void MyDriver::scanBegin()
 {
     yy_flex_debug = this->traceScanning;
+    loc.initialize();
 }
 
 void MyDriver::scanEnd()

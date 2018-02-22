@@ -4,21 +4,37 @@
 #include "Forward.h"
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
-class IdentifierContext;
-
-class TypeEnv {
-public:
-};
-
-class TypeResolver final : public ASTVisitor {
-    int rank = 0;
-    std::vector<std::shared_ptr<NamedDecl>> nonTypedNames;
-    std::shared_ptr<Type> lastReturnType;
+class ASTDumper2 final : public ASTVisitor {
+private:
+    std::string indent;
+    bool allowMultiLine;
 
 public:
+    std::string result;
+
+    ASTDumper2()
+        : allowMultiLine(true)
+    {
+    }
+    explicit ASTDumper2(bool multiLine)
+        : allowMultiLine(multiLine)
+    {
+    }
+
+    std::string GetIndent() const
+    {
+        if (!allowMultiLine) {
+            return "";
+        }
+        return indent;
+    }
+
+    void SetIndent(const std::string& i) { indent = i; }
+
+    bool isMultiLine() { return allowMultiLine; }
+
     void visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traverse) override;
     void visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse) override;
     void visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse) override;

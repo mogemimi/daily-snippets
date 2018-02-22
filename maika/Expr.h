@@ -63,9 +63,8 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper&) const override;
 
-    static std::shared_ptr<CallExpr> make(
-        const std::shared_ptr<Expr>& fn,
-        const std::vector<std::shared_ptr<Expr>>& args);
+    static std::shared_ptr<CallExpr>
+    make(const std::shared_ptr<Expr>& fn, const std::vector<std::shared_ptr<Expr>>& args);
 };
 
 enum class BinaryOperatorKind {
@@ -74,6 +73,15 @@ enum class BinaryOperatorKind {
     Multiply,
     Divide,
     Assign,
+    Equal,
+    NotEqual,
+    LogicalAnd, // &&
+    LogicalOr,  // ||
+
+    // LogicalNot, // !
+    // And, // &
+    // Xor, // ^
+    // Or, // |
 };
 
 class BinaryOperator final
@@ -87,10 +95,8 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper& dumper) const override;
 
-    static std::shared_ptr<BinaryOperator> make(
-        BinaryOperatorKind k,
-        const std::shared_ptr<Expr>& l,
-        const std::shared_ptr<Expr>& r);
+    static std::shared_ptr<BinaryOperator>
+    make(BinaryOperatorKind k, const std::shared_ptr<Expr>& l, const std::shared_ptr<Expr>& r);
 };
 
 class DeclRefExpr final
@@ -102,6 +108,5 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper& dumper) const override;
 
-    static std::shared_ptr<DeclRefExpr>
-    make(const std::shared_ptr<NamedDecl>& d);
+    static std::shared_ptr<DeclRefExpr> make(const std::shared_ptr<NamedDecl>& d);
 };

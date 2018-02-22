@@ -12,15 +12,16 @@ public:
     virtual std::string dump(ASTDumper& dumper) const = 0;
 };
 
-class CompoundStmt final : public Stmt {
+class CompoundStmt final
+    : public Stmt
+    , public std::enable_shared_from_this<CompoundStmt> {
 public:
     std::vector<std::shared_ptr<Stmt>> statements;
 
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper& dumper) const override;
 
-    static std::shared_ptr<CompoundStmt>
-    make(const std::vector<std::shared_ptr<Stmt>>& s);
+    static std::shared_ptr<CompoundStmt> make(const std::vector<std::shared_ptr<Stmt>>& s);
 };
 
 class DeclStmt final
@@ -35,7 +36,9 @@ public:
     static std::shared_ptr<DeclStmt> make(const std::shared_ptr<Decl>& d);
 };
 
-class ReturnStmt final : public Stmt {
+class ReturnStmt final
+    : public Stmt
+    , public std::enable_shared_from_this<ReturnStmt> {
 public:
     std::shared_ptr<Expr> expr;
 

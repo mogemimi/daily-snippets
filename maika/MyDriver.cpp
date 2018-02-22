@@ -46,8 +46,7 @@ std::tuple<std::string, bool> MyDriver::parseString(const std::string& text)
     return std::make_tuple(ast.dump(), ok);
 }
 
-void MyDriver::visitComment(
-    const yy::location& l, CommentKind kind, const std::string& text)
+void MyDriver::visitComment(const yy::location& l, CommentKind kind, const std::string& text)
 {
     Comment comment;
     comment.location = l;

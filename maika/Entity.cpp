@@ -6,13 +6,13 @@
 #include <cassert>
 #include <utility>
 
-Entity::Entity(const std::string& nameIn, const std::shared_ptr<Decl>& declIn)
+Entity::Entity(const std::string& nameIn, const std::shared_ptr<NamedDecl>& declIn)
     : name(nameIn)
     , decl(declIn)
 {
 }
 
-std::shared_ptr<Decl> Entity::getDecl() const
+std::shared_ptr<NamedDecl> Entity::getDecl() const
 {
     return decl.lock();
 }

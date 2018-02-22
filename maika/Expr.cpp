@@ -74,11 +74,12 @@ std::shared_ptr<BoolLiteral> BoolLiteral::make(bool v)
 void CallExpr::traverse(ASTVisitor& visitor)
 {
     assert(callee);
-    visitor.visit(shared_from_this());
-    callee->traverse(visitor);
-    for (const auto& arg : arguments) {
-        arg->traverse(visitor);
-    }
+    visitor.visit(shared_from_this(), [&] {
+        callee->traverse(visitor);
+        for (const auto& arg : arguments) {
+            arg->traverse(visitor);
+        }
+    });
 }
 
 std::string CallExpr::dump(ASTDumper& dumper) const
@@ -93,9 +94,8 @@ std::string CallExpr::dump(ASTDumper& dumper) const
     return s;
 }
 
-std::shared_ptr<CallExpr> CallExpr::make(
-    const std::shared_ptr<Expr>& fn,
-    const std::vector<std::shared_ptr<Expr>>& args)
+std::shared_ptr<CallExpr>
+CallExpr::make(const std::shared_ptr<Expr>& fn, const std::vector<std::shared_ptr<Expr>>& args)
 {
     auto expr = std::make_shared<CallExpr>();
     expr->callee = fn;
@@ -107,9 +107,10 @@ void BinaryOperator::traverse(ASTVisitor& visitor)
 {
     assert(lhs);
     assert(rhs);
-    visitor.visit(shared_from_this());
-    lhs->traverse(visitor);
-    rhs->traverse(visitor);
+    visitor.visit(shared_from_this(), [&] {
+        lhs->traverse(visitor);
+        rhs->traverse(visitor);
+    });
 }
 
 std::string BinaryOperator::dump(ASTDumper& dumper) const
@@ -123,17 +124,18 @@ std::string BinaryOperator::dump(ASTDumper& dumper) const
         case BinaryOperatorKind::Multiply: return "*";
         case BinaryOperatorKind::Divide: return "/";
         case BinaryOperatorKind::Assign: return "=";
+        case BinaryOperatorKind::Equal: return "==";
+        case BinaryOperatorKind::NotEqual: return "!=";
+        case BinaryOperatorKind::LogicalAnd: return "&&";
+        case BinaryOperatorKind::LogicalOr: return "||";
         }
     }();
-    std::string s =
-        "(" + k + " " + lhs->dump(dumper) + " " + rhs->dump(dumper) + ")";
+    std::string s = "(" + k + " " + lhs->dump(dumper) + " " + rhs->dump(dumper) + ")";
     return s;
 }
 
 std::shared_ptr<BinaryOperator> BinaryOperator::make(
-    BinaryOperatorKind k,
-    const std::shared_ptr<Expr>& l,
-    const std::shared_ptr<Expr>& r)
+    BinaryOperatorKind k, const std::shared_ptr<Expr>& l, const std::shared_ptr<Expr>& r)
 {
     auto expr = std::make_shared<BinaryOperator>();
     expr->kind = k;
@@ -145,8 +147,7 @@ std::shared_ptr<BinaryOperator> BinaryOperator::make(
 void DeclRefExpr::traverse(ASTVisitor& visitor)
 {
     assert(decl);
-    visitor.visit(shared_from_this());
-    decl->traverse(visitor);
+    visitor.visit(shared_from_this(), [&] { decl->traverse(visitor); });
 }
 
 std::string DeclRefExpr::dump(ASTDumper& dumper) const
@@ -155,8 +156,7 @@ std::string DeclRefExpr::dump(ASTDumper& dumper) const
     return decl->dump(dumper);
 }
 
-std::shared_ptr<DeclRefExpr>
-DeclRefExpr::make(const std::shared_ptr<NamedDecl>& d)
+std::shared_ptr<DeclRefExpr> DeclRefExpr::make(const std::shared_ptr<NamedDecl>& d)
 {
     auto expr = std::make_shared<DeclRefExpr>();
     expr->decl = d;

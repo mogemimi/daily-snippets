@@ -365,20 +365,25 @@ namespace yy {
         TOK_PLUS = 260,
         TOK_STAR = 261,
         TOK_SLASH = 262,
-        TOK_LEFT_PARENTHESIS = 263,
-        TOK_RIGHT_PARENTHESIS = 264,
-        TOK_LEFT_CURLY_BRACKET = 265,
-        TOK_RIGHT_CURLY_BRACKET = 266,
-        TOK_COLON = 267,
-        TOK_SEMICOLON = 268,
-        TOK_COMMA = 269,
-        TOK_FUNCTION = 270,
-        TOK_RETURN = 271,
-        TOK_LET = 272,
-        TOK_IDENTIFIER = 273,
-        TOK_INTEGER = 274,
-        TOK_DOUBLE = 275,
-        TOK_BOOL = 276
+        TOK_LOGICAL_NOT = 263,
+        TOK_LOGICAL_AND = 264,
+        TOK_LOGICAL_OR = 265,
+        TOK_EQUAL = 266,
+        TOK_NOT_EQUAL = 267,
+        TOK_LEFT_PARENTHESIS = 268,
+        TOK_RIGHT_PARENTHESIS = 269,
+        TOK_LEFT_CURLY_BRACKET = 270,
+        TOK_RIGHT_CURLY_BRACKET = 271,
+        TOK_COLON = 272,
+        TOK_SEMICOLON = 273,
+        TOK_COMMA = 274,
+        TOK_FUNCTION = 275,
+        TOK_RETURN = 276,
+        TOK_LET = 277,
+        TOK_IDENTIFIER = 278,
+        TOK_INTEGER = 279,
+        TOK_DOUBLE = 280,
+        TOK_BOOL = 281
       };
     };
 
@@ -536,6 +541,26 @@ namespace yy {
     static inline
     symbol_type
     make_SLASH (const location_type& l);
+
+    static inline
+    symbol_type
+    make_LOGICAL_NOT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_LOGICAL_AND (const location_type& l);
+
+    static inline
+    symbol_type
+    make_LOGICAL_OR (const location_type& l);
+
+    static inline
+    symbol_type
+    make_EQUAL (const location_type& l);
+
+    static inline
+    symbol_type
+    make_NOT_EQUAL (const location_type& l);
 
     static inline
     symbol_type
@@ -798,12 +823,12 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 80,     ///< Last index in yytable_.
+      yylast_ = 119,     ///< Last index in yytable_.
       yynnts_ = 14,  ///< Number of nonterminal symbols.
       yyfinal_ = 5, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 22  ///< Number of tokens.
+      yyntokens_ = 27  ///< Number of tokens.
     };
 
 
@@ -847,9 +872,10 @@ namespace yy {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20,    21
+      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
+      25,    26
     };
-    const unsigned int user_token_number_max_ = 276;
+    const unsigned int user_token_number_max_ = 281;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int>(t) <= yyeof_)
@@ -882,64 +908,64 @@ namespace yy {
   {
       switch (other.type_get ())
     {
-      case 21: // "bool_literal"
+      case 26: // "bool_literal"
         value.copy< std::shared_ptr<BoolLiteral> > (other.value);
         break;
 
-      case 33: // call_expression
+      case 38: // call_expression
         value.copy< std::shared_ptr<CallExpr> > (other.value);
         break;
 
-      case 27: // compound_statement
+      case 32: // compound_statement
         value.copy< std::shared_ptr<CompoundStmt> > (other.value);
         break;
 
-      case 20: // "double_literal"
+      case 25: // "double_literal"
         value.copy< std::shared_ptr<DoubleLiteral> > (other.value);
         break;
 
-      case 32: // literal
-      case 35: // expression
+      case 37: // literal
+      case 40: // expression
         value.copy< std::shared_ptr<Expr> > (other.value);
         break;
 
-      case 24: // function_definition
+      case 29: // function_definition
         value.copy< std::shared_ptr<FunctionDecl> > (other.value);
         break;
 
-      case 19: // "integer_literal"
+      case 24: // "integer_literal"
         value.copy< std::shared_ptr<IntegerLiteral> > (other.value);
         break;
 
-      case 18: // "identifier"
+      case 23: // "identifier"
         value.copy< std::shared_ptr<NamedDecl> > (other.value);
         break;
 
-      case 26: // parameter_variable
+      case 31: // parameter_variable
         value.copy< std::shared_ptr<ParmVarDecl> > (other.value);
         break;
 
-      case 30: // return_statement
+      case 35: // return_statement
         value.copy< std::shared_ptr<ReturnStmt> > (other.value);
         break;
 
-      case 29: // statement
+      case 34: // statement
         value.copy< std::shared_ptr<Stmt> > (other.value);
         break;
 
-      case 31: // variable_definition
+      case 36: // variable_definition
         value.copy< std::shared_ptr<VariableDecl> > (other.value);
         break;
 
-      case 34: // expressions
+      case 39: // expressions
         value.copy< std::vector<std::shared_ptr<Expr>> > (other.value);
         break;
 
-      case 25: // parameter_variables
+      case 30: // parameter_variables
         value.copy< std::vector<std::shared_ptr<ParmVarDecl>> > (other.value);
         break;
 
-      case 28: // statements
+      case 33: // statements
         value.copy< std::vector<std::shared_ptr<Stmt>> > (other.value);
         break;
 
@@ -960,64 +986,64 @@ namespace yy {
     (void) v;
       switch (this->type_get ())
     {
-      case 21: // "bool_literal"
+      case 26: // "bool_literal"
         value.copy< std::shared_ptr<BoolLiteral> > (v);
         break;
 
-      case 33: // call_expression
+      case 38: // call_expression
         value.copy< std::shared_ptr<CallExpr> > (v);
         break;
 
-      case 27: // compound_statement
+      case 32: // compound_statement
         value.copy< std::shared_ptr<CompoundStmt> > (v);
         break;
 
-      case 20: // "double_literal"
+      case 25: // "double_literal"
         value.copy< std::shared_ptr<DoubleLiteral> > (v);
         break;
 
-      case 32: // literal
-      case 35: // expression
+      case 37: // literal
+      case 40: // expression
         value.copy< std::shared_ptr<Expr> > (v);
         break;
 
-      case 24: // function_definition
+      case 29: // function_definition
         value.copy< std::shared_ptr<FunctionDecl> > (v);
         break;
 
-      case 19: // "integer_literal"
+      case 24: // "integer_literal"
         value.copy< std::shared_ptr<IntegerLiteral> > (v);
         break;
 
-      case 18: // "identifier"
+      case 23: // "identifier"
         value.copy< std::shared_ptr<NamedDecl> > (v);
         break;
 
-      case 26: // parameter_variable
+      case 31: // parameter_variable
         value.copy< std::shared_ptr<ParmVarDecl> > (v);
         break;
 
-      case 30: // return_statement
+      case 35: // return_statement
         value.copy< std::shared_ptr<ReturnStmt> > (v);
         break;
 
-      case 29: // statement
+      case 34: // statement
         value.copy< std::shared_ptr<Stmt> > (v);
         break;
 
-      case 31: // variable_definition
+      case 36: // variable_definition
         value.copy< std::shared_ptr<VariableDecl> > (v);
         break;
 
-      case 34: // expressions
+      case 39: // expressions
         value.copy< std::vector<std::shared_ptr<Expr>> > (v);
         break;
 
-      case 25: // parameter_variables
+      case 30: // parameter_variables
         value.copy< std::vector<std::shared_ptr<ParmVarDecl>> > (v);
         break;
 
-      case 28: // statements
+      case 33: // statements
         value.copy< std::vector<std::shared_ptr<Stmt>> > (v);
         break;
 
@@ -1167,64 +1193,64 @@ namespace yy {
     // Type destructor.
     switch (yytype)
     {
-      case 21: // "bool_literal"
+      case 26: // "bool_literal"
         value.template destroy< std::shared_ptr<BoolLiteral> > ();
         break;
 
-      case 33: // call_expression
+      case 38: // call_expression
         value.template destroy< std::shared_ptr<CallExpr> > ();
         break;
 
-      case 27: // compound_statement
+      case 32: // compound_statement
         value.template destroy< std::shared_ptr<CompoundStmt> > ();
         break;
 
-      case 20: // "double_literal"
+      case 25: // "double_literal"
         value.template destroy< std::shared_ptr<DoubleLiteral> > ();
         break;
 
-      case 32: // literal
-      case 35: // expression
+      case 37: // literal
+      case 40: // expression
         value.template destroy< std::shared_ptr<Expr> > ();
         break;
 
-      case 24: // function_definition
+      case 29: // function_definition
         value.template destroy< std::shared_ptr<FunctionDecl> > ();
         break;
 
-      case 19: // "integer_literal"
+      case 24: // "integer_literal"
         value.template destroy< std::shared_ptr<IntegerLiteral> > ();
         break;
 
-      case 18: // "identifier"
+      case 23: // "identifier"
         value.template destroy< std::shared_ptr<NamedDecl> > ();
         break;
 
-      case 26: // parameter_variable
+      case 31: // parameter_variable
         value.template destroy< std::shared_ptr<ParmVarDecl> > ();
         break;
 
-      case 30: // return_statement
+      case 35: // return_statement
         value.template destroy< std::shared_ptr<ReturnStmt> > ();
         break;
 
-      case 29: // statement
+      case 34: // statement
         value.template destroy< std::shared_ptr<Stmt> > ();
         break;
 
-      case 31: // variable_definition
+      case 36: // variable_definition
         value.template destroy< std::shared_ptr<VariableDecl> > ();
         break;
 
-      case 34: // expressions
+      case 39: // expressions
         value.template destroy< std::vector<std::shared_ptr<Expr>> > ();
         break;
 
-      case 25: // parameter_variables
+      case 30: // parameter_variables
         value.template destroy< std::vector<std::shared_ptr<ParmVarDecl>> > ();
         break;
 
-      case 28: // statements
+      case 33: // statements
         value.template destroy< std::vector<std::shared_ptr<Stmt>> > ();
         break;
 
@@ -1251,64 +1277,64 @@ namespace yy {
     super_type::move(s);
       switch (this->type_get ())
     {
-      case 21: // "bool_literal"
+      case 26: // "bool_literal"
         value.move< std::shared_ptr<BoolLiteral> > (s.value);
         break;
 
-      case 33: // call_expression
+      case 38: // call_expression
         value.move< std::shared_ptr<CallExpr> > (s.value);
         break;
 
-      case 27: // compound_statement
+      case 32: // compound_statement
         value.move< std::shared_ptr<CompoundStmt> > (s.value);
         break;
 
-      case 20: // "double_literal"
+      case 25: // "double_literal"
         value.move< std::shared_ptr<DoubleLiteral> > (s.value);
         break;
 
-      case 32: // literal
-      case 35: // expression
+      case 37: // literal
+      case 40: // expression
         value.move< std::shared_ptr<Expr> > (s.value);
         break;
 
-      case 24: // function_definition
+      case 29: // function_definition
         value.move< std::shared_ptr<FunctionDecl> > (s.value);
         break;
 
-      case 19: // "integer_literal"
+      case 24: // "integer_literal"
         value.move< std::shared_ptr<IntegerLiteral> > (s.value);
         break;
 
-      case 18: // "identifier"
+      case 23: // "identifier"
         value.move< std::shared_ptr<NamedDecl> > (s.value);
         break;
 
-      case 26: // parameter_variable
+      case 31: // parameter_variable
         value.move< std::shared_ptr<ParmVarDecl> > (s.value);
         break;
 
-      case 30: // return_statement
+      case 35: // return_statement
         value.move< std::shared_ptr<ReturnStmt> > (s.value);
         break;
 
-      case 29: // statement
+      case 34: // statement
         value.move< std::shared_ptr<Stmt> > (s.value);
         break;
 
-      case 31: // variable_definition
+      case 36: // variable_definition
         value.move< std::shared_ptr<VariableDecl> > (s.value);
         break;
 
-      case 34: // expressions
+      case 39: // expressions
         value.move< std::vector<std::shared_ptr<Expr>> > (s.value);
         break;
 
-      case 25: // parameter_variables
+      case 30: // parameter_variables
         value.move< std::vector<std::shared_ptr<ParmVarDecl>> > (s.value);
         break;
 
-      case 28: // statements
+      case 33: // statements
         value.move< std::vector<std::shared_ptr<Stmt>> > (s.value);
         break;
 
@@ -1369,7 +1395,7 @@ namespace yy {
     {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275,   276
+     275,   276,   277,   278,   279,   280,   281
     };
     return static_cast<token_type> (yytoken_number_[type]);
   }
@@ -1408,6 +1434,36 @@ namespace yy {
   MyParser::make_SLASH (const location_type& l)
   {
     return symbol_type (token::TOK_SLASH, l);
+  }
+
+  MyParser::symbol_type
+  MyParser::make_LOGICAL_NOT (const location_type& l)
+  {
+    return symbol_type (token::TOK_LOGICAL_NOT, l);
+  }
+
+  MyParser::symbol_type
+  MyParser::make_LOGICAL_AND (const location_type& l)
+  {
+    return symbol_type (token::TOK_LOGICAL_AND, l);
+  }
+
+  MyParser::symbol_type
+  MyParser::make_LOGICAL_OR (const location_type& l)
+  {
+    return symbol_type (token::TOK_LOGICAL_OR, l);
+  }
+
+  MyParser::symbol_type
+  MyParser::make_EQUAL (const location_type& l)
+  {
+    return symbol_type (token::TOK_EQUAL, l);
+  }
+
+  MyParser::symbol_type
+  MyParser::make_NOT_EQUAL (const location_type& l)
+  {
+    return symbol_type (token::TOK_NOT_EQUAL, l);
   }
 
   MyParser::symbol_type
@@ -1497,7 +1553,7 @@ namespace yy {
 
 
 } // yy
-#line 1501 "MyParser.h" // lalr1.cc:377
+#line 1557 "MyParser.h" // lalr1.cc:377
 
 
 

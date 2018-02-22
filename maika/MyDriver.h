@@ -48,8 +48,7 @@ public:
     void scanBegin();
     void scanEnd();
 
-    void visitComment(
-        const yy::location& l, CommentKind kind, const std::string& comment);
+    void visitComment(const yy::location& l, CommentKind kind, const std::string& comment);
     void error(const yy::location& l, const std::string& m);
     void error(const std::string& m);
 };

@@ -5,6 +5,7 @@ HEADERS = \
 	*.h
 
 SOURCES = \
+	ASTDumper2.cpp \
 	ASTVisitor.cpp \
 	Decl.cpp \
 	Entity.cpp \
@@ -30,6 +31,8 @@ format:
 	@clang-format -i \
 		AST.h \
 		ASTDumper.h \
+		ASTDumper2.cpp \
+		ASTDumper2.h \
 		ASTVisitor.cpp \
 		ASTVisitor.h \
 		Decl.cpp \

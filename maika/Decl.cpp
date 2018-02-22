@@ -47,8 +47,7 @@ std::string NamedDecl::dump(ASTDumper&) const
     return name;
 }
 
-std::shared_ptr<NamedDecl>
-NamedDecl::make(const yy::location& loc, const std::string& v)
+std::shared_ptr<NamedDecl> NamedDecl::make(const yy::location& loc, const std::string& v)
 {
     auto decl = std::make_shared<NamedDecl>();
     decl->location = loc;
@@ -59,14 +58,15 @@ NamedDecl::make(const yy::location& loc, const std::string& v)
 void FunctionDecl::traverse(ASTVisitor& visitor)
 {
     assert(compoundStmt);
-    visitor.visit(shared_from_this());
-    if (namedDecl) {
-        namedDecl->traverse(visitor);
-    }
-    for (const auto& arg : arguments) {
-        arg->traverse(visitor);
-    }
-    compoundStmt->traverse(visitor);
+    visitor.visit(shared_from_this(), [&] {
+        if (namedDecl) {
+            namedDecl->traverse(visitor);
+        }
+        for (const auto& arg : arguments) {
+            arg->traverse(visitor);
+        }
+        compoundStmt->traverse(visitor);
+    });
 }
 
 std::string FunctionDecl::dump(ASTDumper& dumper) const
@@ -110,8 +110,7 @@ std::shared_ptr<FunctionDecl> FunctionDecl::make(
 void ParmVarDecl::traverse(ASTVisitor& visitor)
 {
     assert(name);
-    visitor.visit(shared_from_this());
-    name->traverse(visitor);
+    visitor.visit(shared_from_this(), [&] { name->traverse(visitor); });
 }
 
 std::string ParmVarDecl::dump(ASTDumper& dumper) const
@@ -126,8 +125,8 @@ std::string ParmVarDecl::dump(ASTDumper& dumper) const
     return s;
 }
 
-std::shared_ptr<ParmVarDecl> ParmVarDecl::make(
-    const yy::location& loc, const std::shared_ptr<NamedDecl>& name)
+std::shared_ptr<ParmVarDecl>
+ParmVarDecl::make(const yy::location& loc, const std::shared_ptr<NamedDecl>& name)
 {
     auto decl = std::make_shared<ParmVarDecl>();
     decl->location = loc;
@@ -150,10 +149,12 @@ std::shared_ptr<ParmVarDecl> ParmVarDecl::make(
 void VariableDecl::traverse(ASTVisitor& visitor)
 {
     assert(namedDecl);
-    assert(expr);
-    visitor.visit(shared_from_this());
-    namedDecl->traverse(visitor);
-    expr->traverse(visitor);
+    visitor.visit(shared_from_this(), [&] {
+        namedDecl->traverse(visitor);
+        if (expr) {
+            expr->traverse(visitor);
+        }
+    });
 }
 
 std::string VariableDecl::dump(ASTDumper& dumper) const
@@ -178,9 +179,7 @@ VariableDecl::make(const yy::location& loc, const std::shared_ptr<NamedDecl>& n)
 }
 
 std::shared_ptr<VariableDecl> VariableDecl::make(
-    const yy::location& loc,
-    const std::shared_ptr<NamedDecl>& n,
-    const std::shared_ptr<Expr>& e)
+    const yy::location& loc, const std::shared_ptr<NamedDecl>& n, const std::shared_ptr<Expr>& e)
 {
     auto decl = std::make_shared<VariableDecl>();
     decl->location = loc;

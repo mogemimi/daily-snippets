@@ -7,12 +7,12 @@
 
 class Entity final {
 private:
-    std::weak_ptr<Decl> decl;
+    std::weak_ptr<NamedDecl> decl;
     std::string name;
 
 public:
-    Entity(const std::string& name, const std::shared_ptr<Decl>& decl);
+    Entity(const std::string& name, const std::shared_ptr<NamedDecl>& decl);
 
-    std::shared_ptr<Decl> getDecl() const;
+    std::shared_ptr<NamedDecl> getDecl() const;
     std::string getName() const;
 };

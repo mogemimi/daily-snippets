@@ -8,10 +8,12 @@
 
 void CompoundStmt::traverse(ASTVisitor& visitor)
 {
-    for (const auto& statement : statements) {
-        assert(statement);
-        statement->traverse(visitor);
-    }
+    visitor.visit(shared_from_this(), [&] {
+        for (const auto& statement : statements) {
+            assert(statement);
+            statement->traverse(visitor);
+        }
+    });
 }
 
 std::string CompoundStmt::dump(ASTDumper& dumper) const
@@ -47,8 +49,7 @@ std::string CompoundStmt::dump(ASTDumper& dumper) const
     return s;
 }
 
-std::shared_ptr<CompoundStmt>
-CompoundStmt::make(const std::vector<std::shared_ptr<Stmt>>& s)
+std::shared_ptr<CompoundStmt> CompoundStmt::make(const std::vector<std::shared_ptr<Stmt>>& s)
 {
     auto stmt = std::make_shared<CompoundStmt>();
     stmt->statements = s;
@@ -58,8 +59,7 @@ CompoundStmt::make(const std::vector<std::shared_ptr<Stmt>>& s)
 void DeclStmt::traverse(ASTVisitor& visitor)
 {
     assert(decl);
-    visitor.visit(shared_from_this());
-    decl->traverse(visitor);
+    visitor.visit(shared_from_this(), [&] { decl->traverse(visitor); });
 }
 
 std::string DeclStmt::dump(ASTDumper& dumper) const
@@ -78,7 +78,7 @@ std::shared_ptr<DeclStmt> DeclStmt::make(const std::shared_ptr<Decl>& d)
 void ReturnStmt::traverse(ASTVisitor& visitor)
 {
     assert(expr);
-    expr->traverse(visitor);
+    visitor.visit(shared_from_this(), [&] { expr->traverse(visitor); });
 }
 
 std::string ReturnStmt::dump(ASTDumper& dumper) const

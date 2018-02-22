@@ -53,6 +53,11 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %token PLUS                 "+"
 %token STAR                 "*"
 %token SLASH                "/"
+%token LOGICAL_NOT          "!"
+%token LOGICAL_AND          "&&"
+%token LOGICAL_OR           "||"
+%token EQUAL                "=="
+%token NOT_EQUAL            "!="
 %token LEFT_PARENTHESIS     "("
 %token RIGHT_PARENTHESIS    ")"
 %token LEFT_CURLY_BRACKET   "{"
@@ -135,7 +140,8 @@ expressions:
 
 %right "=";
 %left "+" "-";
-%left "*" "/";
+%left "==" "!=";
+%left "&&" "||";
 expression:
   "identifier"                      { $$ = DeclRefExpr::make($1); };
 | literal                           { $$ = $1; }
@@ -145,6 +151,10 @@ expression:
 | expression "*" expression         { $$ = BinaryOperator::make(BinaryOperatorKind::Multiply, $1, $3); }
 | expression "/" expression         { $$ = BinaryOperator::make(BinaryOperatorKind::Divide, $1, $3); }
 | expression "=" expression         { $$ = BinaryOperator::make(BinaryOperatorKind::Assign, $1, $3); }
+| expression "==" expression        { $$ = BinaryOperator::make(BinaryOperatorKind::Equal, $1, $3); }
+| expression "!=" expression        { $$ = BinaryOperator::make(BinaryOperatorKind::NotEqual, $1, $3); }
+| expression "&&" expression        { $$ = BinaryOperator::make(BinaryOperatorKind::LogicalAnd, $1, $3); }
+| expression "||" expression        { $$ = BinaryOperator::make(BinaryOperatorKind::LogicalOr, $1, $3); }
 | call_expression                   { $$ = $1; };
 
 %%
