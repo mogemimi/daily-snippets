@@ -53,7 +53,7 @@ function main() {
 TEST_CASE("TypeInfer", "[type-inference]")
 {
     constexpr auto source = R"(
-function sub(a, b) {
+function sub(a : int, b : int) {
 	return a - b;
 }
 

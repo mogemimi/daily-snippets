@@ -8,8 +8,5 @@
 
 void ASTTraverser::traverse(const AST& ast, ASTVisitor& visitor)
 {
-    for (const auto& funcDecl : ast.functionDecls) {
-        assert(funcDecl);
-        funcDecl->traverse(visitor);
-    }
+    ast.translationUnit->traverse(visitor);
 }

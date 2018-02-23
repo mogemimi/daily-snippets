@@ -22,6 +22,41 @@ void Decl::setType(const std::shared_ptr<Type>& t)
     type = t;
 }
 
+void TranslationUnitDecl::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        for (const auto& funcDecl : functionDecls) {
+            assert(funcDecl);
+            funcDecl->traverse(visitor);
+        }
+    });
+}
+
+std::string TranslationUnitDecl::dump(ASTDumper& dumper) const
+{
+    std::string s;
+    bool needToBreakLine = false;
+    for (auto& funcDecl : functionDecls) {
+        assert(funcDecl);
+        if (needToBreakLine) {
+            s += "\n";
+            needToBreakLine = false;
+        }
+        s += funcDecl->dump(dumper);
+        needToBreakLine = true;
+    }
+    return s;
+}
+
+std::shared_ptr<TranslationUnitDecl> TranslationUnitDecl::make(
+    const yy::location& loc, const std::vector<std::shared_ptr<FunctionDecl>>& functions)
+{
+    auto decl = std::make_shared<TranslationUnitDecl>();
+    decl->location = loc;
+    decl->functionDecls = functions;
+    return decl;
+}
+
 std::string NamedDecl::getName() const
 {
     return name;

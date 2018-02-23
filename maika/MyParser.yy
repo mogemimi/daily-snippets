@@ -83,15 +83,21 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %type  <std::shared_ptr<ParmVarDecl>>               parameter_variable
 %type  <std::shared_ptr<CompoundStmt>>              compound_statement
 %type  <std::shared_ptr<ReturnStmt>>                return_statement
+%type  <std::vector<std::shared_ptr<FunctionDecl>>> function_definitions
 %type  <std::shared_ptr<FunctionDecl>>              function_definition
 %type  <std::shared_ptr<VariableDecl>>              variable_definition
+%type  <std::shared_ptr<TranslationUnitDecl>>       translation_unit
+
 
 %%
-%start program;
+%start translation_unit;
 
-program:
-  function_definition         { driver.ast.functionDecls.push_back($1); }
-| program function_definition { driver.ast.functionDecls.push_back($2); };
+translation_unit:
+  function_definitions  { driver.ast.translationUnit = TranslationUnitDecl::make(@$, $1); };
+
+function_definitions:
+  function_definition                       { $$.push_back($1); }
+| function_definition function_definitions  { $$ = appendVector($1, $2); };
 
 function_definition:
   "function" "identifier" "(" parameter_variables ")" compound_statement { $$ = FunctionDecl::make(@$, $2, $4, $6); };

@@ -129,6 +129,7 @@ std::string BinaryOperator::dump(ASTDumper& dumper) const
         case BinaryOperatorKind::LogicalAnd: return "&&";
         case BinaryOperatorKind::LogicalOr: return "||";
         }
+        return "<unknown>";
     }();
     std::string s = "(" + k + " " + lhs->dump(dumper) + " " + rhs->dump(dumper) + ")";
     return s;

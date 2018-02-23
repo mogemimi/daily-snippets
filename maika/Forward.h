@@ -25,6 +25,7 @@ class Decl;
 class FunctionDecl;
 class NamedDecl;
 class ParmVarDecl;
+class TranslationUnitDecl;
 class VariableDecl;
 
 // NOTE: AST::Type

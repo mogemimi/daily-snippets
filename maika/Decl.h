@@ -23,6 +23,19 @@ public:
     void setType(const std::shared_ptr<Type>& t);
 };
 
+class TranslationUnitDecl final
+    : public Decl
+    , public std::enable_shared_from_this<TranslationUnitDecl> {
+public:
+    std::vector<std::shared_ptr<FunctionDecl>> functionDecls;
+
+    void traverse(ASTVisitor& visitor) override;
+    std::string dump(ASTDumper& dumper) const override;
+
+    static std::shared_ptr<TranslationUnitDecl>
+    make(const yy::location& loc, const std::vector<std::shared_ptr<FunctionDecl>>& n);
+};
+
 class NamedDecl final
     : public Decl
     , public std::enable_shared_from_this<NamedDecl> {

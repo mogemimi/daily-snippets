@@ -73,6 +73,13 @@ public:
         traverse();
     }
 
+    virtual void visit(const std::shared_ptr<TranslationUnitDecl>& decl) {}
+    virtual void visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invoke&& traverse)
+    {
+        visit(decl);
+        traverse();
+    }
+
     virtual void visit(const std::shared_ptr<VariableDecl>& decl) {}
     virtual void visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse)
     {
