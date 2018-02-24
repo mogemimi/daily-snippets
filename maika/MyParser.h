@@ -40,15 +40,18 @@
 #ifndef YY_YY_MYPARSER_H_INCLUDED
 # define YY_YY_MYPARSER_H_INCLUDED
 // //                    "%code requires" blocks.
-#line 11 "MyParser.yy" // lalr1.cc:377
+#line 11 "MyParser.yy" // lalr1.cc:392
 
-#include "AST.h"
+#include "ASTContext.h"
+#include "Decl.h"
+#include "Expr.h"
+#include "Stmt.h"
 #include <iostream>
 #include <string>
 
 class MyDriver;
 
-#line 52 "MyParser.h" // lalr1.cc:377
+#line 55 "MyParser.h" // lalr1.cc:392
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -125,7 +128,7 @@ class MyDriver;
 
 
 namespace yy {
-#line 129 "MyParser.h" // lalr1.cc:377
+#line 132 "MyParser.h" // lalr1.cc:392
 
 
 
@@ -1609,7 +1612,7 @@ namespace yy {
 
 
 } // yy
-#line 1613 "MyParser.h" // lalr1.cc:377
+#line 1616 "MyParser.h" // lalr1.cc:392
 
 
 

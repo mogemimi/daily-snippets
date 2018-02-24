@@ -5,6 +5,7 @@ HEADERS = \
 	*.h
 
 SOURCES = \
+	ASTContext.cpp \
 	ASTDumper2.cpp \
 	ASTVisitor.cpp \
 	Decl.cpp \
@@ -17,8 +18,8 @@ SOURCES = \
 	Scope.cpp \
 	Stmt.cpp \
 	TypeResolver.cpp \
-	tests\DumpTest.cpp \
-	tests\main.cpp
+	tests/DumpTest.cpp \
+	tests/main.cpp
 
 COMPILER_OPTIONS = \
 	-o $(PRODUCTNAME) \
@@ -29,7 +30,8 @@ COMPILER_OPTIONS = \
 
 format:
 	@clang-format -i \
-		AST.h \
+		ASTContext.cpp \
+		ASTContext.h \
 		ASTDumper.h \
 		ASTDumper2.cpp \
 		ASTDumper2.h \
@@ -55,8 +57,8 @@ format:
 		Type.h \
 		TypeResolver.cpp \
 		TypeResolver.h \
-		tests\DumpTest.cpp \
-		tests\main.cpp
+		tests/DumpTest.cpp \
+		tests/main.cpp
 
 bison:
 	@flex MyLexer.l

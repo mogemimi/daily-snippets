@@ -4,7 +4,7 @@
 #define YY_NO_UNISTD_H 1
 #include "MyLexer.h"
 
-std::tuple<std::string, bool> MyDriver::parseFile(const std::string& filename)
+std::tuple<ASTContext, bool> MyDriver::parseFile(const std::string& filename)
 {
     this->traceScanning = false;
     this->file = filename;
@@ -15,7 +15,7 @@ std::tuple<std::string, bool> MyDriver::parseFile(const std::string& filename)
     }
     else if (!(yyin = fopen(file.c_str(), "r"))) {
         error("cannot open " + file + ": " + strerror(errno));
-        return std::make_tuple(ast.dump(), false);
+        return std::make_tuple(ast, false);
     }
     this->defer = [] { fclose(yyin); };
 
@@ -25,10 +25,10 @@ std::tuple<std::string, bool> MyDriver::parseFile(const std::string& filename)
     scanEnd();
 
     const auto ok = (resultCode == 0);
-    return std::make_tuple(ast.dump(), ok);
+    return std::make_tuple(ast, ok);
 }
 
-std::tuple<std::string, bool> MyDriver::parseString(const std::string& text)
+std::tuple<ASTContext, bool> MyDriver::parseString(const std::string& text)
 {
     this->traceScanning = false;
     this->file.clear();
@@ -43,7 +43,7 @@ std::tuple<std::string, bool> MyDriver::parseString(const std::string& text)
     scanEnd();
 
     const auto ok = (resultCode == 0);
-    return std::make_tuple(ast.dump(), ok);
+    return std::make_tuple(ast, ok);
 }
 
 void MyDriver::visitComment(const yy::location& l, CommentKind kind, const std::string& text)

@@ -1,12 +1,12 @@
 #include "ASTVisitor.h"
-#include "AST.h"
+#include "ASTContext.h"
 #include "Decl.h"
 #include "Expr.h"
 #include "Stmt.h"
 #include <cassert>
 #include <utility>
 
-void ASTTraverser::traverse(const AST& ast, ASTVisitor& visitor)
+void ASTTraverser::traverse(const ASTContext& context, ASTVisitor& visitor)
 {
-    ast.translationUnit->traverse(visitor);
+    context.translationUnit->traverse(visitor);
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 // NOTE: AST
-class AST;
+class ASTContext;
 class ASTDumper;
 class ASTVisitor;
 

@@ -9,7 +9,10 @@
 
 %code requires
 {
-#include "AST.h"
+#include "ASTContext.h"
+#include "Decl.h"
+#include "Expr.h"
+#include "Stmt.h"
 #include <iostream>
 #include <string>
 

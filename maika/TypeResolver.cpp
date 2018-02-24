@@ -1,5 +1,4 @@
 #include "TypeResolver.h"
-#include "AST.h"
 #include "Decl.h"
 #include "Entity.h"
 #include "Expr.h"

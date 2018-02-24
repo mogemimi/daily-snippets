@@ -1,5 +1,8 @@
 %{
-#include "AST.h"
+#include "ASTContext.h"
+#include "Decl.h"
+#include "Expr.h"
+#include "Stmt.h"
 #include "MyDriver.h"
 #include "MyParser.h"
 

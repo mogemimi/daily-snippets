@@ -1,4 +1,4 @@
-#include "AST.h"
+#include "ASTContext.h"
 #include "ASTDumper2.h"
 #include "Entity.h"
 #include "IdentifierResolver.h"
@@ -40,7 +40,7 @@ function main() {
 
     auto [result, ok] = driver.parseString(source);
     REQUIRE(ok);
-    REQUIRE(result == sExpression);
+    REQUIRE(result.dump() == sExpression);
 
     // ASTDumper2 dumper;
     //{
@@ -71,14 +71,14 @@ function main() {
 )";
     MyDriver driver;
 
-    auto [result, ok] = driver.parseString(source);
+    auto [astContext, ok] = driver.parseString(source);
     REQUIRE(ok);
 
     IdentifierContext context;
     {
         IdentifierResolver resolver(&context);
         ASTTraverser traverser;
-        traverser.traverse(driver.ast, resolver);
+        traverser.traverse(astContext, resolver);
     }
 
     // NOTE: type inference unification
@@ -90,7 +90,7 @@ function main() {
     TypeResolver typeResolver;
     {
         ASTTraverser traverser;
-        traverser.traverse(driver.ast, typeResolver);
+        traverser.traverse(astContext, typeResolver);
     }
 
     for (const auto& e : context.entities) {

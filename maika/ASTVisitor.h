@@ -92,5 +92,5 @@ public:
 
 class ASTTraverser final {
 public:
-    void traverse(const AST& ast, ASTVisitor& visitor);
+    void traverse(const ASTContext& context, ASTVisitor& visitor);
 };

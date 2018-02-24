@@ -1,5 +1,5 @@
 #include "ASTDumper2.h"
-#include "AST.h"
+#include "ASTContext.h"
 #include "Decl.h"
 #include "Entity.h"
 #include "Expr.h"

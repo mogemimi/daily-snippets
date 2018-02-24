@@ -37,13 +37,13 @@ private:
     bool traceScanning;
 
 public:
+    ASTContext ast;
     std::string file;
     std::string sourceText;
-    AST ast;
     std::vector<Comment> comments;
 
-    std::tuple<std::string, bool> parseFile(const std::string& filename);
-    std::tuple<std::string, bool> parseString(const std::string& text);
+    std::tuple<ASTContext, bool> parseFile(const std::string& filename);
+    std::tuple<ASTContext, bool> parseString(const std::string& text);
 
     void scanBegin();
     void scanEnd();
