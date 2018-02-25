@@ -26,7 +26,18 @@ public:
     }
 };
 
-// std::shared_ptr<const Type> unify(const std::shared_ptr<const Type>& type)
+//std::shared_ptr<Type> prune(const std::shared_ptr<Type>& type)
+//{
+//    auto typeVariable = std::dynamic_pointer_cast<TypeVariable>(type);
+//    if (typeVariable) {
+//        if (auto instance = typeVariable->getType()) {
+//            return instance;
+//        }
+//    }
+//    return type;
+//}
+//
+//std::shared_ptr<const Type> unify(const std::shared_ptr<const Type>& type)
 //{
 //    const auto typeVariable = std::dynamic_pointer_cast<const TypeVariable>(type);
 //    if (!typeVariable) {
