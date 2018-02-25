@@ -9,16 +9,16 @@
 
 class Expr : public Stmt {
 protected:
-    std::shared_ptr<const Type> type;
+    std::shared_ptr<Type> type;
     yy::location location;
 
 public:
     virtual ~Expr() = default;
 
-    yy::location getLocation() const;
+    std::shared_ptr<Type> getType() const;
+    void setType(const std::shared_ptr<Type>& t);
 
-    std::shared_ptr<const Type> getType() const;
-    void setType(const std::shared_ptr<const Type>& t);
+    yy::location getLocation() const;
 };
 
 class IntegerLiteral final

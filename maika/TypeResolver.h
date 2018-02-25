@@ -13,12 +13,10 @@ class IdentifierContext;
 
 class TypeResolver final : public ASTVisitor {
     std::vector<std::shared_ptr<TypeEnvironment>> scopeStack;
-    int rank = 0;
-    std::vector<std::shared_ptr<NamedDecl>> nonTypedNames;
-    std::shared_ptr<const Type> lastReturnType;
 
 public:
     TypeResolver();
+
     std::shared_ptr<TypeEnvironment> getCurrentScope();
     void pushScope(const std::shared_ptr<TypeEnvironment>& scope);
     void popScope();

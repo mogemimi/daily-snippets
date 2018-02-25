@@ -9,7 +9,7 @@
 
 class Decl {
 protected:
-    std::shared_ptr<const Type> type;
+    std::shared_ptr<Type> type;
     yy::location location;
 
 public:
@@ -17,10 +17,10 @@ public:
     virtual void traverse(ASTVisitor& visitor) = 0;
     virtual std::string dump(ASTDumper& dumper) const = 0;
 
-    yy::location getLocation() const;
+    std::shared_ptr<Type> getType() const;
+    void setType(const std::shared_ptr<Type>& t);
 
-    std::shared_ptr<const Type> getType() const;
-    void setType(const std::shared_ptr<const Type>& t);
+    yy::location getLocation() const;
 };
 
 class TranslationUnitDecl final

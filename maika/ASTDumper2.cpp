@@ -45,41 +45,61 @@ void ASTDumper2::visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& trave
     dump(this, "CompoundStmt", {}, std::move(traverse));
 }
 
-void ASTDumper2::visit(const std::shared_ptr<ReturnStmt>& decl, Invoke&& traverse)
+void ASTDumper2::visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse)
 {
     dump(this, "ReturnStmt", {}, std::move(traverse));
 }
 
-void ASTDumper2::visit(const std::shared_ptr<DeclStmt>& decl, Invoke&& traverse)
+void ASTDumper2::visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse)
 {
     dump(this, "DeclStmt", {}, std::move(traverse));
 }
 
-void ASTDumper2::visit(const std::shared_ptr<CallExpr>& decl, Invoke&& traverse)
+void ASTDumper2::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse)
 {
-    dump(this, "CallExpr", {}, std::move(traverse));
+    std::vector<std::string> options;
+    if (auto type = expr->getType()) {
+        options.push_back(type->dump());
+    }
+    dump(this, "CallExpr", options, std::move(traverse));
 }
 
-void ASTDumper2::visit(const std::shared_ptr<IntegerLiteral>& decl)
+void ASTDumper2::visit(const std::shared_ptr<IntegerLiteral>& expr)
 {
-    dump(this, "IntegerLiteral", {std::to_string(decl->value)});
+    std::vector<std::string> options;
+    options.push_back(std::to_string(expr->value));
+    if (auto type = expr->getType()) {
+        options.push_back(type->dump());
+    }
+    dump(this, "IntegerLiteral", options);
 }
 
-void ASTDumper2::visit(const std::shared_ptr<DoubleLiteral>& decl)
+void ASTDumper2::visit(const std::shared_ptr<DoubleLiteral>& expr)
 {
-    dump(this, "DoubleLiteral", {std::to_string(decl->value)});
+    std::vector<std::string> options;
+    options.push_back(std::to_string(expr->value));
+    if (auto type = expr->getType()) {
+        options.push_back(type->dump());
+    }
+    dump(this, "DoubleLiteral", options);
 }
 
-void ASTDumper2::visit(const std::shared_ptr<BoolLiteral>& decl)
+void ASTDumper2::visit(const std::shared_ptr<BoolLiteral>& expr)
 {
-    auto str = (decl->value ? "true" : "false");
-    dump(this, "BoolLiteral", {str});
+    std::vector<std::string> options;
+    options.push_back(expr->value ? "true" : "false");
+    if (auto type = expr->getType()) {
+        options.push_back(type->dump());
+    }
+    dump(this, "BoolLiteral", options);
 }
 
-void ASTDumper2::visit(const std::shared_ptr<BinaryOperator>& decl, Invoke&& traverse)
+void ASTDumper2::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
 {
+    std::vector<std::string> options;
+
     std::string op = [&]() -> std::string {
-        switch (decl->kind) {
+        switch (expr->kind) {
         case BinaryOperatorKind::Assign: return "=";
         case BinaryOperatorKind::Add: return "+";
         case BinaryOperatorKind::Subtract: return "-";
@@ -92,14 +112,21 @@ void ASTDumper2::visit(const std::shared_ptr<BinaryOperator>& decl, Invoke&& tra
         }
         return "<unknown>";
     }();
-    dump(this, "BinaryOperator", {op}, std::move(traverse));
+    options.push_back(op);
+    if (auto type = expr->getType()) {
+        options.push_back(type->dump());
+    }
+    dump(this, "BinaryOperator", options, std::move(traverse));
 }
 
-void ASTDumper2::visit(const std::shared_ptr<DeclRefExpr>& decl, Invoke&& traverse)
+void ASTDumper2::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;
-    if (auto namedDecl = std::dynamic_pointer_cast<NamedDecl>(decl->decl)) {
+    if (auto namedDecl = std::dynamic_pointer_cast<NamedDecl>(expr->decl)) {
         options.push_back(namedDecl->getName());
+        if (auto type = namedDecl->getType()) {
+            options.push_back(type->dump());
+        }
     }
     dump(this, "DeclRefExpr", options, std::move(traverse));
 }
@@ -114,6 +141,9 @@ void ASTDumper2::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& trave
     std::vector<std::string> options;
     if (decl->namedDecl) {
         options.push_back(decl->namedDecl->getName());
+        if (auto type = decl->namedDecl->getType()) {
+            options.push_back(type->dump());
+        }
     }
     dump(this, "FunctionDecl", options, std::move(traverse));
 }
@@ -127,6 +157,9 @@ void ASTDumper2::visit(const std::shared_ptr<ParmVarDecl>& decl, Invoke&& traver
     if (decl->typeAnnotation) {
         options.push_back(decl->typeAnnotation->getName());
     }
+    if (auto type = decl->namedDecl->getType()) {
+        options.push_back(type->dump());
+    }
     dump(this, "ParmVarDecl", options, std::move(traverse));
 }
 
@@ -135,6 +168,9 @@ void ASTDumper2::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& trave
     std::vector<std::string> options;
     if (decl->namedDecl) {
         options.push_back(decl->namedDecl->getName());
+        if (auto type = decl->namedDecl->getType()) {
+            options.push_back(type->dump());
+        }
     }
     dump(this, "VariableDecl", options, std::move(traverse));
 }

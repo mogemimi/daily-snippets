@@ -5,21 +5,20 @@
 #include <cassert>
 #include <utility>
 
-yy::location Expr::getLocation() const
-{
-    return location;
-}
-
-std::shared_ptr<const Type> Expr::getType() const
+std::shared_ptr<Type> Expr::getType() const
 {
     return type;
 }
 
-void Expr::setType(const std::shared_ptr<const Type>& t)
+void Expr::setType(const std::shared_ptr<Type>& t)
 {
-    assert(!type);
     assert(t);
     type = t;
+}
+
+yy::location Expr::getLocation() const
+{
+    return location;
 }
 
 void IntegerLiteral::traverse(ASTVisitor& visitor)
@@ -37,7 +36,6 @@ std::shared_ptr<IntegerLiteral> IntegerLiteral::make(const yy::location& loc, in
     auto expr = std::make_shared<IntegerLiteral>();
     expr->location = loc;
     expr->value = v;
-    expr->setType(BuiltinType::make(BuiltinTypeKind::Int));
     return expr;
 }
 
@@ -56,7 +54,6 @@ std::shared_ptr<DoubleLiteral> DoubleLiteral::make(const yy::location& loc, doub
     auto expr = std::make_shared<DoubleLiteral>();
     expr->location = loc;
     expr->value = v;
-    expr->setType(BuiltinType::make(BuiltinTypeKind::Double));
     return expr;
 }
 
@@ -75,7 +72,6 @@ std::shared_ptr<BoolLiteral> BoolLiteral::make(const yy::location& loc, bool v)
     auto expr = std::make_shared<BoolLiteral>();
     expr->location = loc;
     expr->value = v;
-    expr->setType(BuiltinType::make(BuiltinTypeKind::Bool));
     return expr;
 }
 

@@ -6,6 +6,55 @@
 #include <unordered_map>
 #include <vector>
 
+class Type {
+public:
+    virtual ~Type() = default;
+    virtual std::string dump() const = 0;
+};
+
+class FunctionType final : public Type {
+private:
+    std::shared_ptr<Type> returnType;
+    std::vector<std::shared_ptr<Type>> parameterTypes;
+
+public:
+    std::string dump() const override;
+
+    static std::shared_ptr<FunctionType>
+    make(const std::shared_ptr<Type>& to, const std::vector<std::shared_ptr<Type>>& from);
+};
+
+class ReturnType final : public Type {
+private:
+    std::shared_ptr<Type> callableType;
+    std::vector<std::shared_ptr<Type>> argumentTypes;
+
+public:
+    std::string dump() const override;
+
+    static std::shared_ptr<ReturnType> make(
+        const std::shared_ptr<Type>& callableType,
+        const std::vector<std::shared_ptr<Type>>& argumentTypes);
+};
+
+using TypeID = uint64_t;
+
+class TypeVariable final : public Type {
+private:
+    std::shared_ptr<Type> instance;
+    TypeID id;
+
+public:
+    std::string dump() const override;
+
+    TypeID getTypeID() const;
+
+    std::shared_ptr<Type> getType() const;
+    void setType(const std::shared_ptr<Type>& type);
+
+    static std::shared_ptr<TypeVariable> make();
+};
+
 enum class BuiltinTypeKind {
     // Int32,
     // Int64,
@@ -19,30 +68,6 @@ enum class BuiltinTypeKind {
     Any,
 };
 
-using TypeIndex = uint64_t;
-
-class Type {
-public:
-    virtual ~Type() = default;
-    virtual std::string dump() const = 0;
-    // virtual TypeIndex getTypeIndex() const = 0;
-};
-
-class TypeVariable final : public Type {
-private:
-    TypeIndex index;
-    std::shared_ptr<const Type> type;
-
-public:
-    std::string dump() const override;
-    TypeIndex getTypeIndex() const;
-
-    void setType(const std::shared_ptr<const Type>& type);
-    std::shared_ptr<const Type> getType() const;
-
-    static std::shared_ptr<TypeVariable> make(TypeIndex index);
-};
-
 class BuiltinType final : public Type {
 public:
     BuiltinTypeKind kind;
@@ -52,31 +77,39 @@ public:
     static std::shared_ptr<BuiltinType> make(BuiltinTypeKind kind);
 };
 
-class FunctionType final : public Type {
-public:
-    std::shared_ptr<const Type> returnType; // TODO: tuple
-    std::vector<std::shared_ptr<const Type>> parameterTypes;
-
-    std::string dump() const override;
-
-    static std::shared_ptr<FunctionType> make();
-};
-
-class TypeEnvironment final {
+class TypeScope final {
 private:
-    std::shared_ptr<const TypeEnvironment> parent;
-    std::unordered_map<TypeIndex, TypeIndex> typeIndices;
-    std::unordered_map<std::string, std::shared_ptr<Type>> typeDefinitions;
+    std::shared_ptr<const TypeScope> parent;
+    std::unordered_map<std::string, std::shared_ptr<Type>> types;
 
 public:
-    TypeEnvironment();
-    explicit TypeEnvironment(const std::shared_ptr<const TypeEnvironment>& parentIn);
+    TypeScope() = default;
+    explicit TypeScope(const std::shared_ptr<const TypeScope>& parentIn);
 
-    TypeIndex getNextIndex();
-
-    std::shared_ptr<const TypeEnvironment> getParent() const;
+    std::shared_ptr<const TypeScope> getParent() const;
 
     std::shared_ptr<Type> getType(const std::string& name) const;
 
     void defineType(const std::string& name, const std::shared_ptr<Type>& type);
+};
+
+class TypeEnvironment final {
+private:
+    std::shared_ptr<TypeScope> identifiers;
+    std::shared_ptr<TypeScope> aliases;
+
+public:
+    std::vector<std::shared_ptr<Type>> returnTypes;
+
+public:
+    TypeEnvironment();
+    explicit TypeEnvironment(const std::shared_ptr<TypeEnvironment>& parentIn);
+
+    std::shared_ptr<Type> getIdent(const std::string& name) const;
+
+    std::shared_ptr<Type> getAlias(const std::string& name) const;
+
+    void defineIdent(const std::string& name, const std::shared_ptr<Type>& type);
+
+    void defineAlias(const std::string& name, const std::shared_ptr<Type>& type);
 };

@@ -5,21 +5,20 @@
 #include <cassert>
 #include <utility>
 
-yy::location Decl::getLocation() const
-{
-    return location;
-}
-
-std::shared_ptr<const Type> Decl::getType() const
+std::shared_ptr<Type> Decl::getType() const
 {
     return type;
 }
 
-void Decl::setType(const std::shared_ptr<const Type>& t)
+void Decl::setType(const std::shared_ptr<Type>& t)
 {
-    assert(!type);
     assert(t);
     type = t;
+}
+
+yy::location Decl::getLocation() const
+{
+    return location;
 }
 
 void TranslationUnitDecl::traverse(ASTVisitor& visitor)
@@ -152,7 +151,7 @@ std::string ParmVarDecl::dump(ASTDumper& dumper) const
 {
     assert(namedDecl);
     std::string s = "(" + namedDecl->dump(dumper);
-    if (type) {
+    if (typeAnnotation) {
         s += " ";
         s += typeAnnotation->dump(dumper);
     }

@@ -85,16 +85,12 @@ function main() {
 TEST_CASE("TypeInfer", "[type-inference]")
 {
     constexpr auto source = R"(
-//function sub(a, b) {
-//    return a - b;
-//}
-
-function f(x) {
-    return x;
+function sub(a, b) {
+    return a - b;
 }
 
 function main() {
-    let a = f(42, 4);
+    let a = sub(42, 7);
 //    let a = 42;
 //    let b = 70;
 //    let c = a + b;
@@ -129,12 +125,5 @@ function main() {
         ASTTraverser traverser;
         traverser.traverse(astContext, dumper);
         printf("%s\n", dumper.result.c_str());
-    }
-
-    for (const auto& e : context.entities) {
-        auto name = e->getName();
-        auto type = e->getDecl()->getType()->dump();
-        auto line = e->getDecl()->getLocation().begin.line;
-        printf("%8s %20s (at line %d)\n", name.c_str(), ("[" + type + "]").c_str(), line);
     }
 }
