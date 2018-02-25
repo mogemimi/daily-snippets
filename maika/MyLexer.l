@@ -3,6 +3,7 @@
 #include "Decl.h"
 #include "Expr.h"
 #include "Stmt.h"
+#include "Type.h"
 #include "MyDriver.h"
 #include "MyParser.h"
 
@@ -60,29 +61,29 @@ blank       [ \t]
 {blank}+    loc.step();
 [\n]+       loc.lines(yyleng); loc.step();
 
-"-"     return yy::MyParser::make_MINUS(loc);
-"+"     return yy::MyParser::make_PLUS(loc);
-"*"     return yy::MyParser::make_STAR(loc);
-"/"     return yy::MyParser::make_SLASH(loc);
-"="     return yy::MyParser::make_ASSIGN(loc);
-"!"     return yy::MyParser::make_LOGICAL_NOT(loc);
-"&&"    return yy::MyParser::make_LOGICAL_AND(loc);
-"||"    return yy::MyParser::make_LOGICAL_OR(loc);
-"=="    return yy::MyParser::make_EQUAL(loc);
-"!="    return yy::MyParser::make_NOT_EQUAL(loc);
-"("     return yy::MyParser::make_LEFT_PARENTHESIS(loc);
-")"     return yy::MyParser::make_RIGHT_PARENTHESIS(loc);
-"{"     return yy::MyParser::make_LEFT_CURLY_BRACKET(loc);
-"}"     return yy::MyParser::make_RIGHT_CURLY_BRACKET(loc);
-":"     return yy::MyParser::make_COLON(loc);
-";"     return yy::MyParser::make_SEMICOLON(loc);
-","     return yy::MyParser::make_COMMA(loc);
+"-"         return yy::MyParser::make_MINUS(loc);
+"+"         return yy::MyParser::make_PLUS(loc);
+"*"         return yy::MyParser::make_STAR(loc);
+"/"         return yy::MyParser::make_SLASH(loc);
+"="         return yy::MyParser::make_ASSIGN(loc);
+"!"         return yy::MyParser::make_LOGICAL_NOT(loc);
+"&&"        return yy::MyParser::make_LOGICAL_AND(loc);
+"||"        return yy::MyParser::make_LOGICAL_OR(loc);
+"=="        return yy::MyParser::make_EQUAL(loc);
+"!="        return yy::MyParser::make_NOT_EQUAL(loc);
+"("         return yy::MyParser::make_LEFT_PARENTHESIS(loc);
+")"         return yy::MyParser::make_RIGHT_PARENTHESIS(loc);
+"{"         return yy::MyParser::make_LEFT_CURLY_BRACKET(loc);
+"}"         return yy::MyParser::make_RIGHT_CURLY_BRACKET(loc);
+":"         return yy::MyParser::make_COLON(loc);
+";"         return yy::MyParser::make_SEMICOLON(loc);
+","         return yy::MyParser::make_COMMA(loc);
 
-"function" return yy::MyParser::make_FUNCTION(loc);
-"return"   return yy::MyParser::make_RETURN(loc);
-"let"      return yy::MyParser::make_LET(loc);
-"true"     return yy::MyParser::make_BOOL(BoolLiteral::make(true), loc);
-"false"    return yy::MyParser::make_BOOL(BoolLiteral::make(false), loc);
+"function"  return yy::MyParser::make_FUNCTION(loc);
+"return"    return yy::MyParser::make_RETURN(loc);
+"let"       return yy::MyParser::make_LET(loc);
+"true"      return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(loc, true), loc);
+"false"     return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(loc, false), loc);
 
 {integer} {
     errno = 0;
@@ -90,7 +91,7 @@ blank       [ \t]
     if (! (INT_MIN <= n && n <= INT_MAX && errno != ERANGE)) {
         driver.error(loc, "integer is out of range");
     }
-    return yy::MyParser::make_INTEGER(IntegerLiteral::make(n), loc);
+    return yy::MyParser::make_INTEGER_LITERAL(IntegerLiteral::make(loc, n), loc);
 }
 
 {double} {
@@ -99,7 +100,7 @@ blank       [ \t]
     if (errno == ERANGE) {
         driver.error(loc, "double is out of range");
     }
-    return yy::MyParser::make_DOUBLE(DoubleLiteral::make(d), loc);
+    return yy::MyParser::make_DOUBLE_LITERAL(DoubleLiteral::make(loc, d), loc);
 }
 
 {identifier}    return yy::MyParser::make_IDENTIFIER(NamedDecl::make(loc, yytext), loc);

@@ -3,6 +3,7 @@
 #include <cassert>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 enum class BuiltinTypeKind {
@@ -15,120 +16,67 @@ enum class BuiltinTypeKind {
     Double,
     // String,
     Void,
+    Any,
 };
 
-enum class TypeKind {
-    Any,
-    BuiltinTypeKind,
-};
+using TypeIndex = uint64_t;
 
 class Type {
 public:
     virtual ~Type() = default;
     virtual std::string dump() const = 0;
+    // virtual TypeIndex getTypeIndex() const = 0;
 };
-
-class AnyType final : public Type {
-public:
-    std::string dump() const override { return "any"; }
-
-    static std::shared_ptr<AnyType> make()
-    {
-        auto type = std::make_shared<AnyType>();
-        return type;
-    }
-};
-
-using TypeVariableIndex = uint64_t;
 
 class TypeVariable final : public Type {
 private:
-    TypeVariableIndex index;
+    TypeIndex index;
     std::shared_ptr<const Type> type;
 
 public:
-    std::string dump() const override
-    {
-        if (type) {
-            return type->dump();
-        }
-        return "T(" + std::to_string(index) + ")";
-    }
+    std::string dump() const override;
+    TypeIndex getTypeIndex() const;
 
-    void setType(const std::shared_ptr<const Type>& t)
-    {
-        assert(t);
-        assert(!this->type);
-        assert(!std::dynamic_pointer_cast<const TypeVariable>(type));
-        this->type = t;
-    }
+    void setType(const std::shared_ptr<const Type>& type);
+    std::shared_ptr<const Type> getType() const;
 
-    static std::shared_ptr<TypeVariable> make()
-    {
-        static TypeVariableIndex typeIndexCounter = 10000;
-        ++typeIndexCounter;
-
-        auto type = std::make_shared<TypeVariable>();
-        type->index = typeIndexCounter;
-        return type;
-    }
+    static std::shared_ptr<TypeVariable> make(TypeIndex index);
 };
 
 class BuiltinType final : public Type {
 public:
     BuiltinTypeKind kind;
 
-    std::string dump() const override
-    {
-        switch (kind) {
-        case BuiltinTypeKind::Bool: return "bool";
-        case BuiltinTypeKind::Int: return "int";
-        case BuiltinTypeKind::Double: return "double";
-        case BuiltinTypeKind::Void: return "void";
-        }
-        return "builtin";
-    }
+    std::string dump() const override;
 
-    static std::shared_ptr<BuiltinType> make(BuiltinTypeKind kind)
-    {
-        auto type = std::make_shared<BuiltinType>();
-        type->kind = kind;
-        return type;
-    }
+    static std::shared_ptr<BuiltinType> make(BuiltinTypeKind kind);
 };
 
 class FunctionType final : public Type {
 public:
-    std::shared_ptr<const Type> returnType;                  // TODO: tuple
-    std::vector<std::shared_ptr<const Type>> parameterTypes; // TODO: tuple
+    std::shared_ptr<const Type> returnType; // TODO: tuple
+    std::vector<std::shared_ptr<const Type>> parameterTypes;
 
-    std::string dump() const override
-    {
-        assert(returnType);
+    std::string dump() const override;
 
-        std::string params;
-        bool needToSpace = false;
-        for (const auto& param : parameterTypes) {
-            if (needToSpace) {
-                params += " ";
-            }
-            params += param->dump();
-            needToSpace = true;
-        }
-        if (parameterTypes.empty()) {
-            params = "void";
-        }
+    static std::shared_ptr<FunctionType> make();
+};
 
-        return "(" + params + ") => (" + returnType->dump() + ")";
-    }
+class TypeEnvironment final {
+private:
+    std::shared_ptr<const TypeEnvironment> parent;
+    std::unordered_map<TypeIndex, TypeIndex> typeIndices;
+    std::unordered_map<std::string, std::shared_ptr<Type>> typeDefinitions;
 
-    static std::shared_ptr<FunctionType> make()
-    {
-        auto type = std::make_shared<FunctionType>();
+public:
+    TypeEnvironment();
+    explicit TypeEnvironment(const std::shared_ptr<const TypeEnvironment>& parentIn);
 
-        // TODO: Not implemented
-        type->returnType = BuiltinType::make(BuiltinTypeKind::Void);
+    TypeIndex getNextIndex();
 
-        return type;
-    }
+    std::shared_ptr<const TypeEnvironment> getParent() const;
+
+    std::shared_ptr<Type> getType(const std::string& name) const;
+
+    void defineType(const std::string& name, const std::shared_ptr<Type>& type);
 };

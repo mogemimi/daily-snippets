@@ -8,14 +8,14 @@
 
 class Scope final {
 private:
-    std::shared_ptr<Scope> parent;
+    std::shared_ptr<const Scope> parent;
     std::unordered_map<std::string, std::shared_ptr<Entity>> variables;
 
 public:
-    Scope();
-    explicit Scope(std::shared_ptr<Scope> parentIn);
+    Scope() = default;
+    explicit Scope(const std::shared_ptr<const Scope>& parentIn);
 
-    std::shared_ptr<Scope> getParent() const;
+    std::shared_ptr<const Scope> getParent() const;
 
     std::shared_ptr<Entity> getEntity(const std::string& name) const;
 

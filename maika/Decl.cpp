@@ -10,12 +10,12 @@ yy::location Decl::getLocation() const
     return location;
 }
 
-std::shared_ptr<Type> Decl::getType() const
+std::shared_ptr<const Type> Decl::getType() const
 {
     return type;
 }
 
-void Decl::setType(const std::shared_ptr<Type>& t)
+void Decl::setType(const std::shared_ptr<const Type>& t)
 {
     assert(!type);
     assert(t);
@@ -144,17 +144,17 @@ std::shared_ptr<FunctionDecl> FunctionDecl::make(
 
 void ParmVarDecl::traverse(ASTVisitor& visitor)
 {
-    assert(name);
-    visitor.visit(shared_from_this(), [&] { name->traverse(visitor); });
+    assert(namedDecl);
+    visitor.visit(shared_from_this(), [&] { namedDecl->traverse(visitor); });
 }
 
 std::string ParmVarDecl::dump(ASTDumper& dumper) const
 {
-    assert(name);
-    std::string s = "(" + name->dump(dumper);
+    assert(namedDecl);
+    std::string s = "(" + namedDecl->dump(dumper);
     if (type) {
         s += " ";
-        s += type->dump(dumper);
+        s += typeAnnotation->dump(dumper);
     }
     s += ")";
     return s;
@@ -165,19 +165,19 @@ ParmVarDecl::make(const yy::location& loc, const std::shared_ptr<NamedDecl>& nam
 {
     auto decl = std::make_shared<ParmVarDecl>();
     decl->location = loc;
-    decl->name = name;
+    decl->namedDecl = name;
     return decl;
 }
 
 std::shared_ptr<ParmVarDecl> ParmVarDecl::make(
     const yy::location& loc,
     const std::shared_ptr<NamedDecl>& name,
-    const std::shared_ptr<NamedDecl>& type)
+    const std::shared_ptr<NamedDecl>& typeAnnotation)
 {
     auto decl = std::make_shared<ParmVarDecl>();
     decl->location = loc;
-    decl->name = name;
-    decl->type = type;
+    decl->namedDecl = name;
+    decl->typeAnnotation = typeAnnotation;
     return decl;
 }
 

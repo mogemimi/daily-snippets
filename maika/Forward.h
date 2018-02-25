@@ -30,6 +30,7 @@ class VariableDecl;
 
 // NOTE: AST::Type
 class Type;
+class TypeEnvironment;
 
 // NOTE: Sema
 class Entity;

@@ -73,9 +73,9 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %token LET                  "let"
 
 %token <std::shared_ptr<NamedDecl>>                 IDENTIFIER "identifier"
-%token <std::shared_ptr<IntegerLiteral>>            INTEGER "integer_literal"
-%token <std::shared_ptr<DoubleLiteral>>             DOUBLE "double_literal"
-%token <std::shared_ptr<BoolLiteral>>               BOOL "bool_literal"
+%token <std::shared_ptr<IntegerLiteral>>            INTEGER_LITERAL "integer_literal"
+%token <std::shared_ptr<DoubleLiteral>>             DOUBLE_LITERAL "double_literal"
+%token <std::shared_ptr<BoolLiteral>>               BOOL_LITERAL "bool_literal"
 %type  <std::shared_ptr<Expr>>                      literal
 %type  <std::shared_ptr<Expr>>                      expression
 %type  <std::vector<std::shared_ptr<Stmt>>>         statements
@@ -140,7 +140,7 @@ literal:
 | "bool_literal"    { $$ = $1; };
 
 call_expression:
-  "identifier" "(" expressions ")"  { $$ = CallExpr::make(DeclRefExpr::make($1), $3); };
+  "identifier" "(" expressions ")"  { $$ = CallExpr::make(@$, DeclRefExpr::make(@1, $1), $3); };
 
 expressions:
   %empty                     { }
@@ -152,18 +152,18 @@ expressions:
 %left "==" "!=";
 %left "&&" "||";
 expression:
-  "identifier"                      { $$ = DeclRefExpr::make($1); };
+  "identifier"                      { $$ = DeclRefExpr::make(@$, $1); };
 | literal                           { $$ = $1; }
 | "(" expression ")"                { std::swap($$, $2); }
-| expression "+" expression         { $$ = BinaryOperator::make(BinaryOperatorKind::Add, $1, $3); }
-| expression "-" expression         { $$ = BinaryOperator::make(BinaryOperatorKind::Subtract, $1, $3); }
-| expression "*" expression         { $$ = BinaryOperator::make(BinaryOperatorKind::Multiply, $1, $3); }
-| expression "/" expression         { $$ = BinaryOperator::make(BinaryOperatorKind::Divide, $1, $3); }
-| expression "=" expression         { $$ = BinaryOperator::make(BinaryOperatorKind::Assign, $1, $3); }
-| expression "==" expression        { $$ = BinaryOperator::make(BinaryOperatorKind::Equal, $1, $3); }
-| expression "!=" expression        { $$ = BinaryOperator::make(BinaryOperatorKind::NotEqual, $1, $3); }
-| expression "&&" expression        { $$ = BinaryOperator::make(BinaryOperatorKind::LogicalAnd, $1, $3); }
-| expression "||" expression        { $$ = BinaryOperator::make(BinaryOperatorKind::LogicalOr, $1, $3); }
+| expression "+" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Add, $1, $3); }
+| expression "-" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Subtract, $1, $3); }
+| expression "*" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Multiply, $1, $3); }
+| expression "/" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Divide, $1, $3); }
+| expression "=" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Assign, $1, $3); }
+| expression "==" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Equal, $1, $3); }
+| expression "!=" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::NotEqual, $1, $3); }
+| expression "&&" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LogicalAnd, $1, $3); }
+| expression "||" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LogicalOr, $1, $3); }
 | call_expression                   { $$ = $1; };
 
 %%

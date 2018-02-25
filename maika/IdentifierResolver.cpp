@@ -76,7 +76,7 @@ void IdentifierResolver::visit(const std::shared_ptr<ParmVarDecl>& decl)
     auto scope = getCurrentScope();
     assert(scope);
 
-    auto namedDecl = decl->name;
+    auto namedDecl = decl->namedDecl;
     assert(namedDecl);
 
     auto name = namedDecl->getName();

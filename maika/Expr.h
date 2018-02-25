@@ -2,19 +2,23 @@
 
 #include "Forward.h"
 #include "Stmt.h"
+#include "location.hh"
 #include <memory>
 #include <string>
 #include <vector>
 
 class Expr : public Stmt {
 protected:
-    std::shared_ptr<Type> type;
+    std::shared_ptr<const Type> type;
+    yy::location location;
 
 public:
     virtual ~Expr() = default;
 
-    std::shared_ptr<Type> getType() const;
-    void setType(const std::shared_ptr<Type>& t);
+    yy::location getLocation() const;
+
+    std::shared_ptr<const Type> getType() const;
+    void setType(const std::shared_ptr<const Type>& t);
 };
 
 class IntegerLiteral final
@@ -26,7 +30,7 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper&) const override;
 
-    static std::shared_ptr<IntegerLiteral> make(int64_t v);
+    static std::shared_ptr<IntegerLiteral> make(const yy::location& loc, int64_t v);
 };
 
 class DoubleLiteral final
@@ -38,7 +42,7 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper&) const override;
 
-    static std::shared_ptr<DoubleLiteral> make(double v);
+    static std::shared_ptr<DoubleLiteral> make(const yy::location& loc, double v);
 };
 
 class BoolLiteral final
@@ -50,7 +54,7 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper&) const override;
 
-    static std::shared_ptr<BoolLiteral> make(bool v);
+    static std::shared_ptr<BoolLiteral> make(const yy::location& loc, bool v);
 };
 
 class CallExpr final
@@ -63,8 +67,10 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper&) const override;
 
-    static std::shared_ptr<CallExpr>
-    make(const std::shared_ptr<Expr>& fn, const std::vector<std::shared_ptr<Expr>>& args);
+    static std::shared_ptr<CallExpr> make(
+        const yy::location& loc,
+        const std::shared_ptr<Expr>& fn,
+        const std::vector<std::shared_ptr<Expr>>& args);
 };
 
 enum class BinaryOperatorKind {
@@ -95,8 +101,11 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper& dumper) const override;
 
-    static std::shared_ptr<BinaryOperator>
-    make(BinaryOperatorKind k, const std::shared_ptr<Expr>& l, const std::shared_ptr<Expr>& r);
+    static std::shared_ptr<BinaryOperator> make(
+        const yy::location& loc,
+        BinaryOperatorKind k,
+        const std::shared_ptr<Expr>& l,
+        const std::shared_ptr<Expr>& r);
 };
 
 class DeclRefExpr final
@@ -108,5 +117,6 @@ public:
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper& dumper) const override;
 
-    static std::shared_ptr<DeclRefExpr> make(const std::shared_ptr<NamedDecl>& d);
+    static std::shared_ptr<DeclRefExpr>
+    make(const yy::location& loc, const std::shared_ptr<NamedDecl>& d);
 };

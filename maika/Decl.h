@@ -9,7 +9,7 @@
 
 class Decl {
 protected:
-    std::shared_ptr<Type> type;
+    std::shared_ptr<const Type> type;
     yy::location location;
 
 public:
@@ -19,8 +19,8 @@ public:
 
     yy::location getLocation() const;
 
-    std::shared_ptr<Type> getType() const;
-    void setType(const std::shared_ptr<Type>& t);
+    std::shared_ptr<const Type> getType() const;
+    void setType(const std::shared_ptr<const Type>& t);
 };
 
 class TranslationUnitDecl final
@@ -77,8 +77,8 @@ class ParmVarDecl final
     : public Decl
     , public std::enable_shared_from_this<ParmVarDecl> {
 public:
-    std::shared_ptr<NamedDecl> name;
-    std::shared_ptr<NamedDecl> type;
+    std::shared_ptr<NamedDecl> namedDecl;
+    std::shared_ptr<NamedDecl> typeAnnotation;
 
     void traverse(ASTVisitor& visitor) override;
     std::string dump(ASTDumper& dumper) const override;
@@ -89,7 +89,7 @@ public:
     static std::shared_ptr<ParmVarDecl> make(
         const yy::location& loc,
         const std::shared_ptr<NamedDecl>& name,
-        const std::shared_ptr<NamedDecl>& type);
+        const std::shared_ptr<NamedDecl>& typeAnnotation);
 };
 
 class VariableDecl final

@@ -17,6 +17,7 @@ SOURCES = \
 	MyParser.cpp \
 	Scope.cpp \
 	Stmt.cpp \
+	Type.cpp \
 	TypeResolver.cpp \
 	tests/DumpTest.cpp \
 	tests/main.cpp
@@ -54,6 +55,7 @@ format:
 		Scope.h \
 		Stmt.cpp \
 		Stmt.h \
+		Type.cpp \
 		Type.h \
 		TypeResolver.cpp \
 		TypeResolver.h \

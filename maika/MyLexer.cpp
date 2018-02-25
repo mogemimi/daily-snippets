@@ -560,10 +560,10 @@ int yy_flex_debug = 1;
 
 static const flex_int16_t yy_rule_linenum[34] =
     {   0,
-       51,   52,   57,   58,   60,   61,   62,   64,   65,   66,
-       67,   68,   69,   70,   71,   72,   73,   74,   75,   76,
-       77,   78,   79,   80,   82,   83,   84,   85,   86,   88,
-       97,  106,  107
+       52,   53,   58,   59,   61,   62,   63,   65,   66,   67,
+       68,   69,   70,   71,   72,   73,   74,   75,   76,   77,
+       78,   79,   80,   81,   83,   84,   85,   86,   87,   89,
+       98,  107,  108
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -580,6 +580,7 @@ char *yytext;
 #include "Decl.h"
 #include "Expr.h"
 #include "Stmt.h"
+#include "Type.h"
 #include "MyDriver.h"
 #include "MyParser.h"
 
@@ -600,15 +601,15 @@ namespace {
 yy::location loc;
 std::string comment;
 } // end of anonymous namespace
-#line 603 "MyLexer.cpp"
+#line 604 "MyLexer.cpp"
 #define YY_NO_INPUT 1
 #define YY_NO_UNISTD_H 1
-#line 39 "MyLexer.l"
+#line 40 "MyLexer.l"
     // Code run each time a pattern is matched.
     #define YY_USER_ACTION  loc.columns(yyleng);
-#line 609 "MyLexer.cpp"
+#line 610 "MyLexer.cpp"
 
-#line 611 "MyLexer.cpp"
+#line 612 "MyLexer.cpp"
 
 #define INITIAL 0
 #define CSTYLE_COMMENT 1
@@ -887,15 +888,15 @@ YY_DECL
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 44 "MyLexer.l"
+#line 45 "MyLexer.l"
 
 
-#line 47 "MyLexer.l"
+#line 48 "MyLexer.l"
     // Code run each time yylex is called.
     loc.step();
 
 
-#line 898 "MyLexer.cpp"
+#line 899 "MyLexer.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -973,12 +974,12 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 51 "MyLexer.l"
+#line 52 "MyLexer.l"
 BEGIN(CSTYLE_COMMENT); comment = yytext;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 52 "MyLexer.l"
+#line 53 "MyLexer.l"
 {
     BEGIN(INITIAL);
     driver.visitComment(loc, CommentKind::C, comment + yytext);
@@ -988,185 +989,185 @@ YY_RULE_SETUP
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 57 "MyLexer.l"
+#line 58 "MyLexer.l"
 loc.lines(yyleng); comment += yytext;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 58 "MyLexer.l"
+#line 59 "MyLexer.l"
 comment += yytext;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 60 "MyLexer.l"
+#line 61 "MyLexer.l"
 driver.visitComment(loc, CommentKind::BCPL, yytext);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 61 "MyLexer.l"
+#line 62 "MyLexer.l"
 loc.step();
 	YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 62 "MyLexer.l"
+#line 63 "MyLexer.l"
 loc.lines(yyleng); loc.step();
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 64 "MyLexer.l"
+#line 65 "MyLexer.l"
 return yy::MyParser::make_MINUS(loc);
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 65 "MyLexer.l"
+#line 66 "MyLexer.l"
 return yy::MyParser::make_PLUS(loc);
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 66 "MyLexer.l"
+#line 67 "MyLexer.l"
 return yy::MyParser::make_STAR(loc);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 67 "MyLexer.l"
+#line 68 "MyLexer.l"
 return yy::MyParser::make_SLASH(loc);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 68 "MyLexer.l"
+#line 69 "MyLexer.l"
 return yy::MyParser::make_ASSIGN(loc);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 69 "MyLexer.l"
+#line 70 "MyLexer.l"
 return yy::MyParser::make_LOGICAL_NOT(loc);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 70 "MyLexer.l"
+#line 71 "MyLexer.l"
 return yy::MyParser::make_LOGICAL_AND(loc);
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 71 "MyLexer.l"
+#line 72 "MyLexer.l"
 return yy::MyParser::make_LOGICAL_OR(loc);
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 72 "MyLexer.l"
+#line 73 "MyLexer.l"
 return yy::MyParser::make_EQUAL(loc);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 73 "MyLexer.l"
+#line 74 "MyLexer.l"
 return yy::MyParser::make_NOT_EQUAL(loc);
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 74 "MyLexer.l"
+#line 75 "MyLexer.l"
 return yy::MyParser::make_LEFT_PARENTHESIS(loc);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 75 "MyLexer.l"
+#line 76 "MyLexer.l"
 return yy::MyParser::make_RIGHT_PARENTHESIS(loc);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 76 "MyLexer.l"
+#line 77 "MyLexer.l"
 return yy::MyParser::make_LEFT_CURLY_BRACKET(loc);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 77 "MyLexer.l"
+#line 78 "MyLexer.l"
 return yy::MyParser::make_RIGHT_CURLY_BRACKET(loc);
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 78 "MyLexer.l"
+#line 79 "MyLexer.l"
 return yy::MyParser::make_COLON(loc);
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 79 "MyLexer.l"
+#line 80 "MyLexer.l"
 return yy::MyParser::make_SEMICOLON(loc);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 80 "MyLexer.l"
+#line 81 "MyLexer.l"
 return yy::MyParser::make_COMMA(loc);
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 82 "MyLexer.l"
+#line 83 "MyLexer.l"
 return yy::MyParser::make_FUNCTION(loc);
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 83 "MyLexer.l"
+#line 84 "MyLexer.l"
 return yy::MyParser::make_RETURN(loc);
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 84 "MyLexer.l"
+#line 85 "MyLexer.l"
 return yy::MyParser::make_LET(loc);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 85 "MyLexer.l"
-return yy::MyParser::make_BOOL(BoolLiteral::make(true), loc);
+#line 86 "MyLexer.l"
+return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(loc, true), loc);
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 86 "MyLexer.l"
-return yy::MyParser::make_BOOL(BoolLiteral::make(false), loc);
+#line 87 "MyLexer.l"
+return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(loc, false), loc);
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 88 "MyLexer.l"
+#line 89 "MyLexer.l"
 {
     errno = 0;
     const auto n = strtol(yytext, nullptr, 10);
     if (! (INT_MIN <= n && n <= INT_MAX && errno != ERANGE)) {
         driver.error(loc, "integer is out of range");
     }
-    return yy::MyParser::make_INTEGER(IntegerLiteral::make(n), loc);
+    return yy::MyParser::make_INTEGER_LITERAL(IntegerLiteral::make(loc, n), loc);
 }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 97 "MyLexer.l"
+#line 98 "MyLexer.l"
 {
     errno = 0;
     const auto d = strtod(yytext, nullptr);
     if (errno == ERANGE) {
         driver.error(loc, "double is out of range");
     }
-    return yy::MyParser::make_DOUBLE(DoubleLiteral::make(d), loc);
+    return yy::MyParser::make_DOUBLE_LITERAL(DoubleLiteral::make(loc, d), loc);
 }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 106 "MyLexer.l"
+#line 107 "MyLexer.l"
 return yy::MyParser::make_IDENTIFIER(NamedDecl::make(loc, yytext), loc);
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 107 "MyLexer.l"
+#line 108 "MyLexer.l"
 driver.error(loc, "invalid character");
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(CSTYLE_COMMENT):
-#line 108 "MyLexer.l"
+#line 109 "MyLexer.l"
 return yy::MyParser::make_END(loc);
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 110 "MyLexer.l"
+#line 111 "MyLexer.l"
 ECHO;
 	YY_BREAK
-#line 1169 "MyLexer.cpp"
+#line 1170 "MyLexer.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2271,7 +2272,7 @@ void yyfree (void * ptr )
 
 /* %ok-for-header */
 
-#line 110 "MyLexer.l"
+#line 111 "MyLexer.l"
 
 
 void MyDriver::scanBegin()

@@ -46,8 +46,8 @@ public:
     void visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse) override;
     void visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse) override;
 
+    void visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<ParmVarDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse) override;
-    void visit(const std::shared_ptr<NamedDecl>& decl) override;
 };

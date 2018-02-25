@@ -9,7 +9,7 @@
 
 #include "catch.hpp"
 
-TEST_CASE("Dump", "[dump-test]")
+TEST_CASE("ASTDump", "[ast-dump]")
 {
     constexpr auto source = R"(
 function mul(a: int, b: int) {
@@ -17,56 +17,93 @@ function mul(a: int, b: int) {
 }
 
 function main() {
-    // NOTE:
     let a = 95 / 4;
-    let b = 3.1415926535;
+    let b = 3.141592;
     let c = mul(a + a, b);
-    let d = (a) = c;
+    let d = true;
+    let e = (d != false);
     return (c + 4) * (a - 75);
 }
 )";
 
-    constexpr auto sExpression = R"((function mul ((a int) (b int)) (
-  (return (* a b))
-))
-(function main () (
-  (let a (/ 95 4))
-  (let b 3.141593)
-  (let c (mul (+ a a) b))
-  (let d (= a c))
-  (return (* (+ c 4) (- a 75)))
-)))";
+    constexpr auto expect = R"(TranslationUnitDecl
+  FunctionDecl 'mul'
+    ParmVarDecl 'a' 'int'
+    ParmVarDecl 'b' 'int'
+    CompoundStmt
+      ReturnStmt
+        BinaryOperator '*'
+          DeclRefExpr 'a'
+          DeclRefExpr 'b'
+  FunctionDecl 'main'
+    CompoundStmt
+      DeclStmt
+        VariableDecl 'a'
+          BinaryOperator '/'
+            IntegerLiteral '95'
+            IntegerLiteral '4'
+      DeclStmt
+        VariableDecl 'b'
+          DoubleLiteral '3.141592'
+      DeclStmt
+        VariableDecl 'c'
+          CallExpr
+            DeclRefExpr 'mul'
+            BinaryOperator '+'
+              DeclRefExpr 'a'
+              DeclRefExpr 'a'
+            DeclRefExpr 'b'
+      DeclStmt
+        VariableDecl 'd'
+          BoolLiteral 'true'
+      DeclStmt
+        VariableDecl 'e'
+          BinaryOperator '!='
+            DeclRefExpr 'd'
+            BoolLiteral 'false'
+      ReturnStmt
+        BinaryOperator '*'
+          BinaryOperator '+'
+            DeclRefExpr 'c'
+            IntegerLiteral '4'
+          BinaryOperator '-'
+            DeclRefExpr 'a'
+            IntegerLiteral '75'
+)";
+
     MyDriver driver;
-
-    auto [result, ok] = driver.parseString(source);
+    auto [astContext, ok] = driver.parseString(source);
     REQUIRE(ok);
-    REQUIRE(result.dump() == sExpression);
 
-    // ASTDumper2 dumper;
-    //{
-    //    ASTTraverser traverser;
-    //    traverser.traverse(driver.ast, dumper);
-    //    printf("%s\n", dumper.result.c_str());
-    //}
+    ASTDumper2 dumper;
+    ASTTraverser traverser;
+    traverser.traverse(astContext, dumper);
+
+    REQUIRE(dumper.result == expect);
 }
 
 TEST_CASE("TypeInfer", "[type-inference]")
 {
     constexpr auto source = R"(
-function sub(a : int, b : int) {
-	return a - b;
+//function sub(a, b) {
+//    return a - b;
+//}
+
+function f(x) {
+    return x;
 }
 
 function main() {
-	let a = (4 + 5) - 7;
-	let b = 3.0 + (4.2 - (a * a));
-	let c = 5.0 * (b = a);
-	let d = true;
-	let e = (c == a);
-	let x;
-	let y = x;
-	let z = sub(b, c);
-    return ((a * b) != c);
+    let a = f(42, 4);
+//    let a = 42;
+//    let b = 70;
+//    let c = a + b;
+//    let d = 2.71828;
+//    let x = sub(a, b);
+//    let y = sub(c, d);
+//    let z = sub;
+//    let w = z(a, b);
+//    return x == y;
 }
 )";
     MyDriver driver;
@@ -81,16 +118,17 @@ function main() {
         traverser.traverse(astContext, resolver);
     }
 
-    // NOTE: type inference unification
-    for (const auto& e : context.entities) {
-        auto decl = e->getDecl();
-        decl->setType(TypeVariable::make());
-    }
-
     TypeResolver typeResolver;
     {
         ASTTraverser traverser;
         traverser.traverse(astContext, typeResolver);
+    }
+
+    ASTDumper2 dumper;
+    {
+        ASTTraverser traverser;
+        traverser.traverse(astContext, dumper);
+        printf("%s\n", dumper.result.c_str());
     }
 
     for (const auto& e : context.entities) {

@@ -2,6 +2,8 @@
 
 #include "ASTVisitor.h"
 #include "Forward.h"
+#include "Type.h"
+#include "location.hh"
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -9,16 +11,20 @@
 
 class IdentifierContext;
 
-class TypeEnv {
-public:
-};
-
 class TypeResolver final : public ASTVisitor {
+    std::vector<std::shared_ptr<TypeEnvironment>> scopeStack;
     int rank = 0;
     std::vector<std::shared_ptr<NamedDecl>> nonTypedNames;
-    std::shared_ptr<Type> lastReturnType;
+    std::shared_ptr<const Type> lastReturnType;
 
 public:
+    TypeResolver();
+    std::shared_ptr<TypeEnvironment> getCurrentScope();
+    void pushScope(const std::shared_ptr<TypeEnvironment>& scope);
+    void popScope();
+
+    void error(const yy::location& l, const std::string& err);
+
     void visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traverse) override;
     void visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse) override;
     void visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse) override;

@@ -5,12 +5,17 @@
 #include <cassert>
 #include <utility>
 
-std::shared_ptr<Type> Expr::getType() const
+yy::location Expr::getLocation() const
+{
+    return location;
+}
+
+std::shared_ptr<const Type> Expr::getType() const
 {
     return type;
 }
 
-void Expr::setType(const std::shared_ptr<Type>& t)
+void Expr::setType(const std::shared_ptr<const Type>& t)
 {
     assert(!type);
     assert(t);
@@ -27,12 +32,13 @@ std::string IntegerLiteral::dump(ASTDumper&) const
     return std::to_string(value);
 }
 
-std::shared_ptr<IntegerLiteral> IntegerLiteral::make(int64_t v)
+std::shared_ptr<IntegerLiteral> IntegerLiteral::make(const yy::location& loc, int64_t v)
 {
-    auto decl = std::make_shared<IntegerLiteral>();
-    decl->value = v;
-    decl->setType(BuiltinType::make(BuiltinTypeKind::Int));
-    return decl;
+    auto expr = std::make_shared<IntegerLiteral>();
+    expr->location = loc;
+    expr->value = v;
+    expr->setType(BuiltinType::make(BuiltinTypeKind::Int));
+    return expr;
 }
 
 void DoubleLiteral::traverse(ASTVisitor& visitor)
@@ -45,12 +51,13 @@ std::string DoubleLiteral::dump(ASTDumper&) const
     return std::to_string(value);
 }
 
-std::shared_ptr<DoubleLiteral> DoubleLiteral::make(double v)
+std::shared_ptr<DoubleLiteral> DoubleLiteral::make(const yy::location& loc, double v)
 {
-    auto decl = std::make_shared<DoubleLiteral>();
-    decl->value = v;
-    decl->setType(BuiltinType::make(BuiltinTypeKind::Double));
-    return decl;
+    auto expr = std::make_shared<DoubleLiteral>();
+    expr->location = loc;
+    expr->value = v;
+    expr->setType(BuiltinType::make(BuiltinTypeKind::Double));
+    return expr;
 }
 
 void BoolLiteral::traverse(ASTVisitor& visitor)
@@ -63,12 +70,13 @@ std::string BoolLiteral::dump(ASTDumper&) const
     return value ? "true" : "false";
 }
 
-std::shared_ptr<BoolLiteral> BoolLiteral::make(bool v)
+std::shared_ptr<BoolLiteral> BoolLiteral::make(const yy::location& loc, bool v)
 {
-    auto decl = std::make_shared<BoolLiteral>();
-    decl->value = v;
-    decl->setType(BuiltinType::make(BuiltinTypeKind::Bool));
-    return decl;
+    auto expr = std::make_shared<BoolLiteral>();
+    expr->location = loc;
+    expr->value = v;
+    expr->setType(BuiltinType::make(BuiltinTypeKind::Bool));
+    return expr;
 }
 
 void CallExpr::traverse(ASTVisitor& visitor)
@@ -94,10 +102,13 @@ std::string CallExpr::dump(ASTDumper& dumper) const
     return s;
 }
 
-std::shared_ptr<CallExpr>
-CallExpr::make(const std::shared_ptr<Expr>& fn, const std::vector<std::shared_ptr<Expr>>& args)
+std::shared_ptr<CallExpr> CallExpr::make(
+    const yy::location& loc,
+    const std::shared_ptr<Expr>& fn,
+    const std::vector<std::shared_ptr<Expr>>& args)
 {
     auto expr = std::make_shared<CallExpr>();
+    expr->location = loc;
     expr->callee = fn;
     expr->arguments = args;
     return expr;
@@ -136,9 +147,13 @@ std::string BinaryOperator::dump(ASTDumper& dumper) const
 }
 
 std::shared_ptr<BinaryOperator> BinaryOperator::make(
-    BinaryOperatorKind k, const std::shared_ptr<Expr>& l, const std::shared_ptr<Expr>& r)
+    const yy::location& loc,
+    BinaryOperatorKind k,
+    const std::shared_ptr<Expr>& l,
+    const std::shared_ptr<Expr>& r)
 {
     auto expr = std::make_shared<BinaryOperator>();
+    expr->location = loc;
     expr->kind = k;
     expr->lhs = l;
     expr->rhs = r;
@@ -157,9 +172,11 @@ std::string DeclRefExpr::dump(ASTDumper& dumper) const
     return decl->dump(dumper);
 }
 
-std::shared_ptr<DeclRefExpr> DeclRefExpr::make(const std::shared_ptr<NamedDecl>& d)
+std::shared_ptr<DeclRefExpr>
+DeclRefExpr::make(const yy::location& loc, const std::shared_ptr<NamedDecl>& d)
 {
     auto expr = std::make_shared<DeclRefExpr>();
+    expr->location = loc;
     expr->decl = d;
     return expr;
 }

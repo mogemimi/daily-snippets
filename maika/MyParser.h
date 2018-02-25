@@ -390,9 +390,9 @@ namespace yy {
         TOK_RETURN = 276,
         TOK_LET = 277,
         TOK_IDENTIFIER = 278,
-        TOK_INTEGER = 279,
-        TOK_DOUBLE = 280,
-        TOK_BOOL = 281
+        TOK_INTEGER_LITERAL = 279,
+        TOK_DOUBLE_LITERAL = 280,
+        TOK_BOOL_LITERAL = 281
       };
     };
 
@@ -621,15 +621,15 @@ namespace yy {
 
     static inline
     symbol_type
-    make_INTEGER (const std::shared_ptr<IntegerLiteral>& v, const location_type& l);
+    make_INTEGER_LITERAL (const std::shared_ptr<IntegerLiteral>& v, const location_type& l);
 
     static inline
     symbol_type
-    make_DOUBLE (const std::shared_ptr<DoubleLiteral>& v, const location_type& l);
+    make_DOUBLE_LITERAL (const std::shared_ptr<DoubleLiteral>& v, const location_type& l);
 
     static inline
     symbol_type
-    make_BOOL (const std::shared_ptr<BoolLiteral>& v, const location_type& l);
+    make_BOOL_LITERAL (const std::shared_ptr<BoolLiteral>& v, const location_type& l);
 
 
     /// Build a parser object.
@@ -1592,21 +1592,21 @@ namespace yy {
   }
 
   MyParser::symbol_type
-  MyParser::make_INTEGER (const std::shared_ptr<IntegerLiteral>& v, const location_type& l)
+  MyParser::make_INTEGER_LITERAL (const std::shared_ptr<IntegerLiteral>& v, const location_type& l)
   {
-    return symbol_type (token::TOK_INTEGER, v, l);
+    return symbol_type (token::TOK_INTEGER_LITERAL, v, l);
   }
 
   MyParser::symbol_type
-  MyParser::make_DOUBLE (const std::shared_ptr<DoubleLiteral>& v, const location_type& l)
+  MyParser::make_DOUBLE_LITERAL (const std::shared_ptr<DoubleLiteral>& v, const location_type& l)
   {
-    return symbol_type (token::TOK_DOUBLE, v, l);
+    return symbol_type (token::TOK_DOUBLE_LITERAL, v, l);
   }
 
   MyParser::symbol_type
-  MyParser::make_BOOL (const std::shared_ptr<BoolLiteral>& v, const location_type& l)
+  MyParser::make_BOOL_LITERAL (const std::shared_ptr<BoolLiteral>& v, const location_type& l)
   {
-    return symbol_type (token::TOK_BOOL, v, l);
+    return symbol_type (token::TOK_BOOL_LITERAL, v, l);
   }
 
 

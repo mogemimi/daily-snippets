@@ -6,14 +6,12 @@
 #include <cassert>
 #include <utility>
 
-Scope::Scope() {}
-
-Scope::Scope(std::shared_ptr<Scope> parentIn)
+Scope::Scope(const std::shared_ptr<const Scope>& parentIn)
     : parent(parentIn)
 {
 }
 
-std::shared_ptr<Scope> Scope::getParent() const
+std::shared_ptr<const Scope> Scope::getParent() const
 {
     return parent;
 }
