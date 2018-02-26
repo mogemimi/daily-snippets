@@ -3,6 +3,7 @@
 #include "ASTVisitor.h"
 #include "Forward.h"
 #include "Scope.h"
+#include "location.hh"
 #include <memory>
 #include <string>
 #include <vector>
@@ -23,8 +24,10 @@ public:
     void pushScope(const std::shared_ptr<Scope>& scope);
     void popScope();
 
-    void visit(const std::shared_ptr<DeclRefExpr>& decl) override;
-    void visit(const std::shared_ptr<FunctionDecl>& decl) override;
-    void visit(const std::shared_ptr<ParmVarDecl>& decl) override;
-    void visit(const std::shared_ptr<VariableDecl>& decl) override;
+    void error(const yy::location& l, const std::string& err);
+
+    void visit(const std::shared_ptr<DeclRefExpr>& decl, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<ParmVarDecl>& decl, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse) override;
 };

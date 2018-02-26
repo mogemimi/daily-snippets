@@ -1,5 +1,6 @@
 #include "TypeResolver.h"
 #include "Decl.h"
+#include "Entity.h"
 #include "Expr.h"
 #include "IdentifierResolver.h"
 #include "Stmt.h"
@@ -9,24 +10,7 @@
 
 namespace {
 
-class ScopedFunc final {
-    std::function<void()> defer;
-
-public:
-    explicit ScopedFunc(std::function<void()>&& d)
-        : defer(std::move(d))
-    {
-    }
-
-    ~ScopedFunc()
-    {
-        if (defer) {
-            defer();
-        }
-    }
-};
-
-//std::shared_ptr<Type> prune(const std::shared_ptr<Type>& type)
+// std::shared_ptr<Type> prune(const std::shared_ptr<Type>& type)
 //{
 //    auto typeVariable = std::dynamic_pointer_cast<TypeVariable>(type);
 //    if (typeVariable) {
@@ -37,7 +21,7 @@ public:
 //    return type;
 //}
 //
-//std::shared_ptr<const Type> unify(const std::shared_ptr<const Type>& type)
+// std::shared_ptr<const Type> unify(const std::shared_ptr<const Type>& type)
 //{
 //    const auto typeVariable = std::dynamic_pointer_cast<const TypeVariable>(type);
 //    if (!typeVariable) {
@@ -61,23 +45,17 @@ public:
 
 TypeResolver::TypeResolver()
 {
-    auto env = std::make_shared<TypeEnvironment>();
-    pushScope(env);
-
-    env->defineAlias("int", BuiltinType::make(BuiltinTypeKind::Int));
-    env->defineAlias("bool", BuiltinType::make(BuiltinTypeKind::Bool));
-    env->defineAlias("double", BuiltinType::make(BuiltinTypeKind::Double));
-    env->defineAlias("string", BuiltinType::make(BuiltinTypeKind::Int));
-    env->defineAlias("void", BuiltinType::make(BuiltinTypeKind::Void));
+    auto scope = std::make_shared<TypeResolverScope>();
+    pushScope(scope);
 }
 
-std::shared_ptr<TypeEnvironment> TypeResolver::getCurrentScope()
+std::shared_ptr<TypeResolverScope> TypeResolver::getCurrentScope()
 {
     assert(!scopeStack.empty());
     return scopeStack.back();
 }
 
-void TypeResolver::pushScope(const std::shared_ptr<TypeEnvironment>& scope)
+void TypeResolver::pushScope(const std::shared_ptr<TypeResolverScope>& scope)
 {
     scopeStack.push_back(std::move(scope));
 }
@@ -100,13 +78,13 @@ void TypeResolver::visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& tra
 
 void TypeResolver::visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse)
 {
-    const auto env = getCurrentScope();
+    const auto scope = getCurrentScope();
 
     traverse();
 
     assert(stmt->expr);
     assert(stmt->expr->getType());
-    env->returnTypes.push_back(stmt->expr->getType());
+    scope->returnTypes.push_back(stmt->expr->getType());
 }
 
 void TypeResolver::visit(const std::shared_ptr<DeclStmt>& expr, Invoke&& traverse)
@@ -195,10 +173,9 @@ void TypeResolver::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& trav
 
 void TypeResolver::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse)
 {
-    const auto parentEnv = getCurrentScope();
-    const auto env = std::make_shared<TypeEnvironment>(parentEnv);
-    pushScope(env);
-    ScopedFunc scoped([&] { popScope(); });
+    const auto outerScope = getCurrentScope();
+    const auto scope = std::make_shared<TypeResolverScope>();
+    pushScope(scope);
 
     const auto typeVariable = TypeVariable::make();
     if (decl->namedDecl) {
@@ -206,17 +183,17 @@ void TypeResolver::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& tra
         assert(namedDecl);
         assert(!namedDecl->getType());
         namedDecl->setType(typeVariable);
-        parentEnv->defineIdent(namedDecl->getName(), namedDecl->getType());
     }
 
     traverse();
+    popScope();
 
     auto returnType = [&]() -> std::shared_ptr<Type> {
-        if (env->returnTypes.empty()) {
+        if (scope->returnTypes.empty()) {
             return BuiltinType::make(BuiltinTypeKind::Void);
         }
-        std::shared_ptr<Type> candidate = env->returnTypes.back();
-        for (const auto& ret : env->returnTypes) {
+        std::shared_ptr<Type> candidate = scope->returnTypes.back();
+        for (const auto& ret : scope->returnTypes) {
             if (candidate != ret) {
                 return BuiltinType::make(BuiltinTypeKind::Any);
             }
@@ -240,28 +217,23 @@ void TypeResolver::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& tra
 
 void TypeResolver::visit(const std::shared_ptr<ParmVarDecl>& decl, Invoke&& traverse)
 {
-    const auto env = getCurrentScope();
-
     const auto namedDecl = decl->namedDecl;
     assert(namedDecl);
     assert(!namedDecl->getName().empty());
     assert(!namedDecl->getType());
 
     if (decl->typeAnnotation) {
-        auto type = env->getAlias(decl->typeAnnotation->getName());
-        if (type) {
-            namedDecl->setType(type);
-        }
-
-        // TODO: Not implemented
-        assert(type);
+        auto entity = decl->typeAnnotation->getEntity();
+        assert(entity);
+        assert(entity->getKind() == EntityKind::Type);
+        assert(entity->getType());
+        auto type = entity->getType();
+        namedDecl->setType(type);
     }
     else {
         auto typeVariable = TypeVariable::make();
         namedDecl->setType(typeVariable);
     }
-
-    env->defineIdent(namedDecl->getName(), namedDecl->getType());
 
     traverse();
 
@@ -272,8 +244,6 @@ void TypeResolver::visit(const std::shared_ptr<ParmVarDecl>& decl, Invoke&& trav
 
 void TypeResolver::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse)
 {
-    const auto env = getCurrentScope();
-
     const auto namedDecl = decl->namedDecl;
     assert(namedDecl);
     assert(!namedDecl->getName().empty());
@@ -281,8 +251,6 @@ void TypeResolver::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& tra
 
     const auto typeVariable = TypeVariable::make();
     namedDecl->setType(typeVariable);
-
-    env->defineIdent(namedDecl->getName(), namedDecl->getType());
 
     traverse();
 
@@ -305,13 +273,15 @@ void TypeResolver::visit(const std::shared_ptr<NamedDecl>& decl)
         return;
     }
 
-    auto env = getCurrentScope();
-
-    auto type = env->getIdent(decl->getName());
-    if (!type) {
-        error(decl->getLocation(), "'" + decl->getName() + "' was not declared in this scope.");
+    auto entity = decl->getEntity();
+    assert(entity);
+    assert(entity->getKind() == EntityKind::Variable);
+    assert(entity->getDecl());
+    assert(entity->getDecl()->getType());
+    if (decl == entity->getDecl()) {
         return;
     }
 
+    auto type = entity->getDecl()->getType();
     decl->setType(type);
 }

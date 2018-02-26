@@ -6,29 +6,29 @@
 #include <cassert>
 #include <utility>
 
-Scope::Scope(const std::shared_ptr<const Scope>& parentIn)
-    : parent(parentIn)
+Scope::Scope(const std::shared_ptr<const Scope>& outerIn)
+    : outer(outerIn)
 {
 }
 
-std::shared_ptr<const Scope> Scope::getParent() const
+std::shared_ptr<const Scope> Scope::getOuter() const
 {
-    return parent;
+    return outer;
 }
 
-std::shared_ptr<Entity> Scope::getEntity(const std::string& name) const
+std::shared_ptr<Entity> Scope::lookup(const std::string& name) const
 {
     auto iter = variables.find(name);
     if (iter != std::end(variables)) {
         return iter->second;
     }
-    if (parent) {
-        return parent->getEntity(name);
+    if (outer) {
+        return outer->lookup(name);
     }
     return nullptr;
 }
 
-void Scope::defineVariable(const std::shared_ptr<Entity>& v)
+void Scope::insert(const std::shared_ptr<Entity>& v)
 {
     assert(v);
     variables.emplace(v->getName(), v);

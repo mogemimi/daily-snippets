@@ -11,14 +11,18 @@
 
 class IdentifierContext;
 
+struct TypeResolverScope final {
+    std::vector<std::shared_ptr<Type>> returnTypes;
+};
+
 class TypeResolver final : public ASTVisitor {
-    std::vector<std::shared_ptr<TypeEnvironment>> scopeStack;
+    std::vector<std::shared_ptr<TypeResolverScope>> scopeStack;
 
 public:
     TypeResolver();
 
-    std::shared_ptr<TypeEnvironment> getCurrentScope();
-    void pushScope(const std::shared_ptr<TypeEnvironment>& scope);
+    std::shared_ptr<TypeResolverScope> getCurrentScope();
+    void pushScope(const std::shared_ptr<TypeResolverScope>& scope);
     void popScope();
 
     void error(const yy::location& l, const std::string& err);
