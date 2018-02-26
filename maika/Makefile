@@ -18,6 +18,7 @@ SOURCES = \
 	Scope.cpp \
 	Stmt.cpp \
 	Type.cpp \
+	TypeInferer.cpp \
 	TypeResolver.cpp \
 	tests/DumpTest.cpp \
 	tests/main.cpp
@@ -57,6 +58,8 @@ format:
 		Stmt.h \
 		Type.cpp \
 		Type.h \
+		TypeInferer.cpp \
+		TypeInferer.h \
 		TypeResolver.cpp \
 		TypeResolver.h \
 		tests/DumpTest.cpp \

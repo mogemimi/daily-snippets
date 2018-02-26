@@ -9,8 +9,6 @@
 #include <unordered_map>
 #include <vector>
 
-class IdentifierContext;
-
 struct TypeResolverScope final {
     std::vector<std::shared_ptr<Type>> returnTypes;
 };

@@ -8,41 +8,6 @@
 #include <sstream>
 #include <utility>
 
-namespace {
-
-// std::shared_ptr<Type> prune(const std::shared_ptr<Type>& type)
-//{
-//    auto typeVariable = std::dynamic_pointer_cast<TypeVariable>(type);
-//    if (typeVariable) {
-//        if (auto instance = typeVariable->getType()) {
-//            return instance;
-//        }
-//    }
-//    return type;
-//}
-//
-// std::shared_ptr<const Type> unify(const std::shared_ptr<const Type>& type)
-//{
-//    const auto typeVariable = std::dynamic_pointer_cast<const TypeVariable>(type);
-//    if (!typeVariable) {
-//        return type;
-//    }
-//
-//    auto t = typeVariable;
-//    while (t) {
-//        const auto a = t->getType();
-//        const auto v = std::dynamic_pointer_cast<const TypeVariable>(a);
-//        if (!v) {
-//            return a;
-//        }
-//        t = v;
-//        assert(t != typeVariable);
-//    }
-//    return t;
-//}
-
-} // end of anonymous namespace
-
 TypeResolver::TypeResolver()
 {
     auto scope = std::make_shared<TypeResolverScope>();

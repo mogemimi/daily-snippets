@@ -3,6 +3,7 @@
 #include "Entity.h"
 #include "IdentifierResolver.h"
 #include "MyDriver.h"
+#include "TypeInferer.h"
 #include "TypeResolver.h"
 #include <iostream>
 #include <sstream>
@@ -90,16 +91,15 @@ function sub(a, b) {
 }
 
 function main() {
-    let a = sub(42, 7);
-//    let a = 42;
-//    let b = 70;
-//    let c = a + b;
-//    let d = 2.71828;
-//    let x = sub(a, b);
-//    let y = sub(c, d);
-//    let z = sub;
-//    let w = z(a, b);
-//    return x == y;
+    let a = 42;
+    let b = 70;
+    let c = 3.14 * (a + b);
+    let d = 2.71828;
+    let x = sub(a, b);
+    let y = sub(c, d);
+    let z = sub;
+    let w = z(a, b);
+    return x == y;
 }
 )";
     MyDriver driver;
@@ -113,15 +113,28 @@ function main() {
         ASTTraverser traverser;
         traverser.traverse(astContext, resolver);
     }
-
-    TypeResolver typeResolver;
     {
+        TypeResolver typeResolver;
         ASTTraverser traverser;
         traverser.traverse(astContext, typeResolver);
     }
 
-    ASTDumper2 dumper;
+    for (const auto& entity : context.entities) {
+        if (entity->getKind() != EntityKind::Variable) {
+            continue;
+        }
+
+        auto decl = entity->getDecl();
+
+        TypeEnvironment env;
+        auto type = TypeInferer::infer(env, decl->getType());
+        if (decl->getType() != type) {
+            // NOTE: substitution
+            decl->setType(type);
+        }
+    }
     {
+        ASTDumper2 dumper;
         ASTTraverser traverser;
         traverser.traverse(astContext, dumper);
         printf("%s\n", dumper.result.c_str());

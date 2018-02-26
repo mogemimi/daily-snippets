@@ -13,7 +13,7 @@ public:
 };
 
 class FunctionType final : public Type {
-private:
+public:
     std::shared_ptr<Type> returnType;
     std::vector<std::shared_ptr<Type>> parameterTypes;
 
@@ -25,7 +25,7 @@ public:
 };
 
 class ReturnType final : public Type {
-private:
+public:
     std::shared_ptr<Type> callableType;
     std::vector<std::shared_ptr<Type>> argumentTypes;
 
