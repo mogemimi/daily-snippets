@@ -3,6 +3,7 @@
 #include "ASTVisitor.h"
 #include "Forward.h"
 #include "Type.h"
+#include "TypeInferer.h"
 #include "location.hh"
 #include <memory>
 #include <string>
@@ -11,6 +12,7 @@
 
 struct TypeResolverScope final {
     std::vector<std::shared_ptr<Type>> returnTypes;
+    TypeEnvironment env;
 };
 
 class TypeResolver final : public ASTVisitor {

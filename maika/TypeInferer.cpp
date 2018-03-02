@@ -6,14 +6,23 @@
 #include "Stmt.h"
 #include <cassert>
 #include <sstream>
+#include <unordered_set>
 #include <utility>
 
 namespace {
 
+std::shared_ptr<Type> fresh(
+    TypeEnvironment& env,
+    std::unordered_set<TypeID>& processed,
+    std::unordered_set<std::shared_ptr<Type>>& processedTypes,
+    const std::shared_ptr<Type>& type);
+
 std::shared_ptr<Type> prune(const std::shared_ptr<Type>& type)
 {
-    auto typeVariable = std::dynamic_pointer_cast<TypeVariable>(type);
-    if (typeVariable) {
+    assert(type);
+    if (type->getKind() == TypeKind::TypeVariable) {
+        auto typeVariable = std::static_pointer_cast<TypeVariable>(type);
+        assert(typeVariable == std::dynamic_pointer_cast<TypeVariable>(type));
         if (auto instance = typeVariable->getType()) {
             return instance;
         }
@@ -21,45 +30,26 @@ std::shared_ptr<Type> prune(const std::shared_ptr<Type>& type)
     return type;
 }
 
-std::shared_ptr<Type> substitution(const std::shared_ptr<Type>& type)
+std::shared_ptr<Type> instantiate(
+    TypeEnvironment& env,
+    std::unordered_set<TypeID>& processed,
+    std::unordered_set<std::shared_ptr<Type>>& processedTypes,
+    const std::shared_ptr<ReturnType>& ret)
 {
-    // TODO: check DAG (directed acyclic graph), not cycle graph.
-    auto prev = type;
-    auto next = prune(prev);
-    while (prev != next) {
-        std::swap(next, prev);
-        next = prune(prev);
-    }
-    return next;
-}
+    const auto callable = fresh(env, processed, processedTypes, ret->callableType);
 
-// std::shared_ptr<const Type> unify(const std::shared_ptr<const Type>& type)
-//{
-//    const auto typeVariable = std::dynamic_pointer_cast<const TypeVariable>(type);
-//    if (!typeVariable) {
-//        return type;
-//    }
-//
-//    auto t = typeVariable;
-//    while (t) {
-//        const auto a = t->getType();
-//        const auto v = std::dynamic_pointer_cast<const TypeVariable>(a);
-//        if (!v) {
-//            return a;
-//        }
-//        t = v;
-//        assert(t != typeVariable);
-//    }
-//    return t;
-//}
-
-std::shared_ptr<Type> instantiate(TypeEnvironment& env, const std::shared_ptr<ReturnType>& ret)
-{
-    auto callable = TypeInferer::infer(env, ret->callableType);
-    auto function = std::dynamic_pointer_cast<FunctionType>(callable);
-    if (!function) {
+    assert(callable);
+    if (callable->getKind() != TypeKind::FunctionType) {
         return ret;
     }
+    if (processedTypes.find(callable) != std::end(processedTypes)) {
+        // NOTE: recursive calls
+        return BuiltinType::make(BuiltinTypeKind::Any);
+    }
+    processedTypes.emplace(callable);
+
+    const auto function = std::static_pointer_cast<FunctionType>(callable);
+    assert(function == std::dynamic_pointer_cast<FunctionType>(callable));
 
     if (function->parameterTypes.size() != ret->argumentTypes.size()) {
         // TODO: need to handle error
@@ -68,21 +58,85 @@ std::shared_ptr<Type> instantiate(TypeEnvironment& env, const std::shared_ptr<Re
     }
 
     for (size_t i = 0; i < function->parameterTypes.size(); ++i) {
-        auto param = TypeInferer::infer(env, function->parameterTypes[i]);
-        if (auto v = std::dynamic_pointer_cast<TypeVariable>(param)) {
-            auto arg = TypeInferer::infer(env, ret->argumentTypes[i]);
+        assert(i < function->parameterTypes.size());
+        assert(i < ret->argumentTypes.size());
+
+        const auto param = fresh(env, processed, processedTypes, function->parameterTypes[i]);
+
+        if (param->getKind() == TypeKind::TypeVariable) {
+            auto v = std::static_pointer_cast<TypeVariable>(param);
+            assert(v == std::dynamic_pointer_cast<TypeVariable>(param));
+            auto arg = fresh(env, processed, processedTypes, ret->argumentTypes[i]);
             env.variables.emplace(v->getTypeID(), arg);
         }
     }
 
-    return TypeInferer::infer(env, function->returnType);
+    return fresh(env, processed, processedTypes, function->returnType);
 }
 
 void unify(TypeEnvironment& env, const std::shared_ptr<Type>& t1, const std::shared_ptr<Type>& t2)
 {
-    if (auto v = std::dynamic_pointer_cast<TypeVariable>(t1)) {
+    assert(t1);
+    assert(t2);
+
+    if (t1->getKind() == TypeKind::TypeVariable) {
+        const auto v = std::static_pointer_cast<TypeVariable>(t1);
+        assert(v == std::dynamic_pointer_cast<TypeVariable>(t1));
         env.variables.emplace(v->getTypeID(), t2);
     }
+}
+
+std::shared_ptr<Type> fresh(
+    TypeEnvironment& env,
+    std::unordered_set<TypeID>& processed,
+    std::unordered_set<std::shared_ptr<Type>>& processedTypes,
+    const std::shared_ptr<Type>& type)
+{
+    assert(type);
+
+    switch (type->getKind()) {
+    case TypeKind::TypeVariable: {
+        auto v = std::static_pointer_cast<TypeVariable>(type);
+        assert(v == std::dynamic_pointer_cast<TypeVariable>(type));
+        auto iter = env.variables.find(v->getTypeID());
+        if (iter != std::end(env.variables)) {
+            assert(iter->second);
+            return iter->second;
+        }
+
+        auto pruned = prune(v);
+        if (pruned == type) {
+            return pruned;
+        }
+        unify(env, v, pruned);
+
+        if (processed.find(v->getTypeID()) != std::end(processed)) {
+            // NOTE: This type definition has a circular dependency.
+            return pruned;
+        }
+        processed.emplace(v->getTypeID());
+        return fresh(env, processed, processedTypes, pruned);
+        break;
+    }
+    case TypeKind::BuiltinType: {
+        auto t = std::static_pointer_cast<BuiltinType>(type);
+        assert(t == std::dynamic_pointer_cast<BuiltinType>(type));
+        return t;
+        break;
+    }
+    case TypeKind::ReturnType: {
+        auto ret = std::static_pointer_cast<ReturnType>(type);
+        assert(ret == std::dynamic_pointer_cast<ReturnType>(type));
+        TypeEnvironment innerEnv = env;
+        auto result = instantiate(innerEnv, processed, processedTypes, ret);
+        return result;
+        break;
+    }
+    case TypeKind::FunctionType: {
+        break;
+    }
+    }
+    return type;
 }
 
 } // end of anonymous namespace
@@ -90,29 +144,7 @@ void unify(TypeEnvironment& env, const std::shared_ptr<Type>& t1, const std::sha
 std::shared_ptr<Type> TypeInferer::infer(TypeEnvironment& env, const std::shared_ptr<Type>& type)
 {
     assert(type);
-
-    const auto t = substitution(type);
-
-    if (auto v = std::dynamic_pointer_cast<BuiltinType>(t)) {
-        unify(env, type, v);
-        return v;
-    }
-
-    if (auto v = std::dynamic_pointer_cast<TypeVariable>(t)) {
-        auto iter = env.variables.find(v->getTypeID());
-        if (iter != std::end(env.variables)) {
-            assert(iter->second);
-            return iter->second;
-        }
-        return v;
-    }
-
-    if (auto ret = std::dynamic_pointer_cast<ReturnType>(t)) {
-        TypeEnvironment innerEnv = env;
-        auto result = instantiate(innerEnv, ret);
-        unify(env, type, result);
-        return result;
-    }
-
-    return t;
+    std::unordered_set<TypeID> processed;
+    std::unordered_set<std::shared_ptr<Type>> processedTypes;
+    return fresh(env, processed, processedTypes, type);
 }

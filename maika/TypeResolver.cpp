@@ -8,6 +8,25 @@
 #include <sstream>
 #include <utility>
 
+namespace {
+
+template <class ASTNode>
+void substition(
+    const std::shared_ptr<ASTNode>& ast,
+    const std::shared_ptr<TypeVariable>& variable,
+    const std::shared_ptr<Type>& type)
+{
+    if (variable == type) {
+        return;
+    }
+    variable->setType(type);
+
+    assert(ast->getType() == variable);
+    ast->setType(type);
+}
+
+} // end of anonymous namespace
+
 TypeResolver::TypeResolver()
 {
     auto scope = std::make_shared<TypeResolverScope>();
@@ -140,6 +159,7 @@ void TypeResolver::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& tra
 {
     const auto outerScope = getCurrentScope();
     const auto scope = std::make_shared<TypeResolverScope>();
+    scope->env = outerScope->env;
     pushScope(scope);
 
     const auto typeVariable = TypeVariable::make();
@@ -225,7 +245,11 @@ void TypeResolver::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& tra
     else {
         assert(decl->expr);
         assert(decl->expr->getType());
+        auto scope = getCurrentScope();
         typeVariable->setType(decl->expr->getType());
+
+        auto s = TypeInferer::infer(scope->env, typeVariable);
+        substition(namedDecl, typeVariable, s);
     }
 
     assert(!decl->getType());

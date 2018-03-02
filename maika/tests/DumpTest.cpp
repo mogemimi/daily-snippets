@@ -118,21 +118,6 @@ function main() {
         ASTTraverser traverser;
         traverser.traverse(astContext, typeResolver);
     }
-
-    for (const auto& entity : context.entities) {
-        if (entity->getKind() != EntityKind::Variable) {
-            continue;
-        }
-
-        auto decl = entity->getDecl();
-
-        TypeEnvironment env;
-        auto type = TypeInferer::infer(env, decl->getType());
-        if (decl->getType() != type) {
-            // NOTE: substitution
-            decl->setType(type);
-        }
-    }
     {
         ASTDumper2 dumper;
         ASTTraverser traverser;

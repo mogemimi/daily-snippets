@@ -6,10 +6,18 @@
 #include <unordered_map>
 #include <vector>
 
+enum class TypeKind {
+    FunctionType,
+    ReturnType,
+    TypeVariable,
+    BuiltinType,
+};
+
 class Type {
 public:
     virtual ~Type() = default;
     virtual std::string dump() const = 0;
+    virtual TypeKind getKind() const = 0;
 };
 
 class FunctionType final : public Type {
@@ -19,6 +27,8 @@ public:
 
 public:
     std::string dump() const override;
+
+    TypeKind getKind() const override;
 
     static std::shared_ptr<FunctionType>
     make(const std::shared_ptr<Type>& to, const std::vector<std::shared_ptr<Type>>& from);
@@ -31,6 +41,8 @@ public:
 
 public:
     std::string dump() const override;
+
+    TypeKind getKind() const override;
 
     static std::shared_ptr<ReturnType> make(
         const std::shared_ptr<Type>& callableType,
@@ -46,6 +58,8 @@ private:
 
 public:
     std::string dump() const override;
+
+    TypeKind getKind() const override;
 
     TypeID getTypeID() const;
 
@@ -73,6 +87,8 @@ public:
     BuiltinTypeKind kind;
 
     std::string dump() const override;
+
+    TypeKind getKind() const override;
 
     static std::shared_ptr<BuiltinType> make(BuiltinTypeKind kind);
 };

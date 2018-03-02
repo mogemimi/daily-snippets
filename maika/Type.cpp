@@ -24,6 +24,11 @@ std::string FunctionType::dump() const
     return stringify(parameterTypes) + " -> " + returnType->dump();
 }
 
+TypeKind FunctionType::getKind() const
+{
+    return TypeKind::FunctionType;
+}
+
 std::shared_ptr<FunctionType>
 FunctionType::make(const std::shared_ptr<Type>& to, const std::vector<std::shared_ptr<Type>>& from)
 {
@@ -36,6 +41,11 @@ FunctionType::make(const std::shared_ptr<Type>& to, const std::vector<std::share
 std::string ReturnType::dump() const
 {
     return "((" + callableType->dump() + ")(" + stringify(argumentTypes) + "))";
+}
+
+TypeKind ReturnType::getKind() const
+{
+    return TypeKind::ReturnType;
 }
 
 std::shared_ptr<ReturnType> ReturnType::make(
@@ -54,6 +64,11 @@ std::string TypeVariable::dump() const
     //        return instance->dump();
     //    }
     return "<" + std::to_string(id) + ">";
+}
+
+TypeKind TypeVariable::getKind() const
+{
+    return TypeKind::TypeVariable;
 }
 
 TypeID TypeVariable::getTypeID() const
@@ -92,6 +107,11 @@ std::string BuiltinType::dump() const
     case BuiltinTypeKind::Any: return "any";
     }
     return "builtin";
+}
+
+TypeKind BuiltinType::getKind() const
+{
+    return TypeKind::BuiltinType;
 }
 
 std::shared_ptr<BuiltinType> BuiltinType::make(BuiltinTypeKind kind)
