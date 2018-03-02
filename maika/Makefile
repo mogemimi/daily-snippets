@@ -6,7 +6,7 @@ HEADERS = \
 
 SOURCES = \
 	ASTContext.cpp \
-	ASTDumper2.cpp \
+	ASTDumper.cpp \
 	ASTVisitor.cpp \
 	Decl.cpp \
 	Entity.cpp \
@@ -35,8 +35,8 @@ format:
 		ASTContext.cpp \
 		ASTContext.h \
 		ASTDumper.h \
-		ASTDumper2.cpp \
-		ASTDumper2.h \
+		ASTDumper.cpp \
+		ASTDumper.h \
 		ASTVisitor.cpp \
 		ASTVisitor.h \
 		Decl.cpp \

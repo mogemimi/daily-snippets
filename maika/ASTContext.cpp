@@ -9,7 +9,9 @@
 
 std::string ASTContext::dump() const
 {
-    ASTDumper dumper(true);
     assert(translationUnit);
-    return translationUnit->dump(dumper);
+    ASTDumper dumper;
+    ASTTraverser traverser;
+    traverser.traverse(*this, dumper);
+    return dumper.result;
 }

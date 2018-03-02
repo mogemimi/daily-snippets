@@ -28,7 +28,6 @@ public:
     int64_t value;
 
     void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper&) const override;
 
     static std::shared_ptr<IntegerLiteral> make(const yy::location& loc, int64_t v);
 };
@@ -40,7 +39,6 @@ public:
     double value;
 
     void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper&) const override;
 
     static std::shared_ptr<DoubleLiteral> make(const yy::location& loc, double v);
 };
@@ -52,7 +50,6 @@ public:
     bool value;
 
     void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper&) const override;
 
     static std::shared_ptr<BoolLiteral> make(const yy::location& loc, bool v);
 };
@@ -65,7 +62,6 @@ public:
     std::vector<std::shared_ptr<Expr>> arguments;
 
     void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper&) const override;
 
     static std::shared_ptr<CallExpr> make(
         const yy::location& loc,
@@ -99,7 +95,6 @@ public:
     std::shared_ptr<Expr> rhs;
 
     void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper& dumper) const override;
 
     static std::shared_ptr<BinaryOperator> make(
         const yy::location& loc,
@@ -115,7 +110,6 @@ public:
     std::shared_ptr<NamedDecl> decl;
 
     void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper& dumper) const override;
 
     static std::shared_ptr<DeclRefExpr>
     make(const yy::location& loc, const std::shared_ptr<NamedDecl>& d);

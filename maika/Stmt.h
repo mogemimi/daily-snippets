@@ -9,7 +9,6 @@ class Stmt {
 public:
     virtual ~Stmt() = default;
     virtual void traverse(ASTVisitor& visitor) = 0;
-    virtual std::string dump(ASTDumper& dumper) const = 0;
 };
 
 class CompoundStmt final
@@ -19,7 +18,6 @@ public:
     std::vector<std::shared_ptr<Stmt>> statements;
 
     void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper& dumper) const override;
 
     static std::shared_ptr<CompoundStmt> make(const std::vector<std::shared_ptr<Stmt>>& s);
 };
@@ -31,7 +29,6 @@ public:
     std::shared_ptr<Decl> decl;
 
     void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper& dumper) const override;
 
     static std::shared_ptr<DeclStmt> make(const std::shared_ptr<Decl>& d);
 };
@@ -43,7 +40,6 @@ public:
     std::shared_ptr<Expr> expr;
 
     void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper& dumper) const override;
 
     static std::shared_ptr<ReturnStmt> make();
     static std::shared_ptr<ReturnStmt> make(const std::shared_ptr<Expr>& e);

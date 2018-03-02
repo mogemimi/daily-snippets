@@ -31,22 +31,6 @@ void TranslationUnitDecl::traverse(ASTVisitor& visitor)
     });
 }
 
-std::string TranslationUnitDecl::dump(ASTDumper& dumper) const
-{
-    std::string s;
-    bool needToBreakLine = false;
-    for (auto& funcDecl : functionDecls) {
-        assert(funcDecl);
-        if (needToBreakLine) {
-            s += "\n";
-            needToBreakLine = false;
-        }
-        s += funcDecl->dump(dumper);
-        needToBreakLine = true;
-    }
-    return s;
-}
-
 std::shared_ptr<TranslationUnitDecl> TranslationUnitDecl::make(
     const yy::location& loc, const std::vector<std::shared_ptr<FunctionDecl>>& functions)
 {
@@ -76,11 +60,6 @@ void NamedDecl::traverse(ASTVisitor& visitor)
     visitor.visit(shared_from_this());
 }
 
-std::string NamedDecl::dump(ASTDumper&) const
-{
-    return name;
-}
-
 std::shared_ptr<NamedDecl> NamedDecl::make(const yy::location& loc, const std::string& v)
 {
     auto decl = std::make_shared<NamedDecl>();
@@ -103,30 +82,6 @@ void FunctionDecl::traverse(ASTVisitor& visitor)
     });
 }
 
-std::string FunctionDecl::dump(ASTDumper& dumper) const
-{
-    assert(namedDecl);
-    assert(compoundStmt);
-    std::string s = "(function ";
-    if (namedDecl) {
-        s += namedDecl->dump(dumper);
-        s += " ";
-    }
-    s += "(";
-    bool needToSpace = false;
-    for (const auto& arg : arguments) {
-        if (needToSpace) {
-            s += " ";
-        }
-        s += arg->dump(dumper);
-        needToSpace = true;
-    }
-    s += ") ";
-    s += compoundStmt->dump(dumper);
-    s += ")";
-    return s;
-}
-
 std::shared_ptr<FunctionDecl> FunctionDecl::make(
     const yy::location& loc,
     const std::shared_ptr<NamedDecl>& n,
@@ -145,18 +100,6 @@ void ParmVarDecl::traverse(ASTVisitor& visitor)
 {
     assert(namedDecl);
     visitor.visit(shared_from_this(), [&] { namedDecl->traverse(visitor); });
-}
-
-std::string ParmVarDecl::dump(ASTDumper& dumper) const
-{
-    assert(namedDecl);
-    std::string s = "(" + namedDecl->dump(dumper);
-    if (typeAnnotation) {
-        s += " ";
-        s += typeAnnotation->dump(dumper);
-    }
-    s += ")";
-    return s;
 }
 
 std::shared_ptr<ParmVarDecl>
@@ -189,18 +132,6 @@ void VariableDecl::traverse(ASTVisitor& visitor)
             expr->traverse(visitor);
         }
     });
-}
-
-std::string VariableDecl::dump(ASTDumper& dumper) const
-{
-    assert(namedDecl);
-    std::string s = "(let " + namedDecl->dump(dumper);
-    if (expr) {
-        s += " ";
-        s += expr->dump(dumper);
-    }
-    s += ")";
-    return s;
 }
 
 std::shared_ptr<VariableDecl>

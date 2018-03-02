@@ -15,7 +15,6 @@ protected:
 public:
     virtual ~Decl() = default;
     virtual void traverse(ASTVisitor& visitor) = 0;
-    virtual std::string dump(ASTDumper& dumper) const = 0;
 
     std::shared_ptr<Type> getType() const;
     void setType(const std::shared_ptr<Type>& t);
@@ -30,7 +29,6 @@ public:
     std::vector<std::shared_ptr<FunctionDecl>> functionDecls;
 
     void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper& dumper) const override;
 
     static std::shared_ptr<TranslationUnitDecl>
     make(const yy::location& loc, const std::vector<std::shared_ptr<FunctionDecl>>& n);
@@ -50,7 +48,6 @@ public:
     void setEntity(const std::shared_ptr<const Entity>& entity);
 
     void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper&) const override;
 
     static std::shared_ptr<NamedDecl> make(const yy::location& loc, const std::string& v);
 };
@@ -64,7 +61,6 @@ public:
     std::shared_ptr<CompoundStmt> compoundStmt;
 
     void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper& dumper) const override;
 
     static std::shared_ptr<FunctionDecl> make(
         const yy::location& loc,
@@ -81,7 +77,6 @@ public:
     std::shared_ptr<NamedDecl> typeAnnotation;
 
     void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper& dumper) const override;
 
     static std::shared_ptr<ParmVarDecl>
     make(const yy::location& loc, const std::shared_ptr<NamedDecl>& name);
@@ -100,7 +95,6 @@ public:
     std::shared_ptr<Expr> expr;
 
     void traverse(ASTVisitor& visitor) override;
-    std::string dump(ASTDumper& dumper) const override;
 
     static std::shared_ptr<VariableDecl>
     make(const yy::location& loc, const std::shared_ptr<NamedDecl>& n);

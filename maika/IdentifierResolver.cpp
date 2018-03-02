@@ -3,6 +3,7 @@
 #include "Entity.h"
 #include "Expr.h"
 #include "Stmt.h"
+#include "Type.h"
 #include <cassert>
 #include <utility>
 

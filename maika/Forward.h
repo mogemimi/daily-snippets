@@ -2,7 +2,6 @@
 
 // NOTE: AST
 class ASTContext;
-class ASTDumper;
 class ASTVisitor;
 
 // NOTE: AST::Stmt

@@ -1,5 +1,5 @@
 #include "ASTContext.h"
-#include "ASTDumper2.h"
+#include "ASTDumper.h"
 #include "Entity.h"
 #include "IdentifierResolver.h"
 #include "MyDriver.h"
@@ -76,7 +76,7 @@ function main() {
     auto [astContext, ok] = driver.parseString(source);
     REQUIRE(ok);
 
-    ASTDumper2 dumper;
+    ASTDumper dumper;
     ASTTraverser traverser;
     traverser.traverse(astContext, dumper);
 
@@ -119,7 +119,7 @@ function main() {
         traverser.traverse(astContext, typeResolver);
     }
     {
-        ASTDumper2 dumper;
+        ASTDumper dumper;
         ASTTraverser traverser;
         traverser.traverse(astContext, dumper);
         printf("%s\n", dumper.result.c_str());
