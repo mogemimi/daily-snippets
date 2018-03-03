@@ -47,7 +47,7 @@ void IdentifierResolver::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&
     auto scope = getCurrentScope();
     assert(scope);
 
-    auto decl = expr->decl;
+    auto decl = expr->getNamedDecl();
     assert(decl);
 
     auto entity = scope->lookup(decl->getName());
@@ -91,24 +91,24 @@ void IdentifierResolver::visit(const std::shared_ptr<ParmVarDecl>& decl, Invoke&
     auto scope = getCurrentScope();
     assert(scope);
 
-    if (decl->typeAnnotation) {
-        auto type = scope->lookup(decl->typeAnnotation->getName());
+    if (auto typeAnnotation = decl->getTypeAnnotation()) {
+        auto type = scope->lookup(typeAnnotation->getName());
         if (!type) {
             error(
-                decl->typeAnnotation->getLocation(),
-                "'" + decl->typeAnnotation->getName() + "' was not declared in this scope.");
+                typeAnnotation->getLocation(),
+                "'" + typeAnnotation->getName() + "' was not declared in this scope.");
             return;
         }
         if (type->getKind() != EntityKind::Type) {
             error(
-                decl->typeAnnotation->getLocation(),
-                "'" + decl->typeAnnotation->getName() + "' is not a type name.");
+                typeAnnotation->getLocation(),
+                "'" + typeAnnotation->getName() + "' is not a type name.");
             return;
         }
-        decl->typeAnnotation->setEntity(type);
+        typeAnnotation->setEntity(type);
     }
 
-    auto namedDecl = decl->namedDecl;
+    auto namedDecl = decl->getNamedDecl();
     assert(namedDecl);
     assert(!namedDecl->getName().empty());
 
@@ -128,7 +128,7 @@ void IdentifierResolver::visit(const std::shared_ptr<VariableDecl>& decl, Invoke
     auto scope = getCurrentScope();
     assert(scope);
 
-    auto namedDecl = decl->namedDecl;
+    auto namedDecl = decl->getNamedDecl();
     assert(namedDecl);
 
     auto entity = std::make_shared<Entity>(namedDecl->getName(), namedDecl);

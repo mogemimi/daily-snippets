@@ -14,9 +14,10 @@ public:
 class CompoundStmt final
     : public Stmt
     , public std::enable_shared_from_this<CompoundStmt> {
-public:
+private:
     std::vector<std::shared_ptr<Stmt>> statements;
 
+public:
     void traverse(ASTVisitor& visitor) override;
 
     static std::shared_ptr<CompoundStmt> make(const std::vector<std::shared_ptr<Stmt>>& s);
@@ -25,9 +26,10 @@ public:
 class DeclStmt final
     : public Stmt
     , public std::enable_shared_from_this<DeclStmt> {
-public:
+private:
     std::shared_ptr<Decl> decl;
 
+public:
     void traverse(ASTVisitor& visitor) override;
 
     static std::shared_ptr<DeclStmt> make(const std::shared_ptr<Decl>& d);
@@ -36,10 +38,13 @@ public:
 class ReturnStmt final
     : public Stmt
     , public std::enable_shared_from_this<ReturnStmt> {
-public:
+private:
     std::shared_ptr<Expr> expr;
 
+public:
     void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<Expr> getExpr() const;
 
     static std::shared_ptr<ReturnStmt> make();
     static std::shared_ptr<ReturnStmt> make(const std::shared_ptr<Expr>& e);

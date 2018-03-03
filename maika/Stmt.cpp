@@ -26,6 +26,7 @@ std::shared_ptr<CompoundStmt> CompoundStmt::make(const std::vector<std::shared_p
 void DeclStmt::traverse(ASTVisitor& visitor)
 {
     assert(decl);
+
     visitor.visit(shared_from_this(), [&] { decl->traverse(visitor); });
 }
 
@@ -40,6 +41,11 @@ void ReturnStmt::traverse(ASTVisitor& visitor)
 {
     assert(expr);
     visitor.visit(shared_from_this(), [&] { expr->traverse(visitor); });
+}
+
+std::shared_ptr<Expr> ReturnStmt::getExpr() const
+{
+    return expr;
 }
 
 std::shared_ptr<ReturnStmt> ReturnStmt::make()

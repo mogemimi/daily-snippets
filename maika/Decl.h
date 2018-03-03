@@ -72,11 +72,15 @@ public:
 class ParmVarDecl final
     : public Decl
     , public std::enable_shared_from_this<ParmVarDecl> {
-public:
+private:
     std::shared_ptr<NamedDecl> namedDecl;
     std::shared_ptr<NamedDecl> typeAnnotation;
 
+public:
     void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<NamedDecl> getNamedDecl() const { return namedDecl; }
+    std::shared_ptr<NamedDecl> getTypeAnnotation() const { return typeAnnotation; }
 
     static std::shared_ptr<ParmVarDecl>
     make(const yy::location& loc, const std::shared_ptr<NamedDecl>& name);
@@ -90,14 +94,19 @@ public:
 class VariableDecl final
     : public Decl
     , public std::enable_shared_from_this<VariableDecl> {
-public:
+private:
     std::shared_ptr<NamedDecl> namedDecl;
     std::shared_ptr<Expr> expr;
 
+public:
     void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<NamedDecl> getNamedDecl() const { return namedDecl; }
+    std::shared_ptr<Expr> getExpr() const { return expr; }
 
     static std::shared_ptr<VariableDecl>
     make(const yy::location& loc, const std::shared_ptr<NamedDecl>& n);
+
     static std::shared_ptr<VariableDecl> make(
         const yy::location& loc,
         const std::shared_ptr<NamedDecl>& n,

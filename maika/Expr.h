@@ -24,10 +24,13 @@ public:
 class IntegerLiteral final
     : public Expr
     , public std::enable_shared_from_this<IntegerLiteral> {
-public:
+private:
     int64_t value;
 
+public:
     void traverse(ASTVisitor& visitor) override;
+
+    int64_t getValue() const noexcept { return value; }
 
     static std::shared_ptr<IntegerLiteral> make(const yy::location& loc, int64_t v);
 };
@@ -35,10 +38,13 @@ public:
 class DoubleLiteral final
     : public Expr
     , public std::enable_shared_from_this<DoubleLiteral> {
-public:
+private:
     double value;
 
+public:
     void traverse(ASTVisitor& visitor) override;
+
+    double getValue() const noexcept { return value; }
 
     static std::shared_ptr<DoubleLiteral> make(const yy::location& loc, double v);
 };
@@ -46,10 +52,13 @@ public:
 class BoolLiteral final
     : public Expr
     , public std::enable_shared_from_this<BoolLiteral> {
-public:
+private:
     bool value;
 
+public:
     void traverse(ASTVisitor& visitor) override;
+
+    bool getValue() const noexcept { return value; }
 
     static std::shared_ptr<BoolLiteral> make(const yy::location& loc, bool v);
 };
@@ -57,11 +66,15 @@ public:
 class CallExpr final
     : public Expr
     , public std::enable_shared_from_this<CallExpr> {
-public:
+private:
     std::shared_ptr<Expr> callee;
     std::vector<std::shared_ptr<Expr>> arguments;
 
+public:
     void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<Expr> getCallee() const { return callee; }
+    std::vector<std::shared_ptr<Expr>> getArguments() const { return arguments; }
 
     static std::shared_ptr<CallExpr> make(
         const yy::location& loc,
@@ -89,12 +102,17 @@ enum class BinaryOperatorKind {
 class BinaryOperator final
     : public Expr
     , public std::enable_shared_from_this<BinaryOperator> {
-public:
+private:
     BinaryOperatorKind kind;
     std::shared_ptr<Expr> lhs;
     std::shared_ptr<Expr> rhs;
 
+public:
     void traverse(ASTVisitor& visitor) override;
+
+    BinaryOperatorKind getKind() const { return kind; }
+    std::shared_ptr<Expr> getLHS() const { return lhs; }
+    std::shared_ptr<Expr> getRHS() const { return rhs; }
 
     static std::shared_ptr<BinaryOperator> make(
         const yy::location& loc,
@@ -106,10 +124,13 @@ public:
 class DeclRefExpr final
     : public Expr
     , public std::enable_shared_from_this<DeclRefExpr> {
-public:
+private:
     std::shared_ptr<NamedDecl> decl;
 
+public:
     void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<NamedDecl> getNamedDecl() const { return decl; }
 
     static std::shared_ptr<DeclRefExpr>
     make(const yy::location& loc, const std::shared_ptr<NamedDecl>& d);

@@ -66,9 +66,10 @@ void TypeResolver::visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& trave
 
     traverse();
 
-    assert(stmt->expr);
-    assert(stmt->expr->getType());
-    scope->returnTypes.push_back(stmt->expr->getType());
+    auto expr = stmt->getExpr();
+    assert(expr);
+    assert(expr->getType());
+    scope->returnTypes.push_back(expr->getType());
 }
 
 void TypeResolver::visit(const std::shared_ptr<DeclStmt>& expr, Invoke&& traverse)
@@ -81,13 +82,15 @@ void TypeResolver::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& travers
     traverse();
 
     assert(!expr->getType());
-    assert(expr->callee);
 
-    auto functionType = expr->callee->getType();
+    const auto callee = expr->getCallee();
+    assert(callee);
+
+    const auto functionType = callee->getType();
     assert(functionType);
 
     std::vector<std::shared_ptr<Type>> argumentTypes;
-    for (const auto& arg : expr->arguments) {
+    for (const auto& arg : expr->getArguments()) {
         assert(arg);
         assert(arg->getType());
         argumentTypes.push_back(arg->getType());
@@ -119,7 +122,7 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
     traverse();
 
     const auto logicalOp = [&]() -> bool {
-        switch (expr->kind) {
+        switch (expr->getKind()) {
         case BinaryOperatorKind::Equal: return true;
         case BinaryOperatorKind::NotEqual: return true;
         case BinaryOperatorKind::LogicalAnd: return true;
@@ -135,14 +138,16 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
         return;
     }
 
-    assert(expr->lhs);
-    assert(expr->rhs);
-    assert(expr->lhs->getType());
-    assert(expr->rhs->getType());
+    const auto lhs = expr->getLHS();
+    const auto rhs = expr->getRHS();
+    assert(lhs);
+    assert(rhs);
+    assert(lhs->getType());
+    assert(rhs->getType());
 
     // TODO: Not implemented
     assert(!expr->getType());
-    expr->setType(expr->lhs->getType());
+    expr->setType(lhs->getType());
 }
 
 void TypeResolver::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse)
@@ -150,9 +155,11 @@ void TypeResolver::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& trav
     traverse();
 
     assert(!expr->getType());
-    assert(expr->decl);
-    assert(expr->decl->getType());
-    expr->setType(expr->decl->getType());
+
+    auto namedDecl = expr->getNamedDecl();
+    assert(namedDecl);
+    assert(namedDecl->getType());
+    expr->setType(namedDecl->getType());
 }
 
 void TypeResolver::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse)
@@ -202,13 +209,13 @@ void TypeResolver::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& tra
 
 void TypeResolver::visit(const std::shared_ptr<ParmVarDecl>& decl, Invoke&& traverse)
 {
-    const auto namedDecl = decl->namedDecl;
+    const auto namedDecl = decl->getNamedDecl();
     assert(namedDecl);
     assert(!namedDecl->getName().empty());
     assert(!namedDecl->getType());
 
-    if (decl->typeAnnotation) {
-        auto entity = decl->typeAnnotation->getEntity();
+    if (auto typeAnnotation = decl->getTypeAnnotation()) {
+        auto entity = typeAnnotation->getEntity();
         assert(entity);
         assert(entity->getKind() == EntityKind::Type);
         assert(entity->getType());
@@ -229,7 +236,7 @@ void TypeResolver::visit(const std::shared_ptr<ParmVarDecl>& decl, Invoke&& trav
 
 void TypeResolver::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse)
 {
-    const auto namedDecl = decl->namedDecl;
+    const auto namedDecl = decl->getNamedDecl();
     assert(namedDecl);
     assert(!namedDecl->getName().empty());
     assert(!namedDecl->getType());
@@ -239,17 +246,16 @@ void TypeResolver::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& tra
 
     traverse();
 
-    if (!decl->expr) {
-        typeVariable->setType(BuiltinType::make(BuiltinTypeKind::Any));
-    }
-    else {
-        assert(decl->expr);
-        assert(decl->expr->getType());
+    if (auto expr = decl->getExpr()) {
+        assert(expr->getType());
         auto scope = getCurrentScope();
-        typeVariable->setType(decl->expr->getType());
+        typeVariable->setType(expr->getType());
 
         auto s = TypeInferer::infer(scope->env, typeVariable);
         substition(namedDecl, typeVariable, s);
+    }
+    else {
+        typeVariable->setType(BuiltinType::make(BuiltinTypeKind::Any));
     }
 
     assert(!decl->getType());
