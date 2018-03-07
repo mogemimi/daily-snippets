@@ -49,3 +49,23 @@ public:
     static std::shared_ptr<ReturnStmt> make();
     static std::shared_ptr<ReturnStmt> make(const std::shared_ptr<Expr>& e);
 };
+
+class IfStmt final
+    : public Stmt
+    , public std::enable_shared_from_this<IfStmt> {
+private:
+    std::shared_ptr<Expr> condExpr;
+    std::shared_ptr<Stmt> thenStmt;
+    std::shared_ptr<Stmt> elseStmt;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<Expr> getCond() const;
+
+    std::shared_ptr<Stmt> getThen() const;
+
+    std::shared_ptr<Stmt> getElse() const;
+
+    static std::shared_ptr<IfStmt> make(const std::shared_ptr<Decl>& d);
+};
