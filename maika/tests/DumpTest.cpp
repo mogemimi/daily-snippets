@@ -80,7 +80,7 @@ function main() {
     ASTTraverser traverser;
     traverser.traverse(astContext, dumper);
 
-    REQUIRE(dumper.result == expect);
+    REQUIRE(dumper.getResult() == expect);
 }
 
 TEST_CASE("TypeInfer", "[type-inference]")
@@ -122,6 +122,6 @@ function main() {
         ASTDumper dumper;
         ASTTraverser traverser;
         traverser.traverse(astContext, dumper);
-        printf("%s\n", dumper.result.c_str());
+        printf("%s\n", dumper.getResult().c_str());
     }
 }

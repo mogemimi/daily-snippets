@@ -60,6 +60,19 @@ std::shared_ptr<BoolLiteral> BoolLiteral::make(const yy::location& loc, bool v)
     return expr;
 }
 
+void StringLiteral::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this());
+}
+
+std::shared_ptr<StringLiteral> StringLiteral::make(const yy::location& loc, const std::string& v)
+{
+    auto expr = std::make_shared<StringLiteral>();
+    expr->location = loc;
+    expr->value = v;
+    return expr;
+}
+
 void CallExpr::traverse(ASTVisitor& visitor)
 {
     assert(callee);

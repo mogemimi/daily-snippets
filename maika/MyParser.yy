@@ -76,6 +76,7 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %token <std::shared_ptr<IntegerLiteral>>            INTEGER_LITERAL "integer_literal"
 %token <std::shared_ptr<DoubleLiteral>>             DOUBLE_LITERAL "double_literal"
 %token <std::shared_ptr<BoolLiteral>>               BOOL_LITERAL "bool_literal"
+%token <std::shared_ptr<StringLiteral>>             STRING_LITERAL "string_literal"
 %type  <std::shared_ptr<Expr>>                      literal
 %type  <std::shared_ptr<Expr>>                      expression
 %type  <std::vector<std::shared_ptr<Stmt>>>         statements
@@ -96,59 +97,74 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %start translation_unit;
 
 translation_unit:
-  function_definitions  { driver.ast.translationUnit = TranslationUnitDecl::make(@$, $1); };
+  function_definitions  { driver.ast.translationUnit = TranslationUnitDecl::make(@$, $1); }
+;
 
 function_definitions:
   function_definition                       { $$.push_back($1); }
-| function_definition function_definitions  { $$ = appendVector($1, $2); };
+| function_definition function_definitions  { $$ = appendVector($1, $2); }
+;
 
 function_definition:
-  "function" "identifier" "(" parameter_variables ")" compound_statement { $$ = FunctionDecl::make(@$, $2, $4, $6); };
+  "function" "identifier" "(" parameter_variables ")" compound_statement { $$ = FunctionDecl::make(@$, $2, $4, $6); }
+;
 
 parameter_variables:
   %empty                                      { }
 | parameter_variable                          { $$.push_back($1); }
-| parameter_variable "," parameter_variables  { $$ = appendVector($1, $3); };
+| parameter_variable "," parameter_variables  { $$ = appendVector($1, $3); }
+;
 
 parameter_variable:
   "identifier"                  { $$ = ParmVarDecl::make(@$, $1); }
 | "identifier" ":" "identifier" { $$ = ParmVarDecl::make(@$, $1, $3); }
+;
 
 compound_statement:
-  "{" statements "}" { $$ = CompoundStmt::make($2); };
+  "{" statements "}" { $$ = CompoundStmt::make($2); }
+;
 
 statements:
   %empty                { }
-| statement statements  { $$ = appendVector($1, $2); };
+| statement statements  { $$ = appendVector($1, $2); }
+;
 
 statement:
   expression ";"            { $$ = $1; }
 | return_statement          { $$ = $1; }
-| variable_definition ";"   { $$ = DeclStmt::make($1); };
+| variable_definition ";"   { $$ = DeclStmt::make($1); }
+;
 
 return_statement:
   "return" ";"            { $$ = ReturnStmt::make(); }
-| "return" expression ";" { $$ = ReturnStmt::make($2); };
+| "return" expression ";" { $$ = ReturnStmt::make($2); }
+;
 
 variable_definition:
   "let" "identifier"                { $$ = VariableDecl::make(@$, $2); }
-| "let" "identifier" "=" expression { $$ = VariableDecl::make(@$, $2, $4); };
+| "let" "identifier" "=" expression { $$ = VariableDecl::make(@$, $2, $4); }
+;
 
 literal:
   "integer_literal" { $$ = $1; }
 | "double_literal"  { $$ = $1; }
-| "bool_literal"    { $$ = $1; };
+| "bool_literal"    { $$ = $1; }
+| "string_literal"  { $$ = $1; }
+;
 
 call_expression:
-  "identifier" "(" expressions ")"  { $$ = CallExpr::make(@$, DeclRefExpr::make(@1, $1), $3); };
+  "identifier" "(" expressions ")"  { $$ = CallExpr::make(@$, DeclRefExpr::make(@1, $1), $3); }
+;
 
 expressions:
   %empty                     { }
 | expression                 { $$.push_back($1); }
-| expression "," expressions { $$ = appendVector($1, $3); };
+| expression "," expressions { $$ = appendVector($1, $3); }
+;
 
 %right "=";
 %left "+" "-";
+%left "*" "/";
 %left "==" "!=";
 %left "&&" "||";
 expression:
@@ -164,7 +180,8 @@ expression:
 | expression "!=" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::NotEqual, $1, $3); }
 | expression "&&" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LogicalAnd, $1, $3); }
 | expression "||" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LogicalOr, $1, $3); }
-| call_expression                   { $$ = $1; };
+| call_expression                   { $$ = $1; }
+;
 
 %%
 

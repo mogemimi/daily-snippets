@@ -8,14 +8,15 @@
 
 class ASTDumper final : public ASTVisitor {
 private:
-    std::string indent;
+    struct DumpContext {
+        std::string result;
+        int level = 0;
+    };
+
+    DumpContext dumpContext;
 
 public:
-    std::string result;
-
-    std::string getIndent() const { return indent; }
-
-    void setIndent(const std::string& i) { indent = i; }
+    std::string getResult() const;
 
     void visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traverse) override;
     void visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse) override;
@@ -25,6 +26,7 @@ public:
     void visit(const std::shared_ptr<IntegerLiteral>& expr) override;
     void visit(const std::shared_ptr<DoubleLiteral>& expr) override;
     void visit(const std::shared_ptr<BoolLiteral>& expr) override;
+    void visit(const std::shared_ptr<StringLiteral>& expr) override;
     void visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse) override;
     void visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse) override;
 

@@ -16,6 +16,7 @@ class CallExpr;
 class IntegerLiteral;
 class DoubleLiteral;
 class BoolLiteral;
+class StringLiteral;
 class BinaryOperator;
 class DeclRefExpr;
 

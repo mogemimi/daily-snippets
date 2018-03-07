@@ -103,6 +103,7 @@ std::string BuiltinType::dump() const
     case BuiltinTypeKind::Bool: return "bool";
     case BuiltinTypeKind::Int: return "int";
     case BuiltinTypeKind::Double: return "double";
+    case BuiltinTypeKind::String: return "string";
     case BuiltinTypeKind::Void: return "void";
     case BuiltinTypeKind::Any: return "any";
     }

@@ -31,8 +31,9 @@ std::string comment;
 %option noyywrap nounput batch debug noinput
 %option nounistd never-interactive
 
-double      [0-9]+\.[0-9]*
-integer     [0-9]+
+decimal     [1-9]?[0-9]+
+integer     -?{decimal}
+double      -?({decimal}\.[0-9]*|\.[0-9]+)([eE][-+]?[0-9]+)?
 identifier  [a-zA-Z][a-zA-Z_0-9]*
 blank       [ \t]
 
@@ -84,6 +85,8 @@ blank       [ \t]
 "let"       return yy::MyParser::make_LET(loc);
 "true"      return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(loc, true), loc);
 "false"     return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(loc, false), loc);
+
+\"(\\.|[^\\"])*\" return yy::MyParser::make_STRING_LITERAL(StringLiteral::make(loc, yytext), loc);
 
 {integer} {
     errno = 0;

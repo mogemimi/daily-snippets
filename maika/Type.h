@@ -77,7 +77,7 @@ enum class BuiltinTypeKind {
     Bool,
     Int,
     Double,
-    // String,
+    String,
     Void,
     Any,
 };

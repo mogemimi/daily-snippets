@@ -63,6 +63,20 @@ public:
     static std::shared_ptr<BoolLiteral> make(const yy::location& loc, bool v);
 };
 
+class StringLiteral final
+    : public Expr
+    , public std::enable_shared_from_this<StringLiteral> {
+private:
+    std::string value;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::string getValue() const noexcept { return value; }
+
+    static std::shared_ptr<StringLiteral> make(const yy::location& loc, const std::string& v);
+};
+
 class CallExpr final
     : public Expr
     , public std::enable_shared_from_this<CallExpr> {

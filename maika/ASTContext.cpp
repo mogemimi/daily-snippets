@@ -13,5 +13,5 @@ std::string ASTContext::dump() const
     ASTDumper dumper;
     ASTTraverser traverser;
     traverser.traverse(*this, dumper);
-    return dumper.result;
+    return dumper.getResult();
 }

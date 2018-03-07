@@ -17,16 +17,8 @@ TODO:
 - integer
   - hex
   - binary
-- double
-  - 1.0e-10
-- string
-  - escape chars
 - if
 - for
-- &&
-- ||
-- ==
-- !=
 - unary operators
 - class
 

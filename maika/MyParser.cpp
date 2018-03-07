@@ -267,11 +267,11 @@ namespace yy {
         value.move< std::shared_ptr<BoolLiteral> > (that.value);
         break;
 
-      case 39: // call_expression
+      case 40: // call_expression
         value.move< std::shared_ptr<CallExpr> > (that.value);
         break;
 
-      case 33: // compound_statement
+      case 34: // compound_statement
         value.move< std::shared_ptr<CompoundStmt> > (that.value);
         break;
 
@@ -279,12 +279,12 @@ namespace yy {
         value.move< std::shared_ptr<DoubleLiteral> > (that.value);
         break;
 
-      case 38: // literal
-      case 41: // expression
+      case 39: // literal
+      case 42: // expression
         value.move< std::shared_ptr<Expr> > (that.value);
         break;
 
-      case 30: // function_definition
+      case 31: // function_definition
         value.move< std::shared_ptr<FunctionDecl> > (that.value);
         break;
 
@@ -296,39 +296,43 @@ namespace yy {
         value.move< std::shared_ptr<NamedDecl> > (that.value);
         break;
 
-      case 32: // parameter_variable
+      case 33: // parameter_variable
         value.move< std::shared_ptr<ParmVarDecl> > (that.value);
         break;
 
-      case 36: // return_statement
+      case 37: // return_statement
         value.move< std::shared_ptr<ReturnStmt> > (that.value);
         break;
 
-      case 35: // statement
+      case 36: // statement
         value.move< std::shared_ptr<Stmt> > (that.value);
         break;
 
-      case 28: // translation_unit
+      case 27: // "string_literal"
+        value.move< std::shared_ptr<StringLiteral> > (that.value);
+        break;
+
+      case 29: // translation_unit
         value.move< std::shared_ptr<TranslationUnitDecl> > (that.value);
         break;
 
-      case 37: // variable_definition
+      case 38: // variable_definition
         value.move< std::shared_ptr<VariableDecl> > (that.value);
         break;
 
-      case 40: // expressions
+      case 41: // expressions
         value.move< std::vector<std::shared_ptr<Expr>> > (that.value);
         break;
 
-      case 29: // function_definitions
+      case 30: // function_definitions
         value.move< std::vector<std::shared_ptr<FunctionDecl>> > (that.value);
         break;
 
-      case 31: // parameter_variables
+      case 32: // parameter_variables
         value.move< std::vector<std::shared_ptr<ParmVarDecl>> > (that.value);
         break;
 
-      case 34: // statements
+      case 35: // statements
         value.move< std::vector<std::shared_ptr<Stmt>> > (that.value);
         break;
 
@@ -351,11 +355,11 @@ namespace yy {
         value.copy< std::shared_ptr<BoolLiteral> > (that.value);
         break;
 
-      case 39: // call_expression
+      case 40: // call_expression
         value.copy< std::shared_ptr<CallExpr> > (that.value);
         break;
 
-      case 33: // compound_statement
+      case 34: // compound_statement
         value.copy< std::shared_ptr<CompoundStmt> > (that.value);
         break;
 
@@ -363,12 +367,12 @@ namespace yy {
         value.copy< std::shared_ptr<DoubleLiteral> > (that.value);
         break;
 
-      case 38: // literal
-      case 41: // expression
+      case 39: // literal
+      case 42: // expression
         value.copy< std::shared_ptr<Expr> > (that.value);
         break;
 
-      case 30: // function_definition
+      case 31: // function_definition
         value.copy< std::shared_ptr<FunctionDecl> > (that.value);
         break;
 
@@ -380,39 +384,43 @@ namespace yy {
         value.copy< std::shared_ptr<NamedDecl> > (that.value);
         break;
 
-      case 32: // parameter_variable
+      case 33: // parameter_variable
         value.copy< std::shared_ptr<ParmVarDecl> > (that.value);
         break;
 
-      case 36: // return_statement
+      case 37: // return_statement
         value.copy< std::shared_ptr<ReturnStmt> > (that.value);
         break;
 
-      case 35: // statement
+      case 36: // statement
         value.copy< std::shared_ptr<Stmt> > (that.value);
         break;
 
-      case 28: // translation_unit
+      case 27: // "string_literal"
+        value.copy< std::shared_ptr<StringLiteral> > (that.value);
+        break;
+
+      case 29: // translation_unit
         value.copy< std::shared_ptr<TranslationUnitDecl> > (that.value);
         break;
 
-      case 37: // variable_definition
+      case 38: // variable_definition
         value.copy< std::shared_ptr<VariableDecl> > (that.value);
         break;
 
-      case 40: // expressions
+      case 41: // expressions
         value.copy< std::vector<std::shared_ptr<Expr>> > (that.value);
         break;
 
-      case 29: // function_definitions
+      case 30: // function_definitions
         value.copy< std::vector<std::shared_ptr<FunctionDecl>> > (that.value);
         break;
 
-      case 31: // parameter_variables
+      case 32: // parameter_variables
         value.copy< std::vector<std::shared_ptr<ParmVarDecl>> > (that.value);
         break;
 
-      case 34: // statements
+      case 35: // statements
         value.copy< std::vector<std::shared_ptr<Stmt>> > (that.value);
         break;
 
@@ -563,7 +571,7 @@ namespace yy {
     yyla.location.begin.filename = yyla.location.end.filename = &driver.file;
 }
 
-#line 567 "MyParser.cpp" // lalr1.cc:745
+#line 575 "MyParser.cpp" // lalr1.cc:745
 
     /* Initialize the stack.  The initial state will be set in
        yynewstate, since the latter expects the semantical and the
@@ -657,11 +665,11 @@ namespace yy {
         yylhs.value.build< std::shared_ptr<BoolLiteral> > ();
         break;
 
-      case 39: // call_expression
+      case 40: // call_expression
         yylhs.value.build< std::shared_ptr<CallExpr> > ();
         break;
 
-      case 33: // compound_statement
+      case 34: // compound_statement
         yylhs.value.build< std::shared_ptr<CompoundStmt> > ();
         break;
 
@@ -669,12 +677,12 @@ namespace yy {
         yylhs.value.build< std::shared_ptr<DoubleLiteral> > ();
         break;
 
-      case 38: // literal
-      case 41: // expression
+      case 39: // literal
+      case 42: // expression
         yylhs.value.build< std::shared_ptr<Expr> > ();
         break;
 
-      case 30: // function_definition
+      case 31: // function_definition
         yylhs.value.build< std::shared_ptr<FunctionDecl> > ();
         break;
 
@@ -686,39 +694,43 @@ namespace yy {
         yylhs.value.build< std::shared_ptr<NamedDecl> > ();
         break;
 
-      case 32: // parameter_variable
+      case 33: // parameter_variable
         yylhs.value.build< std::shared_ptr<ParmVarDecl> > ();
         break;
 
-      case 36: // return_statement
+      case 37: // return_statement
         yylhs.value.build< std::shared_ptr<ReturnStmt> > ();
         break;
 
-      case 35: // statement
+      case 36: // statement
         yylhs.value.build< std::shared_ptr<Stmt> > ();
         break;
 
-      case 28: // translation_unit
+      case 27: // "string_literal"
+        yylhs.value.build< std::shared_ptr<StringLiteral> > ();
+        break;
+
+      case 29: // translation_unit
         yylhs.value.build< std::shared_ptr<TranslationUnitDecl> > ();
         break;
 
-      case 37: // variable_definition
+      case 38: // variable_definition
         yylhs.value.build< std::shared_ptr<VariableDecl> > ();
         break;
 
-      case 40: // expressions
+      case 41: // expressions
         yylhs.value.build< std::vector<std::shared_ptr<Expr>> > ();
         break;
 
-      case 29: // function_definitions
+      case 30: // function_definitions
         yylhs.value.build< std::vector<std::shared_ptr<FunctionDecl>> > ();
         break;
 
-      case 31: // parameter_variables
+      case 32: // parameter_variables
         yylhs.value.build< std::vector<std::shared_ptr<ParmVarDecl>> > ();
         break;
 
-      case 34: // statements
+      case 35: // statements
         yylhs.value.build< std::vector<std::shared_ptr<Stmt>> > ();
         break;
 
@@ -740,241 +752,247 @@ namespace yy {
           switch (yyn)
             {
   case 2:
-#line 99 "MyParser.yy" // lalr1.cc:859
+#line 100 "MyParser.yy" // lalr1.cc:859
     { driver.ast.translationUnit = TranslationUnitDecl::make(yylhs.location, yystack_[0].value.as< std::vector<std::shared_ptr<FunctionDecl>> > ()); }
-#line 746 "MyParser.cpp" // lalr1.cc:859
-    break;
-
-  case 3:
-#line 102 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::vector<std::shared_ptr<FunctionDecl>> > ().push_back(yystack_[0].value.as< std::shared_ptr<FunctionDecl> > ()); }
-#line 752 "MyParser.cpp" // lalr1.cc:859
-    break;
-
-  case 4:
-#line 103 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::vector<std::shared_ptr<FunctionDecl>> > () = appendVector(yystack_[1].value.as< std::shared_ptr<FunctionDecl> > (), yystack_[0].value.as< std::vector<std::shared_ptr<FunctionDecl>> > ()); }
 #line 758 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 5:
-#line 106 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<FunctionDecl> > () = FunctionDecl::make(yylhs.location, yystack_[4].value.as< std::shared_ptr<NamedDecl> > (), yystack_[2].value.as< std::vector<std::shared_ptr<ParmVarDecl>> > (), yystack_[0].value.as< std::shared_ptr<CompoundStmt> > ()); }
+  case 3:
+#line 104 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::vector<std::shared_ptr<FunctionDecl>> > ().push_back(yystack_[0].value.as< std::shared_ptr<FunctionDecl> > ()); }
 #line 764 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 6:
-#line 109 "MyParser.yy" // lalr1.cc:859
-    { }
+  case 4:
+#line 105 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::vector<std::shared_ptr<FunctionDecl>> > () = appendVector(yystack_[1].value.as< std::shared_ptr<FunctionDecl> > (), yystack_[0].value.as< std::vector<std::shared_ptr<FunctionDecl>> > ()); }
 #line 770 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 7:
-#line 110 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::vector<std::shared_ptr<ParmVarDecl>> > ().push_back(yystack_[0].value.as< std::shared_ptr<ParmVarDecl> > ()); }
+  case 5:
+#line 109 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<FunctionDecl> > () = FunctionDecl::make(yylhs.location, yystack_[4].value.as< std::shared_ptr<NamedDecl> > (), yystack_[2].value.as< std::vector<std::shared_ptr<ParmVarDecl>> > (), yystack_[0].value.as< std::shared_ptr<CompoundStmt> > ()); }
 #line 776 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 8:
-#line 111 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::vector<std::shared_ptr<ParmVarDecl>> > () = appendVector(yystack_[2].value.as< std::shared_ptr<ParmVarDecl> > (), yystack_[0].value.as< std::vector<std::shared_ptr<ParmVarDecl>> > ()); }
+  case 6:
+#line 113 "MyParser.yy" // lalr1.cc:859
+    { }
 #line 782 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 9:
+  case 7:
 #line 114 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<ParmVarDecl> > () = ParmVarDecl::make(yylhs.location, yystack_[0].value.as< std::shared_ptr<NamedDecl> > ()); }
+    { yylhs.value.as< std::vector<std::shared_ptr<ParmVarDecl>> > ().push_back(yystack_[0].value.as< std::shared_ptr<ParmVarDecl> > ()); }
 #line 788 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 10:
+  case 8:
 #line 115 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<ParmVarDecl> > () = ParmVarDecl::make(yylhs.location, yystack_[2].value.as< std::shared_ptr<NamedDecl> > (), yystack_[0].value.as< std::shared_ptr<NamedDecl> > ()); }
+    { yylhs.value.as< std::vector<std::shared_ptr<ParmVarDecl>> > () = appendVector(yystack_[2].value.as< std::shared_ptr<ParmVarDecl> > (), yystack_[0].value.as< std::vector<std::shared_ptr<ParmVarDecl>> > ()); }
 #line 794 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 11:
-#line 118 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<CompoundStmt> > () = CompoundStmt::make(yystack_[1].value.as< std::vector<std::shared_ptr<Stmt>> > ()); }
+  case 9:
+#line 119 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<ParmVarDecl> > () = ParmVarDecl::make(yylhs.location, yystack_[0].value.as< std::shared_ptr<NamedDecl> > ()); }
 #line 800 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 12:
-#line 121 "MyParser.yy" // lalr1.cc:859
-    { }
+  case 10:
+#line 120 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<ParmVarDecl> > () = ParmVarDecl::make(yylhs.location, yystack_[2].value.as< std::shared_ptr<NamedDecl> > (), yystack_[0].value.as< std::shared_ptr<NamedDecl> > ()); }
 #line 806 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 13:
-#line 122 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::vector<std::shared_ptr<Stmt>> > () = appendVector(yystack_[1].value.as< std::shared_ptr<Stmt> > (), yystack_[0].value.as< std::vector<std::shared_ptr<Stmt>> > ()); }
+  case 11:
+#line 124 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<CompoundStmt> > () = CompoundStmt::make(yystack_[1].value.as< std::vector<std::shared_ptr<Stmt>> > ()); }
 #line 812 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 14:
-#line 125 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Stmt> > () = yystack_[1].value.as< std::shared_ptr<Expr> > (); }
+  case 12:
+#line 128 "MyParser.yy" // lalr1.cc:859
+    { }
 #line 818 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 15:
-#line 126 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Stmt> > () = yystack_[0].value.as< std::shared_ptr<ReturnStmt> > (); }
+  case 13:
+#line 129 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::vector<std::shared_ptr<Stmt>> > () = appendVector(yystack_[1].value.as< std::shared_ptr<Stmt> > (), yystack_[0].value.as< std::vector<std::shared_ptr<Stmt>> > ()); }
 #line 824 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 16:
-#line 127 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Stmt> > () = DeclStmt::make(yystack_[1].value.as< std::shared_ptr<VariableDecl> > ()); }
+  case 14:
+#line 133 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Stmt> > () = yystack_[1].value.as< std::shared_ptr<Expr> > (); }
 #line 830 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 17:
-#line 130 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<ReturnStmt> > () = ReturnStmt::make(); }
+  case 15:
+#line 134 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Stmt> > () = yystack_[0].value.as< std::shared_ptr<ReturnStmt> > (); }
 #line 836 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 18:
-#line 131 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<ReturnStmt> > () = ReturnStmt::make(yystack_[1].value.as< std::shared_ptr<Expr> > ()); }
+  case 16:
+#line 135 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Stmt> > () = DeclStmt::make(yystack_[1].value.as< std::shared_ptr<VariableDecl> > ()); }
 #line 842 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 19:
-#line 134 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<VariableDecl> > () = VariableDecl::make(yylhs.location, yystack_[0].value.as< std::shared_ptr<NamedDecl> > ()); }
+  case 17:
+#line 139 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<ReturnStmt> > () = ReturnStmt::make(); }
 #line 848 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 20:
-#line 135 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<VariableDecl> > () = VariableDecl::make(yylhs.location, yystack_[2].value.as< std::shared_ptr<NamedDecl> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
+  case 18:
+#line 140 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<ReturnStmt> > () = ReturnStmt::make(yystack_[1].value.as< std::shared_ptr<Expr> > ()); }
 #line 854 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 21:
-#line 138 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = yystack_[0].value.as< std::shared_ptr<IntegerLiteral> > (); }
+  case 19:
+#line 144 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<VariableDecl> > () = VariableDecl::make(yylhs.location, yystack_[0].value.as< std::shared_ptr<NamedDecl> > ()); }
 #line 860 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 22:
-#line 139 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = yystack_[0].value.as< std::shared_ptr<DoubleLiteral> > (); }
+  case 20:
+#line 145 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<VariableDecl> > () = VariableDecl::make(yylhs.location, yystack_[2].value.as< std::shared_ptr<NamedDecl> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
 #line 866 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 23:
-#line 140 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = yystack_[0].value.as< std::shared_ptr<BoolLiteral> > (); }
+  case 21:
+#line 149 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = yystack_[0].value.as< std::shared_ptr<IntegerLiteral> > (); }
 #line 872 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 24:
-#line 143 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<CallExpr> > () = CallExpr::make(yylhs.location, DeclRefExpr::make(yystack_[3].location, yystack_[3].value.as< std::shared_ptr<NamedDecl> > ()), yystack_[1].value.as< std::vector<std::shared_ptr<Expr>> > ()); }
+  case 22:
+#line 150 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = yystack_[0].value.as< std::shared_ptr<DoubleLiteral> > (); }
 #line 878 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 25:
-#line 146 "MyParser.yy" // lalr1.cc:859
-    { }
+  case 23:
+#line 151 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = yystack_[0].value.as< std::shared_ptr<BoolLiteral> > (); }
 #line 884 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 26:
-#line 147 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::vector<std::shared_ptr<Expr>> > ().push_back(yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
+  case 24:
+#line 152 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = yystack_[0].value.as< std::shared_ptr<StringLiteral> > (); }
 #line 890 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 27:
-#line 148 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::vector<std::shared_ptr<Expr>> > () = appendVector(yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::vector<std::shared_ptr<Expr>> > ()); }
+  case 25:
+#line 156 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<CallExpr> > () = CallExpr::make(yylhs.location, DeclRefExpr::make(yystack_[3].location, yystack_[3].value.as< std::shared_ptr<NamedDecl> > ()), yystack_[1].value.as< std::vector<std::shared_ptr<Expr>> > ()); }
 #line 896 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 28:
-#line 155 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = DeclRefExpr::make(yylhs.location, yystack_[0].value.as< std::shared_ptr<NamedDecl> > ()); }
+  case 26:
+#line 160 "MyParser.yy" // lalr1.cc:859
+    { }
 #line 902 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 29:
-#line 156 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = yystack_[0].value.as< std::shared_ptr<Expr> > (); }
+  case 27:
+#line 161 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::vector<std::shared_ptr<Expr>> > ().push_back(yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
 #line 908 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 30:
-#line 157 "MyParser.yy" // lalr1.cc:859
-    { std::swap(yylhs.value.as< std::shared_ptr<Expr> > (), yystack_[1].value.as< std::shared_ptr<Expr> > ()); }
+  case 28:
+#line 162 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::vector<std::shared_ptr<Expr>> > () = appendVector(yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::vector<std::shared_ptr<Expr>> > ()); }
 #line 914 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 31:
-#line 158 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::Add, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
+  case 29:
+#line 171 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = DeclRefExpr::make(yylhs.location, yystack_[0].value.as< std::shared_ptr<NamedDecl> > ()); }
 #line 920 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 32:
-#line 159 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::Subtract, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
+  case 30:
+#line 172 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = yystack_[0].value.as< std::shared_ptr<Expr> > (); }
 #line 926 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 33:
-#line 160 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::Multiply, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
+  case 31:
+#line 173 "MyParser.yy" // lalr1.cc:859
+    { std::swap(yylhs.value.as< std::shared_ptr<Expr> > (), yystack_[1].value.as< std::shared_ptr<Expr> > ()); }
 #line 932 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 34:
-#line 161 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::Divide, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
+  case 32:
+#line 174 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::Add, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
 #line 938 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 35:
-#line 162 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::Assign, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
+  case 33:
+#line 175 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::Subtract, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
 #line 944 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 36:
-#line 163 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::Equal, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
+  case 34:
+#line 176 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::Multiply, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
 #line 950 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 37:
-#line 164 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::NotEqual, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
+  case 35:
+#line 177 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::Divide, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
 #line 956 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 38:
-#line 165 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::LogicalAnd, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
+  case 36:
+#line 178 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::Assign, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
 #line 962 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 39:
-#line 166 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::LogicalOr, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
+  case 37:
+#line 179 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::Equal, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
 #line 968 "MyParser.cpp" // lalr1.cc:859
     break;
 
-  case 40:
-#line 167 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::shared_ptr<Expr> > () = yystack_[0].value.as< std::shared_ptr<CallExpr> > (); }
+  case 38:
+#line 180 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::NotEqual, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
 #line 974 "MyParser.cpp" // lalr1.cc:859
     break;
 
+  case 39:
+#line 181 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::LogicalAnd, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
+#line 980 "MyParser.cpp" // lalr1.cc:859
+    break;
 
-#line 978 "MyParser.cpp" // lalr1.cc:859
+  case 40:
+#line 182 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = BinaryOperator::make(yylhs.location, BinaryOperatorKind::LogicalOr, yystack_[2].value.as< std::shared_ptr<Expr> > (), yystack_[0].value.as< std::shared_ptr<Expr> > ()); }
+#line 986 "MyParser.cpp" // lalr1.cc:859
+    break;
+
+  case 41:
+#line 183 "MyParser.yy" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<Expr> > () = yystack_[0].value.as< std::shared_ptr<CallExpr> > (); }
+#line 992 "MyParser.cpp" // lalr1.cc:859
+    break;
+
+
+#line 996 "MyParser.cpp" // lalr1.cc:859
             default:
               break;
             }
@@ -1236,13 +1254,13 @@ namespace yy {
   const signed char
   MyParser::yypact_[] =
   {
-     -18,   -15,    15,   -20,   -18,    18,   -20,   -20,     9,    16,
-      26,    27,    22,    34,     9,   -20,    49,   -20,   -20,    54,
-      63,    24,    43,   -20,   -20,   -20,    45,    49,   -20,    46,
-     -20,   -20,    32,    87,   -20,    48,    60,    54,   -20,   -20,
-     -20,    54,    54,    54,    54,    54,    54,    54,    54,    54,
-     -20,   -20,   -20,    54,    51,     0,    99,   106,   106,    99,
-      99,    14,    14,     7,     7,    99,   -20,    54,   -20
+     -13,    -3,    21,   -20,   -13,     9,   -20,   -20,    10,    15,
+      20,    22,    23,    32,    10,   -20,    50,   -20,   -20,    71,
+      65,    25,    37,   -20,   -20,   -20,   -20,    41,    50,   -20,
+      44,   -20,   -20,    33,    96,   -20,    49,    61,    71,   -20,
+     -20,   -20,    71,    71,    71,    71,    71,    71,    71,    71,
+      71,   -20,   -20,   -20,    71,    51,    -1,   108,   115,   115,
+       3,     3,   -20,   -20,     7,     7,   108,   -20,    71,   -20
   };
 
   const unsigned char
@@ -1250,81 +1268,83 @@ namespace yy {
   {
        0,     0,     0,     2,     3,     0,     1,     4,     6,     9,
        0,     7,     0,     0,     6,    10,    12,     5,     8,     0,
-       0,     0,    28,    21,    22,    23,     0,    12,    15,     0,
-      29,    40,     0,     0,    17,     0,    19,    25,    11,    13,
-      16,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-      14,    30,    18,     0,     0,    26,    35,    32,    31,    33,
-      34,    38,    39,    36,    37,    20,    24,    25,    27
+       0,     0,    29,    21,    22,    23,    24,     0,    12,    15,
+       0,    30,    41,     0,     0,    17,     0,    19,    26,    11,
+      13,    16,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,    14,    31,    18,     0,     0,    27,    36,    33,    32,
+      34,    35,    39,    40,    37,    38,    20,    25,    26,    28
   };
 
   const signed char
   MyParser::yypgoto_[] =
   {
-     -20,   -20,    64,   -20,    55,   -20,   -20,    56,   -20,   -20,
-     -20,   -20,   -20,    17,   -19
+     -20,   -20,    62,   -20,    54,   -20,   -20,    42,   -20,   -20,
+     -20,   -20,   -20,     1,   -19
   };
 
   const signed char
   MyParser::yydefgoto_[] =
   {
-      -1,     2,     3,     4,    10,    11,    17,    26,    27,    28,
-      29,    30,    31,    54,    32
+      -1,     2,     3,     4,    10,    11,    17,    27,    28,    29,
+      30,    31,    32,    55,    33
   };
 
   const unsigned char
   MyParser::yytable_[] =
   {
-      33,    35,     1,    41,    42,    43,    44,    45,     5,    46,
-      47,    48,    49,    44,    45,     6,    46,    47,    55,    67,
-      44,    45,    56,    57,    58,    59,    60,    61,    62,    63,
-      64,     8,     9,    12,    65,    41,    42,    43,    44,    45,
-      13,    46,    47,    48,    49,    15,    14,    36,    55,    16,
-      50,    41,    42,    43,    44,    45,    37,    46,    47,    48,
-      49,    38,    19,    53,    40,    66,    52,    19,     7,    18,
-      20,    21,    22,    23,    24,    25,    19,    22,    23,    24,
-      25,    34,     0,    39,    68,     0,    22,    23,    24,    25,
-      41,    42,    43,    44,    45,     0,    46,    47,    48,    49,
-       0,    51,    41,    42,    43,    44,    45,     0,    46,    47,
-      48,    49,    44,    45,     0,    46,    47,    48,    49
+      34,    36,    42,    43,    44,    45,    46,     1,    47,    48,
+      49,    50,    47,    48,    49,    50,    47,    48,    68,    56,
+       5,     6,     8,    57,    58,    59,    60,    61,    62,    63,
+      64,    65,    12,     9,    13,    66,    42,    43,    44,    45,
+      46,    14,    47,    48,    49,    50,    15,    16,    37,    56,
+      38,    51,    42,    43,    44,    45,    46,    39,    47,    48,
+      49,    50,    41,    19,    54,    67,     7,    53,    18,    69,
+      40,    20,    21,    22,    23,    24,    25,    26,    19,     0,
+       0,     0,     0,    35,    19,     0,     0,     0,    22,    23,
+      24,    25,    26,     0,    22,    23,    24,    25,    26,    42,
+      43,    44,    45,    46,     0,    47,    48,    49,    50,     0,
+      52,    42,    43,    44,    45,    46,     0,    47,    48,    49,
+      50,    45,    46,     0,    47,    48,    49,    50
   };
 
   const signed char
   MyParser::yycheck_[] =
   {
-      19,    20,    20,     3,     4,     5,     6,     7,    23,     9,
-      10,    11,    12,     6,     7,     0,     9,    10,    37,    19,
-       6,     7,    41,    42,    43,    44,    45,    46,    47,    48,
-      49,    13,    23,    17,    53,     3,     4,     5,     6,     7,
-      14,     9,    10,    11,    12,    23,    19,    23,    67,    15,
-      18,     3,     4,     5,     6,     7,    13,     9,    10,    11,
-      12,    16,    13,     3,    18,    14,    18,    13,     4,    14,
-      21,    22,    23,    24,    25,    26,    13,    23,    24,    25,
-      26,    18,    -1,    27,    67,    -1,    23,    24,    25,    26,
-       3,     4,     5,     6,     7,    -1,     9,    10,    11,    12,
-      -1,    14,     3,     4,     5,     6,     7,    -1,     9,    10,
-      11,    12,     6,     7,    -1,     9,    10,    11,    12
+      19,    20,     3,     4,     5,     6,     7,    20,     9,    10,
+      11,    12,     9,    10,    11,    12,     9,    10,    19,    38,
+      23,     0,    13,    42,    43,    44,    45,    46,    47,    48,
+      49,    50,    17,    23,    14,    54,     3,     4,     5,     6,
+       7,    19,     9,    10,    11,    12,    23,    15,    23,    68,
+      13,    18,     3,     4,     5,     6,     7,    16,     9,    10,
+      11,    12,    18,    13,     3,    14,     4,    18,    14,    68,
+      28,    21,    22,    23,    24,    25,    26,    27,    13,    -1,
+      -1,    -1,    -1,    18,    13,    -1,    -1,    -1,    23,    24,
+      25,    26,    27,    -1,    23,    24,    25,    26,    27,     3,
+       4,     5,     6,     7,    -1,     9,    10,    11,    12,    -1,
+      14,     3,     4,     5,     6,     7,    -1,     9,    10,    11,
+      12,     6,     7,    -1,     9,    10,    11,    12
   };
 
   const unsigned char
   MyParser::yystos_[] =
   {
-       0,    20,    28,    29,    30,    23,     0,    29,    13,    23,
-      31,    32,    17,    14,    19,    23,    15,    33,    31,    13,
-      21,    22,    23,    24,    25,    26,    34,    35,    36,    37,
-      38,    39,    41,    41,    18,    41,    23,    13,    16,    34,
-      18,     3,     4,     5,     6,     7,     9,    10,    11,    12,
-      18,    14,    18,     3,    40,    41,    41,    41,    41,    41,
-      41,    41,    41,    41,    41,    41,    14,    19,    40
+       0,    20,    29,    30,    31,    23,     0,    30,    13,    23,
+      32,    33,    17,    14,    19,    23,    15,    34,    32,    13,
+      21,    22,    23,    24,    25,    26,    27,    35,    36,    37,
+      38,    39,    40,    42,    42,    18,    42,    23,    13,    16,
+      35,    18,     3,     4,     5,     6,     7,     9,    10,    11,
+      12,    18,    14,    18,     3,    41,    42,    42,    42,    42,
+      42,    42,    42,    42,    42,    42,    42,    14,    19,    41
   };
 
   const unsigned char
   MyParser::yyr1_[] =
   {
-       0,    27,    28,    29,    29,    30,    31,    31,    31,    32,
-      32,    33,    34,    34,    35,    35,    35,    36,    36,    37,
-      37,    38,    38,    38,    39,    40,    40,    40,    41,    41,
-      41,    41,    41,    41,    41,    41,    41,    41,    41,    41,
-      41
+       0,    28,    29,    30,    30,    31,    32,    32,    32,    33,
+      33,    34,    35,    35,    36,    36,    36,    37,    37,    38,
+      38,    39,    39,    39,    39,    40,    41,    41,    41,    42,
+      42,    42,    42,    42,    42,    42,    42,    42,    42,    42,
+      42,    42
   };
 
   const unsigned char
@@ -1332,9 +1352,9 @@ namespace yy {
   {
        0,     2,     1,     1,     2,     6,     0,     1,     3,     1,
        3,     3,     0,     2,     2,     1,     2,     2,     3,     2,
-       4,     1,     1,     1,     4,     0,     1,     3,     1,     1,
-       3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
-       1
+       4,     1,     1,     1,     1,     4,     0,     1,     3,     1,
+       1,     3,     3,     3,     3,     3,     3,     3,     3,     3,
+       3,     1
   };
 
 
@@ -1349,22 +1369,22 @@ namespace yy {
   "\"(\"", "\")\"", "\"{\"", "\"}\"", "\":\"", "\";\"", "\",\"",
   "\"function\"", "\"return\"", "\"let\"", "\"identifier\"",
   "\"integer_literal\"", "\"double_literal\"", "\"bool_literal\"",
-  "$accept", "translation_unit", "function_definitions",
-  "function_definition", "parameter_variables", "parameter_variable",
-  "compound_statement", "statements", "statement", "return_statement",
-  "variable_definition", "literal", "call_expression", "expressions",
-  "expression", YY_NULLPTR
+  "\"string_literal\"", "$accept", "translation_unit",
+  "function_definitions", "function_definition", "parameter_variables",
+  "parameter_variable", "compound_statement", "statements", "statement",
+  "return_statement", "variable_definition", "literal", "call_expression",
+  "expressions", "expression", YY_NULLPTR
   };
 
 #if YYDEBUG
   const unsigned char
   MyParser::yyrline_[] =
   {
-       0,    99,    99,   102,   103,   106,   109,   110,   111,   114,
-     115,   118,   121,   122,   125,   126,   127,   130,   131,   134,
-     135,   138,   139,   140,   143,   146,   147,   148,   155,   156,
-     157,   158,   159,   160,   161,   162,   163,   164,   165,   166,
-     167
+       0,   100,   100,   104,   105,   109,   113,   114,   115,   119,
+     120,   124,   128,   129,   133,   134,   135,   139,   140,   144,
+     145,   149,   150,   151,   152,   156,   160,   161,   162,   171,
+     172,   173,   174,   175,   176,   177,   178,   179,   180,   181,
+     182,   183
   };
 
   // Print the state stack on the debug stream.
@@ -1399,8 +1419,8 @@ namespace yy {
 
 
 } // yy
-#line 1403 "MyParser.cpp" // lalr1.cc:1167
-#line 169 "MyParser.yy" // lalr1.cc:1168
+#line 1423 "MyParser.cpp" // lalr1.cc:1167
+#line 186 "MyParser.yy" // lalr1.cc:1168
 
 
 void yy::MyParser::error(const location_type& l, const std::string& m)

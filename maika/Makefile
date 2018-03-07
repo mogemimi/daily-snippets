@@ -21,6 +21,7 @@ SOURCES = \
 	TypeInferer.cpp \
 	TypeResolver.cpp \
 	tests/DumpTest.cpp \
+	tests/LexerTest.cpp \
 	tests/main.cpp
 
 COMPILER_OPTIONS = \
@@ -63,6 +64,7 @@ format:
 		TypeResolver.cpp \
 		TypeResolver.h \
 		tests/DumpTest.cpp \
+		tests/LexerTest.cpp \
 		tests/main.cpp
 
 bison:
