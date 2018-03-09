@@ -10,13 +10,16 @@
 TEST_CASE("Lexer", "[lexer]")
 {
     constexpr auto source = R"(
-function main() {
-    let a = 1;
-    let b = -3.46969e+15;
-    let c = "a\n\"aaa";
+function min() {
     if (c == b) {
-        c = a;
-    }
+		a = b;
+	}
+	else if (a) {
+		b;
+	}
+	else {
+		return a;
+	}
 }
 )";
 

@@ -81,15 +81,15 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %token <std::shared_ptr<StringLiteral>>             STRING_LITERAL "string_literal"
 %type  <std::shared_ptr<Expr>>                      literal
 %type  <std::shared_ptr<Expr>>                      expression
-%type  <std::vector<std::shared_ptr<Stmt>>>         statements
+%type  <std::vector<std::shared_ptr<Expr>>>         expression_list
 %type  <std::shared_ptr<Stmt>>                      statement
+%type  <std::vector<std::shared_ptr<Stmt>>>         statement_list
 %type  <std::shared_ptr<CallExpr>>                  call_expression
-%type  <std::vector<std::shared_ptr<Expr>>>         expressions
 %type  <std::vector<std::shared_ptr<ParmVarDecl>>>  parameter_variables
 %type  <std::shared_ptr<ParmVarDecl>>               parameter_variable
 %type  <std::shared_ptr<CompoundStmt>>              compound_statement
 %type  <std::shared_ptr<ReturnStmt>>                return_statement
-%type  <std::shared_ptr<IfStmt>>                    conditional_statement
+%type  <std::shared_ptr<IfStmt>>                    if_statement
 %type  <std::vector<std::shared_ptr<FunctionDecl>>> function_definitions
 %type  <std::shared_ptr<FunctionDecl>>              function_definition
 %type  <std::shared_ptr<VariableDecl>>              variable_definition
@@ -127,18 +127,18 @@ statement:
   expression ";"            { $$ = $1; }
 | return_statement          { $$ = $1; }
 | variable_definition ";"   { $$ = DeclStmt::make($1); }
-| conditional_statement     { $$ = $1; }
+| if_statement              { $$ = $1; }
 | compound_statement        { $$ = $1; }
 ;
 
 compound_statement:
-  "{" "}"             { $$ = CompoundStmt::make(std::vector<std::shared_ptr<Stmt>>{}); }
-| "{" statements "}"  { $$ = CompoundStmt::make($2); }
+  "{" "}"                 { $$ = CompoundStmt::make(std::vector<std::shared_ptr<Stmt>>{}); }
+| "{" statement_list "}"  { $$ = CompoundStmt::make($2); }
 ;
 
-statements:
-  statement             { $$.push_back($1); }
-| statement statements  { $$ = appendVector($1, $2); }
+statement_list:
+  statement                 { $$.push_back($1); }
+| statement statement_list  { $$ = appendVector($1, $2); }
 ;
 
 return_statement:
@@ -146,8 +146,10 @@ return_statement:
 | "return" expression ";" { $$ = ReturnStmt::make($2); }
 ;
 
-conditional_statement:
-  "if" "(" expression ")" statement                   { $$ = IfStmt::make($3, $5); }
+%nonassoc "then";
+%nonassoc "else";
+if_statement:
+  "if" "(" expression ")" statement %prec "then"      { $$ = IfStmt::make($3, $5); }
 | "if" "(" expression ")" statement "else" statement  { $$ = IfStmt::make($3, $5, $7); }
 ;
 
@@ -164,13 +166,13 @@ literal:
 ;
 
 call_expression:
-  "identifier" "(" expressions ")"  { $$ = CallExpr::make(@$, DeclRefExpr::make(@1, $1), $3); }
+  "identifier" "(" expression_list ")"  { $$ = CallExpr::make(@$, DeclRefExpr::make(@1, $1), $3); }
 ;
 
-expressions:
-  %empty                     { }
-| expression                 { $$.push_back($1); }
-| expression "," expressions { $$ = appendVector($1, $3); }
+expression_list:
+  %empty                          { }
+| expression                      { $$.push_back($1); }
+| expression "," expression_list  { $$ = appendVector($1, $3); }
 ;
 
 %right "=";
