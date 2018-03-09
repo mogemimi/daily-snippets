@@ -42,6 +42,26 @@ void IdentifierResolver::error(const yy::location& l, const std::string& err)
     std::cerr << l << ": " << err << std::endl;
 }
 
+void IdentifierResolver::visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traverse)
+{
+    auto scope = std::make_shared<Scope>(getCurrentScope());
+    pushScope(scope);
+
+    traverse();
+
+    popScope();
+}
+
+void IdentifierResolver::visit(const std::shared_ptr<IfStmt>& stmt, Invoke&& traverse)
+{
+    auto scope = std::make_shared<Scope>(getCurrentScope());
+    pushScope(scope);
+
+    traverse();
+
+    popScope();
+}
+
 void IdentifierResolver::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse)
 {
     auto scope = getCurrentScope();

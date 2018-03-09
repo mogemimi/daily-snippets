@@ -77,6 +77,11 @@ void TypeResolver::visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& trave
     scope->returnTypes.push_back(expr->getType());
 }
 
+void TypeResolver::visit(const std::shared_ptr<IfStmt>& stmt, Invoke&& traverse)
+{
+    traverse();
+}
+
 void TypeResolver::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse)
 {
     traverse();
