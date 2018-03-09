@@ -20,6 +20,13 @@ public:
         traverse();
     }
 
+    virtual void visit(const std::shared_ptr<DeclStmt>& stmt) {}
+    virtual void visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse)
+    {
+        visit(stmt);
+        traverse();
+    }
+
     virtual void visit(const std::shared_ptr<ReturnStmt>& stmt) {}
     virtual void visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse)
     {
@@ -27,8 +34,8 @@ public:
         traverse();
     }
 
-    virtual void visit(const std::shared_ptr<DeclStmt>& stmt) {}
-    virtual void visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse)
+    virtual void visit(const std::shared_ptr<IfStmt>& stmt) {}
+    virtual void visit(const std::shared_ptr<IfStmt>& stmt, Invoke&& traverse)
     {
         visit(stmt);
         traverse();

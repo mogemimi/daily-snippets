@@ -71,6 +71,8 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %token FUNCTION             "function"
 %token RETURN               "return"
 %token LET                  "let"
+%token IF                   "if"
+%token ELSE                 "else"
 
 %token <std::shared_ptr<NamedDecl>>                 IDENTIFIER "identifier"
 %token <std::shared_ptr<IntegerLiteral>>            INTEGER_LITERAL "integer_literal"
@@ -87,6 +89,7 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %type  <std::shared_ptr<ParmVarDecl>>               parameter_variable
 %type  <std::shared_ptr<CompoundStmt>>              compound_statement
 %type  <std::shared_ptr<ReturnStmt>>                return_statement
+%type  <std::shared_ptr<IfStmt>>                    conditional_statement
 %type  <std::vector<std::shared_ptr<FunctionDecl>>> function_definitions
 %type  <std::shared_ptr<FunctionDecl>>              function_definition
 %type  <std::shared_ptr<VariableDecl>>              variable_definition
@@ -120,24 +123,32 @@ parameter_variable:
 | "identifier" ":" "identifier" { $$ = ParmVarDecl::make(@$, $1, $3); }
 ;
 
-compound_statement:
-  "{" statements "}" { $$ = CompoundStmt::make($2); }
-;
-
-statements:
-  %empty                { }
-| statement statements  { $$ = appendVector($1, $2); }
-;
-
 statement:
   expression ";"            { $$ = $1; }
 | return_statement          { $$ = $1; }
 | variable_definition ";"   { $$ = DeclStmt::make($1); }
+| conditional_statement     { $$ = $1; }
+| compound_statement        { $$ = $1; }
+;
+
+compound_statement:
+  "{" "}"             { $$ = CompoundStmt::make(std::vector<std::shared_ptr<Stmt>>{}); }
+| "{" statements "}"  { $$ = CompoundStmt::make($2); }
+;
+
+statements:
+  statement             { $$.push_back($1); }
+| statement statements  { $$ = appendVector($1, $2); }
 ;
 
 return_statement:
   "return" ";"            { $$ = ReturnStmt::make(); }
 | "return" expression ";" { $$ = ReturnStmt::make($2); }
+;
+
+conditional_statement:
+  "if" "(" expression ")" statement                   { $$ = IfStmt::make($3, $5); }
+| "if" "(" expression ")" statement "else" statement  { $$ = IfStmt::make($3, $5, $7); }
 ;
 
 variable_definition:

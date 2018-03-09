@@ -28,8 +28,8 @@ public:
     void error(const yy::location& l, const std::string& err);
 
     void visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traverse) override;
-    void visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse) override;
     void visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse) override;
 
     void visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse) override;
     void visit(const std::shared_ptr<IntegerLiteral>& expr) override;

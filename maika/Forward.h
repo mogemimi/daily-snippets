@@ -9,6 +9,7 @@ class Stmt;
 class CompoundStmt;
 class DeclStmt;
 class ReturnStmt;
+class IfStmt;
 
 // NOTE: AST::Expr
 class Expr;

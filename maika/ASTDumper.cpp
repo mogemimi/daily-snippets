@@ -60,14 +60,19 @@ void ASTDumper::visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traver
     dump(&dumpContext, "CompoundStmt", {}, std::move(traverse));
 }
 
+void ASTDumper::visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse)
+{
+    dump(&dumpContext, "DeclStmt", {}, std::move(traverse));
+}
+
 void ASTDumper::visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse)
 {
     dump(&dumpContext, "ReturnStmt", {}, std::move(traverse));
 }
 
-void ASTDumper::visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse)
+void ASTDumper::visit(const std::shared_ptr<IfStmt>& stmt, Invoke&& traverse)
 {
-    dump(&dumpContext, "DeclStmt", {}, std::move(traverse));
+    dump(&dumpContext, "IfStmt", {}, std::move(traverse));
 }
 
 void ASTDumper::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse)

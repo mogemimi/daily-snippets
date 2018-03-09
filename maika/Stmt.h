@@ -67,5 +67,11 @@ public:
 
     std::shared_ptr<Stmt> getElse() const;
 
-    static std::shared_ptr<IfStmt> make(const std::shared_ptr<Decl>& d);
+    static std::shared_ptr<IfStmt>
+    make(const std::shared_ptr<Expr>& condExpr, const std::shared_ptr<Stmt>& thenStmt);
+
+    static std::shared_ptr<IfStmt> make(
+        const std::shared_ptr<Expr>& condExpr,
+        const std::shared_ptr<Stmt>& thenStmt,
+        const std::shared_ptr<Stmt>& elseStmt);
 };

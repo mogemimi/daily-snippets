@@ -60,3 +60,54 @@ std::shared_ptr<ReturnStmt> ReturnStmt::make(const std::shared_ptr<Expr>& e)
     stmt->expr = e;
     return stmt;
 }
+
+void IfStmt::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        if (condExpr) {
+            condExpr->traverse(visitor);
+        }
+        if (thenStmt) {
+            thenStmt->traverse(visitor);
+        }
+        if (elseStmt) {
+            elseStmt->traverse(visitor);
+        }
+    });
+}
+
+std::shared_ptr<Expr> IfStmt::getCond() const
+{
+    return condExpr;
+}
+
+std::shared_ptr<Stmt> IfStmt::getThen() const
+{
+    return thenStmt;
+}
+
+std::shared_ptr<Stmt> IfStmt::getElse() const
+{
+    return elseStmt;
+}
+
+std::shared_ptr<IfStmt>
+IfStmt::make(const std::shared_ptr<Expr>& condExpr, const std::shared_ptr<Stmt>& thenStmt)
+{
+    auto stmt = std::make_shared<IfStmt>();
+    stmt->condExpr = condExpr;
+    stmt->thenStmt = thenStmt;
+    return stmt;
+}
+
+std::shared_ptr<IfStmt> IfStmt::make(
+    const std::shared_ptr<Expr>& condExpr,
+    const std::shared_ptr<Stmt>& thenStmt,
+    const std::shared_ptr<Stmt>& elseStmt)
+{
+    auto stmt = std::make_shared<IfStmt>();
+    stmt->condExpr = condExpr;
+    stmt->thenStmt = thenStmt;
+    stmt->elseStmt = elseStmt;
+    return stmt;
+}

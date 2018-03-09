@@ -60,6 +60,11 @@ void TypeResolver::visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& tra
     traverse();
 }
 
+void TypeResolver::visit(const std::shared_ptr<DeclStmt>& expr, Invoke&& traverse)
+{
+    traverse();
+}
+
 void TypeResolver::visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse)
 {
     const auto scope = getCurrentScope();
@@ -70,11 +75,6 @@ void TypeResolver::visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& trave
     assert(expr);
     assert(expr->getType());
     scope->returnTypes.push_back(expr->getType());
-}
-
-void TypeResolver::visit(const std::shared_ptr<DeclStmt>& expr, Invoke&& traverse)
-{
-    traverse();
 }
 
 void TypeResolver::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse)
