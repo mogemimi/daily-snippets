@@ -82,6 +82,16 @@ void TypeResolver::visit(const std::shared_ptr<IfStmt>& stmt, Invoke&& traverse)
     traverse();
 }
 
+void TypeResolver::visit(const std::shared_ptr<WhileStmt>& stmt, Invoke&& traverse)
+{
+    traverse();
+}
+
+void TypeResolver::visit(const std::shared_ptr<ForStmt>& stmt, Invoke&& traverse)
+{
+    traverse();
+}
+
 void TypeResolver::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse)
 {
     traverse();

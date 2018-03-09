@@ -111,3 +111,86 @@ std::shared_ptr<IfStmt> IfStmt::make(
     stmt->elseStmt = elseStmt;
     return stmt;
 }
+
+void WhileStmt::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        if (condExpr) {
+            condExpr->traverse(visitor);
+        }
+        if (bodyStmt) {
+            bodyStmt->traverse(visitor);
+        }
+    });
+}
+
+std::shared_ptr<Expr> WhileStmt::getCond() const
+{
+    return condExpr;
+}
+
+std::shared_ptr<Stmt> WhileStmt::getBody() const
+{
+    return bodyStmt;
+}
+
+std::shared_ptr<WhileStmt>
+WhileStmt::make(const std::shared_ptr<Expr>& condExpr, const std::shared_ptr<Stmt>& bodyStmt)
+{
+    auto stmt = std::make_shared<WhileStmt>();
+    stmt->condExpr = condExpr;
+    stmt->bodyStmt = bodyStmt;
+    return stmt;
+}
+
+void ForStmt::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        if (initStmt) {
+            initStmt->traverse(visitor);
+        }
+        if (condExpr) {
+            condExpr->traverse(visitor);
+        }
+        if (incExpr) {
+            incExpr->traverse(visitor);
+        }
+        if (bodyStmt) {
+            bodyStmt->traverse(visitor);
+        }
+    });
+}
+
+std::shared_ptr<Stmt> ForStmt::getInit() const
+{
+    return initStmt;
+}
+
+std::shared_ptr<Expr> ForStmt::getCond() const
+{
+    return condExpr;
+}
+
+std::shared_ptr<Expr> ForStmt::getInc() const
+{
+    return incExpr;
+}
+
+std::shared_ptr<Stmt> ForStmt::getBody() const
+{
+    return bodyStmt;
+}
+
+std::shared_ptr<ForStmt> ForStmt::make(
+    const std::shared_ptr<Stmt>& initStmt,
+    const std::shared_ptr<Expr>& condExpr,
+    const std::shared_ptr<Expr>& incExpr,
+    const std::shared_ptr<Stmt>& bodyStmt)
+{
+    auto stmt = std::make_shared<ForStmt>();
+    stmt->initStmt = initStmt;
+    stmt->condExpr = condExpr;
+    stmt->incExpr = incExpr;
+    stmt->bodyStmt = bodyStmt;
+    return stmt;
+}

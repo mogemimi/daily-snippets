@@ -73,6 +73,8 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %token LET                  "let"
 %token IF                   "if"
 %token ELSE                 "else"
+%token WHILE                "while"
+%token FOR                  "FOR"
 
 %token <std::shared_ptr<NamedDecl>>                 IDENTIFIER "identifier"
 %token <std::shared_ptr<IntegerLiteral>>            INTEGER_LITERAL "integer_literal"
@@ -90,6 +92,9 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %type  <std::shared_ptr<CompoundStmt>>              compound_statement
 %type  <std::shared_ptr<ReturnStmt>>                return_statement
 %type  <std::shared_ptr<IfStmt>>                    if_statement
+%type  <std::shared_ptr<WhileStmt>>                 while_statement
+%type  <std::shared_ptr<ForStmt>>                   for_statement
+%type  <std::shared_ptr<Stmt>>                      for_init_statement
 %type  <std::vector<std::shared_ptr<FunctionDecl>>> function_definitions
 %type  <std::shared_ptr<FunctionDecl>>              function_definition
 %type  <std::shared_ptr<VariableDecl>>              variable_definition
@@ -128,6 +133,8 @@ statement:
 | return_statement          { $$ = $1; }
 | variable_definition ";"   { $$ = DeclStmt::make($1); }
 | if_statement              { $$ = $1; }
+| while_statement           { $$ = $1; }
+| for_statement             { $$ = $1; }
 | compound_statement        { $$ = $1; }
 ;
 
@@ -151,6 +158,20 @@ return_statement:
 if_statement:
   "if" "(" expression ")" statement %prec "then"      { $$ = IfStmt::make($3, $5); }
 | "if" "(" expression ")" statement "else" statement  { $$ = IfStmt::make($3, $5, $7); }
+;
+
+while_statement:
+  "while" "(" expression ")" statement { $$ = WhileStmt::make($3, $5); }
+;
+
+for_statement:
+  "for" "(" for_init_statement expression ";" expression ")" statement  { $$ = ForStmt::make($3, $4, $6, $8); }
+;
+
+for_init_statement:
+  ";"                     { }
+| expression ";"          { $$ = $1; }
+| variable_definition ";" { $$ = DeclStmt::make($1); }
 ;
 
 variable_definition:

@@ -75,3 +75,48 @@ public:
         const std::shared_ptr<Stmt>& thenStmt,
         const std::shared_ptr<Stmt>& elseStmt);
 };
+
+class WhileStmt final
+    : public Stmt
+    , public std::enable_shared_from_this<WhileStmt> {
+private:
+    std::shared_ptr<Expr> condExpr;
+    std::shared_ptr<Stmt> bodyStmt;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<Expr> getCond() const;
+
+    std::shared_ptr<Stmt> getBody() const;
+
+    static std::shared_ptr<WhileStmt>
+    make(const std::shared_ptr<Expr>& condExpr, const std::shared_ptr<Stmt>& bodyStmt);
+};
+
+class ForStmt final
+    : public Stmt
+    , public std::enable_shared_from_this<ForStmt> {
+private:
+    std::shared_ptr<Stmt> initStmt;
+    std::shared_ptr<Expr> condExpr;
+    std::shared_ptr<Expr> incExpr;
+    std::shared_ptr<Stmt> bodyStmt;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<Stmt> getInit() const;
+
+    std::shared_ptr<Expr> getCond() const;
+
+    std::shared_ptr<Expr> getInc() const;
+
+    std::shared_ptr<Stmt> getBody() const;
+
+    static std::shared_ptr<ForStmt> make(
+        const std::shared_ptr<Stmt>& initStmt,
+        const std::shared_ptr<Expr>& condExpr,
+        const std::shared_ptr<Expr>& incExpr,
+        const std::shared_ptr<Stmt>& bodyStmt);
+};

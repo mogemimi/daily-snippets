@@ -20,12 +20,26 @@ function min() {
 	else {
 		return a;
 	}
+
+	while (a) {
+		a;
+		a = c;
+		if (c = a) {
+			let b = c;			
+		}
+		else {
+			let a = c;
+		}
+	}
+
+	for (let i = 0; i != 4; i = add(i)) {
+	}
 }
 )";
 
     MyDriver driver;
     auto [astContext, ok] = driver.parseString(source);
-    REQUIRE(ok);
+	REQUIRE(ok);
 
     {
         ASTDumper dumper;

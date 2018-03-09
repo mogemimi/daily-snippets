@@ -28,6 +28,8 @@ public:
 
     void visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traverse) override;
     void visit(const std::shared_ptr<IfStmt>& stmt, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<WhileStmt>& stmt, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<ForStmt>& stmt, Invoke&& traverse) override;
 
     void visit(const std::shared_ptr<DeclRefExpr>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse) override;

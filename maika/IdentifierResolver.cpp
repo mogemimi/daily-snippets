@@ -62,6 +62,26 @@ void IdentifierResolver::visit(const std::shared_ptr<IfStmt>& stmt, Invoke&& tra
     popScope();
 }
 
+void IdentifierResolver::visit(const std::shared_ptr<WhileStmt>& stmt, Invoke&& traverse)
+{
+    auto scope = std::make_shared<Scope>(getCurrentScope());
+    pushScope(scope);
+
+    traverse();
+
+    popScope();
+}
+
+void IdentifierResolver::visit(const std::shared_ptr<ForStmt>& stmt, Invoke&& traverse)
+{
+    auto scope = std::make_shared<Scope>(getCurrentScope());
+    pushScope(scope);
+
+    traverse();
+
+    popScope();
+}
+
 void IdentifierResolver::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse)
 {
     auto scope = getCurrentScope();

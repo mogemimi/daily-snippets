@@ -85,6 +85,8 @@ blank       [ \t]
 "let"       return yy::MyParser::make_LET(loc);
 "if"        return yy::MyParser::make_IF(loc);
 "else"      return yy::MyParser::make_ELSE(loc);
+"while"     return yy::MyParser::make_WHILE(loc);
+"for"       return yy::MyParser::make_FOR(loc);
 "true"      return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(loc, true), loc);
 "false"     return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(loc, false), loc);
 
