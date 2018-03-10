@@ -56,18 +56,34 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %token PLUS                 "+"
 %token STAR                 "*"
 %token SLASH                "/"
+%token MOD                  "%"
+%token SUB_ASSIGN           "-="
+%token ADD_ASSIGN           "+="
+%token MUL_ASSIGN           "*="
+%token DIV_ASSIGN           "/="
+%token MOD_ASSIGN           "%="
+%token PLUS_PLUS            "++"
+%token MINUS_MINUS          "--"
 %token LOGICAL_NOT          "!"
 %token LOGICAL_AND          "&&"
 %token LOGICAL_OR           "||"
 %token EQUAL                "=="
 %token NOT_EQUAL            "!="
+%token LESS_THAN_EQUAL      "<="
+%token GREATER_THAN_EQUAL   ">="
+%token LESS_THAN            "<"
+%token GREATER_THAN         ">"
 %token LEFT_PARENTHESIS     "("
 %token RIGHT_PARENTHESIS    ")"
 %token LEFT_CURLY_BRACKET   "{"
 %token RIGHT_CURLY_BRACKET  "}"
+%token LEFT_SQUARE_BRACKET  "["
+%token RIGHT_SQUARE_BRACKET "]"
 %token COLON                ":"
 %token SEMICOLON            ";"
 %token COMMA                ","
+%token DOT                  "."
+%token QUESTION             "?"
 %token FUNCTION             "function"
 %token RETURN               "return"
 %token LET                  "let"
@@ -86,6 +102,7 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %type  <std::vector<std::shared_ptr<Expr>>>         expression_list
 %type  <std::shared_ptr<Stmt>>                      statement
 %type  <std::vector<std::shared_ptr<Stmt>>>         statement_list
+%type  <std::shared_ptr<MemberExpr>>                member_expression
 %type  <std::shared_ptr<CallExpr>>                  call_expression
 %type  <std::vector<std::shared_ptr<ParmVarDecl>>>  parameter_variables
 %type  <std::shared_ptr<ParmVarDecl>>               parameter_variable
@@ -186,6 +203,18 @@ literal:
 | "string_literal"  { $$ = $1; }
 ;
 
+%right "=";
+%left "||";
+%left "&&";
+%left "==" "!=";
+%left "+" "-";
+%left "*" "/" "%";
+%left ".";
+
+member_expression:
+  expression "." "identifier" { $$ = MemberExpr::make(@$, $1, $3); }
+;
+
 call_expression:
   "identifier" "(" expression_list ")"  { $$ = CallExpr::make(@$, DeclRefExpr::make(@1, $1), $3); }
 ;
@@ -196,11 +225,6 @@ expression_list:
 | expression "," expression_list  { $$ = appendVector($1, $3); }
 ;
 
-%right "=";
-%left "+" "-";
-%left "*" "/";
-%left "==" "!=";
-%left "&&" "||";
 expression:
   "identifier"                      { $$ = DeclRefExpr::make(@$, $1); };
 | literal                           { $$ = $1; }
@@ -209,12 +233,14 @@ expression:
 | expression "-" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Subtract, $1, $3); }
 | expression "*" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Multiply, $1, $3); }
 | expression "/" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Divide, $1, $3); }
+| expression "%" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Mod, $1, $3); }
 | expression "=" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Assign, $1, $3); }
 | expression "==" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Equal, $1, $3); }
 | expression "!=" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::NotEqual, $1, $3); }
 | expression "&&" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LogicalAnd, $1, $3); }
 | expression "||" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LogicalOr, $1, $3); }
 | call_expression                   { $$ = $1; }
+| member_expression                 { $$ = $1; }
 ;
 
 %%

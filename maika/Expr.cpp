@@ -98,9 +98,9 @@ std::shared_ptr<CallExpr> CallExpr::make(
 
 void BinaryOperator::traverse(ASTVisitor& visitor)
 {
-    assert(lhs);
-    assert(rhs);
     visitor.visit(shared_from_this(), [&] {
+        assert(lhs);
+        assert(rhs);
         lhs->traverse(visitor);
         rhs->traverse(visitor);
     });
@@ -132,5 +132,35 @@ DeclRefExpr::make(const yy::location& loc, const std::shared_ptr<NamedDecl>& d)
     auto expr = std::make_shared<DeclRefExpr>();
     expr->location = loc;
     expr->decl = d;
+    return expr;
+}
+
+void MemberExpr::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        assert(base);
+        assert(memberDecl);
+        base->traverse(visitor);
+        memberDecl->traverse(visitor);
+    });
+}
+
+std::shared_ptr<Expr> MemberExpr::getBase() const
+{
+    return base;
+}
+
+std::shared_ptr<NamedDecl> MemberExpr::getMemberDecl() const
+{
+    return memberDecl;
+}
+
+std::shared_ptr<MemberExpr> MemberExpr::make(
+    const yy::location& loc, const std::shared_ptr<Expr>& base, const std::shared_ptr<NamedDecl>& d)
+{
+    auto expr = std::make_shared<MemberExpr>();
+    expr->location = loc;
+    expr->base = base;
+    expr->memberDecl = d;
     return expr;
 }

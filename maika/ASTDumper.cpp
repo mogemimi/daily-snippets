@@ -145,6 +145,7 @@ void ASTDumper::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& trav
         case BinaryOperatorKind::Subtract: return "-";
         case BinaryOperatorKind::Divide: return "/";
         case BinaryOperatorKind::Multiply: return "*";
+        case BinaryOperatorKind::Mod: return "%";
         case BinaryOperatorKind::Equal: return "==";
         case BinaryOperatorKind::NotEqual: return "!=";
         case BinaryOperatorKind::LogicalAnd: return "&&";
@@ -169,6 +170,18 @@ void ASTDumper::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& travers
         }
     }
     dump(&dumpContext, "DeclRefExpr", options, std::move(traverse));
+}
+
+void ASTDumper::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse)
+{
+    std::vector<std::string> options;
+    if (auto namedDecl = expr->getMemberDecl()) {
+        options.push_back(namedDecl->getName());
+        if (auto type = namedDecl->getType()) {
+            options.push_back(type->dump());
+        }
+    }
+    dump(&dumpContext, "MemberExpr", options, std::move(traverse));
 }
 
 void ASTDumper::visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invoke&& traverse)

@@ -101,6 +101,7 @@ enum class BinaryOperatorKind {
     Subtract,
     Multiply,
     Divide,
+    Mod,
     Assign,
     Equal,
     NotEqual,
@@ -148,4 +149,24 @@ public:
 
     static std::shared_ptr<DeclRefExpr>
     make(const yy::location& loc, const std::shared_ptr<NamedDecl>& d);
+};
+
+class MemberExpr final
+    : public Expr
+    , public std::enable_shared_from_this<MemberExpr> {
+private:
+    std::shared_ptr<Expr> base;
+    std::shared_ptr<NamedDecl> memberDecl;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<Expr> getBase() const;
+
+    std::shared_ptr<NamedDecl> getMemberDecl() const;
+
+    static std::shared_ptr<MemberExpr> make(
+        const yy::location& loc,
+        const std::shared_ptr<Expr>& base,
+        const std::shared_ptr<NamedDecl>& d);
 };

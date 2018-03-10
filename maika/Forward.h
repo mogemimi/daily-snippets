@@ -22,6 +22,7 @@ class BoolLiteral;
 class StringLiteral;
 class BinaryOperator;
 class DeclRefExpr;
+class MemberExpr;
 
 // NOTE: AST::Decl
 class Decl;
