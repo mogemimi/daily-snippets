@@ -96,6 +96,24 @@ public:
         const std::vector<std::shared_ptr<Expr>>& args);
 };
 
+class FunctionExpr final
+    : public Expr
+    , public std::enable_shared_from_this<FunctionExpr> {
+public:
+    std::shared_ptr<NamedDecl> namedDecl;
+    std::vector<std::shared_ptr<ParmVarDecl>> arguments;
+    std::shared_ptr<CompoundStmt> compoundStmt;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    static std::shared_ptr<FunctionExpr> make(
+        const yy::location& loc,
+        const std::shared_ptr<NamedDecl>& n,
+        const std::vector<std::shared_ptr<ParmVarDecl>>& a,
+        const std::shared_ptr<CompoundStmt>& s);
+};
+
 enum class BinaryOperatorKind {
     Add,
     Subtract,

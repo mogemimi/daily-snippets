@@ -104,6 +104,7 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %type  <std::shared_ptr<UnaryOperator>>             unary_expression
 %type  <std::shared_ptr<Stmt>>                      statement
 %type  <std::vector<std::shared_ptr<Stmt>>>         statement_list
+%type  <std::shared_ptr<NamedDecl>>                 binding_identifier
 %type  <std::shared_ptr<MemberExpr>>                member_expression
 %type  <std::shared_ptr<CallExpr>>                  call_expression
 %type  <std::vector<std::shared_ptr<ParmVarDecl>>>  parameter_variables
@@ -116,6 +117,7 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %type  <std::shared_ptr<Stmt>>                      for_init_statement
 %type  <std::vector<std::shared_ptr<FunctionDecl>>> function_definitions
 %type  <std::shared_ptr<FunctionDecl>>              function_definition
+%type  <std::shared_ptr<FunctionExpr>>              function_expression
 %type  <std::shared_ptr<VariableDecl>>              variable_definition
 %type  <std::shared_ptr<TranslationUnitDecl>>       translation_unit
 
@@ -134,6 +136,15 @@ function_definitions:
 
 function_definition:
   "function" "identifier" "(" parameter_variables ")" compound_statement { $$ = FunctionDecl::make(@$, $2, $4, $6); }
+;
+
+function_expression:
+  "function" binding_identifier "(" parameter_variables ")" compound_statement { $$ = FunctionExpr::make(@$, $2, $4, $6); }
+;
+
+binding_identifier:
+  %empty        { }
+| "identifier"  { $$ = $1; }
 ;
 
 parameter_variables:
@@ -213,6 +224,7 @@ literal:
 %left "*" "/" "%";
 %right "++" "--" "!";
 %left ".";
+%nonassoc "(" ")";
 
 primary_expression:
   literal                 { $$ = $1; }
@@ -235,7 +247,7 @@ member_expression:
 ;
 
 call_expression:
-  "identifier" "(" expression_list ")"  { $$ = CallExpr::make(@$, DeclRefExpr::make(@1, $1), $3); }
+  expression "(" expression_list ")"  { $$ = CallExpr::make(@$, $1, $3); }
 ;
 
 expression_list:
@@ -259,6 +271,7 @@ expression:
 | unary_expression                  { $$ = $1; }
 | call_expression                   { $$ = $1; }
 | member_expression                 { $$ = $1; }
+| function_expression               { $$ = $1; }
 ;
 
 %%

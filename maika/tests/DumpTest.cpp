@@ -99,6 +99,13 @@ function main() {
     let y = sub(c, d);
     let z = sub;
     let w = z(a, b);
+    let v = function(m, n) {
+        if (m == n) {
+            return "temp";
+        }
+        return "abc";
+    };
+    let t = v(4, 5);
     return !(x == y);
 }
 )";

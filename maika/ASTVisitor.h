@@ -62,6 +62,13 @@ public:
         traverse();
     }
 
+    virtual void visit(const std::shared_ptr<FunctionExpr>& expr) {}
+    virtual void visit(const std::shared_ptr<FunctionExpr>& expr, Invoke&& traverse)
+    {
+        visit(expr);
+        traverse();
+    }
+
     virtual void visit(const std::shared_ptr<IntegerLiteral>& expr) {}
     virtual void visit(const std::shared_ptr<DoubleLiteral>& expr) {}
     virtual void visit(const std::shared_ptr<BoolLiteral>& expr) {}

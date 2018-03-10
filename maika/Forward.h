@@ -16,6 +16,7 @@ class ForStmt;
 // NOTE: AST::Expr
 class Expr;
 class CallExpr;
+class FunctionExpr;
 class IntegerLiteral;
 class DoubleLiteral;
 class BoolLiteral;

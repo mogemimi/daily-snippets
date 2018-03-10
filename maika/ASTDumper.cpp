@@ -94,6 +94,18 @@ void ASTDumper::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse)
     dump(&dumpContext, "CallExpr", options, std::move(traverse));
 }
 
+void ASTDumper::visit(const std::shared_ptr<FunctionExpr>& expr, Invoke&& traverse)
+{
+    std::vector<std::string> options;
+    if (expr->namedDecl) {
+        options.push_back(expr->namedDecl->getName());
+        if (auto type = expr->namedDecl->getType()) {
+            options.push_back(type->dump());
+        }
+    }
+    dump(&dumpContext, "FunctionExpr", options, std::move(traverse));
+}
+
 void ASTDumper::visit(const std::shared_ptr<IntegerLiteral>& expr)
 {
     std::vector<std::string> options;
