@@ -267,11 +267,11 @@ namespace yy {
         value.move< std::shared_ptr<BoolLiteral> > (that.value);
         break;
 
-      case 50: // call_expression
+      case 49: // call_expression
         value.move< std::shared_ptr<CallExpr> > (that.value);
         break;
 
-      case 41: // compound_statement
+      case 40: // compound_statement
         value.move< std::shared_ptr<CompoundStmt> > (that.value);
         break;
 
@@ -279,20 +279,20 @@ namespace yy {
         value.move< std::shared_ptr<DoubleLiteral> > (that.value);
         break;
 
-      case 49: // literal
-      case 52: // expression
+      case 48: // literal
+      case 51: // expression
         value.move< std::shared_ptr<Expr> > (that.value);
         break;
 
-      case 46: // for_statement
+      case 45: // for_statement
         value.move< std::shared_ptr<ForStmt> > (that.value);
         break;
 
-      case 37: // function_definition
+      case 36: // function_definition
         value.move< std::shared_ptr<FunctionDecl> > (that.value);
         break;
 
-      case 44: // if_statement
+      case 43: // if_statement
         value.move< std::shared_ptr<IfStmt> > (that.value);
         break;
 
@@ -304,16 +304,16 @@ namespace yy {
         value.move< std::shared_ptr<NamedDecl> > (that.value);
         break;
 
-      case 39: // parameter_variable
+      case 38: // parameter_variable
         value.move< std::shared_ptr<ParmVarDecl> > (that.value);
         break;
 
-      case 43: // return_statement
+      case 42: // return_statement
         value.move< std::shared_ptr<ReturnStmt> > (that.value);
         break;
 
-      case 40: // statement
-      case 47: // for_init_statement
+      case 39: // statement
+      case 46: // for_init_statement
         value.move< std::shared_ptr<Stmt> > (that.value);
         break;
 
@@ -321,31 +321,31 @@ namespace yy {
         value.move< std::shared_ptr<StringLiteral> > (that.value);
         break;
 
-      case 35: // translation_unit
+      case 34: // translation_unit
         value.move< std::shared_ptr<TranslationUnitDecl> > (that.value);
         break;
 
-      case 48: // variable_definition
+      case 47: // variable_definition
         value.move< std::shared_ptr<VariableDecl> > (that.value);
         break;
 
-      case 45: // while_statement
+      case 44: // while_statement
         value.move< std::shared_ptr<WhileStmt> > (that.value);
         break;
 
-      case 51: // expression_list
+      case 50: // expression_list
         value.move< std::vector<std::shared_ptr<Expr>> > (that.value);
         break;
 
-      case 36: // function_definitions
+      case 35: // function_definitions
         value.move< std::vector<std::shared_ptr<FunctionDecl>> > (that.value);
         break;
 
-      case 38: // parameter_variables
+      case 37: // parameter_variables
         value.move< std::vector<std::shared_ptr<ParmVarDecl>> > (that.value);
         break;
 
-      case 42: // statement_list
+      case 41: // statement_list
         value.move< std::vector<std::shared_ptr<Stmt>> > (that.value);
         break;
 
@@ -368,11 +368,11 @@ namespace yy {
         value.copy< std::shared_ptr<BoolLiteral> > (that.value);
         break;
 
-      case 50: // call_expression
+      case 49: // call_expression
         value.copy< std::shared_ptr<CallExpr> > (that.value);
         break;
 
-      case 41: // compound_statement
+      case 40: // compound_statement
         value.copy< std::shared_ptr<CompoundStmt> > (that.value);
         break;
 
@@ -380,20 +380,20 @@ namespace yy {
         value.copy< std::shared_ptr<DoubleLiteral> > (that.value);
         break;
 
-      case 49: // literal
-      case 52: // expression
+      case 48: // literal
+      case 51: // expression
         value.copy< std::shared_ptr<Expr> > (that.value);
         break;
 
-      case 46: // for_statement
+      case 45: // for_statement
         value.copy< std::shared_ptr<ForStmt> > (that.value);
         break;
 
-      case 37: // function_definition
+      case 36: // function_definition
         value.copy< std::shared_ptr<FunctionDecl> > (that.value);
         break;
 
-      case 44: // if_statement
+      case 43: // if_statement
         value.copy< std::shared_ptr<IfStmt> > (that.value);
         break;
 
@@ -405,16 +405,16 @@ namespace yy {
         value.copy< std::shared_ptr<NamedDecl> > (that.value);
         break;
 
-      case 39: // parameter_variable
+      case 38: // parameter_variable
         value.copy< std::shared_ptr<ParmVarDecl> > (that.value);
         break;
 
-      case 43: // return_statement
+      case 42: // return_statement
         value.copy< std::shared_ptr<ReturnStmt> > (that.value);
         break;
 
-      case 40: // statement
-      case 47: // for_init_statement
+      case 39: // statement
+      case 46: // for_init_statement
         value.copy< std::shared_ptr<Stmt> > (that.value);
         break;
 
@@ -422,31 +422,31 @@ namespace yy {
         value.copy< std::shared_ptr<StringLiteral> > (that.value);
         break;
 
-      case 35: // translation_unit
+      case 34: // translation_unit
         value.copy< std::shared_ptr<TranslationUnitDecl> > (that.value);
         break;
 
-      case 48: // variable_definition
+      case 47: // variable_definition
         value.copy< std::shared_ptr<VariableDecl> > (that.value);
         break;
 
-      case 45: // while_statement
+      case 44: // while_statement
         value.copy< std::shared_ptr<WhileStmt> > (that.value);
         break;
 
-      case 51: // expression_list
+      case 50: // expression_list
         value.copy< std::vector<std::shared_ptr<Expr>> > (that.value);
         break;
 
-      case 36: // function_definitions
+      case 35: // function_definitions
         value.copy< std::vector<std::shared_ptr<FunctionDecl>> > (that.value);
         break;
 
-      case 38: // parameter_variables
+      case 37: // parameter_variables
         value.copy< std::vector<std::shared_ptr<ParmVarDecl>> > (that.value);
         break;
 
-      case 42: // statement_list
+      case 41: // statement_list
         value.copy< std::vector<std::shared_ptr<Stmt>> > (that.value);
         break;
 
@@ -591,13 +591,13 @@ namespace yy {
 
 
     // User initialization code.
-    #line 26 "MyParser.yy" // lalr1.cc:741
+    #line 26 "MyParser.yy" // lalr1.cc:745
 {
     // Initialize the initial location.
     yyla.location.begin.filename = yyla.location.end.filename = &driver.file;
 }
 
-#line 601 "MyParser.cpp" // lalr1.cc:741
+#line 601 "MyParser.cpp" // lalr1.cc:745
 
     /* Initialize the stack.  The initial state will be set in
        yynewstate, since the latter expects the semantical and the
@@ -691,11 +691,11 @@ namespace yy {
         yylhs.value.build< std::shared_ptr<BoolLiteral> > ();
         break;
 
-      case 50: // call_expression
+      case 49: // call_expression
         yylhs.value.build< std::shared_ptr<CallExpr> > ();
         break;
 
-      case 41: // compound_statement
+      case 40: // compound_statement
         yylhs.value.build< std::shared_ptr<CompoundStmt> > ();
         break;
 
@@ -703,20 +703,20 @@ namespace yy {
         yylhs.value.build< std::shared_ptr<DoubleLiteral> > ();
         break;
 
-      case 49: // literal
-      case 52: // expression
+      case 48: // literal
+      case 51: // expression
         yylhs.value.build< std::shared_ptr<Expr> > ();
         break;
 
-      case 46: // for_statement
+      case 45: // for_statement
         yylhs.value.build< std::shared_ptr<ForStmt> > ();
         break;
 
-      case 37: // function_definition
+      case 36: // function_definition
         yylhs.value.build< std::shared_ptr<FunctionDecl> > ();
         break;
 
-      case 44: // if_statement
+      case 43: // if_statement
         yylhs.value.build< std::shared_ptr<IfStmt> > ();
         break;
 
@@ -728,16 +728,16 @@ namespace yy {
         yylhs.value.build< std::shared_ptr<NamedDecl> > ();
         break;
 
-      case 39: // parameter_variable
+      case 38: // parameter_variable
         yylhs.value.build< std::shared_ptr<ParmVarDecl> > ();
         break;
 
-      case 43: // return_statement
+      case 42: // return_statement
         yylhs.value.build< std::shared_ptr<ReturnStmt> > ();
         break;
 
-      case 40: // statement
-      case 47: // for_init_statement
+      case 39: // statement
+      case 46: // for_init_statement
         yylhs.value.build< std::shared_ptr<Stmt> > ();
         break;
 
@@ -745,31 +745,31 @@ namespace yy {
         yylhs.value.build< std::shared_ptr<StringLiteral> > ();
         break;
 
-      case 35: // translation_unit
+      case 34: // translation_unit
         yylhs.value.build< std::shared_ptr<TranslationUnitDecl> > ();
         break;
 
-      case 48: // variable_definition
+      case 47: // variable_definition
         yylhs.value.build< std::shared_ptr<VariableDecl> > ();
         break;
 
-      case 45: // while_statement
+      case 44: // while_statement
         yylhs.value.build< std::shared_ptr<WhileStmt> > ();
         break;
 
-      case 51: // expression_list
+      case 50: // expression_list
         yylhs.value.build< std::vector<std::shared_ptr<Expr>> > ();
         break;
 
-      case 36: // function_definitions
+      case 35: // function_definitions
         yylhs.value.build< std::vector<std::shared_ptr<FunctionDecl>> > ();
         break;
 
-      case 38: // parameter_variables
+      case 37: // parameter_variables
         yylhs.value.build< std::vector<std::shared_ptr<ParmVarDecl>> > ();
         break;
 
-      case 42: // statement_list
+      case 41: // statement_list
         yylhs.value.build< std::vector<std::shared_ptr<Stmt>> > ();
         break;
 
@@ -1365,16 +1365,16 @@ namespace yy {
   const short int
   MyParser::yypact_[] =
   {
-     -13,   -15,    14,   -20,   -13,     7,   -20,   -20,     4,    15,
-      19,    24,    17,    41,     4,   -20,   -12,   -20,   -20,    -5,
-     -20,    58,    31,    53,    54,    59,   -20,   -20,   -20,   -20,
-      61,    32,   -20,    67,   -20,   -20,   -20,   -20,    52,   -20,
-     -20,    98,   153,   -20,   108,    74,    -5,    -5,    -5,    51,
-     -20,   -20,   -20,    -5,    -5,    -5,    -5,    -5,    -5,    -5,
-      -5,    -5,   -20,   -20,   -20,    -5,   165,   177,    70,    87,
-     -20,    -5,    77,   118,   201,   138,   138,    39,    39,   -20,
-     -20,    -4,    -4,   201,    32,    32,   -20,    -5,   128,   -20,
-     -20,    76,   -20,   -20,    -5,    32,   189,   -20,    32,   -20
+       0,    -1,     8,   -20,     0,    18,   -20,   -20,     5,    16,
+      33,    25,    21,    34,     5,   -20,   -12,   -20,   -20,    56,
+     -20,    -6,    27,    49,    51,    52,    53,   -20,   -20,   -20,
+     -20,    30,   -20,    54,   -20,   -20,   -20,   -20,    57,   -20,
+     -20,    96,   151,   -20,   106,    64,    56,    56,    50,    56,
+     -20,   -20,   -20,    56,    56,    56,    56,    56,    56,    56,
+      56,    56,   -20,   -20,   -20,    56,   163,   175,   -20,    56,
+      58,   116,    59,    85,   199,   136,   136,   203,   203,   -20,
+     -20,    -4,    -4,   199,    30,    30,   126,   -20,   -20,   -20,
+      56,    69,   -20,    56,   -20,    30,   187,   -20,    30,   -20
   };
 
   const unsigned char
@@ -1382,108 +1382,108 @@ namespace yy {
   {
        0,     0,     0,     2,     3,     0,     1,     4,     6,     9,
        0,     7,     0,     0,     6,    10,     0,     5,     8,     0,
-      18,     0,     0,     0,     0,    41,    33,    34,    35,    36,
-       0,    20,    17,     0,    12,    14,    15,    16,     0,    42,
-      53,     0,     0,    22,     0,    31,     0,     0,    38,     0,
+      18,     0,     0,     0,     0,     0,    41,    33,    34,    35,
+      36,    20,    17,     0,    12,    14,    15,    16,     0,    42,
+      53,     0,     0,    22,     0,    31,     0,     0,     0,    38,
       21,    19,    13,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,    11,    43,    23,     0,     0,     0,     0,    39,
-      28,     0,     0,     0,    48,    45,    44,    46,    47,    51,
-      52,    49,    50,    32,     0,     0,    37,    38,     0,    30,
-      29,    24,    26,    40,     0,     0,     0,    25,     0,    27
+       0,     0,    11,    43,    23,     0,     0,     0,    28,     0,
+       0,     0,     0,    39,    48,    45,    44,    46,    47,    51,
+      52,    49,    50,    32,     0,     0,     0,    30,    29,    37,
+      38,    24,    26,     0,    40,     0,     0,    25,     0,    27
   };
 
   const short int
   MyParser::yypgoto_[] =
   {
-     -20,   -20,   139,   -20,   137,   -20,    57,   140,   123,   -20,
-     -20,   -20,   -20,   -20,   112,   -20,   -20,    79,   -19
+     -20,   -20,    78,   -20,    84,   -20,    55,   128,   118,   -20,
+     -20,   -20,   -20,   -20,   103,   -20,   -20,    62,   -19
   };
 
   const signed char
   MyParser::yydefgoto_[] =
   {
       -1,     2,     3,     4,    10,    11,    31,    32,    33,    34,
-      35,    36,    37,    71,    38,    39,    40,    68,    41
+      35,    36,    37,    69,    38,    39,    40,    72,    41
   };
 
   const unsigned char
   MyParser::yytable_[] =
   {
-      42,    19,    44,    16,    20,    58,    59,     1,    19,    21,
-      22,    23,     5,    24,     6,    25,    26,    27,    28,    29,
-       8,    30,    25,    26,    27,    28,    29,    66,    67,    69,
-      73,     9,    12,    13,    74,    75,    76,    77,    78,    79,
-      80,    81,    82,    14,    15,    19,    83,    16,    58,    59,
-      60,    61,    88,    21,    22,    23,    16,    24,    45,    25,
-      26,    27,    28,    29,    19,    30,    46,    47,    69,    70,
-      52,    19,    48,    22,    49,    96,    43,    65,    25,    26,
-      27,    28,    29,    51,    86,    25,    26,    27,    28,    29,
-      53,    54,    55,    56,    57,    89,    58,    59,    60,    61,
-      95,    53,    54,    55,    56,    57,    87,    58,    59,    60,
-      61,    53,    54,    55,    56,    57,    62,    58,    59,    60,
-      61,    53,    54,    55,    56,    57,    64,    58,    59,    60,
-      61,    53,    54,    55,    56,    57,    90,    58,    59,    60,
-      61,    91,    92,     7,    56,    57,    94,    58,    59,    60,
-      61,    18,    97,    17,    50,    99,    53,    54,    55,    56,
-      57,    72,    58,    59,    60,    61,    93,    63,    53,    54,
-      55,    56,    57,     0,    58,    59,    60,    61,     0,    84,
+      42,    19,    44,    16,    20,    58,    59,    19,     6,    21,
+      22,    23,    43,    24,    25,    26,    27,    28,    29,    30,
+       1,    26,    27,    28,    29,    30,     5,    66,    67,    71,
+      73,     8,     9,    12,    74,    75,    76,    77,    78,    79,
+      80,    81,    82,    19,    14,    16,    83,    13,    15,    16,
+      86,    21,    22,    23,    45,    24,    25,    26,    27,    28,
+      29,    30,    46,    19,    47,    48,    49,    65,    68,    19,
+      51,    73,    22,    89,    96,    52,    87,    26,    27,    28,
+      29,    30,     7,    26,    27,    28,    29,    30,    53,    54,
+      55,    56,    57,    95,    58,    59,    60,    61,    18,    53,
+      54,    55,    56,    57,    90,    58,    59,    60,    61,    53,
+      54,    55,    56,    57,    62,    58,    59,    60,    61,    53,
+      54,    55,    56,    57,    64,    58,    59,    60,    61,    53,
+      54,    55,    56,    57,    88,    58,    59,    60,    61,    91,
+      92,    17,    56,    57,    93,    58,    59,    60,    61,    50,
+      97,    70,    94,    99,    53,    54,    55,    56,    57,     0,
+      58,    59,    60,    61,     0,    63,    53,    54,    55,    56,
+      57,     0,    58,    59,    60,    61,     0,    84,    53,    54,
+      55,    56,    57,     0,    58,    59,    60,    61,     0,    85,
       53,    54,    55,    56,    57,     0,    58,    59,    60,    61,
-       0,    85,    53,    54,    55,    56,    57,     0,    58,    59,
-      60,    61,     0,    98,    53,    54,    55,    56,    57,     0,
-      58,    59,    60,    61
+       0,    98,    53,    54,    55,    56,    57,     0,    58,    59,
+      60,    61,    58,    59,    60,    61
   };
 
   const signed char
   MyParser::yycheck_[] =
   {
-      19,    13,    21,    15,    16,     9,    10,    20,    13,    21,
-      22,    23,    27,    25,     0,    27,    28,    29,    30,    31,
-      13,    33,    27,    28,    29,    30,    31,    46,    47,    48,
-      49,    27,    17,    14,    53,    54,    55,    56,    57,    58,
-      59,    60,    61,    19,    27,    13,    65,    15,     9,    10,
-      11,    12,    71,    21,    22,    23,    15,    25,    27,    27,
-      28,    29,    30,    31,    13,    33,    13,    13,    87,    18,
-      18,    13,    13,    22,    13,    94,    18,     3,    27,    28,
-      29,    30,    31,    16,    14,    27,    28,    29,    30,    31,
-       3,     4,     5,     6,     7,    18,     9,    10,    11,    12,
-      24,     3,     4,     5,     6,     7,    19,     9,    10,    11,
-      12,     3,     4,     5,     6,     7,    18,     9,    10,    11,
-      12,     3,     4,     5,     6,     7,    18,     9,    10,    11,
-      12,     3,     4,     5,     6,     7,    18,     9,    10,    11,
-      12,    84,    85,     4,     6,     7,    18,     9,    10,    11,
-      12,    14,    95,    13,    31,    98,     3,     4,     5,     6,
-       7,    49,     9,    10,    11,    12,    87,    14,     3,     4,
+      19,    13,    21,    15,    16,     9,    10,    13,     0,    21,
+      22,    23,    18,    25,    26,    27,    28,    29,    30,    31,
+      20,    27,    28,    29,    30,    31,    27,    46,    47,    48,
+      49,    13,    27,    17,    53,    54,    55,    56,    57,    58,
+      59,    60,    61,    13,    19,    15,    65,    14,    27,    15,
+      69,    21,    22,    23,    27,    25,    26,    27,    28,    29,
+      30,    31,    13,    13,    13,    13,    13,     3,    18,    13,
+      16,    90,    22,    14,    93,    18,    18,    27,    28,    29,
+      30,    31,     4,    27,    28,    29,    30,    31,     3,     4,
+       5,     6,     7,    24,     9,    10,    11,    12,    14,     3,
+       4,     5,     6,     7,    19,     9,    10,    11,    12,     3,
+       4,     5,     6,     7,    18,     9,    10,    11,    12,     3,
+       4,     5,     6,     7,    18,     9,    10,    11,    12,     3,
+       4,     5,     6,     7,    18,     9,    10,    11,    12,    84,
+      85,    13,     6,     7,    18,     9,    10,    11,    12,    31,
+      95,    48,    90,    98,     3,     4,     5,     6,     7,    -1,
+       9,    10,    11,    12,    -1,    14,     3,     4,     5,     6,
+       7,    -1,     9,    10,    11,    12,    -1,    14,     3,     4,
        5,     6,     7,    -1,     9,    10,    11,    12,    -1,    14,
        3,     4,     5,     6,     7,    -1,     9,    10,    11,    12,
       -1,    14,     3,     4,     5,     6,     7,    -1,     9,    10,
-      11,    12,    -1,    14,     3,     4,     5,     6,     7,    -1,
-       9,    10,    11,    12
+      11,    12,     9,    10,    11,    12
   };
 
   const unsigned char
   MyParser::yystos_[] =
   {
-       0,    20,    35,    36,    37,    27,     0,    36,    13,    27,
-      38,    39,    17,    14,    19,    27,    15,    41,    38,    13,
-      16,    21,    22,    23,    25,    27,    28,    29,    30,    31,
-      33,    40,    41,    42,    43,    44,    45,    46,    48,    49,
-      50,    52,    52,    18,    52,    27,    13,    13,    13,    13,
-      42,    16,    18,     3,     4,     5,     6,     7,     9,    10,
-      11,    12,    18,    14,    18,     3,    52,    52,    51,    52,
-      18,    47,    48,    52,    52,    52,    52,    52,    52,    52,
-      52,    52,    52,    52,    14,    14,    14,    19,    52,    18,
-      18,    40,    40,    51,    18,    24,    52,    40,    14,    40
+       0,    20,    34,    35,    36,    27,     0,    35,    13,    27,
+      37,    38,    17,    14,    19,    27,    15,    40,    37,    13,
+      16,    21,    22,    23,    25,    26,    27,    28,    29,    30,
+      31,    39,    40,    41,    42,    43,    44,    45,    47,    48,
+      49,    51,    51,    18,    51,    27,    13,    13,    13,    13,
+      41,    16,    18,     3,     4,     5,     6,     7,     9,    10,
+      11,    12,    18,    14,    18,     3,    51,    51,    18,    46,
+      47,    51,    50,    51,    51,    51,    51,    51,    51,    51,
+      51,    51,    51,    51,    14,    14,    51,    18,    18,    14,
+      19,    39,    39,    18,    50,    24,    51,    39,    14,    39
   };
 
   const unsigned char
   MyParser::yyr1_[] =
   {
-       0,    34,    35,    36,    36,    37,    38,    38,    38,    39,
-      39,    40,    40,    40,    40,    40,    40,    40,    41,    41,
-      42,    42,    43,    43,    44,    44,    45,    46,    47,    47,
-      47,    48,    48,    49,    49,    49,    49,    50,    51,    51,
-      51,    52,    52,    52,    52,    52,    52,    52,    52,    52,
-      52,    52,    52,    52
+       0,    33,    34,    35,    35,    36,    37,    37,    37,    38,
+      38,    39,    39,    39,    39,    39,    39,    39,    40,    40,
+      41,    41,    42,    42,    43,    43,    44,    45,    46,    46,
+      46,    47,    47,    48,    48,    48,    48,    49,    50,    50,
+      50,    51,    51,    51,    51,    51,    51,    51,    51,    51,
+      51,    51,    51,    51
   };
 
   const unsigned char
@@ -1508,14 +1508,14 @@ namespace yy {
   "\"*\"", "\"/\"", "\"!\"", "\"&&\"", "\"||\"", "\"==\"", "\"!=\"",
   "\"(\"", "\")\"", "\"{\"", "\"}\"", "\":\"", "\";\"", "\",\"",
   "\"function\"", "\"return\"", "\"let\"", "\"if\"", "\"else\"",
-  "\"while\"", "\"FOR\"", "\"identifier\"", "\"integer_literal\"",
+  "\"while\"", "\"for\"", "\"identifier\"", "\"integer_literal\"",
   "\"double_literal\"", "\"bool_literal\"", "\"string_literal\"",
-  "\"then\"", "\"for\"", "$accept", "translation_unit",
-  "function_definitions", "function_definition", "parameter_variables",
-  "parameter_variable", "statement", "compound_statement",
-  "statement_list", "return_statement", "if_statement", "while_statement",
-  "for_statement", "for_init_statement", "variable_definition", "literal",
-  "call_expression", "expression_list", "expression", YY_NULLPTR
+  "\"then\"", "$accept", "translation_unit", "function_definitions",
+  "function_definition", "parameter_variables", "parameter_variable",
+  "statement", "compound_statement", "statement_list", "return_statement",
+  "if_statement", "while_statement", "for_statement", "for_init_statement",
+  "variable_definition", "literal", "call_expression", "expression_list",
+  "expression", YY_NULLPTR
   };
 
 #if YYDEBUG

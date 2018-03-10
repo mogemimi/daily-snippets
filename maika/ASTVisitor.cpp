@@ -8,6 +8,6 @@
 
 void ASTTraverser::traverse(const ASTContext& context, ASTVisitor& visitor)
 {
-	assert(context.translationUnit);
+    assert(context.translationUnit);
     context.translationUnit->traverse(visitor);
 }

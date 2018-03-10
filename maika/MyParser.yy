@@ -74,7 +74,7 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %token IF                   "if"
 %token ELSE                 "else"
 %token WHILE                "while"
-%token FOR                  "FOR"
+%token FOR                  "for"
 
 %token <std::shared_ptr<NamedDecl>>                 IDENTIFIER "identifier"
 %token <std::shared_ptr<IntegerLiteral>>            INTEGER_LITERAL "integer_literal"

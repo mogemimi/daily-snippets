@@ -39,7 +39,7 @@ function min() {
 
     MyDriver driver;
     auto [astContext, ok] = driver.parseString(source);
-	REQUIRE(ok);
+    REQUIRE(ok);
 
     {
         ASTDumper dumper;
