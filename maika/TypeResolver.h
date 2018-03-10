@@ -40,6 +40,7 @@ public:
     void visit(const std::shared_ptr<BoolLiteral>& expr) override;
     void visit(const std::shared_ptr<StringLiteral>& expr) override;
     void visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& traverse) override;
     void visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse) override;
 
     void visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse) override;

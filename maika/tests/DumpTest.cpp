@@ -99,7 +99,7 @@ function main() {
     let y = sub(c, d);
     let z = sub;
     let w = z(a, b);
-    return x == y;
+    return !(x == y);
 }
 )";
     MyDriver driver;

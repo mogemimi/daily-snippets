@@ -171,6 +171,18 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
     expr->setType(lhs->getType());
 }
 
+void TypeResolver::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& traverse)
+{
+    traverse();
+
+    const auto subExpr = expr->getSubExpr();
+    assert(subExpr);
+    assert(subExpr->getType());
+
+    assert(!expr->getType());
+    expr->setType(subExpr->getType());
+}
+
 void TypeResolver::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse)
 {
     traverse();
