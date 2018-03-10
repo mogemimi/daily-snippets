@@ -120,6 +120,24 @@ std::shared_ptr<BinaryOperator> BinaryOperator::make(
     return expr;
 }
 
+void UnaryOperator::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        assert(subExpr);
+        subExpr->traverse(visitor);
+    });
+}
+
+std::shared_ptr<UnaryOperator>
+UnaryOperator::make(const yy::location& loc, UnaryOperatorKind k, const std::shared_ptr<Expr>& e)
+{
+    auto expr = std::make_shared<UnaryOperator>();
+    expr->location = loc;
+    expr->kind = k;
+    expr->subExpr = e;
+    return expr;
+}
+
 void DeclRefExpr::traverse(ASTVisitor& visitor)
 {
     assert(decl);

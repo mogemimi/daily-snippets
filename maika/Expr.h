@@ -136,6 +136,35 @@ public:
         const std::shared_ptr<Expr>& r);
 };
 
+enum class UnaryOperatorKind {
+    PostInc,
+    PostDec,
+    PreInc,
+    PreDec,
+    // AddrOf,
+    // Deref,
+    Plus,
+    Minus,
+    LogicalNot, // !
+};
+
+class UnaryOperator final
+    : public Expr
+    , public std::enable_shared_from_this<UnaryOperator> {
+private:
+    UnaryOperatorKind kind;
+    std::shared_ptr<Expr> subExpr;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    UnaryOperatorKind getKind() const { return kind; }
+    std::shared_ptr<Expr> getSubExpr() const { return subExpr; }
+
+    static std::shared_ptr<UnaryOperator>
+    make(const yy::location& loc, UnaryOperatorKind k, const std::shared_ptr<Expr>& e);
+};
+
 class DeclRefExpr final
     : public Expr
     , public std::enable_shared_from_this<DeclRefExpr> {

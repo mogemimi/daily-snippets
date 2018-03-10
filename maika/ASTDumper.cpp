@@ -160,6 +160,29 @@ void ASTDumper::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& trav
     dump(&dumpContext, "BinaryOperator", options, std::move(traverse));
 }
 
+void ASTDumper::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& traverse)
+{
+    std::vector<std::string> options;
+
+    std::string op = [&]() -> std::string {
+        switch (expr->getKind()) {
+        case UnaryOperatorKind::LogicalNot: return "!";
+        case UnaryOperatorKind::Plus: return "+";
+        case UnaryOperatorKind::Minus: return "-";
+        case UnaryOperatorKind::PreDec: return "prefix --";
+        case UnaryOperatorKind::PreInc: return "prefix ++";
+        case UnaryOperatorKind::PostDec: return "postfix --";
+        case UnaryOperatorKind::PostInc: return "postfix ++";
+        }
+        return "<unknown>";
+    }();
+    options.push_back(op);
+    if (auto type = expr->getType()) {
+        options.push_back(type->dump());
+    }
+    dump(&dumpContext, "UnaryOperator", options, std::move(traverse));
+}
+
 void ASTDumper::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;

@@ -21,6 +21,7 @@ class DoubleLiteral;
 class BoolLiteral;
 class StringLiteral;
 class BinaryOperator;
+class UnaryOperator;
 class DeclRefExpr;
 class MemberExpr;
 

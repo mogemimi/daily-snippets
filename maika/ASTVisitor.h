@@ -74,6 +74,13 @@ public:
         traverse();
     }
 
+    virtual void visit(const std::shared_ptr<UnaryOperator>& expr) {}
+    virtual void visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& traverse)
+    {
+        visit(expr);
+        traverse();
+    }
+
     virtual void visit(const std::shared_ptr<DeclRefExpr>& expr) {}
     virtual void visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse)
     {

@@ -17,9 +17,6 @@ TODO:
 - integer
   - hex
   - binary
-- if
-- for
-- unary operators
 - class
 
 */

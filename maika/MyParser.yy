@@ -98,8 +98,10 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %token <std::shared_ptr<BoolLiteral>>               BOOL_LITERAL "bool_literal"
 %token <std::shared_ptr<StringLiteral>>             STRING_LITERAL "string_literal"
 %type  <std::shared_ptr<Expr>>                      literal
+%type  <std::shared_ptr<Expr>>                      primary_expression
 %type  <std::shared_ptr<Expr>>                      expression
 %type  <std::vector<std::shared_ptr<Expr>>>         expression_list
+%type  <std::shared_ptr<UnaryOperator>>             unary_expression
 %type  <std::shared_ptr<Stmt>>                      statement
 %type  <std::vector<std::shared_ptr<Stmt>>>         statement_list
 %type  <std::shared_ptr<MemberExpr>>                member_expression
@@ -209,7 +211,24 @@ literal:
 %left "==" "!=";
 %left "+" "-";
 %left "*" "/" "%";
+%right "++" "--" "!";
 %left ".";
+
+primary_expression:
+  literal                 { $$ = $1; }
+| "identifier"            { $$ = DeclRefExpr::make(@$, $1); }
+| "(" expression ")"      { std::swap($$, $2); }
+;
+
+unary_expression:
+  "++" primary_expression { $$ = UnaryOperator::make(@$, UnaryOperatorKind::PreInc, $2); }
+| "--" primary_expression { $$ = UnaryOperator::make(@$, UnaryOperatorKind::PreDec, $2); }
+| primary_expression "++" { $$ = UnaryOperator::make(@$, UnaryOperatorKind::PostInc, $1); }
+| primary_expression "--" { $$ = UnaryOperator::make(@$, UnaryOperatorKind::PostDec, $1); }
+| "+" primary_expression  { $$ = UnaryOperator::make(@$, UnaryOperatorKind::Plus, $2); }
+| "-" primary_expression  { $$ = UnaryOperator::make(@$, UnaryOperatorKind::Minus, $2); }
+| "!" primary_expression  { $$ = UnaryOperator::make(@$, UnaryOperatorKind::LogicalNot, $2); }
+;
 
 member_expression:
   expression "." "identifier" { $$ = MemberExpr::make(@$, $1, $3); }
@@ -226,9 +245,7 @@ expression_list:
 ;
 
 expression:
-  "identifier"                      { $$ = DeclRefExpr::make(@$, $1); };
-| literal                           { $$ = $1; }
-| "(" expression ")"                { std::swap($$, $2); }
+  primary_expression                { $$ = $1; }
 | expression "+" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Add, $1, $3); }
 | expression "-" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Subtract, $1, $3); }
 | expression "*" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Multiply, $1, $3); }
@@ -239,6 +256,7 @@ expression:
 | expression "!=" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::NotEqual, $1, $3); }
 | expression "&&" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LogicalAnd, $1, $3); }
 | expression "||" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LogicalOr, $1, $3); }
+| unary_expression                  { $$ = $1; }
 | call_expression                   { $$ = $1; }
 | member_expression                 { $$ = $1; }
 ;

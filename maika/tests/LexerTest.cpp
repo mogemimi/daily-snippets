@@ -11,7 +11,8 @@ TEST_CASE("Lexer", "[lexer]")
 {
     constexpr auto source = R"(
 function min() {
-    if ((x % a().b.c) || z != w) {
+    if (a && c == true) {
+        return x++;
     }
 }
 )";
