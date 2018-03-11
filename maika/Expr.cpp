@@ -114,12 +114,14 @@ std::shared_ptr<FunctionExpr> FunctionExpr::make(
     const yy::location& loc,
     const std::shared_ptr<NamedDecl>& n,
     const std::vector<std::shared_ptr<ParmVarDecl>>& a,
+    const std::shared_ptr<NamedDecl>& returnType,
     const std::shared_ptr<CompoundStmt>& s)
 {
     auto expr = std::make_shared<FunctionExpr>();
     expr->location = loc;
     expr->namedDecl = n;
     expr->arguments = a;
+    expr->returnType = returnType;
     expr->compoundStmt = s;
     return expr;
 }

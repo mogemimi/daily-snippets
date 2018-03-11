@@ -58,14 +58,17 @@ class FunctionDecl final
 public:
     std::shared_ptr<NamedDecl> namedDecl;
     std::vector<std::shared_ptr<ParmVarDecl>> arguments;
+    std::shared_ptr<NamedDecl> returnType;
     std::shared_ptr<CompoundStmt> compoundStmt;
 
+public:
     void traverse(ASTVisitor& visitor) override;
 
     static std::shared_ptr<FunctionDecl> make(
         const yy::location& loc,
         const std::shared_ptr<NamedDecl>& n,
         const std::vector<std::shared_ptr<ParmVarDecl>>& a,
+        const std::shared_ptr<NamedDecl>& returnType,
         const std::shared_ptr<CompoundStmt>& s);
 };
 

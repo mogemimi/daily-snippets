@@ -99,9 +99,9 @@ void ASTDumper::visit(const std::shared_ptr<FunctionExpr>& expr, Invoke&& traver
     std::vector<std::string> options;
     if (expr->namedDecl) {
         options.push_back(expr->namedDecl->getName());
-        if (auto type = expr->namedDecl->getType()) {
-            options.push_back(type->dump());
-        }
+    }
+    if (auto type = expr->getType()) {
+        options.push_back(type->dump());
     }
     dump(&dumpContext, "FunctionExpr", options, std::move(traverse));
 }
@@ -162,6 +162,10 @@ void ASTDumper::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& trav
         case BinaryOperatorKind::NotEqual: return "!=";
         case BinaryOperatorKind::LogicalAnd: return "&&";
         case BinaryOperatorKind::LogicalOr: return "||";
+        case BinaryOperatorKind::GreaterThan: return ">";
+        case BinaryOperatorKind::GreaterThanOrEqual: return ">=";
+        case BinaryOperatorKind::LessThan: return "<";
+        case BinaryOperatorKind::LessThanOrEqual: return "<=";
         }
         return "<unknown>";
     }();

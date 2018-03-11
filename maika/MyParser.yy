@@ -15,8 +15,26 @@
 #include "Stmt.h"
 #include <iostream>
 #include <string>
+#include <tuple>
 
 class MyDriver;
+
+namespace {
+template <class T>
+std::vector<T> appendVector(T left, const std::vector<T>& right)
+{
+    std::vector<T> s;
+    s.reserve(1 + right.size());
+    s.push_back(left);
+    s.insert(std::end(s), std::begin(right), std::end(right));
+    return s;
+}
+
+using CallSignature = std::tuple<
+  std::vector<std::shared_ptr<ParmVarDecl>>,
+  std::shared_ptr<NamedDecl>>;
+
+} // end of anonymous namespace 
 }
 
 %param { MyDriver& driver }
@@ -34,18 +52,6 @@ class MyDriver;
 %code
 {
 #include "MyDriver.h"
-
-namespace {
-template <class T>
-std::vector<T> appendVector(T left, const std::vector<T>& right)
-{
-    std::vector<T> s;
-    s.reserve(1 + right.size());
-    s.push_back(left);
-    s.insert(std::end(s), std::begin(right), std::end(right));
-    return s;
-}
-} // end of anonymous namespace 
 }
 
 %define api.token.prefix {TOK_}
@@ -118,7 +124,9 @@ std::vector<T> appendVector(T left, const std::vector<T>& right)
 %type  <std::vector<std::shared_ptr<FunctionDecl>>> function_definitions
 %type  <std::shared_ptr<FunctionDecl>>              function_definition
 %type  <std::shared_ptr<FunctionExpr>>              function_expression
+%type  <CallSignature>                              call_signature
 %type  <std::shared_ptr<VariableDecl>>              variable_definition
+%type  <std::shared_ptr<NamedDecl>>                 type_specifier
 %type  <std::shared_ptr<TranslationUnitDecl>>       translation_unit
 
 
@@ -135,11 +143,16 @@ function_definitions:
 ;
 
 function_definition:
-  "function" "identifier" "(" parameter_variables ")" compound_statement { $$ = FunctionDecl::make(@$, $2, $4, $6); }
+  "function" "identifier" call_signature compound_statement { $$ = FunctionDecl::make(@$, $2, std::get<0>($3), std::get<1>($3), $4); }
 ;
 
 function_expression:
-  "function" binding_identifier "(" parameter_variables ")" compound_statement { $$ = FunctionExpr::make(@$, $2, $4, $6); }
+  "function" binding_identifier call_signature compound_statement { $$ = FunctionExpr::make(@$, $2, std::get<0>($3), std::get<1>($3), $4); }
+;
+
+call_signature:
+  "(" parameter_variables ")"                     { std::get<0>($$) = $2; std::get<1>($$) = nullptr; }
+| "(" parameter_variables ")" ":" type_specifier  { std::get<0>($$) = $2; std::get<1>($$) = $5; }
 ;
 
 binding_identifier:
@@ -154,8 +167,12 @@ parameter_variables:
 ;
 
 parameter_variable:
-  "identifier"                  { $$ = ParmVarDecl::make(@$, $1); }
-| "identifier" ":" "identifier" { $$ = ParmVarDecl::make(@$, $1, $3); }
+  "identifier"                    { $$ = ParmVarDecl::make(@$, $1); }
+| "identifier" ":" type_specifier { $$ = ParmVarDecl::make(@$, $1, $3); }
+;
+
+type_specifier:
+  "identifier"  { $$ = $1; }
 ;
 
 statement:
@@ -220,12 +237,13 @@ literal:
 %left "||";
 %left "&&";
 %left "==" "!=";
+%left "<=" ">=" "<" ">";
 %left "+" "-";
 %left "*" "/" "%";
 %right "++" "--" "!";
 %left ".";
 %nonassoc "(" ")";
-
+     
 primary_expression:
   literal                 { $$ = $1; }
 | "identifier"            { $$ = DeclRefExpr::make(@$, $1); }
@@ -268,6 +286,10 @@ expression:
 | expression "!=" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::NotEqual, $1, $3); }
 | expression "&&" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LogicalAnd, $1, $3); }
 | expression "||" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LogicalOr, $1, $3); }
+| expression ">" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::GreaterThan, $1, $3); }
+| expression ">=" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::GreaterThanOrEqual, $1, $3); }
+| expression "<" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LessThan, $1, $3); }
+| expression "<=" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LessThanOrEqual, $1, $3); }
 | unary_expression                  { $$ = $1; }
 | call_expression                   { $$ = $1; }
 | member_expression                 { $$ = $1; }

@@ -25,6 +25,111 @@ void substition(
     ast->setType(type);
 }
 
+bool isSameType(const std::shared_ptr<Type>& a, const std::shared_ptr<Type>& b)
+{
+    if (a->getKind() != b->getKind()) {
+        return false;
+    }
+
+    switch (a->getKind()) {
+    case TypeKind::TypeVariable: {
+        const auto x = std::static_pointer_cast<TypeVariable>(a);
+        const auto y = std::static_pointer_cast<TypeVariable>(b);
+        assert(x);
+        assert(y);
+        return (x->getTypeID() == y->getTypeID());
+    }
+    case TypeKind::BuiltinType: {
+        const auto x = std::static_pointer_cast<BuiltinType>(a);
+        const auto y = std::static_pointer_cast<BuiltinType>(b);
+        assert(x);
+        assert(y);
+        return (x->getKind() == y->getKind());
+    }
+    case TypeKind::ReturnType:
+        // TODO: not implemented
+        return false;
+    case TypeKind::FunctionType:
+        // TODO: not implemented
+        return false;
+    }
+    return false;
+}
+
+bool isIntegral(const std::shared_ptr<Type>& t)
+{
+    if (t->getKind() != TypeKind::BuiltinType) {
+        return false;
+    }
+    assert(std::dynamic_pointer_cast<BuiltinType>(t) != nullptr);
+    const auto s = std::static_pointer_cast<BuiltinType>(t);
+    switch (s->kind) {
+    case BuiltinTypeKind::Int: return true;
+    default: break;
+    }
+    return false;
+}
+
+bool isFloatingPoint(const std::shared_ptr<Type>& t)
+{
+    if (t->getKind() != TypeKind::BuiltinType) {
+        return false;
+    }
+    assert(std::dynamic_pointer_cast<BuiltinType>(t) != nullptr);
+    const auto s = std::static_pointer_cast<BuiltinType>(t);
+    switch (s->kind) {
+    case BuiltinTypeKind::Double: return true;
+    default: break;
+    }
+    return false;
+}
+
+bool isBoolean(const std::shared_ptr<Type>& t)
+{
+    if (t->getKind() != TypeKind::BuiltinType) {
+        return false;
+    }
+    assert(std::dynamic_pointer_cast<BuiltinType>(t) != nullptr);
+    const auto s = std::static_pointer_cast<BuiltinType>(t);
+    switch (s->kind) {
+    case BuiltinTypeKind::Bool: return true;
+    default: break;
+    }
+    return false;
+}
+
+std::shared_ptr<Type> inferReturnType(const std::shared_ptr<TypeResolverScope>& scope)
+{
+    if (scope->returnTypes.empty()) {
+        return BuiltinType::make(BuiltinTypeKind::Void);
+    }
+    auto candidate = TypeInferer::infer(scope->env, scope->returnTypes.front());
+    assert(candidate);
+    for (const auto& ret : scope->returnTypes) {
+        auto t = TypeInferer::infer(scope->env, ret);
+        if (!isSameType(candidate, t)) {
+            // TODO: Not implemented
+            // if (t->getKind() != TypeKind::TypeVariable) {
+            //     error("Type mismatch");
+            // }
+            return BuiltinType::make(BuiltinTypeKind::Any);
+        }
+    }
+    return candidate;
+}
+
+std::vector<std::shared_ptr<Type>>
+getParameterTypes(const std::vector<std::shared_ptr<ParmVarDecl>>& parameters)
+{
+    std::vector<std::shared_ptr<Type>> parameterTypes;
+    for (const auto& param : parameters) {
+        assert(param);
+        assert(param->getType());
+        parameterTypes.push_back(param->getType());
+    }
+    return parameterTypes;
+}
+
 } // end of anonymous namespace
 
 TypeResolver::TypeResolver()
@@ -131,31 +236,16 @@ void TypeResolver::visit(const std::shared_ptr<FunctionExpr>& expr, Invoke&& tra
     traverse();
     popScope();
 
-    auto returnType = [&]() -> std::shared_ptr<Type> {
-        if (scope->returnTypes.empty()) {
-            return BuiltinType::make(BuiltinTypeKind::Void);
-        }
-        std::shared_ptr<Type> candidate = scope->returnTypes.back();
-        for (const auto& ret : scope->returnTypes) {
-            if (candidate != ret) {
-                return BuiltinType::make(BuiltinTypeKind::Any);
-            }
-        }
-        return candidate;
-    }();
+    auto returnType = inferReturnType(scope);
+    auto parameterTypes = getParameterTypes(expr->arguments);
+    auto functionType = FunctionType::make(std::move(returnType), std::move(parameterTypes));
 
-    std::vector<std::shared_ptr<Type>> parameterTypes;
-    for (const auto& param : expr->arguments) {
-        assert(param);
-        assert(param->getType());
-        parameterTypes.push_back(param->getType());
+    if (auto namedDecl = expr->namedDecl) {
+        substition(namedDecl, typeVariable, functionType);
     }
 
-    auto functionType = FunctionType::make(returnType, parameterTypes);
-    typeVariable->setType(functionType);
-
     assert(!expr->getType());
-    expr->setType(typeVariable);
+    expr->setType(functionType);
 }
 
 void TypeResolver::visit(const std::shared_ptr<IntegerLiteral>& expr)
@@ -192,6 +282,10 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
         case BinaryOperatorKind::NotEqual: return true;
         case BinaryOperatorKind::LogicalAnd: return true;
         case BinaryOperatorKind::LogicalOr: return true;
+        case BinaryOperatorKind::GreaterThan: return true;
+        case BinaryOperatorKind::GreaterThanOrEqual: return true;
+        case BinaryOperatorKind::LessThan: return true;
+        case BinaryOperatorKind::LessThanOrEqual: return true;
         default: break;
         }
         return false;
@@ -213,81 +307,6 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
     // TODO: Not implemented
     assert(!expr->getType());
     expr->setType(lhs->getType());
-}
-
-// bool isSameType(const std::shared_ptr<Type>& a, const std::shared_ptr<Type>& b)
-//{
-//    if (a->getKind() != b->getKind()) {
-//        return false;
-//    }
-//
-//    switch (a->getKind()) {
-//    case TypeKind::TypeVariable: {
-//        const auto x = std::static_pointer_cast<TypeVariable>(a);
-//        const auto y = std::static_pointer_cast<TypeVariable>(b);
-//        assert(x);
-//        assert(y);
-//        return (x->getTypeID() == y->getTypeID());
-//    }
-//    case TypeKind::BuiltinType: {
-//        const auto x = std::static_pointer_cast<BuiltinType>(a);
-//        const auto y = std::static_pointer_cast<BuiltinType>(b);
-//        assert(x);
-//        assert(y);
-//        return (x->getKind() == y->getKind());
-//    }
-//    case TypeKind::ReturnType: {
-//        // TODO: not implemented
-//        return false;
-//    }
-//    case TypeKind::FunctionType: {
-//        // TODO: not implemented
-//        return false;
-//    }
-//    }
-//    return false;
-//}
-
-bool isIntegral(const std::shared_ptr<Type>& t)
-{
-    if (t->getKind() != TypeKind::BuiltinType) {
-        return false;
-    }
-    assert(std::dynamic_pointer_cast<BuiltinType>(t) != nullptr);
-    const auto s = std::static_pointer_cast<BuiltinType>(t);
-    switch (s->kind) {
-    case BuiltinTypeKind::Int: return true;
-    default: break;
-    }
-    return false;
-}
-
-bool isFloatingPoint(const std::shared_ptr<Type>& t)
-{
-    if (t->getKind() != TypeKind::BuiltinType) {
-        return false;
-    }
-    assert(std::dynamic_pointer_cast<BuiltinType>(t) != nullptr);
-    const auto s = std::static_pointer_cast<BuiltinType>(t);
-    switch (s->kind) {
-    case BuiltinTypeKind::Double: return true;
-    default: break;
-    }
-    return false;
-}
-
-bool isBoolean(const std::shared_ptr<Type>& t)
-{
-    if (t->getKind() != TypeKind::BuiltinType) {
-        return false;
-    }
-    assert(std::dynamic_pointer_cast<BuiltinType>(t) != nullptr);
-    const auto s = std::static_pointer_cast<BuiltinType>(t);
-    switch (s->kind) {
-    case BuiltinTypeKind::Bool: return true;
-    default: break;
-    }
-    return false;
 }
 
 void TypeResolver::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& traverse)
@@ -355,7 +374,6 @@ void TypeResolver::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& tra
 
     const auto typeVariable = TypeVariable::make();
     if (auto namedDecl = decl->namedDecl) {
-        assert(namedDecl);
         assert(!namedDecl->getType());
         namedDecl->setType(typeVariable);
     }
@@ -363,28 +381,13 @@ void TypeResolver::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& tra
     traverse();
     popScope();
 
-    auto returnType = [&]() -> std::shared_ptr<Type> {
-        if (scope->returnTypes.empty()) {
-            return BuiltinType::make(BuiltinTypeKind::Void);
-        }
-        std::shared_ptr<Type> candidate = scope->returnTypes.back();
-        for (const auto& ret : scope->returnTypes) {
-            if (candidate != ret) {
-                return BuiltinType::make(BuiltinTypeKind::Any);
-            }
-        }
-        return candidate;
-    }();
+    auto returnType = inferReturnType(scope);
+    auto parameterTypes = getParameterTypes(decl->arguments);
+    auto functionType = FunctionType::make(std::move(returnType), std::move(parameterTypes));
 
-    std::vector<std::shared_ptr<Type>> parameterTypes;
-    for (const auto& param : decl->arguments) {
-        assert(param);
-        assert(param->getType());
-        parameterTypes.push_back(param->getType());
+    if (auto namedDecl = decl->namedDecl) {
+        substition(namedDecl, typeVariable, functionType);
     }
-
-    auto functionType = FunctionType::make(returnType, parameterTypes);
-    typeVariable->setType(functionType);
 
     assert(!decl->getType());
     decl->setType(BuiltinType::make(BuiltinTypeKind::Void));

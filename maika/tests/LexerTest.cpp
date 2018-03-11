@@ -10,10 +10,11 @@
 TEST_CASE("Lexer", "[lexer]")
 {
     constexpr auto source = R"(
-function min() {
-    if (a && c == true) {
-        return x++;
+function min(a : int, b : int) : int {
+    if (a < b) {
+        return a;
     }
+    return b;
 }
 )";
 

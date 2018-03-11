@@ -86,12 +86,14 @@ std::shared_ptr<FunctionDecl> FunctionDecl::make(
     const yy::location& loc,
     const std::shared_ptr<NamedDecl>& n,
     const std::vector<std::shared_ptr<ParmVarDecl>>& a,
+    const std::shared_ptr<NamedDecl>& returnType,
     const std::shared_ptr<CompoundStmt>& s)
 {
     auto decl = std::make_shared<FunctionDecl>();
     decl->location = loc;
     decl->namedDecl = n;
     decl->arguments = a;
+    decl->returnType = returnType;
     decl->compoundStmt = s;
     return decl;
 }
