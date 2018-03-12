@@ -9,6 +9,7 @@ SOURCES = \
 	ASTDumper.cpp \
 	ASTVisitor.cpp \
 	Decl.cpp \
+	Diagnostic.cpp \
 	Entity.cpp \
 	Expr.cpp \
 	IdentifierResolver.cpp \
@@ -42,6 +43,8 @@ format:
 		ASTVisitor.h \
 		Decl.cpp \
 		Decl.h \
+		Diagnostic.cpp \
+		Diagnostic.h \
 		Entity.cpp \
 		Entity.h \
 		Expr.cpp \

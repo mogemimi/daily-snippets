@@ -28,8 +28,18 @@ std::shared_ptr<Entity> Scope::lookup(const std::string& name) const
     return nullptr;
 }
 
+std::shared_ptr<Entity> Scope::findAlt(const std::string& name) const
+{
+    auto iter = variables.find(name);
+    if (iter != std::end(variables)) {
+        return iter->second;
+    }
+    return nullptr;
+}
+
 void Scope::insert(const std::shared_ptr<Entity>& v)
 {
     assert(v);
+    assert(findAlt(v->getName()) == nullptr);
     variables.emplace(v->getName(), v);
 }

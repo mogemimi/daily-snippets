@@ -75,24 +75,44 @@ void FunctionDecl::traverse(ASTVisitor& visitor)
         if (namedDecl) {
             namedDecl->traverse(visitor);
         }
-        for (const auto& arg : arguments) {
-            arg->traverse(visitor);
+        for (const auto& param : parameters) {
+            param->traverse(visitor);
         }
         compoundStmt->traverse(visitor);
     });
 }
 
+std::shared_ptr<NamedDecl> FunctionDecl::getNamedDecl() const
+{
+    return namedDecl;
+}
+
+const std::vector<std::shared_ptr<ParmVarDecl>>& FunctionDecl::getParameters() const
+{
+    return parameters;
+}
+
+std::shared_ptr<NamedDecl> FunctionDecl::getReturnType() const
+{
+    return returnType;
+}
+
+std::shared_ptr<CompoundStmt> FunctionDecl::getBody() const
+{
+    return compoundStmt;
+}
+
 std::shared_ptr<FunctionDecl> FunctionDecl::make(
     const yy::location& loc,
     const std::shared_ptr<NamedDecl>& n,
-    const std::vector<std::shared_ptr<ParmVarDecl>>& a,
+    const std::vector<std::shared_ptr<ParmVarDecl>>& parameters,
     const std::shared_ptr<NamedDecl>& returnType,
     const std::shared_ptr<CompoundStmt>& s)
 {
     auto decl = std::make_shared<FunctionDecl>();
     decl->location = loc;
     decl->namedDecl = n;
-    decl->arguments = a;
+    decl->parameters = parameters;
     decl->returnType = returnType;
     decl->compoundStmt = s;
     return decl;

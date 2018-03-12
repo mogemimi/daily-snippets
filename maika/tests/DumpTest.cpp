@@ -1,5 +1,6 @@
 #include "ASTContext.h"
 #include "ASTDumper.h"
+#include "Diagnostic.h"
 #include "Entity.h"
 #include "IdentifierResolver.h"
 #include "MyDriver.h"
@@ -72,13 +73,16 @@ function main() {
             IntegerLiteral '75'
 )";
 
+    auto diag = std::make_shared<DiagnosticHandler>();
+
     MyDriver driver;
-    auto [astContext, ok] = driver.parseString(source);
+    auto [astContext, ok] = driver.parseString(source, diag);
     REQUIRE(ok);
 
     ASTDumper dumper;
     ASTTraverser traverser;
     traverser.traverse(astContext, dumper);
+    REQUIRE(!diag->hasError());
 
     REQUIRE(dumper.getResult() == expect);
 }
@@ -112,26 +116,25 @@ function main() {
     return !(x == y);
 }
 )";
-    MyDriver driver;
+    auto diag = std::make_shared<DiagnosticHandler>();
 
-    auto [astContext, ok] = driver.parseString(source);
+    MyDriver driver;
+    auto [astContext, ok] = driver.parseString(source, diag);
     REQUIRE(ok);
 
+    ASTTraverser traverser;
     IdentifierContext context;
-    {
-        IdentifierResolver resolver(&context);
-        ASTTraverser traverser;
-        traverser.traverse(astContext, resolver);
-    }
-    {
-        TypeResolver typeResolver;
-        ASTTraverser traverser;
-        traverser.traverse(astContext, typeResolver);
-    }
-    {
-        ASTDumper dumper;
-        ASTTraverser traverser;
-        traverser.traverse(astContext, dumper);
-        printf("%s\n", dumper.getResult().c_str());
-    }
+
+    IdentifierResolver resolver(&context, diag);
+    traverser.traverse(astContext, resolver);
+    REQUIRE(!diag->hasError());
+
+    TypeResolver typeResolver(diag);
+    traverser.traverse(astContext, typeResolver);
+    REQUIRE(!diag->hasError());
+
+    ASTDumper dumper;
+    traverser.traverse(astContext, dumper);
+    REQUIRE(!diag->hasError());
+    // printf("%s\n", dumper.getResult().c_str());
 }

@@ -1,5 +1,6 @@
 #include "ASTContext.h"
 #include "ASTDumper.h"
+#include "Diagnostic.h"
 #include "Entity.h"
 #include "MyDriver.h"
 #include <iostream>
@@ -18,14 +19,16 @@ function min(a : int, b : int) : int {
 }
 )";
 
+    auto diag = std::make_shared<DiagnosticHandler>();
+
     MyDriver driver;
-    auto [astContext, ok] = driver.parseString(source);
+    auto [astContext, ok] = driver.parseString(source, diag);
     REQUIRE(ok);
 
-    {
-        ASTDumper dumper;
-        ASTTraverser traverser;
-        traverser.traverse(astContext, dumper);
-        printf("%s\n", dumper.getResult().c_str());
-    }
+    ASTTraverser traverser;
+
+    ASTDumper dumper;
+    traverser.traverse(astContext, dumper);
+    REQUIRE(!diag->hasError());
+    printf("%s\n", dumper.getResult().c_str());
 }

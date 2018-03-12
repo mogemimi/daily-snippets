@@ -1,5 +1,6 @@
 #include "TypeResolver.h"
 #include "Decl.h"
+#include "Diagnostic.h"
 #include "Entity.h"
 #include "Expr.h"
 #include "IdentifierResolver.h"
@@ -132,8 +133,10 @@ getParameterTypes(const std::vector<std::shared_ptr<ParmVarDecl>>& parameters)
 
 } // end of anonymous namespace
 
-TypeResolver::TypeResolver()
+TypeResolver::TypeResolver(const std::shared_ptr<DiagnosticHandler>& diagIn)
+    : diag(diagIn)
 {
+    assert(diag);
     auto scope = std::make_shared<TypeResolverScope>();
     pushScope(scope);
 }
@@ -157,7 +160,8 @@ void TypeResolver::popScope()
 
 void TypeResolver::error(const yy::location& l, const std::string& err)
 {
-    std::cerr << l << ": " << err << std::endl;
+    assert(diag);
+    diag->error(l, err);
 }
 
 void TypeResolver::visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traverse)
@@ -227,8 +231,7 @@ void TypeResolver::visit(const std::shared_ptr<FunctionExpr>& expr, Invoke&& tra
     pushScope(scope);
 
     const auto typeVariable = TypeVariable::make();
-    if (auto namedDecl = expr->namedDecl) {
-        assert(namedDecl);
+    if (auto namedDecl = expr->getNamedDecl()) {
         assert(!namedDecl->getType());
         namedDecl->setType(typeVariable);
     }
@@ -237,10 +240,10 @@ void TypeResolver::visit(const std::shared_ptr<FunctionExpr>& expr, Invoke&& tra
     popScope();
 
     auto returnType = inferReturnType(scope);
-    auto parameterTypes = getParameterTypes(expr->arguments);
+    auto parameterTypes = getParameterTypes(expr->getParameters());
     auto functionType = FunctionType::make(std::move(returnType), std::move(parameterTypes));
 
-    if (auto namedDecl = expr->namedDecl) {
+    if (auto namedDecl = expr->getNamedDecl()) {
         substition(namedDecl, typeVariable, functionType);
     }
 
@@ -373,7 +376,7 @@ void TypeResolver::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& tra
     pushScope(scope);
 
     const auto typeVariable = TypeVariable::make();
-    if (auto namedDecl = decl->namedDecl) {
+    if (auto namedDecl = decl->getNamedDecl()) {
         assert(!namedDecl->getType());
         namedDecl->setType(typeVariable);
     }
@@ -382,10 +385,10 @@ void TypeResolver::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& tra
     popScope();
 
     auto returnType = inferReturnType(scope);
-    auto parameterTypes = getParameterTypes(decl->arguments);
+    auto parameterTypes = getParameterTypes(decl->getParameters());
     auto functionType = FunctionType::make(std::move(returnType), std::move(parameterTypes));
 
-    if (auto namedDecl = decl->namedDecl) {
+    if (auto namedDecl = decl->getNamedDecl()) {
         substition(namedDecl, typeVariable, functionType);
     }
 

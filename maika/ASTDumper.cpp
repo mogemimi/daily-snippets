@@ -97,8 +97,8 @@ void ASTDumper::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse)
 void ASTDumper::visit(const std::shared_ptr<FunctionExpr>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;
-    if (expr->namedDecl) {
-        options.push_back(expr->namedDecl->getName());
+    if (auto namedDecl = expr->getNamedDecl()) {
+        options.push_back(namedDecl->getName());
     }
     if (auto type = expr->getType()) {
         options.push_back(type->dump());
@@ -231,9 +231,9 @@ void ASTDumper::visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invoke&&
 void ASTDumper::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse)
 {
     std::vector<std::string> options;
-    if (decl->namedDecl) {
-        options.push_back(decl->namedDecl->getName());
-        if (auto type = decl->namedDecl->getType()) {
+    if (auto namedDecl = decl->getNamedDecl()) {
+        options.push_back(namedDecl->getName());
+        if (auto type = namedDecl->getType()) {
             options.push_back(type->dump());
         }
     }

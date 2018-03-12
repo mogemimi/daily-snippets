@@ -17,9 +17,10 @@ struct TypeResolverScope final {
 
 class TypeResolver final : public ASTVisitor {
     std::vector<std::shared_ptr<TypeResolverScope>> scopeStack;
+    std::shared_ptr<DiagnosticHandler> diag;
 
 public:
-    TypeResolver();
+    explicit TypeResolver(const std::shared_ptr<DiagnosticHandler>& diag);
 
     std::shared_ptr<TypeResolverScope> getCurrentScope();
     void pushScope(const std::shared_ptr<TypeResolverScope>& scope);

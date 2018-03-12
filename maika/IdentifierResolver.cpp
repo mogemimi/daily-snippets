@@ -1,5 +1,6 @@
 #include "IdentifierResolver.h"
 #include "Decl.h"
+#include "Diagnostic.h"
 #include "Entity.h"
 #include "Expr.h"
 #include "Stmt.h"
@@ -7,15 +8,20 @@
 #include <cassert>
 #include <utility>
 
-IdentifierResolver::IdentifierResolver(IdentifierContext* contextIn)
+IdentifierResolver::IdentifierResolver(
+    IdentifierContext* contextIn, const std::shared_ptr<DiagnosticHandler>& diagIn)
     : context(contextIn)
+    , diag(diagIn)
 {
+    assert(diag);
+
     auto scope = std::make_shared<Scope>();
     pushScope(scope);
 
     scope->insert(std::make_shared<Entity>("int", BuiltinType::make(BuiltinTypeKind::Int)));
     scope->insert(std::make_shared<Entity>("bool", BuiltinType::make(BuiltinTypeKind::Bool)));
     scope->insert(std::make_shared<Entity>("double", BuiltinType::make(BuiltinTypeKind::Double)));
+    scope->insert(std::make_shared<Entity>("string", BuiltinType::make(BuiltinTypeKind::String)));
     scope->insert(std::make_shared<Entity>("void", BuiltinType::make(BuiltinTypeKind::Void)));
     scope->insert(std::make_shared<Entity>("any", BuiltinType::make(BuiltinTypeKind::Any)));
 }
@@ -39,17 +45,13 @@ void IdentifierResolver::popScope()
 
 void IdentifierResolver::error(const yy::location& l, const std::string& err)
 {
-    std::cerr << l << ": " << err << std::endl;
+    assert(diag);
+    diag->error(l, err);
 }
 
 void IdentifierResolver::visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traverse)
 {
-    auto scope = std::make_shared<Scope>(getCurrentScope());
-    pushScope(scope);
-
     traverse();
-
-    popScope();
 }
 
 void IdentifierResolver::visit(const std::shared_ptr<IfStmt>& stmt, Invoke&& traverse)
@@ -102,10 +104,32 @@ void IdentifierResolver::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&
     traverse();
 }
 
+void IdentifierResolver::visit(const std::shared_ptr<FunctionExpr>& expr, Invoke&& traverse)
+{
+    if (auto namedDecl = expr->getNamedDecl()) {
+        auto scope = getCurrentScope();
+        assert(scope);
+
+        auto entity = std::make_shared<Entity>(namedDecl->getName(), namedDecl);
+        scope->insert(entity);
+        namedDecl->setEntity(entity);
+
+        if (context) {
+            context->entities.push_back(entity);
+        }
+    }
+
+    auto scope = std::make_shared<Scope>(getCurrentScope());
+    pushScope(scope);
+
+    traverse();
+
+    popScope();
+}
+
 void IdentifierResolver::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse)
 {
-    auto namedDecl = decl->namedDecl;
-    if (namedDecl) {
+    if (auto namedDecl = decl->getNamedDecl()) {
         auto scope = getCurrentScope();
         assert(scope);
 
@@ -170,6 +194,12 @@ void IdentifierResolver::visit(const std::shared_ptr<VariableDecl>& decl, Invoke
 
     auto namedDecl = decl->getNamedDecl();
     assert(namedDecl);
+
+    auto alt = scope->findAlt(namedDecl->getName());
+    if (alt) {
+        error(namedDecl->getLocation(), "'" + namedDecl->getName() + "' redeclared in this block");
+        return;
+    }
 
     auto entity = std::make_shared<Entity>(namedDecl->getName(), namedDecl);
     scope->insert(entity);

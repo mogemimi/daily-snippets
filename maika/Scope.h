@@ -19,5 +19,7 @@ public:
 
     std::shared_ptr<Entity> lookup(const std::string& name) const;
 
+    std::shared_ptr<Entity> findAlt(const std::string& name) const;
+
     void insert(const std::shared_ptr<Entity>& v);
 };

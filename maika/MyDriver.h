@@ -33,6 +33,7 @@ struct Comment {
 
 class MyDriver final {
 private:
+    std::shared_ptr<DiagnosticHandler> diag;
     std::function<void()> defer;
     bool traceScanning;
 
@@ -42,8 +43,10 @@ public:
     std::string sourceText;
     std::vector<Comment> comments;
 
-    std::tuple<ASTContext, bool> parseFile(const std::string& filename);
-    std::tuple<ASTContext, bool> parseString(const std::string& text);
+    std::tuple<ASTContext, bool>
+    parseFile(const std::string& filename, const std::shared_ptr<DiagnosticHandler>& diag);
+    std::tuple<ASTContext, bool>
+    parseString(const std::string& text, const std::shared_ptr<DiagnosticHandler>& diag);
 
     void scanBegin();
     void scanEnd();

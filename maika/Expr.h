@@ -99,19 +99,27 @@ public:
 class FunctionExpr final
     : public Expr
     , public std::enable_shared_from_this<FunctionExpr> {
-public:
+private:
     std::shared_ptr<NamedDecl> namedDecl;
-    std::vector<std::shared_ptr<ParmVarDecl>> arguments;
+    std::vector<std::shared_ptr<ParmVarDecl>> parameters;
     std::shared_ptr<NamedDecl> returnType;
     std::shared_ptr<CompoundStmt> compoundStmt;
 
 public:
     void traverse(ASTVisitor& visitor) override;
 
+    std::shared_ptr<NamedDecl> getNamedDecl() const;
+
+    const std::vector<std::shared_ptr<ParmVarDecl>>& getParameters() const;
+
+    std::shared_ptr<NamedDecl> getReturnType() const;
+
+    std::shared_ptr<CompoundStmt> getBody() const;
+
     static std::shared_ptr<FunctionExpr> make(
         const yy::location& loc,
         const std::shared_ptr<NamedDecl>& n,
-        const std::vector<std::shared_ptr<ParmVarDecl>>& a,
+        const std::vector<std::shared_ptr<ParmVarDecl>>& parameters,
         const std::shared_ptr<NamedDecl>& returnType,
         const std::shared_ptr<CompoundStmt>& s);
 };
