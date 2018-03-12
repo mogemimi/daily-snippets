@@ -2,6 +2,7 @@
 #include "ASTDumper.h"
 #include "Diagnostic.h"
 #include "Entity.h"
+#include "Formatter.h"
 #include "MyDriver.h"
 #include <iostream>
 #include <sstream>
@@ -12,6 +13,7 @@ TEST_CASE("Lexer", "[lexer]")
 {
     constexpr auto source = R"(
 function min(a : int, b : int) : int {
+    // TODO: Replace with '?' operator.
     if (a < b) {
         return a;
     }
@@ -30,5 +32,10 @@ function min(a : int, b : int) : int {
     ASTDumper dumper;
     traverser.traverse(astContext, dumper);
     REQUIRE(!diag->hasError());
-    printf("%s\n", dumper.getResult().c_str());
+    // printf("%s\n", dumper.getResult().c_str());
+
+    Formatter formatter;
+    traverser.traverse(astContext, formatter);
+    REQUIRE(!diag->hasError());
+    printf("%s\n", formatter.getResult().c_str());
 }

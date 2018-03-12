@@ -393,7 +393,7 @@ void TypeResolver::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& tra
     }
 
     assert(!decl->getType());
-    decl->setType(BuiltinType::make(BuiltinTypeKind::Void));
+    decl->setType(functionType);
 }
 
 void TypeResolver::visit(const std::shared_ptr<ParmVarDecl>& decl, Invoke&& traverse)

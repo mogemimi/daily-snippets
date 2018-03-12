@@ -43,3 +43,6 @@ class Scope;
 
 // NOTE: Diagnostic
 class DiagnosticHandler;
+
+// NOTE: Tools
+class Formatter;

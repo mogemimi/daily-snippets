@@ -12,6 +12,7 @@ SOURCES = \
 	Diagnostic.cpp \
 	Entity.cpp \
 	Expr.cpp \
+	Formatter.cpp \
 	IdentifierResolver.cpp \
 	MyLexer.cpp \
 	MyDriver.cpp \
@@ -51,6 +52,8 @@ format:
 		Expr.h \
 		Expr.cpp \
 		Expr.h \
+		Formatter.cpp \
+		Formatter.h \
 		Forward.h \
 		IdentifierResolver.cpp \
 		IdentifierResolver.h \
