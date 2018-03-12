@@ -15,6 +15,7 @@ TEST_CASE("Lexer", "[lexer]")
 function min(a : int, b : int) : int {
     // TODO: Replace with '?' operator.
     if (a < b) {
+		const c = 42;
         return a;
     }
     return b;

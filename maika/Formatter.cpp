@@ -62,7 +62,7 @@ void Formatter::visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traver
 
 void Formatter::visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse)
 {
-    dump(&dumpContext, "DeclStmt", {}, std::move(traverse));
+    traverse();
 }
 
 void Formatter::visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse)
@@ -145,32 +145,17 @@ void Formatter::visit(const std::shared_ptr<FunctionExpr>& expr, Invoke&& traver
 
 void Formatter::visit(const std::shared_ptr<IntegerLiteral>& expr)
 {
-    std::vector<std::string> options;
-    options.push_back(std::to_string(expr->getValue()));
-    if (auto type = expr->getType()) {
-        options.push_back(type->dump());
-    }
-    dump(&dumpContext, "IntegerLiteral", options);
+    dumpContext.result += std::to_string(expr->getValue());
 }
 
 void Formatter::visit(const std::shared_ptr<DoubleLiteral>& expr)
 {
-    std::vector<std::string> options;
-    options.push_back(std::to_string(expr->getValue()));
-    if (auto type = expr->getType()) {
-        options.push_back(type->dump());
-    }
-    dump(&dumpContext, "DoubleLiteral", options);
+    dumpContext.result += std::to_string(expr->getValue());
 }
 
 void Formatter::visit(const std::shared_ptr<BoolLiteral>& expr)
 {
-    std::vector<std::string> options;
-    options.push_back(expr->getValue() ? "true" : "false");
-    if (auto type = expr->getType()) {
-        options.push_back(type->dump());
-    }
-    dump(&dumpContext, "BoolLiteral", options);
+    dumpContext.result += (expr->getValue() ? "true" : "false");
 }
 
 void Formatter::visit(const std::shared_ptr<StringLiteral>& expr)
@@ -319,4 +304,44 @@ void Formatter::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traver
     dumpContext.result += "\n";
 }
 
-void Formatter::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse) {}
+void Formatter::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse)
+{
+    const auto indent = makeIndent(dumpContext.level);
+    dumpContext.result += indent + "let ";
+    if (auto namedDecl = decl->getNamedDecl()) {
+        dumpContext.result += namedDecl->getName();
+    }
+
+    if (auto type = decl->getType()) {
+        dumpContext.result += ": ";
+        dumpContext.result += type->dump();
+    }
+
+    if (auto expr = decl->getExpr()) {
+        dumpContext.result += " = ";
+        expr->traverse(*this);
+    }
+
+    dumpContext.result += ";\n";
+}
+
+void Formatter::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse)
+{
+    const auto indent = makeIndent(dumpContext.level);
+    dumpContext.result += indent + "const ";
+    if (auto namedDecl = decl->getNamedDecl()) {
+        dumpContext.result += namedDecl->getName();
+    }
+
+    if (auto type = decl->getType()) {
+        dumpContext.result += ": ";
+        dumpContext.result += type->dump();
+    }
+
+    if (auto expr = decl->getExpr()) {
+        dumpContext.result += " = ";
+        expr->traverse(*this);
+    }
+
+    dumpContext.result += ";\n";
+}

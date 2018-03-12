@@ -99,6 +99,7 @@ blank       [ \t]
 "function"  return yy::MyParser::make_FUNCTION(loc);
 "return"    return yy::MyParser::make_RETURN(loc);
 "let"       return yy::MyParser::make_LET(loc);
+"const"     return yy::MyParser::make_CONST(loc);
 "if"        return yy::MyParser::make_IF(loc);
 "else"      return yy::MyParser::make_ELSE(loc);
 "while"     return yy::MyParser::make_WHILE(loc);

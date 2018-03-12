@@ -123,3 +123,25 @@ public:
         const std::shared_ptr<NamedDecl>& n,
         const std::shared_ptr<Expr>& e);
 };
+
+class ConstDecl final
+    : public Decl
+    , public std::enable_shared_from_this<ConstDecl> {
+private:
+    std::shared_ptr<NamedDecl> namedDecl;
+    std::shared_ptr<Expr> expr;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<NamedDecl> getNamedDecl() const { return namedDecl; }
+    std::shared_ptr<Expr> getExpr() const { return expr; }
+
+    static std::shared_ptr<ConstDecl>
+    make(const yy::location& loc, const std::shared_ptr<NamedDecl>& n);
+
+    static std::shared_ptr<ConstDecl> make(
+        const yy::location& loc,
+        const std::shared_ptr<NamedDecl>& n,
+        const std::shared_ptr<Expr>& e);
+};

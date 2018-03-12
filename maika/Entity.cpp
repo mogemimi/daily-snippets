@@ -6,20 +6,6 @@
 #include <cassert>
 #include <utility>
 
-Entity::Entity(const std::string& nameIn, const std::shared_ptr<NamedDecl>& declIn)
-    : name(nameIn)
-    , decl(declIn)
-    , kind(EntityKind::Variable)
-{
-}
-
-Entity::Entity(const std::string& nameIn, const std::shared_ptr<Type>& typeIn)
-    : name(nameIn)
-    , type(typeIn)
-    , kind(EntityKind::Type)
-{
-}
-
 EntityKind Entity::getKind() const
 {
     return kind;
@@ -40,4 +26,33 @@ std::shared_ptr<Type> Entity::getType() const
 {
     assert(kind == EntityKind::Type);
     return type;
+}
+
+std::shared_ptr<Entity>
+Entity::makeVariable(const std::string& name, const std::shared_ptr<NamedDecl>& decl)
+{
+    auto entity = std::make_shared<Entity>();
+    entity->kind = EntityKind::Variable;
+    entity->name = name;
+    entity->decl = decl;
+    return entity;
+}
+
+std::shared_ptr<Entity>
+Entity::makeConst(const std::string& name, const std::shared_ptr<NamedDecl>& decl)
+{
+    auto entity = std::make_shared<Entity>();
+    entity->kind = EntityKind::Constant;
+    entity->name = name;
+    entity->decl = decl;
+    return entity;
+}
+
+std::shared_ptr<Entity> Entity::makeType(const std::string& name, const std::shared_ptr<Type>& type)
+{
+    auto entity = std::make_shared<Entity>();
+    entity->kind = EntityKind::Type;
+    entity->name = name;
+    entity->type = type;
+    return entity;
 }

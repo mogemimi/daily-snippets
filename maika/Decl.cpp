@@ -174,3 +174,33 @@ std::shared_ptr<VariableDecl> VariableDecl::make(
     decl->expr = e;
     return decl;
 }
+
+void ConstDecl::traverse(ASTVisitor& visitor)
+{
+    assert(namedDecl);
+    visitor.visit(shared_from_this(), [&] {
+        namedDecl->traverse(visitor);
+        if (expr) {
+            expr->traverse(visitor);
+        }
+    });
+}
+
+std::shared_ptr<ConstDecl>
+ConstDecl::make(const yy::location& loc, const std::shared_ptr<NamedDecl>& n)
+{
+    auto decl = std::make_shared<ConstDecl>();
+    decl->location = loc;
+    decl->namedDecl = n;
+    return decl;
+}
+
+std::shared_ptr<ConstDecl> ConstDecl::make(
+    const yy::location& loc, const std::shared_ptr<NamedDecl>& n, const std::shared_ptr<Expr>& e)
+{
+    auto decl = std::make_shared<ConstDecl>();
+    decl->location = loc;
+    decl->namedDecl = n;
+    decl->expr = e;
+    return decl;
+}

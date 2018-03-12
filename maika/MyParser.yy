@@ -93,6 +93,7 @@ using CallSignature = std::tuple<
 %token FUNCTION             "function"
 %token RETURN               "return"
 %token LET                  "let"
+%token CONST                "const"
 %token IF                   "if"
 %token ELSE                 "else"
 %token WHILE                "while"
@@ -126,6 +127,7 @@ using CallSignature = std::tuple<
 %type  <std::shared_ptr<FunctionExpr>>              function_expression
 %type  <CallSignature>                              call_signature
 %type  <std::shared_ptr<VariableDecl>>              variable_definition
+%type  <std::shared_ptr<ConstDecl>>                 const_definition
 %type  <std::shared_ptr<NamedDecl>>                 type_specifier
 %type  <std::shared_ptr<TranslationUnitDecl>>       translation_unit
 
@@ -179,6 +181,7 @@ statement:
   expression ";"            { $$ = $1; }
 | return_statement          { $$ = $1; }
 | variable_definition ";"   { $$ = DeclStmt::make($1); }
+| const_definition ";"      { $$ = DeclStmt::make($1); }
 | if_statement              { $$ = $1; }
 | while_statement           { $$ = $1; }
 | for_statement             { $$ = $1; }
@@ -224,6 +227,11 @@ for_init_statement:
 variable_definition:
   "let" "identifier"                { $$ = VariableDecl::make(@$, $2); }
 | "let" "identifier" "=" expression { $$ = VariableDecl::make(@$, $2, $4); }
+;
+
+const_definition:
+  "const" "identifier"                { $$ = ConstDecl::make(@$, $2); }
+| "const" "identifier" "=" expression { $$ = ConstDecl::make(@$, $2, $4); }
 ;
 
 literal:

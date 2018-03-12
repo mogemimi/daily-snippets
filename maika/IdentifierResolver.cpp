@@ -18,12 +18,12 @@ IdentifierResolver::IdentifierResolver(
     auto scope = std::make_shared<Scope>();
     pushScope(scope);
 
-    scope->insert(std::make_shared<Entity>("int", BuiltinType::make(BuiltinTypeKind::Int)));
-    scope->insert(std::make_shared<Entity>("bool", BuiltinType::make(BuiltinTypeKind::Bool)));
-    scope->insert(std::make_shared<Entity>("double", BuiltinType::make(BuiltinTypeKind::Double)));
-    scope->insert(std::make_shared<Entity>("string", BuiltinType::make(BuiltinTypeKind::String)));
-    scope->insert(std::make_shared<Entity>("void", BuiltinType::make(BuiltinTypeKind::Void)));
-    scope->insert(std::make_shared<Entity>("any", BuiltinType::make(BuiltinTypeKind::Any)));
+    scope->insert(Entity::makeType("int", BuiltinType::make(BuiltinTypeKind::Int)));
+    scope->insert(Entity::makeType("bool", BuiltinType::make(BuiltinTypeKind::Bool)));
+    scope->insert(Entity::makeType("double", BuiltinType::make(BuiltinTypeKind::Double)));
+    scope->insert(Entity::makeType("string", BuiltinType::make(BuiltinTypeKind::String)));
+    scope->insert(Entity::makeType("void", BuiltinType::make(BuiltinTypeKind::Void)));
+    scope->insert(Entity::makeType("any", BuiltinType::make(BuiltinTypeKind::Any)));
 }
 
 std::shared_ptr<Scope> IdentifierResolver::getCurrentScope()
@@ -110,7 +110,7 @@ void IdentifierResolver::visit(const std::shared_ptr<FunctionExpr>& expr, Invoke
         auto scope = getCurrentScope();
         assert(scope);
 
-        auto entity = std::make_shared<Entity>(namedDecl->getName(), namedDecl);
+        auto entity = Entity::makeVariable(namedDecl->getName(), namedDecl);
         scope->insert(entity);
         namedDecl->setEntity(entity);
 
@@ -133,7 +133,7 @@ void IdentifierResolver::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke
         auto scope = getCurrentScope();
         assert(scope);
 
-        auto entity = std::make_shared<Entity>(namedDecl->getName(), namedDecl);
+        auto entity = Entity::makeVariable(namedDecl->getName(), namedDecl);
         scope->insert(entity);
         namedDecl->setEntity(entity);
 
@@ -176,7 +176,7 @@ void IdentifierResolver::visit(const std::shared_ptr<ParmVarDecl>& decl, Invoke&
     assert(namedDecl);
     assert(!namedDecl->getName().empty());
 
-    auto entity = std::make_shared<Entity>(namedDecl->getName(), namedDecl);
+    auto entity = Entity::makeVariable(namedDecl->getName(), namedDecl);
     scope->insert(entity);
     namedDecl->setEntity(entity);
 
@@ -201,7 +201,32 @@ void IdentifierResolver::visit(const std::shared_ptr<VariableDecl>& decl, Invoke
         return;
     }
 
-    auto entity = std::make_shared<Entity>(namedDecl->getName(), namedDecl);
+    auto entity = Entity::makeVariable(namedDecl->getName(), namedDecl);
+    scope->insert(entity);
+    namedDecl->setEntity(entity);
+
+    if (context) {
+        context->entities.push_back(entity);
+    }
+
+    traverse();
+}
+
+void IdentifierResolver::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse)
+{
+    auto scope = getCurrentScope();
+    assert(scope);
+
+    auto namedDecl = decl->getNamedDecl();
+    assert(namedDecl);
+
+    auto alt = scope->findAlt(namedDecl->getName());
+    if (alt) {
+        error(namedDecl->getLocation(), "'" + namedDecl->getName() + "' redeclared in this block");
+        return;
+    }
+
+    auto entity = Entity::makeConst(namedDecl->getName(), namedDecl);
     scope->insert(entity);
     namedDecl->setEntity(entity);
 

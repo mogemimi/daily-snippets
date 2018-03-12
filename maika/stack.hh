@@ -42,7 +42,7 @@
 
 
 namespace yy {
-#line 46 "stack.hh" // stack.hh:151
+#line 46 "stack.hh" // stack.hh:132
   template <class T, class S = std::vector<T> >
   class stack
   {
@@ -152,6 +152,6 @@ namespace yy {
 
 
 } // yy
-#line 156 "stack.hh" // stack.hh:151
+#line 156 "stack.hh" // stack.hh:132
 
 #endif // !YY_YY_STACK_HH_INCLUDED

@@ -40,4 +40,5 @@ public:
     void visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<ParmVarDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse) override;
 };

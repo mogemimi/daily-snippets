@@ -33,6 +33,7 @@ class NamedDecl;
 class ParmVarDecl;
 class TranslationUnitDecl;
 class VariableDecl;
+class ConstDecl;
 
 // NOTE: AST::Type
 class Type;

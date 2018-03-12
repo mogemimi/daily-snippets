@@ -8,6 +8,7 @@
 enum class EntityKind {
     Type,
     Variable,
+    Constant,
 };
 
 class Entity final {
@@ -18,10 +19,6 @@ private:
     EntityKind kind;
 
 public:
-    Entity(const std::string& name, const std::shared_ptr<NamedDecl>& decl);
-
-    Entity(const std::string& name, const std::shared_ptr<Type>& type);
-
     EntityKind getKind() const;
 
     std::string getName() const;
@@ -29,4 +26,13 @@ public:
     std::shared_ptr<NamedDecl> getDecl() const;
 
     std::shared_ptr<Type> getType() const;
+
+    static std::shared_ptr<Entity>
+    makeVariable(const std::string& name, const std::shared_ptr<NamedDecl>& decl);
+
+    static std::shared_ptr<Entity>
+    makeConst(const std::string& name, const std::shared_ptr<NamedDecl>& decl);
+
+    static std::shared_ptr<Entity>
+    makeType(const std::string& name, const std::shared_ptr<Type>& type);
 };

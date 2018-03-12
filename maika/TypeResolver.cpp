@@ -451,6 +451,34 @@ void TypeResolver::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& tra
     decl->setType(BuiltinType::make(BuiltinTypeKind::Void));
 }
 
+void TypeResolver::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse)
+{
+    const auto namedDecl = decl->getNamedDecl();
+    assert(namedDecl);
+    assert(!namedDecl->getName().empty());
+    assert(!namedDecl->getType());
+
+    const auto typeVariable = TypeVariable::make();
+    namedDecl->setType(typeVariable);
+
+    traverse();
+
+    if (auto expr = decl->getExpr()) {
+        assert(expr->getType());
+        auto scope = getCurrentScope();
+        typeVariable->setType(expr->getType());
+
+        auto s = TypeInferer::infer(scope->env, typeVariable);
+        substition(namedDecl, typeVariable, s);
+    }
+    else {
+        typeVariable->setType(BuiltinType::make(BuiltinTypeKind::Any));
+    }
+
+    assert(!decl->getType());
+    decl->setType(BuiltinType::make(BuiltinTypeKind::Void));
+}
+
 void TypeResolver::visit(const std::shared_ptr<NamedDecl>& decl)
 {
     if (decl->getType()) {
