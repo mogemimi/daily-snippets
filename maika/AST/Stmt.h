@@ -1,14 +1,20 @@
 #pragma once
 
 #include "Basic/Forward.h"
+#include "Basic/Location.h"
 #include <memory>
 #include <string>
 #include <vector>
 
 class Stmt {
+protected:
+    Location location;
+
 public:
     virtual ~Stmt() = default;
     virtual void traverse(ASTVisitor& visitor) = 0;
+
+    Location getLocation() const;
 };
 
 class CompoundStmt final
@@ -20,7 +26,8 @@ private:
 public:
     void traverse(ASTVisitor& visitor) override;
 
-    static std::shared_ptr<CompoundStmt> make(const std::vector<std::shared_ptr<Stmt>>& s);
+    static std::shared_ptr<CompoundStmt>
+    make(const Location& loc, const std::vector<std::shared_ptr<Stmt>>& s);
 };
 
 class DeclStmt final
@@ -32,7 +39,7 @@ private:
 public:
     void traverse(ASTVisitor& visitor) override;
 
-    static std::shared_ptr<DeclStmt> make(const std::shared_ptr<Decl>& d);
+    static std::shared_ptr<DeclStmt> make(const Location& loc, const std::shared_ptr<Decl>& d);
 };
 
 class ReturnStmt final
@@ -46,8 +53,8 @@ public:
 
     std::shared_ptr<Expr> getExpr() const;
 
-    static std::shared_ptr<ReturnStmt> make();
-    static std::shared_ptr<ReturnStmt> make(const std::shared_ptr<Expr>& e);
+    static std::shared_ptr<ReturnStmt> make(const Location& loc);
+    static std::shared_ptr<ReturnStmt> make(const Location& loc, const std::shared_ptr<Expr>& e);
 };
 
 class IfStmt final
@@ -67,10 +74,13 @@ public:
 
     std::shared_ptr<Stmt> getElse() const;
 
-    static std::shared_ptr<IfStmt>
-    make(const std::shared_ptr<Expr>& condExpr, const std::shared_ptr<Stmt>& thenStmt);
+    static std::shared_ptr<IfStmt> make(
+        const Location& loc,
+        const std::shared_ptr<Expr>& condExpr,
+        const std::shared_ptr<Stmt>& thenStmt);
 
     static std::shared_ptr<IfStmt> make(
+        const Location& loc,
         const std::shared_ptr<Expr>& condExpr,
         const std::shared_ptr<Stmt>& thenStmt,
         const std::shared_ptr<Stmt>& elseStmt);
@@ -90,8 +100,10 @@ public:
 
     std::shared_ptr<Stmt> getBody() const;
 
-    static std::shared_ptr<WhileStmt>
-    make(const std::shared_ptr<Expr>& condExpr, const std::shared_ptr<Stmt>& bodyStmt);
+    static std::shared_ptr<WhileStmt> make(
+        const Location& loc,
+        const std::shared_ptr<Expr>& condExpr,
+        const std::shared_ptr<Stmt>& bodyStmt);
 };
 
 class ForStmt final
@@ -115,6 +127,7 @@ public:
     std::shared_ptr<Stmt> getBody() const;
 
     static std::shared_ptr<ForStmt> make(
+        const Location& loc,
         const std::shared_ptr<Stmt>& initStmt,
         const std::shared_ptr<Expr>& condExpr,
         const std::shared_ptr<Expr>& incExpr,

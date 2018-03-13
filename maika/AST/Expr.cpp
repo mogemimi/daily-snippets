@@ -16,11 +16,6 @@ void Expr::setType(const std::shared_ptr<Type>& t)
     type = t;
 }
 
-Location Expr::getLocation() const
-{
-    return location;
-}
-
 void IntegerLiteral::traverse(ASTVisitor& visitor)
 {
     visitor.visit(shared_from_this());

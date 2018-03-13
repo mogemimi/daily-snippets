@@ -6,6 +6,11 @@
 #include <cassert>
 #include <utility>
 
+Location Stmt::getLocation() const
+{
+    return location;
+}
+
 void CompoundStmt::traverse(ASTVisitor& visitor)
 {
     visitor.visit(shared_from_this(), [&] {
@@ -16,9 +21,11 @@ void CompoundStmt::traverse(ASTVisitor& visitor)
     });
 }
 
-std::shared_ptr<CompoundStmt> CompoundStmt::make(const std::vector<std::shared_ptr<Stmt>>& s)
+std::shared_ptr<CompoundStmt>
+CompoundStmt::make(const Location& loc, const std::vector<std::shared_ptr<Stmt>>& s)
 {
     auto stmt = std::make_shared<CompoundStmt>();
+    stmt->location = loc;
     stmt->statements = s;
     return stmt;
 }
@@ -30,11 +37,12 @@ void DeclStmt::traverse(ASTVisitor& visitor)
     visitor.visit(shared_from_this(), [&] { decl->traverse(visitor); });
 }
 
-std::shared_ptr<DeclStmt> DeclStmt::make(const std::shared_ptr<Decl>& d)
+std::shared_ptr<DeclStmt> DeclStmt::make(const Location& loc, const std::shared_ptr<Decl>& d)
 {
-    auto expr = std::make_shared<DeclStmt>();
-    expr->decl = d;
-    return expr;
+    auto stmt = std::make_shared<DeclStmt>();
+    stmt->location = loc;
+    stmt->decl = d;
+    return stmt;
 }
 
 void ReturnStmt::traverse(ASTVisitor& visitor)
@@ -48,15 +56,17 @@ std::shared_ptr<Expr> ReturnStmt::getExpr() const
     return expr;
 }
 
-std::shared_ptr<ReturnStmt> ReturnStmt::make()
+std::shared_ptr<ReturnStmt> ReturnStmt::make(const Location& loc)
 {
     auto stmt = std::make_shared<ReturnStmt>();
+    stmt->location = loc;
     return stmt;
 }
 
-std::shared_ptr<ReturnStmt> ReturnStmt::make(const std::shared_ptr<Expr>& e)
+std::shared_ptr<ReturnStmt> ReturnStmt::make(const Location& loc, const std::shared_ptr<Expr>& e)
 {
     auto stmt = std::make_shared<ReturnStmt>();
+    stmt->location = loc;
     stmt->expr = e;
     return stmt;
 }
@@ -91,21 +101,26 @@ std::shared_ptr<Stmt> IfStmt::getElse() const
     return elseStmt;
 }
 
-std::shared_ptr<IfStmt>
-IfStmt::make(const std::shared_ptr<Expr>& condExpr, const std::shared_ptr<Stmt>& thenStmt)
+std::shared_ptr<IfStmt> IfStmt::make(
+    const Location& loc,
+    const std::shared_ptr<Expr>& condExpr,
+    const std::shared_ptr<Stmt>& thenStmt)
 {
     auto stmt = std::make_shared<IfStmt>();
+    stmt->location = loc;
     stmt->condExpr = condExpr;
     stmt->thenStmt = thenStmt;
     return stmt;
 }
 
 std::shared_ptr<IfStmt> IfStmt::make(
+    const Location& loc,
     const std::shared_ptr<Expr>& condExpr,
     const std::shared_ptr<Stmt>& thenStmt,
     const std::shared_ptr<Stmt>& elseStmt)
 {
     auto stmt = std::make_shared<IfStmt>();
+    stmt->location = loc;
     stmt->condExpr = condExpr;
     stmt->thenStmt = thenStmt;
     stmt->elseStmt = elseStmt;
@@ -134,10 +149,13 @@ std::shared_ptr<Stmt> WhileStmt::getBody() const
     return bodyStmt;
 }
 
-std::shared_ptr<WhileStmt>
-WhileStmt::make(const std::shared_ptr<Expr>& condExpr, const std::shared_ptr<Stmt>& bodyStmt)
+std::shared_ptr<WhileStmt> WhileStmt::make(
+    const Location& loc,
+    const std::shared_ptr<Expr>& condExpr,
+    const std::shared_ptr<Stmt>& bodyStmt)
 {
     auto stmt = std::make_shared<WhileStmt>();
+    stmt->location = loc;
     stmt->condExpr = condExpr;
     stmt->bodyStmt = bodyStmt;
     return stmt;
@@ -182,12 +200,14 @@ std::shared_ptr<Stmt> ForStmt::getBody() const
 }
 
 std::shared_ptr<ForStmt> ForStmt::make(
+    const Location& loc,
     const std::shared_ptr<Stmt>& initStmt,
     const std::shared_ptr<Expr>& condExpr,
     const std::shared_ptr<Expr>& incExpr,
     const std::shared_ptr<Stmt>& bodyStmt)
 {
     auto stmt = std::make_shared<ForStmt>();
+    stmt->location = loc;
     stmt->initStmt = initStmt;
     stmt->condExpr = condExpr;
     stmt->incExpr = incExpr;

@@ -208,8 +208,8 @@ type_specifier:
 statement:
   expression ";"            { $$ = $1; }
 | return_statement          { $$ = $1; }
-| variable_definition ";"   { $$ = DeclStmt::make($1); }
-| const_definition ";"      { $$ = DeclStmt::make($1); }
+| variable_definition ";"   { $$ = DeclStmt::make(toLoc(@$), $1); }
+| const_definition ";"      { $$ = DeclStmt::make(toLoc(@$), $1); }
 | if_statement              { $$ = $1; }
 | while_statement           { $$ = $1; }
 | for_statement             { $$ = $1; }
@@ -217,8 +217,8 @@ statement:
 ;
 
 compound_statement:
-  "{" "}"                 { $$ = CompoundStmt::make(std::vector<std::shared_ptr<Stmt>>{}); }
-| "{" statement_list "}"  { $$ = CompoundStmt::make($2); }
+  "{" "}"                 { $$ = CompoundStmt::make(toLoc(@$), std::vector<std::shared_ptr<Stmt>>{}); }
+| "{" statement_list "}"  { $$ = CompoundStmt::make(toLoc(@$), $2); }
 ;
 
 statement_list:
@@ -227,29 +227,29 @@ statement_list:
 ;
 
 return_statement:
-  "return" ";"            { $$ = ReturnStmt::make(); }
-| "return" expression ";" { $$ = ReturnStmt::make($2); }
+  "return" ";"            { $$ = ReturnStmt::make(toLoc(@$)); }
+| "return" expression ";" { $$ = ReturnStmt::make(toLoc(@$), $2); }
 ;
 
 %nonassoc "then";
 %nonassoc "else";
 if_statement:
-  "if" "(" expression ")" statement %prec "then"      { $$ = IfStmt::make($3, $5); }
-| "if" "(" expression ")" statement "else" statement  { $$ = IfStmt::make($3, $5, $7); }
+  "if" "(" expression ")" statement %prec "then"      { $$ = IfStmt::make(toLoc(@$), $3, $5); }
+| "if" "(" expression ")" statement "else" statement  { $$ = IfStmt::make(toLoc(@$), $3, $5, $7); }
 ;
 
 while_statement:
-  "while" "(" expression ")" statement { $$ = WhileStmt::make($3, $5); }
+  "while" "(" expression ")" statement { $$ = WhileStmt::make(toLoc(@$), $3, $5); }
 ;
 
 for_statement:
-  "for" "(" for_init_statement expression ";" expression ")" statement  { $$ = ForStmt::make($3, $4, $6, $8); }
+  "for" "(" for_init_statement expression ";" expression ")" statement  { $$ = ForStmt::make(toLoc(@$), $3, $4, $6, $8); }
 ;
 
 for_init_statement:
   ";"                     { }
 | expression ";"          { $$ = $1; }
-| variable_definition ";" { $$ = DeclStmt::make($1); }
+| variable_definition ";" { $$ = DeclStmt::make(toLoc(@$), $1); }
 ;
 
 variable_definition:

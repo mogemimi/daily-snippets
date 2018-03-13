@@ -2,7 +2,6 @@
 
 #include "AST/Stmt.h"
 #include "Basic/Forward.h"
-#include "Basic/Location.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -10,15 +9,12 @@
 class Expr : public Stmt {
 protected:
     std::shared_ptr<Type> type;
-    Location location;
 
 public:
     virtual ~Expr() = default;
 
     std::shared_ptr<Type> getType() const;
     void setType(const std::shared_ptr<Type>& t);
-
-    Location getLocation() const;
 };
 
 class IntegerLiteral final
