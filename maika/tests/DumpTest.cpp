@@ -1,7 +1,7 @@
 #include "AST/ASTContext.h"
 #include "AST/ASTDumper.h"
 #include "Basic/Diagnostic.h"
-#include "MyDriver.h"
+#include "Driver/MyDriver.h"
 #include "Sema/Entity.h"
 #include "Sema/IdentifierResolver.h"
 #include "Sema/TypeInferer.h"

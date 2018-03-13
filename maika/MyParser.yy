@@ -51,7 +51,7 @@ using CallSignature = std::tuple<
 
 %code
 {
-#include "MyDriver.h"
+#include "Driver/MyDriver.h"
 }
 
 %define api.token.prefix {TOK_}
