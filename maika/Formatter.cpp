@@ -1,10 +1,10 @@
 #include "Formatter.h"
+#include "AST/Decl.h"
+#include "AST/Expr.h"
+#include "AST/Stmt.h"
+#include "AST/Type.h"
 #include "ASTContext.h"
-#include "Decl.h"
-#include "Entity.h"
-#include "Expr.h"
-#include "Stmt.h"
-#include "Type.h"
+#include "Sema/Entity.h"
 #include <cassert>
 #include <sstream>
 #include <utility>

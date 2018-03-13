@@ -1,8 +1,8 @@
-#include "Scope.h"
-#include "Decl.h"
-#include "Entity.h"
-#include "Expr.h"
-#include "Stmt.h"
+#include "Sema/Scope.h"
+#include "AST/Decl.h"
+#include "AST/Expr.h"
+#include "AST/Stmt.h"
+#include "Sema/Entity.h"
 #include <cassert>
 #include <utility>
 

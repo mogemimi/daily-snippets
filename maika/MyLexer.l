@@ -1,9 +1,9 @@
 %{
 #include "ASTContext.h"
-#include "Decl.h"
-#include "Expr.h"
-#include "Stmt.h"
-#include "Type.h"
+#include "AST/Decl.h"
+#include "AST/Expr.h"
+#include "AST/Stmt.h"
+#include "AST/Type.h"
 #include "MyDriver.h"
 #include "MyParser.h"
 

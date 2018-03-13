@@ -1,10 +1,10 @@
 #include "IdentifierResolver.h"
-#include "Decl.h"
+#include "AST/Decl.h"
+#include "AST/Expr.h"
+#include "AST/Stmt.h"
+#include "AST/Type.h"
 #include "Diagnostic.h"
-#include "Entity.h"
-#include "Expr.h"
-#include "Stmt.h"
-#include "Type.h"
+#include "Sema/Entity.h"
 #include <cassert>
 #include <utility>
 

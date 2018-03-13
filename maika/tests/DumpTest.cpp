@@ -1,9 +1,9 @@
 #include "ASTContext.h"
 #include "ASTDumper.h"
 #include "Diagnostic.h"
-#include "Entity.h"
 #include "IdentifierResolver.h"
 #include "MyDriver.h"
+#include "Sema/Entity.h"
 #include "TypeInferer.h"
 #include "TypeResolver.h"
 #include <iostream>

@@ -43,9 +43,9 @@
 #line 11 "MyParser.yy" // lalr1.cc:377
 
 #include "ASTContext.h"
-#include "Decl.h"
-#include "Expr.h"
-#include "Stmt.h"
+#include "AST/Decl.h"
+#include "AST/Expr.h"
+#include "AST/Stmt.h"
 #include <iostream>
 #include <string>
 #include <tuple>

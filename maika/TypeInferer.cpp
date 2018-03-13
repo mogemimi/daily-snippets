@@ -1,9 +1,9 @@
 #include "TypeInferer.h"
-#include "Decl.h"
-#include "Entity.h"
-#include "Expr.h"
+#include "AST/Decl.h"
+#include "AST/Expr.h"
+#include "AST/Stmt.h"
 #include "IdentifierResolver.h"
-#include "Stmt.h"
+#include "Sema/Entity.h"
 #include <cassert>
 #include <sstream>
 #include <unordered_set>

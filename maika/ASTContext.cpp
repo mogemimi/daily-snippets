@@ -1,9 +1,9 @@
 #include "ASTContext.h"
+#include "AST/Decl.h"
+#include "AST/Expr.h"
+#include "AST/Stmt.h"
+#include "AST/Type.h"
 #include "ASTDumper.h"
-#include "Decl.h"
-#include "Expr.h"
-#include "Stmt.h"
-#include "Type.h"
 #include <cassert>
 #include <utility>
 

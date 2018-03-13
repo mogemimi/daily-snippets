@@ -2,7 +2,7 @@
 
 #include "ASTVisitor.h"
 #include "Forward.h"
-#include "Scope.h"
+#include "Sema/Scope.h"
 #include "location.hh"
 #include <memory>
 #include <string>

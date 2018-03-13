@@ -1,4 +1,4 @@
-#include "Type.h"
+#include "AST/Type.h"
 
 namespace {
 

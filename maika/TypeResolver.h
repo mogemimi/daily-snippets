@@ -1,8 +1,8 @@
 #pragma once
 
+#include "AST/Type.h"
 #include "ASTVisitor.h"
 #include "Forward.h"
-#include "Type.h"
 #include "TypeInferer.h"
 #include "location.hh"
 #include <memory>

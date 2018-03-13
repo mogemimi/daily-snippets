@@ -1,7 +1,7 @@
 #pragma once
 
+#include "AST/Stmt.h"
 #include "Forward.h"
-#include "Stmt.h"
 #include "location.hh"
 #include <memory>
 #include <string>

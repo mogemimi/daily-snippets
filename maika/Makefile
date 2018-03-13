@@ -5,21 +5,21 @@ HEADERS = \
 	*.h
 
 SOURCES = \
+	AST/Decl.cpp \
+	AST/Expr.cpp \
+	AST/Stmt.cpp \
+	AST/Type.cpp \
+	Sema/Entity.cpp \
+	Sema/Scope.cpp \
 	ASTContext.cpp \
 	ASTDumper.cpp \
 	ASTVisitor.cpp \
-	Decl.cpp \
 	Diagnostic.cpp \
-	Entity.cpp \
-	Expr.cpp \
 	Formatter.cpp \
 	IdentifierResolver.cpp \
 	MyLexer.cpp \
 	MyDriver.cpp \
 	MyParser.cpp \
-	Scope.cpp \
-	Stmt.cpp \
-	Type.cpp \
 	TypeInferer.cpp \
 	TypeResolver.cpp \
 	tests/DumpTest.cpp \
@@ -35,23 +35,26 @@ COMPILER_OPTIONS = \
 
 format:
 	@clang-format -i \
+		AST/Decl.cpp \
+		AST/Decl.h \
+		AST/Expr.cpp \
+		AST/Expr.h \
+		AST/Stmt.cpp \
+		AST/Stmt.h \
+		AST/Type.cpp \
+		AST/Type.h \
+		Sema/Entity.cpp \
+		Sema/Entity.h \
+		Sema/Scope.cpp \
+		Sema/Scope.h \
 		ASTContext.cpp \
 		ASTContext.h \
-		ASTDumper.h \
 		ASTDumper.cpp \
 		ASTDumper.h \
 		ASTVisitor.cpp \
 		ASTVisitor.h \
-		Decl.cpp \
-		Decl.h \
 		Diagnostic.cpp \
 		Diagnostic.h \
-		Entity.cpp \
-		Entity.h \
-		Expr.cpp \
-		Expr.h \
-		Expr.cpp \
-		Expr.h \
 		Formatter.cpp \
 		Formatter.h \
 		Forward.h \
@@ -59,12 +62,6 @@ format:
 		IdentifierResolver.h \
 		MyDriver.cpp \
 		MyDriver.h \
-		Scope.cpp \
-		Scope.h \
-		Stmt.cpp \
-		Stmt.h \
-		Type.cpp \
-		Type.h \
 		TypeInferer.cpp \
 		TypeInferer.h \
 		TypeResolver.cpp \
