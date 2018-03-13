@@ -1,7 +1,7 @@
 %skeleton "lalr1.cc"
 %require "3.0.4"
-%defines "MyParser.h"
-%output "MyParser.cpp"
+%defines "Parser/MyParser.h"
+%output "Parser/MyParser.cpp"
 %define parser_class_name {MyParser}
 %define api.token.constructor
 %define api.value.type variant

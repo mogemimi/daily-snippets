@@ -26,8 +26,8 @@ std::string comment;
 } // end of anonymous namespace
 %}
 
-%option header-file="MyLexer.h"
-%option outfile="MyLexer.cpp"
+%option header-file="Parser/MyLexer.h"
+%option outfile="Parser/MyLexer.cpp"
 %option noyywrap nounput batch debug noinput
 %option nounistd never-interactive
 

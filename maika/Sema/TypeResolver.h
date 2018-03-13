@@ -3,8 +3,8 @@
 #include "AST/ASTVisitor.h"
 #include "AST/Type.h"
 #include "Basic/Forward.h"
-#include "Sema/TypeInferer.h"
 #include "Parser/location.hh"
+#include "Sema/TypeInferer.h"
 #include <memory>
 #include <string>
 #include <unordered_map>

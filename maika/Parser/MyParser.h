@@ -31,16 +31,16 @@
 // version 2.2 of Bison.
 
 /**
- ** \file MyParser.h
+ ** \file Parser/MyParser.h
  ** Define the yy::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
 
-#ifndef YY_YY_MYPARSER_H_INCLUDED
-# define YY_YY_MYPARSER_H_INCLUDED
+#ifndef YY_YY_PARSER_MYPARSER_H_INCLUDED
+# define YY_YY_PARSER_MYPARSER_H_INCLUDED
 // //                    "%code requires" blocks.
-#line 11 "MyParser.yy" // lalr1.cc:377
+#line 11 "Parser/MyParser.yy" // lalr1.cc:377
 
 #include "AST/ASTContext.h"
 #include "AST/Decl.h"
@@ -69,7 +69,7 @@ using CallSignature = std::tuple<
 
 } // end of anonymous namespace 
 
-#line 73 "MyParser.h" // lalr1.cc:377
+#line 73 "Parser/MyParser.h" // lalr1.cc:377
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -146,7 +146,7 @@ using CallSignature = std::tuple<
 
 
 namespace yy {
-#line 150 "MyParser.h" // lalr1.cc:377
+#line 150 "Parser/MyParser.h" // lalr1.cc:377
 
 
 
@@ -2148,9 +2148,9 @@ namespace yy {
 
 
 } // yy
-#line 2152 "MyParser.h" // lalr1.cc:377
+#line 2152 "Parser/MyParser.h" // lalr1.cc:377
 
 
 
 
-#endif // !YY_YY_MYPARSER_H_INCLUDED
+#endif // !YY_YY_PARSER_MYPARSER_H_INCLUDED

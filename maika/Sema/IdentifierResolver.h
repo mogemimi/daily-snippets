@@ -2,8 +2,8 @@
 
 #include "AST/ASTVisitor.h"
 #include "Basic/Forward.h"
-#include "Sema/Scope.h"
 #include "Parser/location.hh"
+#include "Sema/Scope.h"
 #include <memory>
 #include <string>
 #include <vector>
