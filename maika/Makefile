@@ -14,6 +14,7 @@ SOURCES = \
 	AST/ASTContext.cpp \
 	AST/ASTDumper.cpp \
 	AST/ASTVisitor.cpp \
+	AST/Comment.cpp \
 	AST/Decl.cpp \
 	AST/Expr.cpp \
 	AST/Stmt.cpp \
@@ -47,6 +48,8 @@ format:
 		AST/ASTDumper.h \
 		AST/ASTVisitor.cpp \
 		AST/ASTVisitor.h \
+		AST/Comment.cpp \
+		AST/Comment.h \
 		AST/Decl.cpp \
 		AST/Decl.h \
 		AST/Expr.cpp \

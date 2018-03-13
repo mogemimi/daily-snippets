@@ -1,35 +1,13 @@
 #pragma once
 
+#include "AST/Comment.h"
+#include "Basic/Forward.h"
 #include "Parser/MyParser.h"
 #include <functional>
 #include <map>
-#include <sstream>
 #include <string>
 #include <tuple>
-
-enum class CommentKind {
-    C,    // /* comment */
-    BCPL, // // comment
-};
-
-struct Comment {
-    yy::location location;
-    CommentKind kind;
-    std::string text;
-
-    std::string dump()
-    {
-        auto style = [&]() -> std::string {
-            switch (kind) {
-            case CommentKind::BCPL: return "BCPL";
-            case CommentKind::C: return "C";
-            }
-        }();
-        std::stringstream ss;
-        ss << location << ": Comment Style = " << style << "\n" << text;
-        return ss.str();
-    }
-};
+#include <memory>
 
 class MyDriver final {
 private:
@@ -45,6 +23,7 @@ public:
 
     std::tuple<ASTContext, bool>
     parseFile(const std::string& filename, const std::shared_ptr<DiagnosticHandler>& diag);
+
     std::tuple<ASTContext, bool>
     parseString(const std::string& text, const std::shared_ptr<DiagnosticHandler>& diag);
 
