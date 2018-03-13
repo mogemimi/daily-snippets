@@ -2,26 +2,29 @@ NORI = ../nori/bin/nori
 PRODUCTNAME = maika
 
 HEADERS = \
+	AST/*.h \
+	Basic/*.h \
+	Sema/*.h \
 	*.h
 
 SOURCES = \
+	AST/ASTContext.cpp \
+	AST/ASTDumper.cpp \
+	AST/ASTVisitor.cpp \
 	AST/Decl.cpp \
 	AST/Expr.cpp \
 	AST/Stmt.cpp \
 	AST/Type.cpp \
 	Sema/Entity.cpp \
+	Sema/IdentifierResolver.cpp \
 	Sema/Scope.cpp \
-	ASTContext.cpp \
-	ASTDumper.cpp \
-	ASTVisitor.cpp \
+	Sema/TypeInferer.cpp \
+	Sema/TypeResolver.cpp \
 	Diagnostic.cpp \
 	Formatter.cpp \
-	IdentifierResolver.cpp \
 	MyLexer.cpp \
 	MyDriver.cpp \
 	MyParser.cpp \
-	TypeInferer.cpp \
-	TypeResolver.cpp \
 	tests/DumpTest.cpp \
 	tests/LexerTest.cpp \
 	tests/main.cpp
@@ -35,6 +38,12 @@ COMPILER_OPTIONS = \
 
 format:
 	@clang-format -i \
+		AST/ASTContext.cpp \
+		AST/ASTContext.h \
+		AST/ASTDumper.cpp \
+		AST/ASTDumper.h \
+		AST/ASTVisitor.cpp \
+		AST/ASTVisitor.h \
 		AST/Decl.cpp \
 		AST/Decl.h \
 		AST/Expr.cpp \
@@ -43,29 +52,23 @@ format:
 		AST/Stmt.h \
 		AST/Type.cpp \
 		AST/Type.h \
+		Basic/Forward.h \
 		Sema/Entity.cpp \
 		Sema/Entity.h \
+		Sema/IdentifierResolver.cpp \
+		Sema/IdentifierResolver.h \
 		Sema/Scope.cpp \
 		Sema/Scope.h \
-		ASTContext.cpp \
-		ASTContext.h \
-		ASTDumper.cpp \
-		ASTDumper.h \
-		ASTVisitor.cpp \
-		ASTVisitor.h \
+		Sema/TypeInferer.cpp \
+		Sema/TypeInferer.h \
+		Sema/TypeResolver.cpp \
+		Sema/TypeResolver.h \
 		Diagnostic.cpp \
 		Diagnostic.h \
 		Formatter.cpp \
 		Formatter.h \
-		Forward.h \
-		IdentifierResolver.cpp \
-		IdentifierResolver.h \
 		MyDriver.cpp \
 		MyDriver.h \
-		TypeInferer.cpp \
-		TypeInferer.h \
-		TypeResolver.cpp \
-		TypeResolver.h \
 		tests/DumpTest.cpp \
 		tests/LexerTest.cpp \
 		tests/main.cpp

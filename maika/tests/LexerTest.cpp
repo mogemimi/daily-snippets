@@ -1,5 +1,5 @@
-#include "ASTContext.h"
-#include "ASTDumper.h"
+#include "AST/ASTContext.h"
+#include "AST/ASTDumper.h"
 #include "Diagnostic.h"
 #include "Formatter.h"
 #include "MyDriver.h"

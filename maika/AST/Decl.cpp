@@ -1,7 +1,7 @@
 #include "AST/Decl.h"
+#include "AST/ASTVisitor.h"
 #include "AST/Expr.h"
 #include "AST/Stmt.h"
-#include "ASTVisitor.h"
 #include <cassert>
 #include <utility>
 

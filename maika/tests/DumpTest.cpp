@@ -1,11 +1,11 @@
-#include "ASTContext.h"
-#include "ASTDumper.h"
+#include "AST/ASTContext.h"
+#include "AST/ASTDumper.h"
 #include "Diagnostic.h"
-#include "IdentifierResolver.h"
 #include "MyDriver.h"
 #include "Sema/Entity.h"
-#include "TypeInferer.h"
-#include "TypeResolver.h"
+#include "Sema/IdentifierResolver.h"
+#include "Sema/TypeInferer.h"
+#include "Sema/TypeResolver.h"
 #include <iostream>
 #include <sstream>
 

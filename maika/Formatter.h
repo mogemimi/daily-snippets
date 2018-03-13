@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ASTVisitor.h"
-#include "Forward.h"
+#include "AST/ASTVisitor.h"
+#include "Basic/Forward.h"
 #include <memory>
 #include <string>
 #include <vector>

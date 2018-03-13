@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ASTVisitor.h"
-#include "Forward.h"
+#include "AST/ASTVisitor.h"
+#include "Basic/Forward.h"
 #include "Sema/Scope.h"
 #include "location.hh"
 #include <memory>

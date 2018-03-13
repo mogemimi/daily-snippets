@@ -1,4 +1,4 @@
-#include "IdentifierResolver.h"
+#include "Sema/IdentifierResolver.h"
 #include "AST/Decl.h"
 #include "AST/Expr.h"
 #include "AST/Stmt.h"

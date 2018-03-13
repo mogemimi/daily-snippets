@@ -1,10 +1,10 @@
-#include "TypeResolver.h"
+#include "Sema/TypeResolver.h"
 #include "AST/Decl.h"
 #include "AST/Expr.h"
 #include "AST/Stmt.h"
 #include "Diagnostic.h"
-#include "IdentifierResolver.h"
 #include "Sema/Entity.h"
+#include "Sema/IdentifierResolver.h"
 #include <cassert>
 #include <sstream>
 #include <utility>

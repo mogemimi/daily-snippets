@@ -1,5 +1,5 @@
 %{
-#include "ASTContext.h"
+#include "AST/ASTContext.h"
 #include "AST/Decl.h"
 #include "AST/Expr.h"
 #include "AST/Stmt.h"

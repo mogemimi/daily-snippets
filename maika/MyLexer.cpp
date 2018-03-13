@@ -636,7 +636,7 @@ static yyconst flex_int16_t yy_rule_linenum[57] =
 char *yytext;
 #line 1 "MyLexer.l"
 #line 2 "MyLexer.l"
-#include "ASTContext.h"
+#include "AST/ASTContext.h"
 #include "AST/Decl.h"
 #include "AST/Expr.h"
 #include "AST/Stmt.h"

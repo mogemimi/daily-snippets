@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ASTDumper.h"
-#include "Forward.h"
+#include "AST/ASTDumper.h"
+#include "Basic/Forward.h"
 #include "location.hh"
 #include <memory>
 #include <string>

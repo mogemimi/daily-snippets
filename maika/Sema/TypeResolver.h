@@ -1,9 +1,9 @@
 #pragma once
 
+#include "AST/ASTVisitor.h"
 #include "AST/Type.h"
-#include "ASTVisitor.h"
-#include "Forward.h"
-#include "TypeInferer.h"
+#include "Basic/Forward.h"
+#include "Sema/TypeInferer.h"
 #include "location.hh"
 #include <memory>
 #include <string>

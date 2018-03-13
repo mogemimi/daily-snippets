@@ -42,7 +42,7 @@
 // //                    "%code requires" blocks.
 #line 11 "MyParser.yy" // lalr1.cc:377
 
-#include "ASTContext.h"
+#include "AST/ASTContext.h"
 #include "AST/Decl.h"
 #include "AST/Expr.h"
 #include "AST/Stmt.h"

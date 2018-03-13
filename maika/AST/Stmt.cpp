@@ -1,8 +1,8 @@
 #include "AST/Stmt.h"
+#include "AST/ASTDumper.h"
+#include "AST/ASTVisitor.h"
 #include "AST/Decl.h"
 #include "AST/Expr.h"
-#include "ASTDumper.h"
-#include "ASTVisitor.h"
 #include <cassert>
 #include <utility>
 

@@ -1,8 +1,8 @@
 #pragma once
 
+#include "AST/ASTVisitor.h"
 #include "AST/Type.h"
-#include "ASTVisitor.h"
-#include "Forward.h"
+#include "Basic/Forward.h"
 #include "location.hh"
 #include <memory>
 #include <string>

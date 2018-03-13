@@ -1,8 +1,8 @@
 #include "Sema/Entity.h"
+#include "AST/ASTContext.h"
 #include "AST/Decl.h"
 #include "AST/Expr.h"
 #include "AST/Stmt.h"
-#include "ASTContext.h"
 #include <cassert>
 #include <utility>
 

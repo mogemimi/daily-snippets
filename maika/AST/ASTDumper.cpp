@@ -1,9 +1,9 @@
-#include "ASTDumper.h"
+#include "AST/ASTDumper.h"
+#include "AST/ASTContext.h"
 #include "AST/Decl.h"
 #include "AST/Expr.h"
 #include "AST/Stmt.h"
 #include "AST/Type.h"
-#include "ASTContext.h"
 #include "Sema/Entity.h"
 #include <cassert>
 #include <sstream>
