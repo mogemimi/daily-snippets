@@ -3,7 +3,7 @@
 #include "AST/ASTVisitor.h"
 #include "AST/Type.h"
 #include "Basic/Forward.h"
-#include "location.hh"
+#include "Parser/location.hh"
 #include <memory>
 #include <string>
 #include <unordered_map>

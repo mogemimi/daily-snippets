@@ -1,9 +1,9 @@
 #include "Driver/MyDriver.h"
 #include "Basic/Diagnostic.h"
-#include "MyParser.h"
+#include "Parser/MyParser.h"
 
 #define YY_NO_UNISTD_H 1
-#include "MyLexer.h"
+#include "Parser/MyLexer.h"
 
 std::tuple<ASTContext, bool>
 MyDriver::parseFile(const std::string& filename, const std::shared_ptr<DiagnosticHandler>& diagIn)

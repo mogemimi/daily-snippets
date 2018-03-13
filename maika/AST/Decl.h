@@ -2,7 +2,7 @@
 
 #include "AST/ASTDumper.h"
 #include "Basic/Forward.h"
-#include "location.hh"
+#include "Parser/location.hh"
 #include <memory>
 #include <string>
 #include <vector>

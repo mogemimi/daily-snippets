@@ -5,6 +5,7 @@ HEADERS = \
 	AST/*.h \
 	Basic/*.h \
 	Driver/*.h \
+	Parser/*.h \
 	Printer/*.h \
 	Sema/*.h \
 	*.h
@@ -19,14 +20,14 @@ SOURCES = \
 	AST/Type.cpp \
 	Basic/Diagnostic.cpp \
 	Driver/MyDriver.cpp \
+	Parser/MyLexer.cpp \
+	Parser/MyParser.cpp \
+	Printer/Formatter.cpp \
 	Sema/Entity.cpp \
 	Sema/IdentifierResolver.cpp \
 	Sema/Scope.cpp \
 	Sema/TypeInferer.cpp \
 	Sema/TypeResolver.cpp \
-	Printer/Formatter.cpp \
-	MyLexer.cpp \
-	MyParser.cpp \
 	tests/DumpTest.cpp \
 	tests/LexerTest.cpp \
 	tests/main.cpp
@@ -76,12 +77,12 @@ format:
 		tests/main.cpp
 
 bison:
-	@flex MyLexer.l
-	@bison MyParser.yy
+	@flex Parser/MyLexer.l
+	@bison Parser/MyParser.yy
 
 xcode:
-	@flex -o MyLexer.cpp MyLexer.l
-	@bison MyParser.yy
+	@flex Parser/MyLexer.l
+	@bison Parser/MyParser.yy
 	$(NORI) \
 		-generator=xcode \
 		$(HEADERS) \
@@ -91,9 +92,9 @@ xcode:
 	@cp build/Release/$(PRODUCTNAME) bin/$(PRODUCTNAME)
 
 clean:
-	@rm -f MyLexer.cpp
-	@rm -f MyParser.cpp
-	@rm -f MyParser.h
-	@rm -f location.hh
-	@rm -f position.hh
-	@rm -f stack.hh
+	@rm -f Parser/MyLexer.cpp
+	@rm -f Parser/MyParser.cpp
+	@rm -f Parser/MyParser.h
+	@rm -f Parser/location.hh
+	@rm -f Parser/position.hh
+	@rm -f Parser/stack.hh

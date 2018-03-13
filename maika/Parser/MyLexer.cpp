@@ -642,7 +642,7 @@ char *yytext;
 #include "AST/Stmt.h"
 #include "AST/Type.h"
 #include "Driver/MyDriver.h"
-#include "MyParser.h"
+#include "Parser/MyParser.h"
 
 #include <cerrno>
 #include <climits>
