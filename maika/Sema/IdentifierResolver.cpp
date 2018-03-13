@@ -3,7 +3,7 @@
 #include "AST/Expr.h"
 #include "AST/Stmt.h"
 #include "AST/Type.h"
-#include "Diagnostic.h"
+#include "Basic/Diagnostic.h"
 #include "Sema/Entity.h"
 #include <cassert>
 #include <utility>

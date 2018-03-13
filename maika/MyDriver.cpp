@@ -1,5 +1,5 @@
 #include "MyDriver.h"
-#include "Diagnostic.h"
+#include "Basic/Diagnostic.h"
 #include "MyParser.h"
 
 #define YY_NO_UNISTD_H 1

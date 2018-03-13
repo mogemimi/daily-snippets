@@ -1,4 +1,4 @@
-#include "Diagnostic.h"
+#include "Basic/Diagnostic.h"
 
 DiagnosticHandler::DiagnosticHandler()
     : errorCount(0)

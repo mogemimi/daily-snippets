@@ -4,6 +4,7 @@ PRODUCTNAME = maika
 HEADERS = \
 	AST/*.h \
 	Basic/*.h \
+	Printer/*.h \
 	Sema/*.h \
 	*.h
 
@@ -15,13 +16,13 @@ SOURCES = \
 	AST/Expr.cpp \
 	AST/Stmt.cpp \
 	AST/Type.cpp \
+	Basic/Diagnostic.cpp \
 	Sema/Entity.cpp \
 	Sema/IdentifierResolver.cpp \
 	Sema/Scope.cpp \
 	Sema/TypeInferer.cpp \
 	Sema/TypeResolver.cpp \
-	Diagnostic.cpp \
-	Formatter.cpp \
+	Printer/Formatter.cpp \
 	MyLexer.cpp \
 	MyDriver.cpp \
 	MyParser.cpp \
@@ -52,7 +53,11 @@ format:
 		AST/Stmt.h \
 		AST/Type.cpp \
 		AST/Type.h \
+		Basic/Diagnostic.cpp \
+		Basic/Diagnostic.h \
 		Basic/Forward.h \
+		Printer/Formatter.cpp \
+		Printer/Formatter.h \
 		Sema/Entity.cpp \
 		Sema/Entity.h \
 		Sema/IdentifierResolver.cpp \
@@ -63,10 +68,6 @@ format:
 		Sema/TypeInferer.h \
 		Sema/TypeResolver.cpp \
 		Sema/TypeResolver.h \
-		Diagnostic.cpp \
-		Diagnostic.h \
-		Formatter.cpp \
-		Formatter.h \
 		MyDriver.cpp \
 		MyDriver.h \
 		tests/DumpTest.cpp \

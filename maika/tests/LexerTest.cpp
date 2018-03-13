@@ -1,8 +1,8 @@
 #include "AST/ASTContext.h"
 #include "AST/ASTDumper.h"
-#include "Diagnostic.h"
-#include "Formatter.h"
+#include "Basic/Diagnostic.h"
 #include "MyDriver.h"
+#include "Printer/Formatter.h"
 #include "Sema/Entity.h"
 #include <iostream>
 #include <sstream>
