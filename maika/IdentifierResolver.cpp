@@ -226,7 +226,7 @@ void IdentifierResolver::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& 
         return;
     }
 
-    auto entity = Entity::makeConst(namedDecl->getName(), namedDecl);
+    auto entity = Entity::makeConstant(namedDecl->getName(), namedDecl);
     scope->insert(entity);
     namedDecl->setEntity(entity);
 

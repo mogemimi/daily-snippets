@@ -31,7 +31,7 @@ public:
     makeVariable(const std::string& name, const std::shared_ptr<NamedDecl>& decl);
 
     static std::shared_ptr<Entity>
-    makeConst(const std::string& name, const std::shared_ptr<NamedDecl>& decl);
+    makeConstant(const std::string& name, const std::shared_ptr<NamedDecl>& decl);
 
     static std::shared_ptr<Entity>
     makeType(const std::string& name, const std::shared_ptr<Type>& type);

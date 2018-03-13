@@ -855,7 +855,7 @@ namespace yy {
 
   case 3:
 #line 143 "MyParser.yy" // lalr1.cc:859
-    { yylhs.value.as< std::vector<std::shared_ptr<FunctionDecl>> > ().push_back(yystack_[0].value.as< std::shared_ptr<FunctionDecl> > ()); }
+    { }
 #line 860 "MyParser.cpp" // lalr1.cc:859
     break;
 
@@ -1598,7 +1598,7 @@ namespace yy {
   const unsigned char
   MyParser::yydefact_[] =
   {
-       0,     0,     0,     2,     3,     0,     1,     4,    11,     0,
+       3,     0,     0,     2,     3,     0,     1,     4,    11,     0,
       14,     0,    12,     0,     5,     0,     7,    11,     0,     0,
        0,     0,     0,     0,    25,     9,     0,     0,     0,     0,
        0,     0,    47,    42,    43,    44,    45,    79,    27,    24,
@@ -1779,7 +1779,7 @@ namespace yy {
   const unsigned char
   MyParser::yyr2_[] =
   {
-       0,     2,     1,     1,     2,     4,     4,     3,     5,     0,
+       0,     2,     1,     0,     2,     4,     4,     3,     5,     0,
        1,     0,     1,     3,     1,     3,     1,     2,     1,     2,
        2,     1,     1,     1,     1,     2,     3,     1,     2,     2,
        3,     5,     7,     5,     8,     1,     2,     2,     2,     4,

@@ -19,5 +19,4 @@ TODO:
   - hex
   - binary
 - class
-
 */

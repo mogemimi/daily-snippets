@@ -39,7 +39,7 @@ Entity::makeVariable(const std::string& name, const std::shared_ptr<NamedDecl>& 
 }
 
 std::shared_ptr<Entity>
-Entity::makeConst(const std::string& name, const std::shared_ptr<NamedDecl>& decl)
+Entity::makeConstant(const std::string& name, const std::shared_ptr<NamedDecl>& decl)
 {
     auto entity = std::make_shared<Entity>();
     entity->kind = EntityKind::Constant;

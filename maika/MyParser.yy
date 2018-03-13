@@ -140,7 +140,7 @@ translation_unit:
 ;
 
 function_definitions:
-  function_definition                       { $$.push_back($1); }
+  %empty                                    { }
 | function_definition function_definitions  { $$ = appendVector($1, $2); }
 ;
 

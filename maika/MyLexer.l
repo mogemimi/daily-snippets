@@ -36,6 +36,8 @@ integer     -?{decimal}
 double      -?({decimal}\.[0-9]*|\.[0-9]+)([eE][-+]?[0-9]+)?
 identifier  [a-zA-Z][a-zA-Z_0-9]*
 blank       [ \t]
+utf8_bom    \xEF\xBB\xBF
+crlf        (\r\n|\n)
 
 %{
     // Code run each time a pattern is matched.
@@ -60,7 +62,8 @@ blank       [ \t]
 
 "//".*      driver.visitComment(loc, CommentKind::BCPL, yytext);
 {blank}+    loc.step();
-[\n]+       loc.lines(yyleng); loc.step();
+{crlf}+     loc.lines(yyleng); loc.step();
+^{utf8_bom} loc.step();
 
 "-"         return yy::MyParser::make_MINUS(loc);
 "+"         return yy::MyParser::make_PLUS(loc);
