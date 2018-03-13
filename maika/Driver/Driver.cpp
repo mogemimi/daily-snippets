@@ -56,7 +56,7 @@ MyDriver::parseString(const std::string& text, const std::shared_ptr<DiagnosticH
     return std::make_tuple(ast, ok);
 }
 
-void MyDriver::visitComment(const yy::location& l, CommentKind kind, const std::string& text)
+void MyDriver::visitComment(const Location& l, CommentKind kind, const std::string& text)
 {
     Comment comment;
     comment.location = l;
@@ -65,7 +65,7 @@ void MyDriver::visitComment(const yy::location& l, CommentKind kind, const std::
     comments.push_back(comment);
 }
 
-void MyDriver::error(const yy::location& l, const std::string& m)
+void MyDriver::error(const Location& l, const std::string& m)
 {
     assert(diag);
     diag->error(l, m);

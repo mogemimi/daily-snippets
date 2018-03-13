@@ -43,7 +43,7 @@ void IdentifierResolver::popScope()
     scopeStack.pop_back();
 }
 
-void IdentifierResolver::error(const yy::location& l, const std::string& err)
+void IdentifierResolver::error(const Location& l, const std::string& err)
 {
     assert(diag);
     diag->error(l, err);

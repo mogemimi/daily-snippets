@@ -158,7 +158,7 @@ void TypeResolver::popScope()
     scopeStack.pop_back();
 }
 
-void TypeResolver::error(const yy::location& l, const std::string& err)
+void TypeResolver::error(const Location& l, const std::string& err)
 {
     assert(diag);
     diag->error(l, err);

@@ -2,7 +2,7 @@
 
 #include "AST/ASTDumper.h"
 #include "Basic/Forward.h"
-#include "Parser/location.hh"
+#include "Basic/Location.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -10,7 +10,7 @@
 class Decl {
 protected:
     std::shared_ptr<Type> type;
-    yy::location location;
+    Location location;
 
 public:
     virtual ~Decl() = default;
@@ -19,7 +19,7 @@ public:
     std::shared_ptr<Type> getType() const;
     void setType(const std::shared_ptr<Type>& t);
 
-    yy::location getLocation() const;
+    Location getLocation() const;
 };
 
 class TranslationUnitDecl final
@@ -31,7 +31,7 @@ public:
     void traverse(ASTVisitor& visitor) override;
 
     static std::shared_ptr<TranslationUnitDecl>
-    make(const yy::location& loc, const std::vector<std::shared_ptr<FunctionDecl>>& n);
+    make(const Location& loc, const std::vector<std::shared_ptr<FunctionDecl>>& n);
 };
 
 class NamedDecl final
@@ -49,7 +49,7 @@ public:
 
     void traverse(ASTVisitor& visitor) override;
 
-    static std::shared_ptr<NamedDecl> make(const yy::location& loc, const std::string& v);
+    static std::shared_ptr<NamedDecl> make(const Location& loc, const std::string& v);
 };
 
 class FunctionDecl final
@@ -73,7 +73,7 @@ public:
     std::shared_ptr<CompoundStmt> getBody() const;
 
     static std::shared_ptr<FunctionDecl> make(
-        const yy::location& loc,
+        const Location& loc,
         const std::shared_ptr<NamedDecl>& n,
         const std::vector<std::shared_ptr<ParmVarDecl>>& a,
         const std::shared_ptr<NamedDecl>& returnType,
@@ -94,10 +94,10 @@ public:
     std::shared_ptr<NamedDecl> getTypeAnnotation() const { return typeAnnotation; }
 
     static std::shared_ptr<ParmVarDecl>
-    make(const yy::location& loc, const std::shared_ptr<NamedDecl>& name);
+    make(const Location& loc, const std::shared_ptr<NamedDecl>& name);
 
     static std::shared_ptr<ParmVarDecl> make(
-        const yy::location& loc,
+        const Location& loc,
         const std::shared_ptr<NamedDecl>& name,
         const std::shared_ptr<NamedDecl>& typeAnnotation);
 };
@@ -116,12 +116,10 @@ public:
     std::shared_ptr<Expr> getExpr() const { return expr; }
 
     static std::shared_ptr<VariableDecl>
-    make(const yy::location& loc, const std::shared_ptr<NamedDecl>& n);
+    make(const Location& loc, const std::shared_ptr<NamedDecl>& n);
 
-    static std::shared_ptr<VariableDecl> make(
-        const yy::location& loc,
-        const std::shared_ptr<NamedDecl>& n,
-        const std::shared_ptr<Expr>& e);
+    static std::shared_ptr<VariableDecl>
+    make(const Location& loc, const std::shared_ptr<NamedDecl>& n, const std::shared_ptr<Expr>& e);
 };
 
 class ConstDecl final
@@ -138,10 +136,8 @@ public:
     std::shared_ptr<Expr> getExpr() const { return expr; }
 
     static std::shared_ptr<ConstDecl>
-    make(const yy::location& loc, const std::shared_ptr<NamedDecl>& n);
+    make(const Location& loc, const std::shared_ptr<NamedDecl>& n);
 
-    static std::shared_ptr<ConstDecl> make(
-        const yy::location& loc,
-        const std::shared_ptr<NamedDecl>& n,
-        const std::shared_ptr<Expr>& e);
+    static std::shared_ptr<ConstDecl>
+    make(const Location& loc, const std::shared_ptr<NamedDecl>& n, const std::shared_ptr<Expr>& e);
 };

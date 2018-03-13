@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Basic/Forward.h"
-#include "Parser/location.hh"
 #include <memory>
 #include <string>
 
@@ -17,11 +16,11 @@ public:
 
     bool hasError() const;
 
-    void error(const yy::location& loc, const std::string& msg);
+    void error(const Location& loc, const std::string& msg);
 
     void error(const std::string& msg);
 
-    void warn(const yy::location& loc, const std::string& msg);
+    void warn(const Location& loc, const std::string& msg);
 
     void warn(const std::string& msg);
 };

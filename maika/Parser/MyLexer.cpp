@@ -618,12 +618,12 @@ int yy_flex_debug = 1;
 
 static yyconst flex_int16_t yy_rule_linenum[57] =
     {   0,
-       54,   55,   60,   61,   63,   64,   65,   66,   68,   69,
-       70,   71,   72,   73,   74,   75,   76,   77,   78,   79,
-       80,   81,   82,   83,   84,   85,   86,   87,   88,   89,
-       90,   91,   92,   93,   94,   95,   96,   97,   98,   99,
-      100,  102,  103,  104,  105,  106,  107,  108,  109,  110,
-      111,  113,  115,  124,  133,  134
+       57,   58,   63,   64,   66,   67,   68,   69,   71,   72,
+       73,   74,   75,   76,   77,   78,   79,   80,   81,   82,
+       83,   84,   85,   86,   87,   88,   89,   90,   91,   92,
+       93,   94,   95,   96,   97,   98,   99,  100,  101,  102,
+      103,  105,  106,  107,  108,  109,  110,  111,  112,  113,
+      114,  116,  118,  127,  136,  137
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -641,13 +641,16 @@ char *yytext;
 #include "AST/Expr.h"
 #include "AST/Stmt.h"
 #include "AST/Type.h"
+#include "Basic/Location.h"
 #include "Driver/Driver.h"
 #include "Parser/MyParser.h"
+#include "Parser/location.hh"
 
 #include <cerrno>
 #include <climits>
 #include <cstdlib>
 #include <string>
+#include <memory>
 
 // Work around an incompatibility in flex (at least versions
 // 2.5.31 through 2.5.33): it generates code that does
@@ -663,11 +666,11 @@ std::string comment;
 } // end of anonymous namespace
 #define YY_NO_INPUT 1
 #define YY_NO_UNISTD_H 1
-#line 43 "Parser/MyLexer.l"
+#line 46 "Parser/MyLexer.l"
     // Code run each time a pattern is matched.
     #define YY_USER_ACTION  loc.columns(yyleng);
 
-#line 671 "Parser/MyLexer.cpp"
+#line 674 "Parser/MyLexer.cpp"
 
 #define INITIAL 0
 #define CSTYLE_COMMENT 1
@@ -954,14 +957,14 @@ YY_DECL
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 48 "Parser/MyLexer.l"
+#line 51 "Parser/MyLexer.l"
 
 
     // Code run each time yylex is called.
     loc.step();
 
 
-#line 965 "Parser/MyLexer.cpp"
+#line 968 "Parser/MyLexer.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1040,316 +1043,316 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 54 "Parser/MyLexer.l"
+#line 57 "Parser/MyLexer.l"
 BEGIN(CSTYLE_COMMENT); comment = yytext;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 55 "Parser/MyLexer.l"
+#line 58 "Parser/MyLexer.l"
 {
     BEGIN(INITIAL);
-    driver.visitComment(loc, CommentKind::C, comment + yytext);
+    driver.visitComment(toLoc(loc), CommentKind::C, comment + yytext);
     comment.clear();
 }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 60 "Parser/MyLexer.l"
+#line 63 "Parser/MyLexer.l"
 loc.lines(yyleng); comment += yytext;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 61 "Parser/MyLexer.l"
+#line 64 "Parser/MyLexer.l"
 comment += yytext;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 63 "Parser/MyLexer.l"
-driver.visitComment(loc, CommentKind::BCPL, yytext);
+#line 66 "Parser/MyLexer.l"
+driver.visitComment(toLoc(loc), CommentKind::BCPL, yytext);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 64 "Parser/MyLexer.l"
+#line 67 "Parser/MyLexer.l"
 loc.step();
 	YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 65 "Parser/MyLexer.l"
+#line 68 "Parser/MyLexer.l"
 loc.lines(yyleng); loc.step();
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 66 "Parser/MyLexer.l"
+#line 69 "Parser/MyLexer.l"
 loc.step();
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 68 "Parser/MyLexer.l"
+#line 71 "Parser/MyLexer.l"
 return yy::MyParser::make_MINUS(loc);
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 69 "Parser/MyLexer.l"
+#line 72 "Parser/MyLexer.l"
 return yy::MyParser::make_PLUS(loc);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 70 "Parser/MyLexer.l"
+#line 73 "Parser/MyLexer.l"
 return yy::MyParser::make_STAR(loc);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 71 "Parser/MyLexer.l"
+#line 74 "Parser/MyLexer.l"
 return yy::MyParser::make_SLASH(loc);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 72 "Parser/MyLexer.l"
+#line 75 "Parser/MyLexer.l"
 return yy::MyParser::make_MOD(loc);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 73 "Parser/MyLexer.l"
+#line 76 "Parser/MyLexer.l"
 return yy::MyParser::make_ASSIGN(loc);
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 74 "Parser/MyLexer.l"
+#line 77 "Parser/MyLexer.l"
 return yy::MyParser::make_SUB_ASSIGN(loc);
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 75 "Parser/MyLexer.l"
+#line 78 "Parser/MyLexer.l"
 return yy::MyParser::make_ADD_ASSIGN(loc);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 76 "Parser/MyLexer.l"
+#line 79 "Parser/MyLexer.l"
 return yy::MyParser::make_MUL_ASSIGN(loc);
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 77 "Parser/MyLexer.l"
+#line 80 "Parser/MyLexer.l"
 return yy::MyParser::make_DIV_ASSIGN(loc);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 78 "Parser/MyLexer.l"
+#line 81 "Parser/MyLexer.l"
 return yy::MyParser::make_MOD_ASSIGN(loc);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 79 "Parser/MyLexer.l"
+#line 82 "Parser/MyLexer.l"
 return yy::MyParser::make_PLUS_PLUS(loc);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 80 "Parser/MyLexer.l"
+#line 83 "Parser/MyLexer.l"
 return yy::MyParser::make_MINUS_MINUS(loc);
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 81 "Parser/MyLexer.l"
+#line 84 "Parser/MyLexer.l"
 return yy::MyParser::make_LOGICAL_NOT(loc);
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 82 "Parser/MyLexer.l"
+#line 85 "Parser/MyLexer.l"
 return yy::MyParser::make_LOGICAL_AND(loc);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 83 "Parser/MyLexer.l"
+#line 86 "Parser/MyLexer.l"
 return yy::MyParser::make_LOGICAL_OR(loc);
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 84 "Parser/MyLexer.l"
+#line 87 "Parser/MyLexer.l"
 return yy::MyParser::make_EQUAL(loc);
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 85 "Parser/MyLexer.l"
+#line 88 "Parser/MyLexer.l"
 return yy::MyParser::make_NOT_EQUAL(loc);
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 86 "Parser/MyLexer.l"
+#line 89 "Parser/MyLexer.l"
 return yy::MyParser::make_LESS_THAN_EQUAL(loc);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 87 "Parser/MyLexer.l"
+#line 90 "Parser/MyLexer.l"
 return yy::MyParser::make_GREATER_THAN_EQUAL(loc);
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 88 "Parser/MyLexer.l"
+#line 91 "Parser/MyLexer.l"
 return yy::MyParser::make_LESS_THAN(loc);
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 89 "Parser/MyLexer.l"
+#line 92 "Parser/MyLexer.l"
 return yy::MyParser::make_GREATER_THAN(loc);
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 90 "Parser/MyLexer.l"
+#line 93 "Parser/MyLexer.l"
 return yy::MyParser::make_LEFT_PARENTHESIS(loc);
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 91 "Parser/MyLexer.l"
+#line 94 "Parser/MyLexer.l"
 return yy::MyParser::make_RIGHT_PARENTHESIS(loc);
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 92 "Parser/MyLexer.l"
+#line 95 "Parser/MyLexer.l"
 return yy::MyParser::make_LEFT_CURLY_BRACKET(loc);
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 93 "Parser/MyLexer.l"
+#line 96 "Parser/MyLexer.l"
 return yy::MyParser::make_RIGHT_CURLY_BRACKET(loc);
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 94 "Parser/MyLexer.l"
+#line 97 "Parser/MyLexer.l"
 return yy::MyParser::make_LEFT_SQUARE_BRACKET(loc);
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 95 "Parser/MyLexer.l"
+#line 98 "Parser/MyLexer.l"
 return yy::MyParser::make_RIGHT_SQUARE_BRACKET(loc);
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 96 "Parser/MyLexer.l"
+#line 99 "Parser/MyLexer.l"
 return yy::MyParser::make_COLON(loc);
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 97 "Parser/MyLexer.l"
+#line 100 "Parser/MyLexer.l"
 return yy::MyParser::make_SEMICOLON(loc);
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 98 "Parser/MyLexer.l"
+#line 101 "Parser/MyLexer.l"
 return yy::MyParser::make_COMMA(loc);
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 99 "Parser/MyLexer.l"
+#line 102 "Parser/MyLexer.l"
 return yy::MyParser::make_DOT(loc);
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 100 "Parser/MyLexer.l"
+#line 103 "Parser/MyLexer.l"
 return yy::MyParser::make_QUESTION(loc);
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 102 "Parser/MyLexer.l"
+#line 105 "Parser/MyLexer.l"
 return yy::MyParser::make_FUNCTION(loc);
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 103 "Parser/MyLexer.l"
+#line 106 "Parser/MyLexer.l"
 return yy::MyParser::make_RETURN(loc);
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 104 "Parser/MyLexer.l"
+#line 107 "Parser/MyLexer.l"
 return yy::MyParser::make_LET(loc);
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 105 "Parser/MyLexer.l"
+#line 108 "Parser/MyLexer.l"
 return yy::MyParser::make_CONST(loc);
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 106 "Parser/MyLexer.l"
+#line 109 "Parser/MyLexer.l"
 return yy::MyParser::make_IF(loc);
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 107 "Parser/MyLexer.l"
+#line 110 "Parser/MyLexer.l"
 return yy::MyParser::make_ELSE(loc);
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 108 "Parser/MyLexer.l"
+#line 111 "Parser/MyLexer.l"
 return yy::MyParser::make_WHILE(loc);
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 109 "Parser/MyLexer.l"
+#line 112 "Parser/MyLexer.l"
 return yy::MyParser::make_FOR(loc);
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 110 "Parser/MyLexer.l"
-return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(loc, true), loc);
+#line 113 "Parser/MyLexer.l"
+return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(toLoc(loc), true), loc);
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 111 "Parser/MyLexer.l"
-return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(loc, false), loc);
+#line 114 "Parser/MyLexer.l"
+return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(toLoc(loc), false), loc);
 	YY_BREAK
 case 52:
 /* rule 52 can match eol */
 YY_RULE_SETUP
-#line 113 "Parser/MyLexer.l"
-return yy::MyParser::make_STRING_LITERAL(StringLiteral::make(loc, yytext), loc);
+#line 116 "Parser/MyLexer.l"
+return yy::MyParser::make_STRING_LITERAL(StringLiteral::make(toLoc(loc), yytext), loc);
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 115 "Parser/MyLexer.l"
+#line 118 "Parser/MyLexer.l"
 {
     errno = 0;
     const auto n = strtol(yytext, nullptr, 10);
-    if (! (INT_MIN <= n && n <= INT_MAX && errno != ERANGE)) {
-        driver.error(loc, "integer is out of range");
+    if (!(INT_MIN <= n && n <= INT_MAX && errno != ERANGE)) {
+        driver.error(toLoc(loc), "integer is out of range");
     }
-    return yy::MyParser::make_INTEGER_LITERAL(IntegerLiteral::make(loc, n), loc);
+    return yy::MyParser::make_INTEGER_LITERAL(IntegerLiteral::make(toLoc(loc), n), loc);
 }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 124 "Parser/MyLexer.l"
+#line 127 "Parser/MyLexer.l"
 {
     errno = 0;
     const auto d = strtod(yytext, nullptr);
     if (errno == ERANGE) {
-        driver.error(loc, "double is out of range");
+        driver.error(toLoc(loc), "double is out of range");
     }
-    return yy::MyParser::make_DOUBLE_LITERAL(DoubleLiteral::make(loc, d), loc);
+    return yy::MyParser::make_DOUBLE_LITERAL(DoubleLiteral::make(toLoc(loc), d), loc);
 }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 133 "Parser/MyLexer.l"
-return yy::MyParser::make_IDENTIFIER(NamedDecl::make(loc, yytext), loc);
+#line 136 "Parser/MyLexer.l"
+return yy::MyParser::make_IDENTIFIER(NamedDecl::make(toLoc(loc), yytext), loc);
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 134 "Parser/MyLexer.l"
-driver.error(loc, "invalid character");
+#line 137 "Parser/MyLexer.l"
+driver.error(toLoc(loc), "invalid character");
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(CSTYLE_COMMENT):
-#line 135 "Parser/MyLexer.l"
+#line 138 "Parser/MyLexer.l"
 return yy::MyParser::make_END(loc);
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 137 "Parser/MyLexer.l"
+#line 140 "Parser/MyLexer.l"
 ECHO;
 	YY_BREAK
-#line 1353 "Parser/MyLexer.cpp"
+#line 1356 "Parser/MyLexer.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2454,7 +2457,7 @@ void yyfree (void * ptr )
 
 /* %ok-for-header */
 
-#line 137 "Parser/MyLexer.l"
+#line 140 "Parser/MyLexer.l"
 
 
 

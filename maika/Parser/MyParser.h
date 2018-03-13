@@ -42,34 +42,30 @@
 // //                    "%code requires" blocks.
 #line 11 "Parser/MyParser.yy" // lalr1.cc:377
 
-#include "AST/ASTContext.h"
+#include "Basic/Forward.h"
 #include "AST/Decl.h"
 #include "AST/Expr.h"
 #include "AST/Stmt.h"
-#include <iostream>
-#include <string>
+#include <memory>
 #include <tuple>
+#include <vector>
 
 class MyDriver;
 
-namespace {
-template <class T>
-std::vector<T> appendVector(T left, const std::vector<T>& right)
-{
-    std::vector<T> s;
-    s.reserve(1 + right.size());
-    s.push_back(left);
-    s.insert(std::end(s), std::begin(right), std::end(right));
-    return s;
-}
+namespace yy {
+class position;
+class location;
+} // namespace yy
 
 using CallSignature = std::tuple<
   std::vector<std::shared_ptr<ParmVarDecl>>,
   std::shared_ptr<NamedDecl>>;
 
-} // end of anonymous namespace 
+// TODO: Maybe we should use a user-defined location type instead of toLoc() function.
+// https://www.gnu.org/software/bison/manual/html_node/User-Defined-Location-Type.html#User-Defined-Location-Type
+Location toLoc(const yy::location& y);
 
-#line 73 "Parser/MyParser.h" // lalr1.cc:377
+#line 69 "Parser/MyParser.h" // lalr1.cc:377
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -146,7 +142,7 @@ using CallSignature = std::tuple<
 
 
 namespace yy {
-#line 150 "Parser/MyParser.h" // lalr1.cc:377
+#line 146 "Parser/MyParser.h" // lalr1.cc:377
 
 
 
@@ -2148,7 +2144,7 @@ namespace yy {
 
 
 } // yy
-#line 2152 "Parser/MyParser.h" // lalr1.cc:377
+#line 2148 "Parser/MyParser.h" // lalr1.cc:377
 
 
 

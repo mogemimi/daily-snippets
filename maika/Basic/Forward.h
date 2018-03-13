@@ -1,5 +1,9 @@
 #pragma once
 
+// NOTE: Basic
+class Location;
+class Position;
+
 // NOTE: AST
 class ASTContext;
 class ASTVisitor;

@@ -16,7 +16,7 @@ void Decl::setType(const std::shared_ptr<Type>& t)
     type = t;
 }
 
-yy::location Decl::getLocation() const
+Location Decl::getLocation() const
 {
     return location;
 }
@@ -32,7 +32,7 @@ void TranslationUnitDecl::traverse(ASTVisitor& visitor)
 }
 
 std::shared_ptr<TranslationUnitDecl> TranslationUnitDecl::make(
-    const yy::location& loc, const std::vector<std::shared_ptr<FunctionDecl>>& functions)
+    const Location& loc, const std::vector<std::shared_ptr<FunctionDecl>>& functions)
 {
     auto decl = std::make_shared<TranslationUnitDecl>();
     decl->location = loc;
@@ -60,7 +60,7 @@ void NamedDecl::traverse(ASTVisitor& visitor)
     visitor.visit(shared_from_this());
 }
 
-std::shared_ptr<NamedDecl> NamedDecl::make(const yy::location& loc, const std::string& v)
+std::shared_ptr<NamedDecl> NamedDecl::make(const Location& loc, const std::string& v)
 {
     auto decl = std::make_shared<NamedDecl>();
     decl->location = loc;
@@ -103,7 +103,7 @@ std::shared_ptr<CompoundStmt> FunctionDecl::getBody() const
 }
 
 std::shared_ptr<FunctionDecl> FunctionDecl::make(
-    const yy::location& loc,
+    const Location& loc,
     const std::shared_ptr<NamedDecl>& n,
     const std::vector<std::shared_ptr<ParmVarDecl>>& parameters,
     const std::shared_ptr<NamedDecl>& returnType,
@@ -125,7 +125,7 @@ void ParmVarDecl::traverse(ASTVisitor& visitor)
 }
 
 std::shared_ptr<ParmVarDecl>
-ParmVarDecl::make(const yy::location& loc, const std::shared_ptr<NamedDecl>& name)
+ParmVarDecl::make(const Location& loc, const std::shared_ptr<NamedDecl>& name)
 {
     auto decl = std::make_shared<ParmVarDecl>();
     decl->location = loc;
@@ -134,7 +134,7 @@ ParmVarDecl::make(const yy::location& loc, const std::shared_ptr<NamedDecl>& nam
 }
 
 std::shared_ptr<ParmVarDecl> ParmVarDecl::make(
-    const yy::location& loc,
+    const Location& loc,
     const std::shared_ptr<NamedDecl>& name,
     const std::shared_ptr<NamedDecl>& typeAnnotation)
 {
@@ -157,7 +157,7 @@ void VariableDecl::traverse(ASTVisitor& visitor)
 }
 
 std::shared_ptr<VariableDecl>
-VariableDecl::make(const yy::location& loc, const std::shared_ptr<NamedDecl>& n)
+VariableDecl::make(const Location& loc, const std::shared_ptr<NamedDecl>& n)
 {
     auto decl = std::make_shared<VariableDecl>();
     decl->location = loc;
@@ -166,7 +166,7 @@ VariableDecl::make(const yy::location& loc, const std::shared_ptr<NamedDecl>& n)
 }
 
 std::shared_ptr<VariableDecl> VariableDecl::make(
-    const yy::location& loc, const std::shared_ptr<NamedDecl>& n, const std::shared_ptr<Expr>& e)
+    const Location& loc, const std::shared_ptr<NamedDecl>& n, const std::shared_ptr<Expr>& e)
 {
     auto decl = std::make_shared<VariableDecl>();
     decl->location = loc;
@@ -186,8 +186,7 @@ void ConstDecl::traverse(ASTVisitor& visitor)
     });
 }
 
-std::shared_ptr<ConstDecl>
-ConstDecl::make(const yy::location& loc, const std::shared_ptr<NamedDecl>& n)
+std::shared_ptr<ConstDecl> ConstDecl::make(const Location& loc, const std::shared_ptr<NamedDecl>& n)
 {
     auto decl = std::make_shared<ConstDecl>();
     decl->location = loc;
@@ -196,7 +195,7 @@ ConstDecl::make(const yy::location& loc, const std::shared_ptr<NamedDecl>& n)
 }
 
 std::shared_ptr<ConstDecl> ConstDecl::make(
-    const yy::location& loc, const std::shared_ptr<NamedDecl>& n, const std::shared_ptr<Expr>& e)
+    const Location& loc, const std::shared_ptr<NamedDecl>& n, const std::shared_ptr<Expr>& e)
 {
     auto decl = std::make_shared<ConstDecl>();
     decl->location = loc;

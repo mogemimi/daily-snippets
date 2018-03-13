@@ -16,7 +16,7 @@ void Expr::setType(const std::shared_ptr<Type>& t)
     type = t;
 }
 
-yy::location Expr::getLocation() const
+Location Expr::getLocation() const
 {
     return location;
 }
@@ -26,7 +26,7 @@ void IntegerLiteral::traverse(ASTVisitor& visitor)
     visitor.visit(shared_from_this());
 }
 
-std::shared_ptr<IntegerLiteral> IntegerLiteral::make(const yy::location& loc, int64_t v)
+std::shared_ptr<IntegerLiteral> IntegerLiteral::make(const Location& loc, int64_t v)
 {
     auto expr = std::make_shared<IntegerLiteral>();
     expr->location = loc;
@@ -39,7 +39,7 @@ void DoubleLiteral::traverse(ASTVisitor& visitor)
     visitor.visit(shared_from_this());
 }
 
-std::shared_ptr<DoubleLiteral> DoubleLiteral::make(const yy::location& loc, double v)
+std::shared_ptr<DoubleLiteral> DoubleLiteral::make(const Location& loc, double v)
 {
     auto expr = std::make_shared<DoubleLiteral>();
     expr->location = loc;
@@ -52,7 +52,7 @@ void BoolLiteral::traverse(ASTVisitor& visitor)
     visitor.visit(shared_from_this());
 }
 
-std::shared_ptr<BoolLiteral> BoolLiteral::make(const yy::location& loc, bool v)
+std::shared_ptr<BoolLiteral> BoolLiteral::make(const Location& loc, bool v)
 {
     auto expr = std::make_shared<BoolLiteral>();
     expr->location = loc;
@@ -65,7 +65,7 @@ void StringLiteral::traverse(ASTVisitor& visitor)
     visitor.visit(shared_from_this());
 }
 
-std::shared_ptr<StringLiteral> StringLiteral::make(const yy::location& loc, const std::string& v)
+std::shared_ptr<StringLiteral> StringLiteral::make(const Location& loc, const std::string& v)
 {
     auto expr = std::make_shared<StringLiteral>();
     expr->location = loc;
@@ -85,7 +85,7 @@ void CallExpr::traverse(ASTVisitor& visitor)
 }
 
 std::shared_ptr<CallExpr> CallExpr::make(
-    const yy::location& loc,
+    const Location& loc,
     const std::shared_ptr<Expr>& fn,
     const std::vector<std::shared_ptr<Expr>>& args)
 {
@@ -131,7 +131,7 @@ std::shared_ptr<CompoundStmt> FunctionExpr::getBody() const
 }
 
 std::shared_ptr<FunctionExpr> FunctionExpr::make(
-    const yy::location& loc,
+    const Location& loc,
     const std::shared_ptr<NamedDecl>& n,
     const std::vector<std::shared_ptr<ParmVarDecl>>& parameters,
     const std::shared_ptr<NamedDecl>& returnType,
@@ -157,7 +157,7 @@ void BinaryOperator::traverse(ASTVisitor& visitor)
 }
 
 std::shared_ptr<BinaryOperator> BinaryOperator::make(
-    const yy::location& loc,
+    const Location& loc,
     BinaryOperatorKind k,
     const std::shared_ptr<Expr>& l,
     const std::shared_ptr<Expr>& r)
@@ -179,7 +179,7 @@ void UnaryOperator::traverse(ASTVisitor& visitor)
 }
 
 std::shared_ptr<UnaryOperator>
-UnaryOperator::make(const yy::location& loc, UnaryOperatorKind k, const std::shared_ptr<Expr>& e)
+UnaryOperator::make(const Location& loc, UnaryOperatorKind k, const std::shared_ptr<Expr>& e)
 {
     auto expr = std::make_shared<UnaryOperator>();
     expr->location = loc;
@@ -195,7 +195,7 @@ void DeclRefExpr::traverse(ASTVisitor& visitor)
 }
 
 std::shared_ptr<DeclRefExpr>
-DeclRefExpr::make(const yy::location& loc, const std::shared_ptr<NamedDecl>& d)
+DeclRefExpr::make(const Location& loc, const std::shared_ptr<NamedDecl>& d)
 {
     auto expr = std::make_shared<DeclRefExpr>();
     expr->location = loc;
@@ -224,7 +224,7 @@ std::shared_ptr<NamedDecl> MemberExpr::getMemberDecl() const
 }
 
 std::shared_ptr<MemberExpr> MemberExpr::make(
-    const yy::location& loc, const std::shared_ptr<Expr>& base, const std::shared_ptr<NamedDecl>& d)
+    const Location& loc, const std::shared_ptr<Expr>& base, const std::shared_ptr<NamedDecl>& d)
 {
     auto expr = std::make_shared<MemberExpr>();
     expr->location = loc;

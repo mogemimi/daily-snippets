@@ -2,7 +2,7 @@
 
 #include "AST/Stmt.h"
 #include "Basic/Forward.h"
-#include "Parser/location.hh"
+#include "Basic/Location.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -10,7 +10,7 @@
 class Expr : public Stmt {
 protected:
     std::shared_ptr<Type> type;
-    yy::location location;
+    Location location;
 
 public:
     virtual ~Expr() = default;
@@ -18,7 +18,7 @@ public:
     std::shared_ptr<Type> getType() const;
     void setType(const std::shared_ptr<Type>& t);
 
-    yy::location getLocation() const;
+    Location getLocation() const;
 };
 
 class IntegerLiteral final
@@ -32,7 +32,7 @@ public:
 
     int64_t getValue() const noexcept { return value; }
 
-    static std::shared_ptr<IntegerLiteral> make(const yy::location& loc, int64_t v);
+    static std::shared_ptr<IntegerLiteral> make(const Location& loc, int64_t v);
 };
 
 class DoubleLiteral final
@@ -46,7 +46,7 @@ public:
 
     double getValue() const noexcept { return value; }
 
-    static std::shared_ptr<DoubleLiteral> make(const yy::location& loc, double v);
+    static std::shared_ptr<DoubleLiteral> make(const Location& loc, double v);
 };
 
 class BoolLiteral final
@@ -60,7 +60,7 @@ public:
 
     bool getValue() const noexcept { return value; }
 
-    static std::shared_ptr<BoolLiteral> make(const yy::location& loc, bool v);
+    static std::shared_ptr<BoolLiteral> make(const Location& loc, bool v);
 };
 
 class StringLiteral final
@@ -74,7 +74,7 @@ public:
 
     std::string getValue() const noexcept { return value; }
 
-    static std::shared_ptr<StringLiteral> make(const yy::location& loc, const std::string& v);
+    static std::shared_ptr<StringLiteral> make(const Location& loc, const std::string& v);
 };
 
 class CallExpr final
@@ -91,7 +91,7 @@ public:
     std::vector<std::shared_ptr<Expr>> getArguments() const { return arguments; }
 
     static std::shared_ptr<CallExpr> make(
-        const yy::location& loc,
+        const Location& loc,
         const std::shared_ptr<Expr>& fn,
         const std::vector<std::shared_ptr<Expr>>& args);
 };
@@ -117,7 +117,7 @@ public:
     std::shared_ptr<CompoundStmt> getBody() const;
 
     static std::shared_ptr<FunctionExpr> make(
-        const yy::location& loc,
+        const Location& loc,
         const std::shared_ptr<NamedDecl>& n,
         const std::vector<std::shared_ptr<ParmVarDecl>>& parameters,
         const std::shared_ptr<NamedDecl>& returnType,
@@ -161,7 +161,7 @@ public:
     std::shared_ptr<Expr> getRHS() const { return rhs; }
 
     static std::shared_ptr<BinaryOperator> make(
-        const yy::location& loc,
+        const Location& loc,
         BinaryOperatorKind k,
         const std::shared_ptr<Expr>& l,
         const std::shared_ptr<Expr>& r);
@@ -193,7 +193,7 @@ public:
     std::shared_ptr<Expr> getSubExpr() const { return subExpr; }
 
     static std::shared_ptr<UnaryOperator>
-    make(const yy::location& loc, UnaryOperatorKind k, const std::shared_ptr<Expr>& e);
+    make(const Location& loc, UnaryOperatorKind k, const std::shared_ptr<Expr>& e);
 };
 
 class DeclRefExpr final
@@ -208,7 +208,7 @@ public:
     std::shared_ptr<NamedDecl> getNamedDecl() const { return decl; }
 
     static std::shared_ptr<DeclRefExpr>
-    make(const yy::location& loc, const std::shared_ptr<NamedDecl>& d);
+    make(const Location& loc, const std::shared_ptr<NamedDecl>& d);
 };
 
 class MemberExpr final
@@ -226,7 +226,7 @@ public:
     std::shared_ptr<NamedDecl> getMemberDecl() const;
 
     static std::shared_ptr<MemberExpr> make(
-        const yy::location& loc,
+        const Location& loc,
         const std::shared_ptr<Expr>& base,
         const std::shared_ptr<NamedDecl>& d);
 };

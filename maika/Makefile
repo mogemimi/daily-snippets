@@ -20,6 +20,7 @@ SOURCES = \
 	AST/Stmt.cpp \
 	AST/Type.cpp \
 	Basic/Diagnostic.cpp \
+	Basic/Location.cpp \
 	Driver/Driver.cpp \
 	Parser/MyLexer.cpp \
 	Parser/MyParser.cpp \
@@ -60,6 +61,8 @@ format:
 		AST/Type.h \
 		Basic/Diagnostic.cpp \
 		Basic/Diagnostic.h \
+		Basic/Location.cpp \
+		Basic/Location.h \
 		Basic/Forward.h \
 		Driver/Driver.cpp \
 		Driver/Driver.h \

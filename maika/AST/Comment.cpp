@@ -8,8 +8,9 @@ std::string Comment::dump()
         case CommentKind::BCPL: return "BCPL";
         case CommentKind::C: return "C";
         }
+        return "<unknown>";
     }();
     std::stringstream ss;
-    ss << location << ": Comment Style = " << style << "\n" << text;
+    ss << location.toString() << ": Comment Style = " << style << "\n" << text;
     return ss.str();
 }

@@ -9,32 +9,28 @@
 
 %code requires
 {
-#include "AST/ASTContext.h"
+#include "Basic/Forward.h"
 #include "AST/Decl.h"
 #include "AST/Expr.h"
 #include "AST/Stmt.h"
-#include <iostream>
-#include <string>
+#include <memory>
 #include <tuple>
+#include <vector>
 
 class MyDriver;
 
-namespace {
-template <class T>
-std::vector<T> appendVector(T left, const std::vector<T>& right)
-{
-    std::vector<T> s;
-    s.reserve(1 + right.size());
-    s.push_back(left);
-    s.insert(std::end(s), std::begin(right), std::end(right));
-    return s;
-}
+namespace yy {
+class position;
+class location;
+} // namespace yy
 
 using CallSignature = std::tuple<
   std::vector<std::shared_ptr<ParmVarDecl>>,
   std::shared_ptr<NamedDecl>>;
 
-} // end of anonymous namespace 
+// TODO: Maybe we should use a user-defined location type instead of toLoc() function.
+// https://www.gnu.org/software/bison/manual/html_node/User-Defined-Location-Type.html#User-Defined-Location-Type
+Location toLoc(const yy::location& y);
 }
 
 %param { MyDriver& driver }
@@ -51,7 +47,39 @@ using CallSignature = std::tuple<
 
 %code
 {
+#include "AST/ASTContext.h"
+#include "Basic/Location.h"
 #include "Driver/Driver.h"
+#include <string>
+
+namespace {
+template <class T>
+std::vector<T> appendVector(T left, const std::vector<T>& right)
+{
+    std::vector<T> s;
+    s.reserve(1 + right.size());
+    s.push_back(left);
+    s.insert(std::end(s), std::begin(right), std::end(right));
+    return s;
+}
+
+Position toPosition(const yy::position& y)
+{
+    Position pos;
+    if (y.filename) {
+        pos.filename = *y.filename;
+    }
+    pos.line = static_cast<int>(y.line);
+    pos.column = static_cast<int>(y.column);
+    return pos;
+}
+} // end of anonymous namespace
+
+Location toLoc(const yy::location& y)
+{
+    Location loc(toPosition(y.begin), toPosition(y.end));
+    return loc;
+}
 }
 
 %define api.token.prefix {TOK_}
@@ -136,7 +164,7 @@ using CallSignature = std::tuple<
 %start translation_unit;
 
 translation_unit:
-  function_definitions  { driver.ast.translationUnit = TranslationUnitDecl::make(@$, $1); }
+  function_definitions  { driver.ast.translationUnit = TranslationUnitDecl::make(toLoc(@$), $1); }
 ;
 
 function_definitions:
@@ -145,11 +173,11 @@ function_definitions:
 ;
 
 function_definition:
-  "function" "identifier" call_signature compound_statement { $$ = FunctionDecl::make(@$, $2, std::get<0>($3), std::get<1>($3), $4); }
+  "function" "identifier" call_signature compound_statement { $$ = FunctionDecl::make(toLoc(@$), $2, std::get<0>($3), std::get<1>($3), $4); }
 ;
 
 function_expression:
-  "function" binding_identifier call_signature compound_statement { $$ = FunctionExpr::make(@$, $2, std::get<0>($3), std::get<1>($3), $4); }
+  "function" binding_identifier call_signature compound_statement { $$ = FunctionExpr::make(toLoc(@$), $2, std::get<0>($3), std::get<1>($3), $4); }
 ;
 
 call_signature:
@@ -169,8 +197,8 @@ parameter_variables:
 ;
 
 parameter_variable:
-  "identifier"                    { $$ = ParmVarDecl::make(@$, $1); }
-| "identifier" ":" type_specifier { $$ = ParmVarDecl::make(@$, $1, $3); }
+  "identifier"                    { $$ = ParmVarDecl::make(toLoc(@$), $1); }
+| "identifier" ":" type_specifier { $$ = ParmVarDecl::make(toLoc(@$), $1, $3); }
 ;
 
 type_specifier:
@@ -225,13 +253,13 @@ for_init_statement:
 ;
 
 variable_definition:
-  "let" "identifier"                { $$ = VariableDecl::make(@$, $2); }
-| "let" "identifier" "=" expression { $$ = VariableDecl::make(@$, $2, $4); }
+  "let" "identifier"                { $$ = VariableDecl::make(toLoc(@$), $2); }
+| "let" "identifier" "=" expression { $$ = VariableDecl::make(toLoc(@$), $2, $4); }
 ;
 
 const_definition:
-  "const" "identifier"                { $$ = ConstDecl::make(@$, $2); }
-| "const" "identifier" "=" expression { $$ = ConstDecl::make(@$, $2, $4); }
+  "const" "identifier"                { $$ = ConstDecl::make(toLoc(@$), $2); }
+| "const" "identifier" "=" expression { $$ = ConstDecl::make(toLoc(@$), $2, $4); }
 ;
 
 literal:
@@ -254,26 +282,26 @@ literal:
      
 primary_expression:
   literal                 { $$ = $1; }
-| "identifier"            { $$ = DeclRefExpr::make(@$, $1); }
+| "identifier"            { $$ = DeclRefExpr::make(toLoc(@$), $1); }
 | "(" expression ")"      { std::swap($$, $2); }
 ;
 
 unary_expression:
-  "++" primary_expression { $$ = UnaryOperator::make(@$, UnaryOperatorKind::PreInc, $2); }
-| "--" primary_expression { $$ = UnaryOperator::make(@$, UnaryOperatorKind::PreDec, $2); }
-| primary_expression "++" { $$ = UnaryOperator::make(@$, UnaryOperatorKind::PostInc, $1); }
-| primary_expression "--" { $$ = UnaryOperator::make(@$, UnaryOperatorKind::PostDec, $1); }
-| "+" primary_expression  { $$ = UnaryOperator::make(@$, UnaryOperatorKind::Plus, $2); }
-| "-" primary_expression  { $$ = UnaryOperator::make(@$, UnaryOperatorKind::Minus, $2); }
-| "!" primary_expression  { $$ = UnaryOperator::make(@$, UnaryOperatorKind::LogicalNot, $2); }
+  "++" primary_expression { $$ = UnaryOperator::make(toLoc(@$), UnaryOperatorKind::PreInc, $2); }
+| "--" primary_expression { $$ = UnaryOperator::make(toLoc(@$), UnaryOperatorKind::PreDec, $2); }
+| primary_expression "++" { $$ = UnaryOperator::make(toLoc(@$), UnaryOperatorKind::PostInc, $1); }
+| primary_expression "--" { $$ = UnaryOperator::make(toLoc(@$), UnaryOperatorKind::PostDec, $1); }
+| "+" primary_expression  { $$ = UnaryOperator::make(toLoc(@$), UnaryOperatorKind::Plus, $2); }
+| "-" primary_expression  { $$ = UnaryOperator::make(toLoc(@$), UnaryOperatorKind::Minus, $2); }
+| "!" primary_expression  { $$ = UnaryOperator::make(toLoc(@$), UnaryOperatorKind::LogicalNot, $2); }
 ;
 
 member_expression:
-  expression "." "identifier" { $$ = MemberExpr::make(@$, $1, $3); }
+  expression "." "identifier" { $$ = MemberExpr::make(toLoc(@$), $1, $3); }
 ;
 
 call_expression:
-  expression "(" expression_list ")"  { $$ = CallExpr::make(@$, $1, $3); }
+  expression "(" expression_list ")"  { $$ = CallExpr::make(toLoc(@$), $1, $3); }
 ;
 
 expression_list:
@@ -284,20 +312,20 @@ expression_list:
 
 expression:
   primary_expression                { $$ = $1; }
-| expression "+" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Add, $1, $3); }
-| expression "-" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Subtract, $1, $3); }
-| expression "*" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Multiply, $1, $3); }
-| expression "/" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Divide, $1, $3); }
-| expression "%" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Mod, $1, $3); }
-| expression "=" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Assign, $1, $3); }
-| expression "==" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::Equal, $1, $3); }
-| expression "!=" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::NotEqual, $1, $3); }
-| expression "&&" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LogicalAnd, $1, $3); }
-| expression "||" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LogicalOr, $1, $3); }
-| expression ">" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::GreaterThan, $1, $3); }
-| expression ">=" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::GreaterThanOrEqual, $1, $3); }
-| expression "<" expression         { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LessThan, $1, $3); }
-| expression "<=" expression        { $$ = BinaryOperator::make(@$, BinaryOperatorKind::LessThanOrEqual, $1, $3); }
+| expression "+" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Add, $1, $3); }
+| expression "-" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Subtract, $1, $3); }
+| expression "*" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Multiply, $1, $3); }
+| expression "/" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Divide, $1, $3); }
+| expression "%" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Mod, $1, $3); }
+| expression "=" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Assign, $1, $3); }
+| expression "==" expression        { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Equal, $1, $3); }
+| expression "!=" expression        { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::NotEqual, $1, $3); }
+| expression "&&" expression        { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::LogicalAnd, $1, $3); }
+| expression "||" expression        { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::LogicalOr, $1, $3); }
+| expression ">" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::GreaterThan, $1, $3); }
+| expression ">=" expression        { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::GreaterThanOrEqual, $1, $3); }
+| expression "<" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::LessThan, $1, $3); }
+| expression "<=" expression        { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::LessThanOrEqual, $1, $3); }
 | unary_expression                  { $$ = $1; }
 | call_expression                   { $$ = $1; }
 | member_expression                 { $$ = $1; }
@@ -308,5 +336,5 @@ expression:
 
 void yy::MyParser::error(const location_type& l, const std::string& m)
 {
-    driver.error (l, m);
+    driver.error(toLoc(l), m);
 }

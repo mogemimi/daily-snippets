@@ -4,13 +4,16 @@
 #include "AST/Expr.h"
 #include "AST/Stmt.h"
 #include "AST/Type.h"
+#include "Basic/Location.h"
 #include "Driver/Driver.h"
 #include "Parser/MyParser.h"
+#include "Parser/location.hh"
 
 #include <cerrno>
 #include <climits>
 #include <cstdlib>
 #include <string>
+#include <memory>
 
 // Work around an incompatibility in flex (at least versions
 // 2.5.31 through 2.5.33): it generates code that does
@@ -54,13 +57,13 @@ crlf        (\r\n|\n)
 "/*"                    BEGIN(CSTYLE_COMMENT); comment = yytext;
 <CSTYLE_COMMENT>"*/"    {
     BEGIN(INITIAL);
-    driver.visitComment(loc, CommentKind::C, comment + yytext);
+    driver.visitComment(toLoc(loc), CommentKind::C, comment + yytext);
     comment.clear();
 }
 <CSTYLE_COMMENT>\n      loc.lines(yyleng); comment += yytext;
 <CSTYLE_COMMENT>.       comment += yytext;
 
-"//".*      driver.visitComment(loc, CommentKind::BCPL, yytext);
+"//".*      driver.visitComment(toLoc(loc), CommentKind::BCPL, yytext);
 {blank}+    loc.step();
 {crlf}+     loc.lines(yyleng); loc.step();
 ^{utf8_bom} loc.step();
@@ -107,31 +110,31 @@ crlf        (\r\n|\n)
 "else"      return yy::MyParser::make_ELSE(loc);
 "while"     return yy::MyParser::make_WHILE(loc);
 "for"       return yy::MyParser::make_FOR(loc);
-"true"      return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(loc, true), loc);
-"false"     return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(loc, false), loc);
+"true"      return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(toLoc(loc), true), loc);
+"false"     return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(toLoc(loc), false), loc);
 
-\"(\\.|[^\\"])*\" return yy::MyParser::make_STRING_LITERAL(StringLiteral::make(loc, yytext), loc);
+\"(\\.|[^\\"])*\" return yy::MyParser::make_STRING_LITERAL(StringLiteral::make(toLoc(loc), yytext), loc);
 
 {integer} {
     errno = 0;
     const auto n = strtol(yytext, nullptr, 10);
-    if (! (INT_MIN <= n && n <= INT_MAX && errno != ERANGE)) {
-        driver.error(loc, "integer is out of range");
+    if (!(INT_MIN <= n && n <= INT_MAX && errno != ERANGE)) {
+        driver.error(toLoc(loc), "integer is out of range");
     }
-    return yy::MyParser::make_INTEGER_LITERAL(IntegerLiteral::make(loc, n), loc);
+    return yy::MyParser::make_INTEGER_LITERAL(IntegerLiteral::make(toLoc(loc), n), loc);
 }
 
 {double} {
     errno = 0;
     const auto d = strtod(yytext, nullptr);
     if (errno == ERANGE) {
-        driver.error(loc, "double is out of range");
+        driver.error(toLoc(loc), "double is out of range");
     }
-    return yy::MyParser::make_DOUBLE_LITERAL(DoubleLiteral::make(loc, d), loc);
+    return yy::MyParser::make_DOUBLE_LITERAL(DoubleLiteral::make(toLoc(loc), d), loc);
 }
 
-{identifier}    return yy::MyParser::make_IDENTIFIER(NamedDecl::make(loc, yytext), loc);
-.               driver.error(loc, "invalid character");
+{identifier}    return yy::MyParser::make_IDENTIFIER(NamedDecl::make(toLoc(loc), yytext), loc);
+.               driver.error(toLoc(loc), "invalid character");
 <<EOF>>         return yy::MyParser::make_END(loc);
 
 %%

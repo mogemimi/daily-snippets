@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Parser/location.hh"
+#include "Basic/Location.h"
 #include <string>
 
 enum class CommentKind {
@@ -9,7 +9,7 @@ enum class CommentKind {
 };
 
 struct Comment final {
-    yy::location location;
+    Location location;
     CommentKind kind;
     std::string text;
 

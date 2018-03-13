@@ -3,7 +3,6 @@
 #include "AST/ASTVisitor.h"
 #include "AST/Type.h"
 #include "Basic/Forward.h"
-#include "Parser/location.hh"
 #include "Sema/TypeInferer.h"
 #include <memory>
 #include <string>
@@ -26,7 +25,7 @@ public:
     void pushScope(const std::shared_ptr<TypeResolverScope>& scope);
     void popScope();
 
-    void error(const yy::location& l, const std::string& err);
+    void error(const Location& l, const std::string& err);
 
     void visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traverse) override;
     void visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse) override;
