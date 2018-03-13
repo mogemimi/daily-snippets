@@ -20,7 +20,7 @@ SOURCES = \
 	AST/Stmt.cpp \
 	AST/Type.cpp \
 	Basic/Diagnostic.cpp \
-	Driver/MyDriver.cpp \
+	Driver/Driver.cpp \
 	Parser/MyLexer.cpp \
 	Parser/MyParser.cpp \
 	Printer/Formatter.cpp \
@@ -61,8 +61,8 @@ format:
 		Basic/Diagnostic.cpp \
 		Basic/Diagnostic.h \
 		Basic/Forward.h \
-		Driver/MyDriver.cpp \
-		Driver/MyDriver.h \
+		Driver/Driver.cpp \
+		Driver/Driver.h \
 		Printer/Formatter.cpp \
 		Printer/Formatter.h \
 		Sema/Entity.cpp \

@@ -641,7 +641,7 @@ char *yytext;
 #include "AST/Expr.h"
 #include "AST/Stmt.h"
 #include "AST/Type.h"
-#include "Driver/MyDriver.h"
+#include "Driver/Driver.h"
 #include "Parser/MyParser.h"
 
 #include <cerrno>
