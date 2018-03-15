@@ -32,12 +32,13 @@ SOURCES = \
 	Sema/Entity.cpp \
 	Sema/IdentifierResolver.cpp \
 	Sema/Scope.cpp \
-	Sema/TypeChecker.cpp \
+	Sema/SemaChecker.cpp \
 	Sema/TypeInferer.cpp \
 	Sema/TypeResolver.cpp \
 	tests/DumpTest.cpp \
 	tests/LexerTest.cpp \
 	tests/IdentifierResolverTest.cpp \
+	tests/SemaCheckerTest.cpp \
 	tests/TypeResolverTest.cpp \
 	tests/main.cpp
 

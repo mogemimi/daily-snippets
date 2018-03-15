@@ -20,7 +20,6 @@ public:
     ASTContext ast;
     std::string file;
     std::string sourceText;
-    std::vector<Comment> comments;
 
     std::tuple<ASTContext, bool>
     parseFile(const std::string& filename, const std::shared_ptr<DiagnosticHandler>& diag);
@@ -31,7 +30,7 @@ public:
     void scanBegin();
     void scanEnd();
 
-    void visitComment(const Location& l, CommentKind kind, const std::string& comment);
+    void visitComment(const Location& loc, CommentKind kind, const std::string& comment);
     void error(const Location& l, const std::string& m);
     void error(const std::string& m);
 };

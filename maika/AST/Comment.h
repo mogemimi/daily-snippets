@@ -8,10 +8,12 @@ enum class CommentKind {
     BCPL, // // comment
 };
 
-struct Comment final {
+class Comment final {
+public:
     Location location;
     CommentKind kind;
     std::string text;
 
-    std::string dump();
+public:
+    std::string dump() const;
 };

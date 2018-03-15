@@ -1,7 +1,7 @@
 #include "Comment.h"
 #include <sstream>
 
-std::string Comment::dump()
+std::string Comment::dump() const
 {
     auto style = [&]() -> std::string {
         switch (kind) {

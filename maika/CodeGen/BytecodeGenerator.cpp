@@ -5,6 +5,7 @@
 #include "AST/Stmt.h"
 #include "AST/Type.h"
 #include "Sema/Entity.h"
+#include <algorithm>
 #include <cassert>
 #include <sstream>
 #include <utility>

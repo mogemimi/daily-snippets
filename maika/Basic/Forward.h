@@ -4,6 +4,10 @@
 class Location;
 class Position;
 
+// NOTE: Preprocessor
+class Comment;
+enum class CommentKind;
+
 // NOTE: AST
 class ASTContext;
 class ASTVisitor;

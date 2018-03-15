@@ -6,24 +6,23 @@
 #include <string>
 #include <vector>
 
-//enum class ExprValueKind {
-//    LValue,
-//    RValue,
-//};
+enum class ExprValueKind {
+    LValue,
+    RValue,
+};
 
 class Expr : public Stmt {
 protected:
     std::shared_ptr<Type> type;
-    // ExprValueKind valueKind;
+    ExprValueKind valueKind;
 
 public:
     virtual ~Expr() = default;
 
-    virtual bool isLValue() const = 0;
+    bool isLValue() const { return getValueKind() == ExprValueKind::LValue; }
 
-    // bool isLValue() const { return getValueKind() == ExprValueKind::LValue; }
-    // ExprValueKind getValueKind() const;
-    // void setValueKind(ExprValueKind k) { valueKind = k; }
+    ExprValueKind getValueKind() const { return valueKind; }
+    void setValueKind(ExprValueKind k) { valueKind = k; }
 
     // TODO: for constant folding
     // isEvaluatable();
@@ -42,8 +41,6 @@ private:
 public:
     void traverse(ASTVisitor& visitor) override;
 
-    bool isLValue() const override { return false; }
-
     int64_t getValue() const noexcept { return value; }
 
     static std::shared_ptr<IntegerLiteral> make(const Location& loc, int64_t v);
@@ -57,8 +54,6 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
-
-    bool isLValue() const override { return false; }
 
     double getValue() const noexcept { return value; }
 
@@ -74,8 +69,6 @@ private:
 public:
     void traverse(ASTVisitor& visitor) override;
 
-    bool isLValue() const override { return false; }
-
     bool getValue() const noexcept { return value; }
 
     static std::shared_ptr<BoolLiteral> make(const Location& loc, bool v);
@@ -89,8 +82,6 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
-
-    bool isLValue() const override { return false; }
 
     std::string getValue() const noexcept { return value; }
 
@@ -106,8 +97,6 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
-
-    bool isLValue() const override;
 
     std::shared_ptr<Expr> getCallee() const { return callee; }
     std::vector<std::shared_ptr<Expr>> getArguments() const { return arguments; }
@@ -129,8 +118,6 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
-
-    bool isLValue() const override { return false; }
 
     std::shared_ptr<NamedDecl> getNamedDecl() const;
 
@@ -179,8 +166,6 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
-
-    bool isLValue() const override { return false; }
 
     static bool isMultiplicativeOp(BinaryOperatorKind kind);
     bool isMultiplicativeOp() const;
@@ -239,8 +224,6 @@ private:
 public:
     void traverse(ASTVisitor& visitor) override;
 
-    bool isLValue() const override { return false; }
-
     UnaryOperatorKind getKind() const { return kind; }
 
     std::shared_ptr<Expr> getSubExpr() const { return subExpr; }
@@ -262,8 +245,6 @@ private:
 public:
     void traverse(ASTVisitor& visitor) override;
 
-    bool isLValue() const override;
-
     std::shared_ptr<NamedDecl> getNamedDecl() const { return decl; }
 
     static std::shared_ptr<DeclRefExpr>
@@ -279,8 +260,6 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
-
-    bool isLValue() const override { return true; }
 
     std::shared_ptr<Expr> getBase() const;
 
@@ -300,8 +279,6 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
-
-    bool isLValue() const override { return false; }
 
     std::shared_ptr<Expr> getSubExpr() const { return subExpr; }
 

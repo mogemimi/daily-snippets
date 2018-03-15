@@ -4,7 +4,7 @@
 #include "Driver/Driver.h"
 #include "Sema/Entity.h"
 #include "Sema/IdentifierResolver.h"
-#include "Sema/TypeChecker.h"
+#include "Sema/SemaChecker.h"
 #include "Sema/TypeInferer.h"
 #include "Sema/TypeResolver.h"
 
@@ -24,32 +24,22 @@ bool typeCheck(const std::shared_ptr<DiagnosticHandler>& diag, const std::string
     traverser.traverse(astContext, resolver);
     REQUIRE(!diag->hasError());
 
+	SemaChecker semaChecker(diag);
+	traverser.traverse(astContext, semaChecker);
+	REQUIRE(!diag->hasError());
+
     TypeResolver typeResolver(diag);
     traverser.traverse(astContext, typeResolver);
     return !diag->hasError();
 }
 } // end of anonymous namespace
 
-TEST_CASE("TypeResolver can detect type mismatch", "[type-mismtach detection]")
+TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
 {
     auto stream = std::make_shared<UnitTestDiagnosticStream>();
     auto diag = std::make_shared<DiagnosticHandler>();
     diag->setStream(stream);
 
-    SECTION("The left-hand side of an assignment must be a variable.") {
-        constexpr auto source = R"(function test() { 4 = 2; })";
-        REQUIRE(!typeCheck(diag, source));
-        REQUIRE(stream->hasError("1:19: error: The left-hand side of an assignment must be a variable."));
-    }
-    SECTION("The left-hand side of an assignment must be a variable.") {
-        constexpr auto source = R"(function test() { "a" = "a"; })";
-        REQUIRE(!typeCheck(diag, source));
-        REQUIRE(stream->hasError("1:19: error: The left-hand side of an assignment must be a variable."));
-    }
-    SECTION("The LHS is correctly a variable.") {
-        constexpr auto source = R"(function test() { let a = "a"; })";
-        REQUIRE(typeCheck(diag, source));
-    }
     SECTION("Type 'int' is not assignable to 'string'.") {
         constexpr auto source = R"(function test() {
             let a = "a";
@@ -57,31 +47,6 @@ TEST_CASE("TypeResolver can detect type mismatch", "[type-mismtach detection]")
         })";
         REQUIRE(!typeCheck(diag, source));
         REQUIRE(stream->hasError("3:13: error: Type 'int' is not assignable to 'string'."));
-    }
-    SECTION("The left-hand side of an assignment must be a variable.") {
-        constexpr auto source = R"(function test() {
-            let a;
-            let b;
-            a = b = 2;
-        })";
-        REQUIRE(typeCheck(diag, source));
-    }
-    SECTION("The left-hand side of an assignment must be a variable.") {
-        constexpr auto source = R"(function test() {
-            let a;
-            let b;
-            a = (b = 2);
-        })";
-        REQUIRE(typeCheck(diag, source));
-    }
-    SECTION("The left-hand side of an assignment must be a variable.") {
-        constexpr auto source = R"(function test() {
-            let a;
-            let b;
-            (a = b) = 2;
-        })";
-        REQUIRE(!typeCheck(diag, source));
-        REQUIRE(stream->hasError("4:14: error: The left-hand side of an assignment must be a variable."));        
     }
     SECTION("Implicit type conversion: int to double") {
         constexpr auto source = R"(function test() {
@@ -198,6 +163,11 @@ TEST_CASE("TypeResolver can detect type mismatch", "[type-mismtach detection]")
         REQUIRE(!typeCheck(diag, source));
         REQUIRE(stream->hasError("1:19: error: invalid operands to binary expression ('double' and 'int')."));
     }
+	SECTION("invalid operands of types 'double' and 'double' to binary 'operator%'.") {
+		constexpr auto source = R"(function f(x) { x % 3.14; })";
+		REQUIRE(!typeCheck(diag, source));
+		REQUIRE(stream->hasError("1:21: error: invalid operands to binary expression ('any' and 'double')."));
+	}
     SECTION("invalid operands of types 'bool' and 'bool' to binary 'operator%'.") {
         constexpr auto source = R"(function test() { 42 % true; })";
         REQUIRE(!typeCheck(diag, source));

@@ -1,13 +1,17 @@
 #include "Basic/Diagnostic.h"
 #include "Basic/Location.h"
+#include <algorithm>
+#include <cassert>
 #include <iostream>
 #include <sstream>
-#include <cassert>
-#include <algorithm>
 
 namespace {
 
-std::string getErrorString(const std::string& errorLevel, const std::string& programName, const Location& loc, const std::string& msg)
+std::string getErrorString(
+    const std::string& errorLevel,
+    const std::string& programName,
+    const Location& loc,
+    const std::string& msg)
 {
     std::stringstream ss;
     if (!programName.empty()) {
@@ -18,7 +22,8 @@ std::string getErrorString(const std::string& errorLevel, const std::string& pro
     return ss.str();
 }
 
-std::string getErrorString(const std::string& errorLevel, const std::string& programName, const std::string& msg)
+std::string getErrorString(
+    const std::string& errorLevel, const std::string& programName, const std::string& msg)
 {
     std::stringstream ss;
     if (!programName.empty()) {

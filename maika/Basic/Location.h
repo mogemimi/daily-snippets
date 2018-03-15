@@ -15,11 +15,32 @@ public:
     // column number
     int column;
 
+    // file offset
+    // int offset;
+
     bool isValid() const noexcept { return line > 0; }
 
-    bool operator==(const Position& rhs) { return (line == rhs.line) && (column == rhs.column); }
+    bool operator==(const Position& rhs) const
+    {
+        return (line == rhs.line) && (column == rhs.column);
+    }
 
-    bool operator!=(const Position& rhs) { return (line != rhs.line) || (column != rhs.column); }
+    bool operator!=(const Position& rhs) const
+    {
+        return (line != rhs.line) || (column != rhs.column);
+    }
+
+    bool operator<(const Position& rhs) const
+    {
+#if 0
+		return offset < rhs.offset;
+#else
+        if (line == rhs.line) {
+            return column < rhs.column;
+        }
+        return line < rhs.line;
+#endif
+    }
 
     std::string toString() const;
 };

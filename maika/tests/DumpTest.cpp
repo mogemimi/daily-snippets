@@ -6,7 +6,7 @@
 #include "Driver/Driver.h"
 #include "Sema/Entity.h"
 #include "Sema/IdentifierResolver.h"
-#include "Sema/TypeChecker.h"
+#include "Sema/SemaChecker.h"
 #include "Sema/TypeInferer.h"
 #include "Sema/TypeResolver.h"
 #include <iostream>
@@ -170,12 +170,12 @@ function test() {
     traverser.traverse(astContext, resolver);
     REQUIRE(!diag->hasError());
 
-    TypeResolver typeResolver(diag);
-    traverser.traverse(astContext, typeResolver);
+    SemaChecker semaChecker(diag);
+    traverser.traverse(astContext, semaChecker);
     REQUIRE(!diag->hasError());
 
-    TypeChecker typeChecker(diag);
-    traverser.traverse(astContext, typeChecker);
+    TypeResolver typeResolver(diag);
+    traverser.traverse(astContext, typeResolver);
     REQUIRE(!diag->hasError());
 
     ASTDumper dumper;

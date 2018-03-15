@@ -131,36 +131,6 @@ getParameterTypes(const std::vector<std::shared_ptr<ParmVarDecl>>& parameters)
     return parameterTypes;
 }
 
-bool hasConstantReassignedError(
-    const std::shared_ptr<Expr>& lhs, const std::shared_ptr<DiagnosticHandler>& diag)
-{
-    assert(lhs);
-    assert(diag);
-    auto declRef = std::dynamic_pointer_cast<DeclRefExpr>(lhs);
-    if (!declRef) {
-        return false;
-    }
-    auto namedDecl = declRef->getNamedDecl();
-    if (!namedDecl) {
-        return false;
-    }
-    auto entity = namedDecl->getEntity();
-    if (!entity) {
-        return false;
-    }
-    if (entity->getKind() == EntityKind::Constant) {
-        diag->error(
-            lhs->getLocation(),
-            "Cannot assign to '" + namedDecl->getName() + "' because it is constant.");
-        return true;
-    }
-    if (entity->getKind() != EntityKind::Variable) {
-        diag->error(lhs->getLocation(), "Cannot assign to '" + namedDecl->getName() + "'.");
-        return true;
-    }
-    return false;
-}
-
 constexpr int anyBit = 0b00001;
 constexpr int intBit = 0b00010;
 constexpr int doubleBit = 0b00100;
@@ -214,7 +184,11 @@ inferBinaryOpTypeCast(BuiltinTypeKind a, BuiltinTypeKind b)
 }
 
 template <class GetCond, class SetCond>
-void ImplicitCastifyConditionExpr(const std::shared_ptr<TypeResolverScope>& scope, const std::shared_ptr<DiagnosticHandler>& diag, GetCond && getCond, SetCond && setCond)
+void ImplicitCastifyConditionExpr(
+    const std::shared_ptr<TypeResolverScope>& scope,
+    const std::shared_ptr<DiagnosticHandler>& diag,
+    GetCond&& getCond,
+    SetCond&& setCond)
 {
     const auto condExpr = getCond();
     assert(condExpr);
@@ -309,7 +283,8 @@ void TypeResolver::visit(const std::shared_ptr<IfStmt>& stmt, Invoke&& traverse)
 
     const auto scope = getCurrentScope();
 
-    ImplicitCastifyConditionExpr(scope, diag, [&]{ return stmt->getCond(); }, [&](auto cond){ stmt->setCond(cond); });
+    ImplicitCastifyConditionExpr(
+        scope, diag, [&] { return stmt->getCond(); }, [&](auto cond) { stmt->setCond(cond); });
     if (diag->hasError()) {
         return;
     }
@@ -321,7 +296,8 @@ void TypeResolver::visit(const std::shared_ptr<WhileStmt>& stmt, Invoke&& traver
 
     const auto scope = getCurrentScope();
 
-    ImplicitCastifyConditionExpr(scope, diag, [&]{ return stmt->getCond(); }, [&](auto cond){ stmt->setCond(cond); });
+    ImplicitCastifyConditionExpr(
+        scope, diag, [&] { return stmt->getCond(); }, [&](auto cond) { stmt->setCond(cond); });
     if (diag->hasError()) {
         return;
     }
@@ -333,7 +309,8 @@ void TypeResolver::visit(const std::shared_ptr<ForStmt>& stmt, Invoke&& traverse
 
     const auto scope = getCurrentScope();
 
-    ImplicitCastifyConditionExpr(scope, diag, [&]{ return stmt->getCond(); }, [&](auto cond){ stmt->setCond(cond); });
+    ImplicitCastifyConditionExpr(
+        scope, diag, [&] { return stmt->getCond(); }, [&](auto cond) { stmt->setCond(cond); });
     if (diag->hasError()) {
         return;
     }
@@ -415,19 +392,6 @@ void TypeResolver::visit(const std::shared_ptr<StringLiteral>& expr)
 
 void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
 {
-    if (expr->isAssignmentOp()) {
-        const auto lhs = expr->getLHS();
-        assert(lhs);
-        if (hasConstantReassignedError(lhs, diag)) {
-            return;
-        }
-
-        if (!lhs->isLValue()) {
-            error(lhs->getLocation(), "The left-hand side of an assignment must be a variable.");
-            return;
-        }
-    }
-
     traverse();
 
     if (expr->isEqualityOp() || expr->isComparisonOp() || expr->isLogicalOp()) {
@@ -461,33 +425,51 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
 
     if (expr->getKind() == BinaryOperatorKind::Mod) {
         if (lhsType == BuiltinTypeKind::Double) {
-            error(lhs->getLocation(), "invalid operands to binary expression ('"+lhsTypeInferred->dump()+"' and '"+rhsTypeInferred->dump()+"').");
+            error(
+                lhs->getLocation(),
+                "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
+                    "' and '" + BuiltinType::toString(rhsType) + "').");
             return;
         }
         if (rhsType == BuiltinTypeKind::Double) {
-            error(rhs->getLocation(), "invalid operands to binary expression ('"+lhsTypeInferred->dump()+"' and '"+rhsTypeInferred->dump()+"').");
+            error(
+                rhs->getLocation(),
+                "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
+                    "' and '" + BuiltinType::toString(rhsType) + "').");
             return;
         }
     }
 
     if (expr->isAdditiveOp() || expr->isMultiplicativeOp()) {
         if (lhsType == BuiltinTypeKind::Bool) {
-            error(lhs->getLocation(), "invalid operands to binary expression ('"+lhsTypeInferred->dump()+"' and '"+rhsTypeInferred->dump()+"').");
+            error(
+                lhs->getLocation(),
+                "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
+                    "' and '" + BuiltinType::toString(rhsType) + "').");
             return;
         }
         if (rhsType == BuiltinTypeKind::Bool) {
-            error(rhs->getLocation(), "invalid operands to binary expression ('"+lhsTypeInferred->dump()+"' and '"+rhsTypeInferred->dump()+"').");
+            error(
+                rhs->getLocation(),
+                "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
+                    "' and '" + BuiltinType::toString(rhsType) + "').");
             return;
         }
     }
 
     if ((expr->getKind() == BinaryOperatorKind::Subtract) || expr->isMultiplicativeOp()) {
         if (lhsType == BuiltinTypeKind::String) {
-            error(lhs->getLocation(), "invalid operands to binary expression ('"+lhsTypeInferred->dump()+"' and '"+rhsTypeInferred->dump()+"').");
+            error(
+                lhs->getLocation(),
+                "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
+                    "' and '" + BuiltinType::toString(rhsType) + "').");
             return;
         }
         if (rhsType == BuiltinTypeKind::String) {
-            error(rhs->getLocation(), "invalid operands to binary expression ('"+lhsTypeInferred->dump()+"' and '"+rhsTypeInferred->dump()+"').");
+            error(
+                rhs->getLocation(),
+                "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
+                    "' and '" + BuiltinType::toString(rhsType) + "').");
             return;
         }
     }
@@ -520,7 +502,11 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
             return;
         }
 
-        error(expr->getLocation(), "Operator '"+BinaryOperator::toString(expr->getKind())+"' cannot be applied to types '"+lhsTypeInferred->dump() + "' and '" + rhsTypeInferred->dump() + "'.");
+        error(
+            expr->getLocation(),
+            "Operator '" + BinaryOperator::toString(expr->getKind()) +
+                "' cannot be applied to types '" + lhsTypeInferred->dump() + "' and '" +
+                rhsTypeInferred->dump() + "'.");
         return;
     }
 
@@ -598,7 +584,11 @@ void TypeResolver::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& tr
         }
         break;
     case UnaryOperatorKind::LogicalNot: {
-        ImplicitCastifyConditionExpr(scope, diag, [&]{ return expr->getSubExpr(); }, [&](auto cond){ expr->setSubExpr(cond); });
+        ImplicitCastifyConditionExpr(
+            scope,
+            diag,
+            [&] { return expr->getSubExpr(); },
+            [&](auto cond) { expr->setSubExpr(cond); });
 
         if (isBoolean(t)) {
             assert(!expr->getType());

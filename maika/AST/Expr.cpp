@@ -25,6 +25,7 @@ std::shared_ptr<IntegerLiteral> IntegerLiteral::make(const Location& loc, int64_
 {
     auto expr = std::make_shared<IntegerLiteral>();
     expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
     expr->value = v;
     return expr;
 }
@@ -38,6 +39,7 @@ std::shared_ptr<DoubleLiteral> DoubleLiteral::make(const Location& loc, double v
 {
     auto expr = std::make_shared<DoubleLiteral>();
     expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
     expr->value = v;
     return expr;
 }
@@ -51,6 +53,7 @@ std::shared_ptr<BoolLiteral> BoolLiteral::make(const Location& loc, bool v)
 {
     auto expr = std::make_shared<BoolLiteral>();
     expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
     expr->value = v;
     return expr;
 }
@@ -64,6 +67,7 @@ std::shared_ptr<StringLiteral> StringLiteral::make(const Location& loc, const st
 {
     auto expr = std::make_shared<StringLiteral>();
     expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
     expr->value = v;
     return expr;
 }
@@ -79,18 +83,6 @@ void CallExpr::traverse(ASTVisitor& visitor)
     });
 }
 
-bool CallExpr::isLValue() const
-{
-    // TODO: Support the following case
-    // ```
-    // function f(x) : &int { return &x; }
-    // let a = 0;
-    // *f(a) = 42;
-    // print(a); // 42
-    // ```
-    return false;
-}
-
 std::shared_ptr<CallExpr> CallExpr::make(
     const Location& loc,
     const std::shared_ptr<Expr>& fn,
@@ -98,6 +90,7 @@ std::shared_ptr<CallExpr> CallExpr::make(
 {
     auto expr = std::make_shared<CallExpr>();
     expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
     expr->callee = fn;
     expr->arguments = args;
     return expr;
@@ -146,6 +139,7 @@ std::shared_ptr<FunctionExpr> FunctionExpr::make(
 {
     auto expr = std::make_shared<FunctionExpr>();
     expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
     expr->namedDecl = n;
     expr->parameters = parameters;
     expr->returnType = returnType;
@@ -244,6 +238,7 @@ std::shared_ptr<BinaryOperator> BinaryOperator::make(
 {
     auto expr = std::make_shared<BinaryOperator>();
     expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
     expr->kind = k;
     expr->lhs = l;
     expr->rhs = r;
@@ -284,6 +279,7 @@ UnaryOperator::make(const Location& loc, UnaryOperatorKind k, const std::shared_
 {
     auto expr = std::make_shared<UnaryOperator>();
     expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
     expr->kind = k;
     expr->subExpr = e;
     return expr;
@@ -309,21 +305,12 @@ void DeclRefExpr::traverse(ASTVisitor& visitor)
     visitor.visit(shared_from_this(), [&] { decl->traverse(visitor); });
 }
 
-bool DeclRefExpr::isLValue() const
-{
-    // if (decl) {
-    //     if (auto entity = decl->getEntity()) {
-    //         return entity->getKind() == EntityKind::Variable;
-    //     }
-    // }
-    return true;
-}
-
 std::shared_ptr<DeclRefExpr>
 DeclRefExpr::make(const Location& loc, const std::shared_ptr<NamedDecl>& d)
 {
     auto expr = std::make_shared<DeclRefExpr>();
     expr->location = loc;
+    expr->valueKind = ExprValueKind::LValue;
     expr->decl = d;
     return expr;
 }
@@ -353,6 +340,7 @@ std::shared_ptr<MemberExpr> MemberExpr::make(
 {
     auto expr = std::make_shared<MemberExpr>();
     expr->location = loc;
+    expr->valueKind = ExprValueKind::LValue;
     expr->base = base;
     expr->memberDecl = d;
     return expr;
@@ -369,6 +357,7 @@ ImplicitStaticCastExpr::make(const Location& loc, const std::shared_ptr<Expr>& e
 {
     auto expr = std::make_shared<ImplicitStaticCastExpr>();
     expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
     expr->subExpr = e;
     return expr;
 }

@@ -21,7 +21,7 @@ public:
     bool isBinaryOp() const;
 };
 
-struct LocalVariable {
+struct LocalVariable final {
     std::string name;
     std::int32_t variableIndex;
 };
