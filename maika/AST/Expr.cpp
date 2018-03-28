@@ -227,3 +227,39 @@ std::shared_ptr<MemberExpr> MemberExpr::make(
     expr->memberDecl = d;
     return expr;
 }
+
+
+std::string ASTHelper::toString(BinaryOperatorKind kind)
+{
+    switch (kind) {
+    case BinaryOperatorKind::Assign: return "=";
+    case BinaryOperatorKind::Add: return "+";
+    case BinaryOperatorKind::Subtract: return "-";
+    case BinaryOperatorKind::Divide: return "/";
+    case BinaryOperatorKind::Multiply: return "*";
+    case BinaryOperatorKind::Mod: return "%";
+    case BinaryOperatorKind::Equal: return "==";
+    case BinaryOperatorKind::NotEqual: return "!=";
+    case BinaryOperatorKind::LogicalAnd: return "&&";
+    case BinaryOperatorKind::LogicalOr: return "||";
+    case BinaryOperatorKind::GreaterThan: return ">";
+    case BinaryOperatorKind::GreaterThanOrEqual: return ">=";
+    case BinaryOperatorKind::LessThan: return "<";
+    case BinaryOperatorKind::LessThanOrEqual: return "<=";
+    }
+    return "<unknown>";
+}
+
+std::string ASTHelper::toString(UnaryOperatorKind kind)
+{
+    switch (kind) {
+    case UnaryOperatorKind::LogicalNot: return "!";
+    case UnaryOperatorKind::Plus: return "+";
+    case UnaryOperatorKind::Minus: return "-";
+    case UnaryOperatorKind::PreDec: return "prefix --";
+    case UnaryOperatorKind::PreInc: return "prefix ++";
+    case UnaryOperatorKind::PostDec: return "postfix --";
+    case UnaryOperatorKind::PostInc: return "postfix ++";
+    }
+    return "<unknown>";
+}

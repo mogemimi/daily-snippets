@@ -226,3 +226,10 @@ public:
         const std::shared_ptr<Expr>& base,
         const std::shared_ptr<NamedDecl>& d);
 };
+
+// TODO: Move the following definition to other header file.
+struct ASTHelper final {
+    static std::string toString(BinaryOperatorKind kind);
+
+    static std::string toString(UnaryOperatorKind kind);
+};

@@ -5,6 +5,7 @@ HEADERS = \
 	AST/*.h \
 	Basic/*.h \
 	Driver/*.h \
+	CodeGen/*.h \
 	Parser/*.h \
 	Printer/*.h \
 	Sema/*.h \
@@ -22,6 +23,7 @@ SOURCES = \
 	Basic/Diagnostic.cpp \
 	Basic/Location.cpp \
 	Driver/Driver.cpp \
+	CodeGen/IRGenerator.cpp \
 	Parser/MyLexer.cpp \
 	Parser/MyParser.cpp \
 	Printer/Formatter.cpp \
@@ -66,6 +68,9 @@ format:
 		Basic/Forward.h \
 		Driver/Driver.cpp \
 		Driver/Driver.h \
+		CodeGen/Inst.h \
+		CodeGen/IRGenerator.cpp \
+		CodeGen/IRGenerator.h \
 		Printer/Formatter.cpp \
 		Printer/Formatter.h \
 		Sema/Entity.cpp \

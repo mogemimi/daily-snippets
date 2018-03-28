@@ -81,5 +81,5 @@ function min(a : int, b : int) : int {
     Formatter formatter;
     traverser.traverse(astContext, formatter);
     REQUIRE(!diag->hasError());
-    printf("%s\n", formatter.getResult().c_str());
+    // printf("%s\n", formatter.getResult().c_str());
 }

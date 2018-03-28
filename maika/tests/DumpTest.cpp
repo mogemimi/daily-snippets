@@ -2,6 +2,7 @@
 #include "AST/ASTDumper.h"
 #include "Basic/Diagnostic.h"
 #include "Driver/Driver.h"
+#include "CodeGen/IRGenerator.h"
 #include "Sema/Entity.h"
 #include "Sema/IdentifierResolver.h"
 #include "Sema/TypeInferer.h"
@@ -137,4 +138,36 @@ function main() {
     traverser.traverse(astContext, dumper);
     REQUIRE(!diag->hasError());
     // printf("%s\n", dumper.getResult().c_str());
+}
+
+TEST_CASE("IRGenerator", "[codegen]")
+{
+    constexpr auto source = R"(
+function min(a, b) {
+    if (a < b) {
+        return a;
+    }
+    return b;
+}
+)";
+    auto diag = std::make_shared<DiagnosticHandler>();
+
+    MyDriver driver;
+    auto [astContext, ok] = driver.parseString(source, diag);
+    REQUIRE(ok);
+
+    ASTTraverser traverser;
+    IdentifierContext context;
+
+    IdentifierResolver resolver(&context, diag);
+    traverser.traverse(astContext, resolver);
+    REQUIRE(!diag->hasError());
+
+    TypeResolver typeResolver(diag);
+    traverser.traverse(astContext, typeResolver);
+    REQUIRE(!diag->hasError());
+
+    IRGenerator irGenerator;
+    traverser.traverse(astContext, irGenerator);
+    REQUIRE(!diag->hasError());
 }

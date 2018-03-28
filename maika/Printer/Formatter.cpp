@@ -170,25 +170,7 @@ void Formatter::visit(const std::shared_ptr<StringLiteral>& expr)
 
 void Formatter::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
 {
-    std::string op = [&]() -> std::string {
-        switch (expr->getKind()) {
-        case BinaryOperatorKind::Assign: return "=";
-        case BinaryOperatorKind::Add: return "+";
-        case BinaryOperatorKind::Subtract: return "-";
-        case BinaryOperatorKind::Divide: return "/";
-        case BinaryOperatorKind::Multiply: return "*";
-        case BinaryOperatorKind::Mod: return "%";
-        case BinaryOperatorKind::Equal: return "==";
-        case BinaryOperatorKind::NotEqual: return "!=";
-        case BinaryOperatorKind::LogicalAnd: return "&&";
-        case BinaryOperatorKind::LogicalOr: return "||";
-        case BinaryOperatorKind::GreaterThan: return ">";
-        case BinaryOperatorKind::GreaterThanOrEqual: return ">=";
-        case BinaryOperatorKind::LessThan: return "<";
-        case BinaryOperatorKind::LessThanOrEqual: return "<=";
-        }
-        return "<unknown>";
-    }();
+    auto op = ASTHelper::toString(expr->getKind());
 
     if (auto lhs = expr->getLHS()) {
         lhs->traverse(*this);
@@ -207,18 +189,7 @@ void Formatter::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& trave
 {
     std::vector<std::string> options;
 
-    std::string op = [&]() -> std::string {
-        switch (expr->getKind()) {
-        case UnaryOperatorKind::LogicalNot: return "!";
-        case UnaryOperatorKind::Plus: return "+";
-        case UnaryOperatorKind::Minus: return "-";
-        case UnaryOperatorKind::PreDec: return "prefix --";
-        case UnaryOperatorKind::PreInc: return "prefix ++";
-        case UnaryOperatorKind::PostDec: return "postfix --";
-        case UnaryOperatorKind::PostInc: return "postfix ++";
-        }
-        return "<unknown>";
-    }();
+    auto op = ASTHelper::toString(expr->getKind());
     options.push_back(op);
     if (auto type = expr->getType()) {
         options.push_back(type->dump());
