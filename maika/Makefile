@@ -23,7 +23,8 @@ SOURCES = \
 	Basic/Diagnostic.cpp \
 	Basic/Location.cpp \
 	Driver/Driver.cpp \
-	CodeGen/IRGenerator.cpp \
+	CodeGen/BytecodeGenerator.cpp \
+	CodeGen/Instruction.cpp \
 	Parser/MyLexer.cpp \
 	Parser/MyParser.cpp \
 	Printer/Formatter.cpp \
@@ -68,9 +69,11 @@ format:
 		Basic/Forward.h \
 		Driver/Driver.cpp \
 		Driver/Driver.h \
-		CodeGen/Inst.h \
-		CodeGen/IRGenerator.cpp \
-		CodeGen/IRGenerator.h \
+		CodeGen/BytecodeGenerator.cpp \
+		CodeGen/BytecodeGenerator.h \
+		CodeGen/Instruction.cpp \
+		CodeGen/Instruction.h \
+		CodeGen/Opcode.h \
 		Printer/Formatter.cpp \
 		Printer/Formatter.h \
 		Sema/Entity.cpp \

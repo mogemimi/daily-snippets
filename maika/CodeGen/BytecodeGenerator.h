@@ -2,14 +2,18 @@
 
 #include "AST/ASTVisitor.h"
 #include "Basic/Forward.h"
+#include "CodeGen/Instruction.h"
 #include <memory>
 #include <string>
 #include <vector>
 
-class IRGenerator final : public ASTVisitor {
+class BytecodeGenerator final : public ASTVisitor {
 private:
+    std::vector<std::shared_ptr<Instruction>> instructions;
 
 public:
+    std::vector<std::shared_ptr<Instruction>> getInstructions() const { return instructions; }
+
     void visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traverse) override;
     void visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse) override;
     void visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse) override;
@@ -32,4 +36,17 @@ public:
     void visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse) override;
+};
+
+// NOTE: the following class reperesents a VM
+class Runtime final {
+private:
+    std::vector<std::shared_ptr<Value>> valueStack;
+
+public:
+    bool run(const std::vector<std::shared_ptr<Instruction>>& instructions);
+
+    std::string getResultString() const;
+
+    static void dump(const std::vector<std::shared_ptr<Instruction>>& instructions);
 };

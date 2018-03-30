@@ -2,7 +2,7 @@
 #include "AST/ASTDumper.h"
 #include "Basic/Diagnostic.h"
 #include "Driver/Driver.h"
-#include "CodeGen/IRGenerator.h"
+#include "CodeGen/BytecodeGenerator.h"
 #include "Sema/Entity.h"
 #include "Sema/IdentifierResolver.h"
 #include "Sema/TypeInferer.h"
@@ -140,14 +140,17 @@ function main() {
     // printf("%s\n", dumper.getResult().c_str());
 }
 
-TEST_CASE("IRGenerator", "[codegen]")
+TEST_CASE("BytecodeGenerator", "[codegen]")
 {
     constexpr auto source = R"(
-function min(a, b) {
-    if (a < b) {
-        return a;
-    }
-    return b;
+// function min(a, b) {
+//     if (a < b) {
+//         return a;
+//     }
+//     return b;
+// }
+function test() {
+    return 4 + ((10 * 3) - (21 / 3)) - 9;
 }
 )";
     auto diag = std::make_shared<DiagnosticHandler>();
@@ -167,7 +170,15 @@ function min(a, b) {
     traverser.traverse(astContext, typeResolver);
     REQUIRE(!diag->hasError());
 
-    IRGenerator irGenerator;
+    BytecodeGenerator irGenerator;
     traverser.traverse(astContext, irGenerator);
     REQUIRE(!diag->hasError());
+
+    auto instructions = irGenerator.getInstructions();
+    Runtime::dump(instructions);
+
+    Runtime runtime;
+    REQUIRE(runtime.run(instructions));
+    auto result = runtime.getResultString();
+    printf("result: %s\n", result.c_str());
 }
