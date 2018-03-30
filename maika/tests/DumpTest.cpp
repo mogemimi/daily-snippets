@@ -3,6 +3,7 @@
 #include "Basic/Diagnostic.h"
 #include "Driver/Driver.h"
 #include "CodeGen/BytecodeGenerator.h"
+#include "CodeGen/Runtime.h"
 #include "Sema/Entity.h"
 #include "Sema/IdentifierResolver.h"
 #include "Sema/TypeInferer.h"

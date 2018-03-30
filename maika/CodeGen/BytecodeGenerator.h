@@ -37,16 +37,3 @@ public:
     void visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse) override;
 };
-
-// NOTE: the following class reperesents a VM
-class Runtime final {
-private:
-    std::vector<std::shared_ptr<Value>> valueStack;
-
-public:
-    bool run(const std::vector<std::shared_ptr<Instruction>>& instructions);
-
-    std::string getResultString() const;
-
-    static void dump(const std::vector<std::shared_ptr<Instruction>>& instructions);
-};

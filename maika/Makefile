@@ -25,6 +25,7 @@ SOURCES = \
 	Driver/Driver.cpp \
 	CodeGen/BytecodeGenerator.cpp \
 	CodeGen/Instruction.cpp \
+	CodeGen/Runtime.cpp \
 	Parser/MyLexer.cpp \
 	Parser/MyParser.cpp \
 	Printer/Formatter.cpp \
@@ -74,6 +75,8 @@ format:
 		CodeGen/Instruction.cpp \
 		CodeGen/Instruction.h \
 		CodeGen/Opcode.h \
+		CodeGen/Runtime.cpp \
+		CodeGen/Runtime.h \
 		Printer/Formatter.cpp \
 		Printer/Formatter.h \
 		Sema/Entity.cpp \
