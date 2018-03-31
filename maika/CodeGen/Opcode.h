@@ -5,6 +5,8 @@
 enum class Opcode : int8_t {
     Exit = 0,
 
+    Label,
+
     Load, // Store,
     //JumpIf,
     JumpIfNot,
@@ -13,16 +15,21 @@ enum class Opcode : int8_t {
     Sub,
     Mul,
     Div,
+    Mod,
 
+    CompareEqual,
+    CompareNotEqual,
     CompareLessThan,
     CompareLessThanOrEqual,
     CompareGreaterThan,
     CompareGreaterThanOrEqual,
-    CompareEqual,
 
     // operand: int64
     ConstantInt64,
     ConstantDouble,
     ConstantBool,
     ConstantString,
+
+    TypeCastFromBoolToInt64,
+    TypeCastFromInt64ToDouble,
 };

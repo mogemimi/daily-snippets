@@ -228,6 +228,20 @@ std::shared_ptr<MemberExpr> MemberExpr::make(
     return expr;
 }
 
+void ImplicitStaticTypeCastExpr::traverse(ASTVisitor& visitor)
+{
+    assert(subExpr);
+    visitor.visit(shared_from_this(), [&] { subExpr->traverse(visitor); });
+}
+
+std::shared_ptr<ImplicitStaticTypeCastExpr>
+ImplicitStaticTypeCastExpr::make(const Location& loc, const std::shared_ptr<Expr>& e)
+{
+    auto expr = std::make_shared<ImplicitStaticTypeCastExpr>();
+    expr->location = loc;
+    expr->subExpr = e;
+    return expr;
+}
 
 std::string ASTHelper::toString(BinaryOperatorKind kind)
 {

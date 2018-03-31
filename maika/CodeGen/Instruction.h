@@ -10,6 +10,7 @@ enum class ValueKind {
     Double,
     Bool,
     String,
+    // Object,
     // Array,
     // Map,
     // None,

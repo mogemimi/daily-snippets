@@ -10,6 +10,7 @@ bool isBinaryOp(Opcode opcode) noexcept
     case Opcode::Mul:
     case Opcode::Div:
     case Opcode::CompareEqual:
+    case Opcode::CompareNotEqual:
     case Opcode::CompareGreaterThan:
     case Opcode::CompareGreaterThanOrEqual:
     case Opcode::CompareLessThan:

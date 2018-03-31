@@ -29,6 +29,7 @@ class BinaryOperator;
 class UnaryOperator;
 class DeclRefExpr;
 class MemberExpr;
+class ImplicitStaticTypeCastExpr;
 
 // NOTE: AST::Decl
 class Decl;
@@ -41,6 +42,8 @@ class ConstDecl;
 
 // NOTE: AST::Type
 class Type;
+
+enum class BuiltinTypeKind;
 
 // NOTE: Sema
 class Entity;

@@ -119,15 +119,15 @@ void BytecodeGenerator::visit(const std::shared_ptr<BinaryOperator>& expr, Invok
         case BinaryOperatorKind::Subtract: return Opcode::Sub;
         case BinaryOperatorKind::Divide: return Opcode::Div;
         case BinaryOperatorKind::Multiply: return Opcode::Mul;
-        // case BinaryOperatorKind::Mod: return "%";
-        // case BinaryOperatorKind::Equal: return "==";
-        // case BinaryOperatorKind::NotEqual: return "!=";
+        case BinaryOperatorKind::Mod: return Opcode::Mod;
+        case BinaryOperatorKind::Equal: return Opcode::CompareEqual;
+        case BinaryOperatorKind::NotEqual: return Opcode::CompareNotEqual;
         // case BinaryOperatorKind::LogicalAnd: return "&&";
         // case BinaryOperatorKind::LogicalOr: return "||";
-        // case BinaryOperatorKind::GreaterThan: return ">";
-        // case BinaryOperatorKind::GreaterThanOrEqual: return ">=";
-        // case BinaryOperatorKind::LessThan: return "<";
-        // case BinaryOperatorKind::LessThanOrEqual: return "<=";
+        case BinaryOperatorKind::GreaterThan: return Opcode::CompareGreaterThan;
+        case BinaryOperatorKind::GreaterThanOrEqual: return Opcode::CompareGreaterThanOrEqual;
+        case BinaryOperatorKind::LessThan: return Opcode::CompareLessThan;
+        case BinaryOperatorKind::LessThanOrEqual: return Opcode::CompareLessThanOrEqual;
         default:
             // TODO: Not implemented
             break;
@@ -159,6 +159,53 @@ void BytecodeGenerator::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& 
 {
     traverse();
     printf("[%s]\n", "MemberExpr");
+}
+
+void BytecodeGenerator::visit(const std::shared_ptr<ImplicitStaticTypeCastExpr>& expr, Invoke&& traverse)
+{
+    traverse();
+
+    const auto [targetType, targetTypeEnabled] = TypeHelper::toBuiltinType(expr->getType());
+    assert(targetTypeEnabled);
+    if (!targetTypeEnabled) {
+        return;
+    }
+    auto subExpr = expr->getSubExpr();
+    const auto [sourceType, sourceTypeEnabled] = TypeHelper::toBuiltinType(subExpr->getType());
+    assert(sourceTypeEnabled);
+    if (!sourceTypeEnabled) {
+        return;
+    }
+
+    if (targetType == BuiltinTypeKind::Int) {
+        if (sourceType == BuiltinTypeKind::Bool) {
+            // bool -> in64
+            auto inst = std::make_shared<Instruction>();
+            inst->opcode = Opcode::TypeCastFromBoolToInt64;
+            instructions.push_back(inst);   
+        }
+    }
+    else if (targetType == BuiltinTypeKind::Double) {
+        if (sourceType == BuiltinTypeKind::Int) {
+            // NOTE: int64 -> double
+            auto inst = std::make_shared<Instruction>();
+            inst->opcode = Opcode::TypeCastFromInt64ToDouble;
+            instructions.push_back(inst);   
+        }
+        else if (sourceType == BuiltinTypeKind::Bool) {
+            // NOTE: bool -> int64 -> double
+            {
+                auto inst = std::make_shared<Instruction>();
+                inst->opcode = Opcode::TypeCastFromBoolToInt64;
+                instructions.push_back(inst);
+            }
+            {
+                auto inst = std::make_shared<Instruction>();
+                inst->opcode = Opcode::TypeCastFromInt64ToDouble;
+                instructions.push_back(inst);
+            }
+        }
+    }
 }
 
 void BytecodeGenerator::visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invoke&& traverse)

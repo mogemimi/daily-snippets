@@ -6,6 +6,7 @@
 #include "CodeGen/Runtime.h"
 #include "Sema/Entity.h"
 #include "Sema/IdentifierResolver.h"
+#include "Sema/TypeChecker.h"
 #include "Sema/TypeInferer.h"
 #include "Sema/TypeResolver.h"
 #include <iostream>
@@ -151,7 +152,7 @@ TEST_CASE("BytecodeGenerator", "[codegen]")
 //     return b;
 // }
 function test() {
-    return 4 + ((10 * 3) - (21 / 3)) - 9;
+    return (42.0 > (100 + true)) == true;
 }
 )";
     auto diag = std::make_shared<DiagnosticHandler>();
@@ -170,6 +171,17 @@ function test() {
     TypeResolver typeResolver(diag);
     traverser.traverse(astContext, typeResolver);
     REQUIRE(!diag->hasError());
+
+    TypeChecker typeChecker(diag);
+    traverser.traverse(astContext, typeChecker);
+    REQUIRE(!diag->hasError());
+
+
+    ASTDumper dumper;
+    traverser.traverse(astContext, dumper);
+    REQUIRE(!diag->hasError());
+    printf("%s\n", dumper.getResult().c_str());
+
 
     BytecodeGenerator irGenerator;
     traverser.traverse(astContext, irGenerator);

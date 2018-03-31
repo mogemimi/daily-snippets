@@ -92,3 +92,7 @@ public:
 
     static std::shared_ptr<BuiltinType> make(BuiltinTypeKind kind);
 };
+
+struct TypeHelper {
+    static std::tuple<BuiltinTypeKind, bool> toBuiltinType(const std::shared_ptr<Type>& type);
+};

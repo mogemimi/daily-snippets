@@ -153,8 +153,12 @@ public:
     void traverse(ASTVisitor& visitor) override;
 
     BinaryOperatorKind getKind() const { return kind; }
+
     std::shared_ptr<Expr> getLHS() const { return lhs; }
     std::shared_ptr<Expr> getRHS() const { return rhs; }
+
+    void setLHS(const std::shared_ptr<Expr>& e) { lhs = e; }
+    void setRHS(const std::shared_ptr<Expr>& e) { rhs = e; }
 
     static std::shared_ptr<BinaryOperator> make(
         const Location& loc,
@@ -225,6 +229,22 @@ public:
         const Location& loc,
         const std::shared_ptr<Expr>& base,
         const std::shared_ptr<NamedDecl>& d);
+};
+
+class ImplicitStaticTypeCastExpr final
+    : public Expr
+    , public std::enable_shared_from_this<ImplicitStaticTypeCastExpr> {
+private:
+    std::shared_ptr<Expr> subExpr;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<Expr> getSubExpr() const { return subExpr; }
+
+    static std::shared_ptr<ImplicitStaticTypeCastExpr> make(
+        const Location& loc,
+        const std::shared_ptr<Expr>& e);
 };
 
 // TODO: Move the following definition to other header file.

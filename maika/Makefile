@@ -32,6 +32,7 @@ SOURCES = \
 	Sema/Entity.cpp \
 	Sema/IdentifierResolver.cpp \
 	Sema/Scope.cpp \
+	Sema/TypeChecker.cpp \
 	Sema/TypeInferer.cpp \
 	Sema/TypeResolver.cpp \
 	tests/DumpTest.cpp \
@@ -85,6 +86,8 @@ format:
 		Sema/IdentifierResolver.h \
 		Sema/Scope.cpp \
 		Sema/Scope.h \
+		Sema/TypeChecker.cpp \
+		Sema/TypeChecker.h \
 		Sema/TypeInferer.cpp \
 		Sema/TypeInferer.h \
 		Sema/TypeResolver.cpp \

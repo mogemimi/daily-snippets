@@ -1,308 +1,665 @@
 #include "CodeGen/Runtime.h"
 #include <cassert>
 
+namespace {
+
+template <class TUnderlyingValue>
+bool invokeConstant(const std::shared_ptr<Value>& operand, std::vector<std::shared_ptr<Value>>& valueStack)
+{
+    auto value = std::static_pointer_cast<TUnderlyingValue>(operand);
+    assert(value == std::dynamic_pointer_cast<TUnderlyingValue>(operand));
+    if (!value) {
+        printf("%s\n", "runtime error");
+        return false;
+    }
+    valueStack.push_back(value);
+    return true;
+}
+
+bool invokeAdd(std::vector<std::shared_ptr<Value>>& valueStack)
+{
+    if (valueStack.size() < 2) {
+        printf("%s\n", "runtime error");
+        return false;
+    }
+    auto rhs = valueStack.back();
+    valueStack.pop_back();
+    auto lhs = valueStack.back();
+    valueStack.pop_back();
+
+    if (lhs->getKind() != rhs->getKind()) {
+        printf("%s\n", "runtime error: type mismatch");
+        return false;
+    }
+
+    switch (lhs->getKind()) {
+    case ValueKind::Int64: {
+        auto a = std::static_pointer_cast<Int64Value>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<Int64Value>(rhs);
+        assert(b);
+        auto v = a->getValue() + b->getValue();
+        auto resultValue = std::make_shared<Int64Value>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::Double: {
+        auto a = std::static_pointer_cast<DoubleValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<DoubleValue>(rhs);
+        assert(b);
+        auto v = a->getValue() + b->getValue();
+        auto resultValue = std::make_shared<DoubleValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::Bool: {
+        // TODO: adding two bool values
+        printf("%s\n", "warning: undefined behavior when adding two bool values.");
+    
+        auto a = std::static_pointer_cast<BoolValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<BoolValue>(rhs);
+        assert(b);
+        auto v = a->getValue() + b->getValue();
+        auto resultValue = std::make_shared<BoolValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::String: {
+        auto a = std::static_pointer_cast<StringValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<StringValue>(rhs);
+        assert(b);
+        auto v = a->getValue() + b->getValue();
+        auto resultValue = std::make_shared<StringValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    default:
+        printf("%s\n", "runtime error: not implemented");
+        return false;
+    }
+    return true;
+}
+
+bool invokeSub(std::vector<std::shared_ptr<Value>>& valueStack)
+{
+    if (valueStack.size() < 2) {
+        printf("%s\n", "runtime error");
+        return false;
+    }
+    auto rhs = valueStack.back();
+    valueStack.pop_back();
+    auto lhs = valueStack.back();
+    valueStack.pop_back();
+
+    if (lhs->getKind() != rhs->getKind()) {
+        printf("%s\n", "runtime error: type mismatch");
+        return false;
+    }
+
+    switch (lhs->getKind()) {
+    case ValueKind::Int64: {
+        auto a = std::static_pointer_cast<Int64Value>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<Int64Value>(rhs);
+        assert(b);
+        auto v = a->getValue() - b->getValue();
+        auto resultValue = std::make_shared<Int64Value>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::Double: {
+        auto a = std::static_pointer_cast<DoubleValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<DoubleValue>(rhs);
+        assert(b);
+        auto v = a->getValue() - b->getValue();
+        auto resultValue = std::make_shared<DoubleValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::Bool: {
+        // TODO: adding two bool values
+        printf("%s\n", "warning: undefined behavior when subtracting two bool values.");
+    
+        auto a = std::static_pointer_cast<BoolValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<BoolValue>(rhs);
+        assert(b);
+        auto v = a->getValue() - b->getValue();
+        auto resultValue = std::make_shared<BoolValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::String: {
+        printf("%s\n", "runtime error: Cannot subtract two strings.");
+        return false;
+        break;
+    }
+    default:
+        printf("%s\n", "runtime error: not implemented");
+        return false;
+    }
+    return true;
+}
+
+bool invokeMul(std::vector<std::shared_ptr<Value>>& valueStack)
+{
+    if (valueStack.size() < 2) {
+        printf("%s\n", "runtime error");
+        return false;
+    }
+    auto rhs = valueStack.back();
+    valueStack.pop_back();
+    auto lhs = valueStack.back();
+    valueStack.pop_back();
+
+    if (lhs->getKind() != rhs->getKind()) {
+        printf("%s\n", "runtime error: type mismatch");
+        return false;
+    }
+
+    switch (lhs->getKind()) {
+    case ValueKind::Int64: {
+        auto a = std::static_pointer_cast<Int64Value>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<Int64Value>(rhs);
+        assert(b);
+        auto v = a->getValue() * b->getValue();
+        auto resultValue = std::make_shared<Int64Value>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::Double: {
+        auto a = std::static_pointer_cast<DoubleValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<DoubleValue>(rhs);
+        assert(b);
+        auto v = a->getValue() * b->getValue();
+        auto resultValue = std::make_shared<DoubleValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::Bool: {
+        // TODO: adding two bool values
+        printf("%s\n", "warning: undefined behavior when multiplying two bool values.");
+    
+        auto a = std::static_pointer_cast<BoolValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<BoolValue>(rhs);
+        assert(b);
+        auto v = a->getValue() * b->getValue();
+        auto resultValue = std::make_shared<BoolValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::String: {
+        printf("%s\n", "runtime error: Cannot multiply two strings.");
+        return false;
+        break;
+    }
+    default:
+        printf("%s\n", "runtime error: not implemented");
+        return false;
+    }
+    return true;
+}
+
+bool invokeDiv(std::vector<std::shared_ptr<Value>>& valueStack)
+{
+    if (valueStack.size() < 2) {
+        printf("%s\n", "runtime error");
+        return false;
+    }
+    auto rhs = valueStack.back();
+    valueStack.pop_back();
+    auto lhs = valueStack.back();
+    valueStack.pop_back();
+
+    if (lhs->getKind() != rhs->getKind()) {
+        printf("%s\n", "runtime error: type mismatch");
+        return false;
+    }
+
+    switch (lhs->getKind()) {
+    case ValueKind::Int64: {
+        auto a = std::static_pointer_cast<Int64Value>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<Int64Value>(rhs);
+        assert(b);
+        if (b->getValue() == 0) {
+            printf("%s\n", "runtime error: Division by zero");
+            return false;
+        }
+        auto v = a->getValue() / b->getValue();
+        auto resultValue = std::make_shared<Int64Value>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::Double: {
+        auto a = std::static_pointer_cast<DoubleValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<DoubleValue>(rhs);
+        assert(b);
+        if (b->getValue() == 0) {
+            printf("%s\n", "runtime error: Division by zero");
+            return false;
+        }
+        auto v = a->getValue() / b->getValue();
+        auto resultValue = std::make_shared<DoubleValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::Bool: {
+        // TODO: adding two bool values
+        printf("%s\n", "warning: undefined behavior when dividing two bool values.");
+    
+        auto a = std::static_pointer_cast<BoolValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<BoolValue>(rhs);
+        assert(b);
+        if (b->getValue() == 0) {
+            printf("%s\n", "runtime error: Division by zero");
+            return false;
+        }
+        auto v = a->getValue() / b->getValue();
+        auto resultValue = std::make_shared<BoolValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::String: {
+        printf("%s\n", "runtime error: Cannot divide two strings.");
+        return false;
+        break;
+    }
+    default:
+        printf("%s\n", "runtime error: not implemented");
+        return false;
+    }
+    return true;
+}
+
+bool invokeMod(std::vector<std::shared_ptr<Value>>& valueStack)
+{
+    if (valueStack.size() < 2) {
+        printf("%s\n", "runtime error");
+        return false;
+    }
+    auto rhs = valueStack.back();
+    valueStack.pop_back();
+    auto lhs = valueStack.back();
+    valueStack.pop_back();
+
+    if (lhs->getKind() != rhs->getKind()) {
+        printf("%s\n", "runtime error: type mismatch");
+        return false;
+    }
+
+    switch (lhs->getKind()) {
+    case ValueKind::Int64: {
+        auto a = std::static_pointer_cast<Int64Value>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<Int64Value>(rhs);
+        assert(b);
+        if (b->getValue() == 0) {
+            printf("%s\n", "runtime error: Division by zero");
+            return false;
+        }
+        auto v = a->getValue() % b->getValue();
+        auto resultValue = std::make_shared<Int64Value>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::Double: {
+        printf("%s\n", "runtime error: invalid operands to binary expression");
+        return false;
+        break;
+    }
+    case ValueKind::Bool: {
+        // TODO: adding two bool values
+        printf("%s\n", "warning: undefined behavior when dividing two bool values.");
+    
+        auto a = std::static_pointer_cast<BoolValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<BoolValue>(rhs);
+        assert(b);
+        if (b->getValue() == 0) {
+            printf("%s\n", "runtime error: Division by zero");
+            return false;
+        }
+        auto v = a->getValue() % b->getValue();
+        auto resultValue = std::make_shared<BoolValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::String: {
+        printf("%s\n", "runtime error: Cannot divide two strings.");
+        return false;
+        break;
+    }
+    default:
+        printf("%s\n", "runtime error: not implemented");
+        return false;
+    }
+    return true;
+}
+
+struct CompareOperatorGreaterThan final {
+    template <typename T>
+    static bool compare(T a, T b) {
+        return a > b;
+    }
+};
+
+struct CompareOperatorGreaterThanOrEqual final {
+    template <typename T>
+    static bool compare(T a, T b) {
+        return a >= b;
+    }
+};
+
+struct CompareOperatorLessThan final {
+    template <typename T>
+    static bool compare(T a, T b) {
+        return a < b;
+    }
+};
+
+struct CompareOperatorLessThanOrEqual final {
+    template <typename T>
+    static bool compare(T a, T b) {
+        return a <= b;
+    }
+};
+
+template <class TCompareOperator>
+bool invokeCompare(std::vector<std::shared_ptr<Value>>& valueStack)
+{
+    if (valueStack.size() < 2) {
+        printf("%s\n", "runtime error");
+        return false;
+    }
+    auto rhs = valueStack.back();
+    valueStack.pop_back();
+    auto lhs = valueStack.back();
+    valueStack.pop_back();
+
+    if (lhs->getKind() != rhs->getKind()) {
+        printf("%s\n", "runtime error: type mismatch");
+        return false;
+    }
+
+    switch (lhs->getKind()) {
+    case ValueKind::Int64: {
+        auto a = std::static_pointer_cast<Int64Value>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<Int64Value>(rhs);
+        assert(b);
+        auto v = TCompareOperator::compare(a->getValue(), b->getValue());
+        auto resultValue = std::make_shared<BoolValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::Double: {
+        auto a = std::static_pointer_cast<DoubleValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<DoubleValue>(rhs);
+        assert(b);
+        auto v = TCompareOperator::compare(a->getValue(), b->getValue());
+        auto resultValue = std::make_shared<BoolValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::Bool: {
+        // TODO: comparing two bool values
+        printf("%s\n", "warning: undefined behavior when comparing two bool values.");
+    
+        auto a = std::static_pointer_cast<BoolValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<BoolValue>(rhs);
+        assert(b);
+        auto v = TCompareOperator::compare(a->getValue(), b->getValue());
+        auto resultValue = std::make_shared<BoolValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::String: {
+        printf("%s\n", "runtime error: Cannot compare two strings.");
+        return false;
+        break;
+    }
+    default:
+        printf("%s\n", "runtime error: not implemented");
+        return false;
+    }
+    return true;
+}
+
+struct CompareOperatorEqual final {
+    template <typename T>
+    static bool compare(T a, T b) {
+        return a == b;
+    }
+};
+
+struct CompareOperatorNotEqual final {
+    template <typename T>
+    static bool compare(T a, T b) {
+        return a != b;
+    }
+};
+
+template <class TCompareOperator>
+bool invokeCompareEqual(std::vector<std::shared_ptr<Value>>& valueStack)
+{
+    if (valueStack.size() < 2) {
+        printf("%s\n", "runtime error");
+        return false;
+    }
+    auto rhs = valueStack.back();
+    valueStack.pop_back();
+    auto lhs = valueStack.back();
+    valueStack.pop_back();
+
+    if (lhs->getKind() != rhs->getKind()) {
+        printf("%s\n", "runtime error: type mismatch");
+        return false;
+    }
+
+    switch (lhs->getKind()) {
+    case ValueKind::Int64: {
+        auto a = std::static_pointer_cast<Int64Value>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<Int64Value>(rhs);
+        assert(b);
+        auto v = TCompareOperator::compare(a->getValue(), b->getValue());
+        auto resultValue = std::make_shared<BoolValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::Double: {
+        auto a = std::static_pointer_cast<DoubleValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<DoubleValue>(rhs);
+        assert(b);
+        auto v = TCompareOperator::compare(a->getValue(), b->getValue());
+        auto resultValue = std::make_shared<BoolValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::Bool: {
+        auto a = std::static_pointer_cast<BoolValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<BoolValue>(rhs);
+        assert(b);
+        auto v = TCompareOperator::compare(a->getValue(), b->getValue());
+        auto resultValue = std::make_shared<BoolValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    case ValueKind::String: {
+        auto a = std::static_pointer_cast<StringValue>(lhs);
+        assert(a);
+        auto b = std::static_pointer_cast<StringValue>(rhs);
+        assert(b);
+        auto v = TCompareOperator::compare(a->getValue(), b->getValue());
+        auto resultValue = std::make_shared<BoolValue>(v);
+        valueStack.push_back(resultValue);
+        break;
+    }
+    default:
+        printf("%s\n", "runtime error: not implemented");
+        return false;
+    }
+    return true;
+}
+
+} // end of anonymous namespace
+
 bool Runtime::run(const std::vector<std::shared_ptr<Instruction>>& instructions)
 {
     for (auto & inst : instructions) {
         switch (inst->getOpcode()) {
         case Opcode::ConstantBool: {
-            auto value = std::static_pointer_cast<BoolValue>(inst->operand);
-            if (!value) {
-                printf("%s\n", "runtime error");
+            if (!invokeConstant<BoolValue>(inst->operand, valueStack)) {
                 return false;
             }
-            valueStack.push_back(value);
             break;
         }
         case Opcode::ConstantDouble: {
-            auto value = std::static_pointer_cast<DoubleValue>(inst->operand);
-            if (!value) {
-                printf("%s\n", "runtime error");
+            if (!invokeConstant<DoubleValue>(inst->operand, valueStack)) {
                 return false;
             }
-            valueStack.push_back(value);
             break;
         }
         case Opcode::ConstantInt64: {
-            auto value = std::static_pointer_cast<Int64Value>(inst->operand);
-            if (!value) {
-                printf("%s\n", "runtime error");
+            if (!invokeConstant<Int64Value>(inst->operand, valueStack)) {
                 return false;
             }
-            valueStack.push_back(value);
             break;
         }
         case Opcode::ConstantString: {
-            auto value = std::static_pointer_cast<StringValue>(inst->operand);
-            if (!value) {
-                printf("%s\n", "runtime error");
+            if (!invokeConstant<StringValue>(inst->operand, valueStack)) {
                 return false;
             }
-            valueStack.push_back(value);
             break;
         }
         case Opcode::Add: {
-            if (valueStack.size() < 2) {
-                printf("%s\n", "runtime error");
-                return false;
-            }
-            auto rhs = valueStack.back();
-            valueStack.pop_back();
-            auto lhs = valueStack.back();
-            valueStack.pop_back();
-
-            if (lhs->getKind() != rhs->getKind()) {
-                printf("%s\n", "runtime error: type mismatch");
-                return false;
-            }
-
-            switch (lhs->getKind()) {
-            case ValueKind::Int64: {
-                auto a = std::static_pointer_cast<Int64Value>(lhs);
-                assert(a);
-                auto b = std::static_pointer_cast<Int64Value>(rhs);
-                assert(b);
-                auto v = a->getValue() + b->getValue();
-                auto resultValue = std::make_shared<Int64Value>(v);
-                valueStack.push_back(resultValue);
-                break;
-            }
-            case ValueKind::Double: {
-                auto a = std::static_pointer_cast<DoubleValue>(lhs);
-                assert(a);
-                auto b = std::static_pointer_cast<DoubleValue>(rhs);
-                assert(b);
-                auto v = a->getValue() + b->getValue();
-                auto resultValue = std::make_shared<DoubleValue>(v);
-                valueStack.push_back(resultValue);
-                break;
-            }
-            case ValueKind::Bool: {
-                // TODO: adding two bool values
-                printf("%s\n", "warning: undefined behavior when adding two bool values.");
-            
-                auto a = std::static_pointer_cast<BoolValue>(lhs);
-                assert(a);
-                auto b = std::static_pointer_cast<BoolValue>(rhs);
-                assert(b);
-                auto v = a->getValue() + b->getValue();
-                auto resultValue = std::make_shared<BoolValue>(v);
-                valueStack.push_back(resultValue);
-                break;
-            }
-            case ValueKind::String: {
-                auto a = std::static_pointer_cast<StringValue>(lhs);
-                assert(a);
-                auto b = std::static_pointer_cast<StringValue>(rhs);
-                assert(b);
-                auto v = a->getValue() + b->getValue();
-                auto resultValue = std::make_shared<StringValue>(v);
-                valueStack.push_back(resultValue);
-                break;
-            }
-            default:
-                printf("%s\n", "runtime error: not implemented");
+            if (!invokeAdd(valueStack)) {
                 return false;
             }
             break;
         }
         case Opcode::Sub: {
-            if (valueStack.size() < 2) {
-                printf("%s\n", "runtime error");
-                return false;
-            }
-            auto rhs = valueStack.back();
-            valueStack.pop_back();
-            auto lhs = valueStack.back();
-            valueStack.pop_back();
-
-            if (lhs->getKind() != rhs->getKind()) {
-                printf("%s\n", "runtime error: type mismatch");
-                return false;
-            }
-
-            switch (lhs->getKind()) {
-            case ValueKind::Int64: {
-                auto a = std::static_pointer_cast<Int64Value>(lhs);
-                assert(a);
-                auto b = std::static_pointer_cast<Int64Value>(rhs);
-                assert(b);
-                auto v = a->getValue() - b->getValue();
-                auto resultValue = std::make_shared<Int64Value>(v);
-                valueStack.push_back(resultValue);
-                break;
-            }
-            case ValueKind::Double: {
-                auto a = std::static_pointer_cast<DoubleValue>(lhs);
-                assert(a);
-                auto b = std::static_pointer_cast<DoubleValue>(rhs);
-                assert(b);
-                auto v = a->getValue() - b->getValue();
-                auto resultValue = std::make_shared<DoubleValue>(v);
-                valueStack.push_back(resultValue);
-                break;
-            }
-            case ValueKind::Bool: {
-                // TODO: adding two bool values
-                printf("%s\n", "warning: undefined behavior when subtracting two bool values.");
-            
-                auto a = std::static_pointer_cast<BoolValue>(lhs);
-                assert(a);
-                auto b = std::static_pointer_cast<BoolValue>(rhs);
-                assert(b);
-                auto v = a->getValue() - b->getValue();
-                auto resultValue = std::make_shared<BoolValue>(v);
-                valueStack.push_back(resultValue);
-                break;
-            }
-            case ValueKind::String: {
-                printf("%s\n", "runtime error: Cannot subtract two strings.");
-                return false;
-                break;
-            }
-            default:
-                printf("%s\n", "runtime error: not implemented");
+            if (!invokeSub(valueStack)) {
                 return false;
             }
             break;
         }
         case Opcode::Mul: {
-            if (valueStack.size() < 2) {
-                printf("%s\n", "runtime error");
-                return false;
-            }
-            auto rhs = valueStack.back();
-            valueStack.pop_back();
-            auto lhs = valueStack.back();
-            valueStack.pop_back();
-
-            if (lhs->getKind() != rhs->getKind()) {
-                printf("%s\n", "runtime error: type mismatch");
-                return false;
-            }
-
-            switch (lhs->getKind()) {
-            case ValueKind::Int64: {
-                auto a = std::static_pointer_cast<Int64Value>(lhs);
-                assert(a);
-                auto b = std::static_pointer_cast<Int64Value>(rhs);
-                assert(b);
-                auto v = a->getValue() * b->getValue();
-                auto resultValue = std::make_shared<Int64Value>(v);
-                valueStack.push_back(resultValue);
-                break;
-            }
-            case ValueKind::Double: {
-                auto a = std::static_pointer_cast<DoubleValue>(lhs);
-                assert(a);
-                auto b = std::static_pointer_cast<DoubleValue>(rhs);
-                assert(b);
-                auto v = a->getValue() * b->getValue();
-                auto resultValue = std::make_shared<DoubleValue>(v);
-                valueStack.push_back(resultValue);
-                break;
-            }
-            case ValueKind::Bool: {
-                // TODO: adding two bool values
-                printf("%s\n", "warning: undefined behavior when multiplying two bool values.");
-            
-                auto a = std::static_pointer_cast<BoolValue>(lhs);
-                assert(a);
-                auto b = std::static_pointer_cast<BoolValue>(rhs);
-                assert(b);
-                auto v = a->getValue() * b->getValue();
-                auto resultValue = std::make_shared<BoolValue>(v);
-                valueStack.push_back(resultValue);
-                break;
-            }
-            case ValueKind::String: {
-                printf("%s\n", "runtime error: Cannot multiply two strings.");
-                return false;
-                break;
-            }
-            default:
-                printf("%s\n", "runtime error: not implemented");
+            if (!invokeMul(valueStack)) {
                 return false;
             }
             break;
         }
         case Opcode::Div: {
-            if (valueStack.size() < 2) {
-                printf("%s\n", "runtime error");
-                return false;
-            }
-            auto rhs = valueStack.back();
-            valueStack.pop_back();
-            auto lhs = valueStack.back();
-            valueStack.pop_back();
-
-            if (lhs->getKind() != rhs->getKind()) {
-                printf("%s\n", "runtime error: type mismatch");
-                return false;
-            }
-
-            switch (lhs->getKind()) {
-            case ValueKind::Int64: {
-                auto a = std::static_pointer_cast<Int64Value>(lhs);
-                assert(a);
-                auto b = std::static_pointer_cast<Int64Value>(rhs);
-                assert(b);
-                if (b->getValue() == 0) {
-                    printf("%s\n", "runtime error: Division by zero");
-                    return false;
-                }
-                auto v = a->getValue() / b->getValue();
-                auto resultValue = std::make_shared<Int64Value>(v);
-                valueStack.push_back(resultValue);
-                break;
-            }
-            case ValueKind::Double: {
-                auto a = std::static_pointer_cast<DoubleValue>(lhs);
-                assert(a);
-                auto b = std::static_pointer_cast<DoubleValue>(rhs);
-                assert(b);
-                if (b->getValue() == 0) {
-                    printf("%s\n", "runtime error: Division by zero");
-                    return false;
-                }
-                auto v = a->getValue() / b->getValue();
-                auto resultValue = std::make_shared<DoubleValue>(v);
-                valueStack.push_back(resultValue);
-                break;
-            }
-            case ValueKind::Bool: {
-                // TODO: adding two bool values
-                printf("%s\n", "warning: undefined behavior when dividing two bool values.");
-            
-                auto a = std::static_pointer_cast<BoolValue>(lhs);
-                assert(a);
-                auto b = std::static_pointer_cast<BoolValue>(rhs);
-                assert(b);
-                if (b->getValue() == 0) {
-                    printf("%s\n", "runtime error: Division by zero");
-                    return false;
-                }
-                auto v = a->getValue() / b->getValue();
-                auto resultValue = std::make_shared<BoolValue>(v);
-                valueStack.push_back(resultValue);
-                break;
-            }
-            case ValueKind::String: {
-                printf("%s\n", "runtime error: Cannot divide two strings.");
-                return false;
-                break;
-            }
-            default:
-                printf("%s\n", "runtime error: not implemented");
+            if (!invokeDiv(valueStack)) {
                 return false;
             }
             break;
         }
-        case Opcode::CompareEqual:
-        case Opcode::CompareGreaterThan:
-        case Opcode::CompareGreaterThanOrEqual:
-        case Opcode::CompareLessThan:
-        case Opcode::CompareLessThanOrEqual:
+        case Opcode::Mod: {
+            if (!invokeMod(valueStack)) {
+                return false;
+            }
+            break;
+        }
+        case Opcode::CompareEqual: {
+            if (!invokeCompareEqual<CompareOperatorEqual>(valueStack)) {
+                return false;
+            }
+            break;
+        }
+        case Opcode::CompareNotEqual: {
+            if (!invokeCompareEqual<CompareOperatorNotEqual>(valueStack)) {
+                return false;
+            }
+            break;
+        }
+        case Opcode::CompareGreaterThan: {
+            if (!invokeCompare<CompareOperatorGreaterThan>(valueStack)) {
+                return false;
+            }
+            break;
+        }
+        case Opcode::CompareGreaterThanOrEqual: {
+            if (!invokeCompare<CompareOperatorGreaterThan>(valueStack)) {
+                return false;
+            }
+            break;
+        }
+        case Opcode::CompareLessThan: {
+            if (!invokeCompare<CompareOperatorLessThan>(valueStack)) {
+                return false;
+            }
+            break;
+        }
+        case Opcode::CompareLessThanOrEqual: {
+            if (!invokeCompare<CompareOperatorLessThanOrEqual>(valueStack)) {
+                return false;
+            }
+            break;
+        }
+        case Opcode::TypeCastFromBoolToInt64: {
+            if (valueStack.size() < 1) {
+                printf("%s\n", "runtime error");
+                return false;
+            }
+            auto sourceValue = valueStack.back();
+            valueStack.pop_back();
+
+            assert(sourceValue->getKind() == ValueKind::Bool);
+#if !defined(NDEBUG)
+            if (sourceValue->getKind() != ValueKind::Bool) {
+                printf("%s\n", "runtime error: type of operand must be bool.");
+                return false;
+            }
+#endif
+            auto a = std::static_pointer_cast<BoolValue>(sourceValue);
+            assert(a);
+
+            const auto v = a->getValue() ? 1 : 0;
+
+            auto resultValue = std::make_shared<Int64Value>(v);
+            valueStack.push_back(resultValue);
+            break;
+        }
+        case Opcode::TypeCastFromInt64ToDouble: {
+            if (valueStack.size() < 1) {
+                printf("%s\n", "runtime error");
+                return false;
+            }
+            auto sourceValue = valueStack.back();
+            valueStack.pop_back();
+
+            assert(sourceValue->getKind() == ValueKind::Int64);
+#if !defined(NDEBUG)
+            if (sourceValue->getKind() != ValueKind::Int64) {
+                printf("%s\n", "runtime error: type of operand must be integer.");
+                return false;
+            }
+#endif
+            auto a = std::static_pointer_cast<Int64Value>(sourceValue);
+            assert(a);
+
+            const auto v = static_cast<double>(a->getValue());
+
+            auto resultValue = std::make_shared<DoubleValue>(v);
+            valueStack.push_back(resultValue);
+            break;
+        }
         default:
             break;
         }
@@ -392,11 +749,30 @@ void Runtime::dump(const std::vector<std::shared_ptr<Instruction>>& instructions
             printf("%s\n", "div");
             break;
         }
-        case Opcode::CompareEqual:
-        case Opcode::CompareGreaterThan:
-        case Opcode::CompareGreaterThanOrEqual:
-        case Opcode::CompareLessThan:
-        case Opcode::CompareLessThanOrEqual:
+        case Opcode::CompareEqual: {
+            printf("%s\n", "comp_eq");
+            break;
+        }
+        case Opcode::CompareNotEqual: {
+            printf("%s\n", "comp_ne");
+            break;
+        }
+        case Opcode::CompareGreaterThan: {
+            printf("%s\n", "comp_g");
+            break;
+        }
+        case Opcode::CompareGreaterThanOrEqual: {
+            printf("%s\n", "comp_ge");
+            break;
+        }
+        case Opcode::CompareLessThan: {
+            printf("%s\n", "comp_l");
+            break;
+        }
+        case Opcode::CompareLessThanOrEqual: {
+            printf("%s\n", "comp_le");
+            break;
+        }
         default:
             break;
         }

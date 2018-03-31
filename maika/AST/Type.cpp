@@ -121,3 +121,18 @@ std::shared_ptr<BuiltinType> BuiltinType::make(BuiltinTypeKind kind)
     type->kind = kind;
     return type;
 }
+
+std::tuple<BuiltinTypeKind, bool> TypeHelper::toBuiltinType(const std::shared_ptr<Type>& type)
+{
+    assert(type);
+    switch (type->getKind()) {
+    case TypeKind::BuiltinType: {
+        auto t = std::static_pointer_cast<BuiltinType>(type);
+        assert(t == std::dynamic_pointer_cast<BuiltinType>(type));
+        return std::make_tuple(t->kind, true);
+    }
+    default:
+        break;
+    }
+    return std::make_tuple(BuiltinTypeKind::Any, false);
+}

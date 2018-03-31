@@ -31,6 +31,7 @@ public:
     void visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& traverse) override;
     void visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse) override;
     void visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<ImplicitStaticTypeCastExpr>& expr, Invoke&& traverse) override;
 
     void visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse) override;
