@@ -29,7 +29,10 @@ private:
     int64_t value;
 
 public:
-    explicit Int64Value(int64_t v) : value(v) {}
+    explicit Int64Value(int64_t v)
+        : value(v)
+    {
+    }
 
     ValueKind getKind() const noexcept { return ValueKind::Int64; }
 
@@ -43,7 +46,10 @@ private:
     double value;
 
 public:
-    explicit DoubleValue(double v) : value(v) {}
+    explicit DoubleValue(double v)
+        : value(v)
+    {
+    }
 
     ValueKind getKind() const noexcept { return ValueKind::Double; }
 
@@ -57,7 +63,10 @@ private:
     std::string value;
 
 public:
-    explicit StringValue(const std::string& v) : value(v) {}
+    explicit StringValue(const std::string& v)
+        : value(v)
+    {
+    }
 
     ValueKind getKind() const noexcept { return ValueKind::String; }
 
@@ -71,7 +80,10 @@ private:
     bool value;
 
 public:
-    explicit BoolValue(bool v) : value(v) {}
+    explicit BoolValue(bool v)
+        : value(v)
+    {
+    }
 
     ValueKind getKind() const noexcept { return ValueKind::Bool; }
 

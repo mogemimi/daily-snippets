@@ -1,9 +1,9 @@
 #include "AST/ASTContext.h"
 #include "AST/ASTDumper.h"
 #include "Basic/Diagnostic.h"
-#include "Driver/Driver.h"
 #include "CodeGen/BytecodeGenerator.h"
 #include "CodeGen/Runtime.h"
+#include "Driver/Driver.h"
 #include "Sema/Entity.h"
 #include "Sema/IdentifierResolver.h"
 #include "Sema/TypeChecker.h"
@@ -176,12 +176,10 @@ function test() {
     traverser.traverse(astContext, typeChecker);
     REQUIRE(!diag->hasError());
 
-
     ASTDumper dumper;
     traverser.traverse(astContext, dumper);
     REQUIRE(!diag->hasError());
     printf("%s\n", dumper.getResult().c_str());
-
 
     BytecodeGenerator byteCodeGenerator;
     traverser.traverse(astContext, byteCodeGenerator);

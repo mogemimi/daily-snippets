@@ -48,53 +48,19 @@ COMPILER_OPTIONS = \
 
 format:
 	@clang-format -i \
-		AST/ASTContext.cpp \
-		AST/ASTContext.h \
-		AST/ASTDumper.cpp \
-		AST/ASTDumper.h \
-		AST/ASTVisitor.cpp \
-		AST/ASTVisitor.h \
-		AST/Comment.cpp \
-		AST/Comment.h \
-		AST/Decl.cpp \
-		AST/Decl.h \
-		AST/Expr.cpp \
-		AST/Expr.h \
-		AST/Stmt.cpp \
-		AST/Stmt.h \
-		AST/Type.cpp \
-		AST/Type.h \
-		Basic/Diagnostic.cpp \
-		Basic/Diagnostic.h \
-		Basic/Location.cpp \
-		Basic/Location.h \
-		Basic/Forward.h \
-		Driver/Driver.cpp \
-		Driver/Driver.h \
-		CodeGen/BytecodeGenerator.cpp \
-		CodeGen/BytecodeGenerator.h \
-		CodeGen/Instruction.cpp \
-		CodeGen/Instruction.h \
-		CodeGen/Opcode.h \
-		CodeGen/Runtime.cpp \
-		CodeGen/Runtime.h \
-		Printer/Formatter.cpp \
-		Printer/Formatter.h \
-		Sema/Entity.cpp \
-		Sema/Entity.h \
-		Sema/IdentifierResolver.cpp \
-		Sema/IdentifierResolver.h \
-		Sema/Scope.cpp \
-		Sema/Scope.h \
-		Sema/TypeChecker.cpp \
-		Sema/TypeChecker.h \
-		Sema/TypeInferer.cpp \
-		Sema/TypeInferer.h \
-		Sema/TypeResolver.cpp \
-		Sema/TypeResolver.h \
-		tests/DumpTest.cpp \
-		tests/LexerTest.cpp \
-		tests/main.cpp
+		AST/*.cpp \
+		AST/*.h \
+		Basic/*.cpp \
+		Basic/*.h \
+		Driver/*.cpp \
+		Driver/*.h \
+		CodeGen/*.cpp \
+		CodeGen/*.h \
+		Printer/*.cpp \
+		Printer/*.h \
+		Sema/*.cpp \
+		Sema/*.h \
+		tests/*.cpp
 
 bison:
 	@flex Parser/MyLexer.l

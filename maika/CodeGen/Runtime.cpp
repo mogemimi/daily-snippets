@@ -9,8 +9,7 @@ bool getConstantBoolValue(int32_t operand)
     return (operand != 0);
 }
 
-template <typename T>
-const T& getConstantValue(int32_t operand, const std::vector<T>& constants)
+template <typename T> const T& getConstantValue(int32_t operand, const std::vector<T>& constants)
 {
     assert(operand >= 0);
     assert(operand < static_cast<int>(constants.size()));
@@ -25,7 +24,10 @@ void invokeConstantBool(int32_t operand, std::vector<std::shared_ptr<Value>>& va
 }
 
 template <class ValueType, class TConstantTable>
-void invokeConstant(int32_t operand, const TConstantTable& constants, std::vector<std::shared_ptr<Value>>& valueStack)
+void invokeConstant(
+    int32_t operand,
+    const TConstantTable& constants,
+    std::vector<std::shared_ptr<Value>>& valueStack)
 {
     const auto v = getConstantValue(operand, constants);
     const auto value = std::make_shared<ValueType>(v);
@@ -72,7 +74,7 @@ bool invokeAdd(std::vector<std::shared_ptr<Value>>& valueStack)
     case ValueKind::Bool: {
         // TODO: adding two bool values
         printf("%s\n", "warning: undefined behavior when adding two bool values.");
-    
+
         auto a = std::static_pointer_cast<BoolValue>(lhs);
         assert(a);
         auto b = std::static_pointer_cast<BoolValue>(rhs);
@@ -92,9 +94,7 @@ bool invokeAdd(std::vector<std::shared_ptr<Value>>& valueStack)
         valueStack.push_back(resultValue);
         break;
     }
-    default:
-        printf("%s\n", "runtime error: not implemented");
-        return false;
+    default: printf("%s\n", "runtime error: not implemented"); return false;
     }
     return true;
 }
@@ -139,7 +139,7 @@ bool invokeSub(std::vector<std::shared_ptr<Value>>& valueStack)
     case ValueKind::Bool: {
         // TODO: adding two bool values
         printf("%s\n", "warning: undefined behavior when subtracting two bool values.");
-    
+
         auto a = std::static_pointer_cast<BoolValue>(lhs);
         assert(a);
         auto b = std::static_pointer_cast<BoolValue>(rhs);
@@ -154,9 +154,7 @@ bool invokeSub(std::vector<std::shared_ptr<Value>>& valueStack)
         return false;
         break;
     }
-    default:
-        printf("%s\n", "runtime error: not implemented");
-        return false;
+    default: printf("%s\n", "runtime error: not implemented"); return false;
     }
     return true;
 }
@@ -201,7 +199,7 @@ bool invokeMul(std::vector<std::shared_ptr<Value>>& valueStack)
     case ValueKind::Bool: {
         // TODO: adding two bool values
         printf("%s\n", "warning: undefined behavior when multiplying two bool values.");
-    
+
         auto a = std::static_pointer_cast<BoolValue>(lhs);
         assert(a);
         auto b = std::static_pointer_cast<BoolValue>(rhs);
@@ -216,9 +214,7 @@ bool invokeMul(std::vector<std::shared_ptr<Value>>& valueStack)
         return false;
         break;
     }
-    default:
-        printf("%s\n", "runtime error: not implemented");
-        return false;
+    default: printf("%s\n", "runtime error: not implemented"); return false;
     }
     return true;
 }
@@ -271,7 +267,7 @@ bool invokeDiv(std::vector<std::shared_ptr<Value>>& valueStack)
     case ValueKind::Bool: {
         // TODO: adding two bool values
         printf("%s\n", "warning: undefined behavior when dividing two bool values.");
-    
+
         auto a = std::static_pointer_cast<BoolValue>(lhs);
         assert(a);
         auto b = std::static_pointer_cast<BoolValue>(rhs);
@@ -290,9 +286,7 @@ bool invokeDiv(std::vector<std::shared_ptr<Value>>& valueStack)
         return false;
         break;
     }
-    default:
-        printf("%s\n", "runtime error: not implemented");
-        return false;
+    default: printf("%s\n", "runtime error: not implemented"); return false;
     }
     return true;
 }
@@ -336,7 +330,7 @@ bool invokeMod(std::vector<std::shared_ptr<Value>>& valueStack)
     case ValueKind::Bool: {
         // TODO: adding two bool values
         printf("%s\n", "warning: undefined behavior when dividing two bool values.");
-    
+
         auto a = std::static_pointer_cast<BoolValue>(lhs);
         assert(a);
         auto b = std::static_pointer_cast<BoolValue>(rhs);
@@ -355,39 +349,25 @@ bool invokeMod(std::vector<std::shared_ptr<Value>>& valueStack)
         return false;
         break;
     }
-    default:
-        printf("%s\n", "runtime error: not implemented");
-        return false;
+    default: printf("%s\n", "runtime error: not implemented"); return false;
     }
     return true;
 }
 
 struct CompareOperatorGreaterThan final {
-    template <typename T>
-    static bool compare(T a, T b) {
-        return a > b;
-    }
+    template <typename T> static bool compare(T a, T b) { return a > b; }
 };
 
 struct CompareOperatorGreaterThanOrEqual final {
-    template <typename T>
-    static bool compare(T a, T b) {
-        return a >= b;
-    }
+    template <typename T> static bool compare(T a, T b) { return a >= b; }
 };
 
 struct CompareOperatorLessThan final {
-    template <typename T>
-    static bool compare(T a, T b) {
-        return a < b;
-    }
+    template <typename T> static bool compare(T a, T b) { return a < b; }
 };
 
 struct CompareOperatorLessThanOrEqual final {
-    template <typename T>
-    static bool compare(T a, T b) {
-        return a <= b;
-    }
+    template <typename T> static bool compare(T a, T b) { return a <= b; }
 };
 
 template <class TCompareOperator>
@@ -431,7 +411,7 @@ bool invokeCompare(std::vector<std::shared_ptr<Value>>& valueStack)
     case ValueKind::Bool: {
         // TODO: comparing two bool values
         printf("%s\n", "warning: undefined behavior when comparing two bool values.");
-    
+
         auto a = std::static_pointer_cast<BoolValue>(lhs);
         assert(a);
         auto b = std::static_pointer_cast<BoolValue>(rhs);
@@ -446,25 +426,17 @@ bool invokeCompare(std::vector<std::shared_ptr<Value>>& valueStack)
         return false;
         break;
     }
-    default:
-        printf("%s\n", "runtime error: not implemented");
-        return false;
+    default: printf("%s\n", "runtime error: not implemented"); return false;
     }
     return true;
 }
 
 struct CompareOperatorEqual final {
-    template <typename T>
-    static bool compare(T a, T b) {
-        return a == b;
-    }
+    template <typename T> static bool compare(T a, T b) { return a == b; }
 };
 
 struct CompareOperatorNotEqual final {
-    template <typename T>
-    static bool compare(T a, T b) {
-        return a != b;
-    }
+    template <typename T> static bool compare(T a, T b) { return a != b; }
 };
 
 template <class TCompareOperator>
@@ -525,9 +497,7 @@ bool invokeCompareEqual(std::vector<std::shared_ptr<Value>>& valueStack)
         valueStack.push_back(resultValue);
         break;
     }
-    default:
-        printf("%s\n", "runtime error: not implemented");
-        return false;
+    default: printf("%s\n", "runtime error: not implemented"); return false;
     }
     return true;
 }
@@ -536,7 +506,7 @@ bool invokeCompareEqual(std::vector<std::shared_ptr<Value>>& valueStack)
 
 bool Runtime::run(const BytecodeProgram& program)
 {
-    for (auto & inst : program.instructions) {
+    for (auto& inst : program.instructions) {
         switch (inst->getOpcode()) {
         case Opcode::ConstantBool: {
             invokeConstantBool(inst->operand, valueStack);
@@ -668,8 +638,7 @@ bool Runtime::run(const BytecodeProgram& program)
             valueStack.push_back(resultValue);
             break;
         }
-        default:
-            break;
+        default: break;
         }
     }
     return true;
@@ -711,7 +680,7 @@ std::string Runtime::getResultString() const
 
 void Runtime::dump(const BytecodeProgram& program)
 {
-    for (auto & inst : program.instructions) {
+    for (auto& inst : program.instructions) {
         switch (inst->getOpcode()) {
         case Opcode::ConstantBool: {
             const auto boolValue = getConstantBoolValue(inst->getOperand());
@@ -720,19 +689,22 @@ void Runtime::dump(const BytecodeProgram& program)
             break;
         }
         case Opcode::ConstantDouble: {
-            const auto doubleValue = getConstantValue<double>(inst->getOperand(), program.doubleConstants);
+            const auto doubleValue =
+                getConstantValue<double>(inst->getOperand(), program.doubleConstants);
             const auto s = std::to_string(doubleValue);
             printf("%s %s\n", "double", s.c_str());
             break;
         }
         case Opcode::ConstantInt64: {
-            const auto int64Value = getConstantValue<int64_t>(inst->getOperand(), program.int64Constants);
+            const auto int64Value =
+                getConstantValue<int64_t>(inst->getOperand(), program.int64Constants);
             const auto s = std::to_string(int64Value);
             printf("%s %s\n", "int64", s.c_str());
             break;
         }
         case Opcode::ConstantString: {
-            const auto stringValue = getConstantValue<std::string>(inst->getOperand(), program.stringConstants);
+            const auto stringValue =
+                getConstantValue<std::string>(inst->getOperand(), program.stringConstants);
             printf("%s %s\n", "string", stringValue.c_str());
             break;
         }
@@ -776,8 +748,7 @@ void Runtime::dump(const BytecodeProgram& program)
             printf("%s\n", "comp_le");
             break;
         }
-        default:
-            break;
+        default: break;
         }
     }
 }

@@ -183,7 +183,8 @@ void BytecodeGenerator::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& 
     printf("[%s]\n", "MemberExpr");
 }
 
-void BytecodeGenerator::visit(const std::shared_ptr<ImplicitStaticTypeCastExpr>& expr, Invoke&& traverse)
+void BytecodeGenerator::visit(
+    const std::shared_ptr<ImplicitStaticTypeCastExpr>& expr, Invoke&& traverse)
 {
     traverse();
 
@@ -204,7 +205,7 @@ void BytecodeGenerator::visit(const std::shared_ptr<ImplicitStaticTypeCastExpr>&
             // NOTE: bool -> int64
             auto inst = std::make_shared<Instruction>();
             inst->opcode = Opcode::TypeCastFromBoolToInt64;
-            addInstruction(inst);   
+            addInstruction(inst);
         }
     }
     else if (targetType == BuiltinTypeKind::Double) {
@@ -212,7 +213,7 @@ void BytecodeGenerator::visit(const std::shared_ptr<ImplicitStaticTypeCastExpr>&
             // NOTE: int64 -> double
             auto inst = std::make_shared<Instruction>();
             inst->opcode = Opcode::TypeCastFromInt64ToDouble;
-            addInstruction(inst);   
+            addInstruction(inst);
         }
         else if (sourceType == BuiltinTypeKind::Bool) {
             // NOTE: bool -> int64 -> double

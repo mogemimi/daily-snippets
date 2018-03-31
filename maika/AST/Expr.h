@@ -242,9 +242,8 @@ public:
 
     std::shared_ptr<Expr> getSubExpr() const { return subExpr; }
 
-    static std::shared_ptr<ImplicitStaticTypeCastExpr> make(
-        const Location& loc,
-        const std::shared_ptr<Expr>& e);
+    static std::shared_ptr<ImplicitStaticTypeCastExpr>
+    make(const Location& loc, const std::shared_ptr<Expr>& e);
 };
 
 // TODO: Move the following definition to other header file.

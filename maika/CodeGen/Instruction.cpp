@@ -14,11 +14,8 @@ bool isBinaryOp(Opcode opcode) noexcept
     case Opcode::CompareGreaterThan:
     case Opcode::CompareGreaterThanOrEqual:
     case Opcode::CompareLessThan:
-    case Opcode::CompareLessThanOrEqual:
-        return true;
-        break;
-    default:
-        break;
+    case Opcode::CompareLessThanOrEqual: return true; break;
+    default: break;
     }
     return false;
 }

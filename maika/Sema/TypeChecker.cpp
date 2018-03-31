@@ -11,27 +11,21 @@
 
 namespace {
 
-constexpr int anyBit    = 0b00001;
-constexpr int intBit    = 0b00010;
+constexpr int anyBit = 0b00001;
+constexpr int intBit = 0b00010;
 constexpr int doubleBit = 0b00100;
-constexpr int boolBit   = 0b01000;
+constexpr int boolBit = 0b01000;
 constexpr int stringBit = 0b10000;
 
 int toBinaryOpTypeCastBits(BuiltinTypeKind type)
 {
     switch (type) {
-    case BuiltinTypeKind::Any:
-        return anyBit;
-    case BuiltinTypeKind::Int:
-        return intBit | doubleBit;
-    case BuiltinTypeKind::Double:
-        return doubleBit;
-    case BuiltinTypeKind::Bool:
-        return intBit | doubleBit | boolBit;
-    case BuiltinTypeKind::String:
-        return stringBit;
-    case BuiltinTypeKind::Void:
-        return 0b0;
+    case BuiltinTypeKind::Any: return anyBit;
+    case BuiltinTypeKind::Int: return intBit | doubleBit;
+    case BuiltinTypeKind::Double: return doubleBit;
+    case BuiltinTypeKind::Bool: return intBit | doubleBit | boolBit;
+    case BuiltinTypeKind::String: return stringBit;
+    case BuiltinTypeKind::Void: return 0b0;
     }
     return anyBit;
 }
@@ -42,13 +36,14 @@ enum class BinaryOpTypeCastResult {
     TypeMismatch,
 };
 
-std::tuple<BuiltinTypeKind, BinaryOpTypeCastResult> inferBinaryOpTypeCast(BuiltinTypeKind a, BuiltinTypeKind b)
+std::tuple<BuiltinTypeKind, BinaryOpTypeCastResult>
+inferBinaryOpTypeCast(BuiltinTypeKind a, BuiltinTypeKind b)
 {
     const auto lhsBits = toBinaryOpTypeCastBits(a);
     const auto rhsBits = toBinaryOpTypeCastBits(b);
 
     if (((lhsBits | rhsBits) & anyBit) != 0) {
-        return std::make_tuple(BuiltinTypeKind::Any, BinaryOpTypeCastResult::ResolveOnRuntime); 
+        return std::make_tuple(BuiltinTypeKind::Any, BinaryOpTypeCastResult::ResolveOnRuntime);
     }
 
     const auto castBits = lhsBits & rhsBits;

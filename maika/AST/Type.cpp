@@ -131,8 +131,7 @@ std::tuple<BuiltinTypeKind, bool> TypeHelper::toBuiltinType(const std::shared_pt
         assert(t == std::dynamic_pointer_cast<BuiltinType>(type));
         return std::make_tuple(t->kind, true);
     }
-    default:
-        break;
+    default: break;
     }
     return std::make_tuple(BuiltinTypeKind::Any, false);
 }
