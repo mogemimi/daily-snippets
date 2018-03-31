@@ -52,7 +52,7 @@
 
 
 namespace yy {
-#line 56 "Parser/position.hh" // location.cc:296
+#line 56 "Parser/position.hh" // location.cc:337
   /// Abstract a position.
   class position
   {
@@ -176,5 +176,5 @@ namespace yy {
 
 
 } // yy
-#line 180 "Parser/position.hh" // location.cc:296
+#line 180 "Parser/position.hh" // location.cc:337
 #endif // !YY_YY_PARSER_POSITION_HH_INCLUDED
