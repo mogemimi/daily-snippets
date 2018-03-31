@@ -21,7 +21,7 @@ public:
     bool isBinaryOp() const;
 };
 
-struct BytecodeProgram {
+struct BytecodeProgram final {
     std::vector<int64_t> int64Constants;
     std::vector<double> doubleConstants;
     std::vector<std::string> stringConstants;

@@ -7,7 +7,7 @@ enum class Opcode : std::int8_t {
 
     Label,
 
-    Load, // Store,
+    Load, // Store, Var,
     //JumpIf,
     JumpIfNot,
 
