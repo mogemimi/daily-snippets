@@ -13,6 +13,11 @@ namespace {
 
 } // end of anonymous namespace
 
+void BytecodeGenerator::addInstruction(const std::shared_ptr<Instruction>& inst)
+{
+    program.instructions.push_back(inst);
+}
+
 void BytecodeGenerator::visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traverse)
 {
     traverse();
@@ -74,38 +79,55 @@ void BytecodeGenerator::visit(const std::shared_ptr<FunctionExpr>& expr, Invoke&
 
 void BytecodeGenerator::visit(const std::shared_ptr<IntegerLiteral>& expr)
 {
+    auto& constants = program.int64Constants;
+    const auto index = constants.size();
+    constants.push_back(expr->getValue());
+
     auto inst = std::make_shared<Instruction>();
     inst->opcode = Opcode::ConstantInt64;
-    inst->operand = std::make_shared<Int64Value>(expr->getValue());
-    instructions.push_back(inst);
-    // printf("%s %d [%s]\n", "int", static_cast<int>(expr->getValue()), "IntegerLiteral");
+
+    assert(index <= static_cast<size_t>(std::numeric_limits<decltype(inst->operand)>::max()));
+    inst->operand = static_cast<int32_t>(index);
+
+    addInstruction(inst);
 }
 
 void BytecodeGenerator::visit(const std::shared_ptr<DoubleLiteral>& expr)
 {
+    auto& constants = program.doubleConstants;
+    const auto index = constants.size();
+    constants.push_back(expr->getValue());
+
     auto inst = std::make_shared<Instruction>();
     inst->opcode = Opcode::ConstantDouble;
-    inst->operand = std::make_shared<DoubleValue>(expr->getValue());
-    instructions.push_back(inst);
-    // printf("%s %lf [%s]\n", "double", expr->getValue(), "DoubleLiteral");
+
+    assert(index <= static_cast<size_t>(std::numeric_limits<decltype(inst->operand)>::max()));
+    inst->operand = static_cast<int32_t>(index);
+
+    addInstruction(inst);
 }
 
 void BytecodeGenerator::visit(const std::shared_ptr<BoolLiteral>& expr)
 {
     auto inst = std::make_shared<Instruction>();
     inst->opcode = Opcode::ConstantBool;
-    inst->operand = std::make_shared<BoolValue>(expr->getValue());
-    instructions.push_back(inst);
-    // printf("%s %s [%s]\n", "bool", expr->getValue() ? "true" : "false", "BoolLiteral");
+    inst->operand = expr->getValue() ? 1 : 0;
+    addInstruction(inst);
 }
 
 void BytecodeGenerator::visit(const std::shared_ptr<StringLiteral>& expr)
 {
+    auto& constants = program.stringConstants;
+    const auto index = constants.size();
+    constants.push_back(expr->getValue());
+
     auto inst = std::make_shared<Instruction>();
     inst->opcode = Opcode::ConstantString;
-    inst->operand = std::make_shared<StringValue>(expr->getValue());
-    instructions.push_back(inst);
-    // printf("[%s]\n", "StringLiteral");
+
+    assert(index <= static_cast<size_t>(std::numeric_limits<decltype(inst->operand)>::max()));
+    inst->operand = static_cast<int32_t>(index);
+
+    addInstruction(inst);
 }
 
 void BytecodeGenerator::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
@@ -137,7 +159,7 @@ void BytecodeGenerator::visit(const std::shared_ptr<BinaryOperator>& expr, Invok
 
     auto inst = std::make_shared<Instruction>();
     inst->opcode = opcode;
-    instructions.push_back(inst);
+    addInstruction(inst);
 
     // auto op = ASTHelper::toString(expr->getKind());
     // printf("%s %s [%s]\n", "bin-op", op.c_str(), "BinaryOperator");
@@ -179,10 +201,10 @@ void BytecodeGenerator::visit(const std::shared_ptr<ImplicitStaticTypeCastExpr>&
 
     if (targetType == BuiltinTypeKind::Int) {
         if (sourceType == BuiltinTypeKind::Bool) {
-            // bool -> in64
+            // NOTE: bool -> int64
             auto inst = std::make_shared<Instruction>();
             inst->opcode = Opcode::TypeCastFromBoolToInt64;
-            instructions.push_back(inst);   
+            addInstruction(inst);   
         }
     }
     else if (targetType == BuiltinTypeKind::Double) {
@@ -190,19 +212,19 @@ void BytecodeGenerator::visit(const std::shared_ptr<ImplicitStaticTypeCastExpr>&
             // NOTE: int64 -> double
             auto inst = std::make_shared<Instruction>();
             inst->opcode = Opcode::TypeCastFromInt64ToDouble;
-            instructions.push_back(inst);   
+            addInstruction(inst);   
         }
         else if (sourceType == BuiltinTypeKind::Bool) {
             // NOTE: bool -> int64 -> double
             {
                 auto inst = std::make_shared<Instruction>();
                 inst->opcode = Opcode::TypeCastFromBoolToInt64;
-                instructions.push_back(inst);
+                addInstruction(inst);
             }
             {
                 auto inst = std::make_shared<Instruction>();
                 inst->opcode = Opcode::TypeCastFromInt64ToDouble;
-                instructions.push_back(inst);
+                addInstruction(inst);
             }
         }
     }

@@ -3,17 +3,33 @@
 
 namespace {
 
-template <class TUnderlyingValue>
-bool invokeConstant(const std::shared_ptr<Value>& operand, std::vector<std::shared_ptr<Value>>& valueStack)
+bool getConstantBoolValue(int32_t operand)
 {
-    auto value = std::static_pointer_cast<TUnderlyingValue>(operand);
-    assert(value == std::dynamic_pointer_cast<TUnderlyingValue>(operand));
-    if (!value) {
-        printf("%s\n", "runtime error");
-        return false;
-    }
+    assert((operand == 0) || (operand == 1));
+    return (operand != 0);
+}
+
+template <typename T>
+const T& getConstantValue(int32_t operand, const std::vector<T>& constants)
+{
+    assert(operand >= 0);
+    assert(operand < static_cast<int>(constants.size()));
+    return constants[operand];
+}
+
+void invokeConstantBool(int32_t operand, std::vector<std::shared_ptr<Value>>& valueStack)
+{
+    const auto boolValue = getConstantBoolValue(operand);
+    const auto value = std::make_shared<BoolValue>(boolValue);
     valueStack.push_back(value);
-    return true;
+}
+
+template <class ValueType, class TConstantTable>
+void invokeConstant(int32_t operand, const TConstantTable& constants, std::vector<std::shared_ptr<Value>>& valueStack)
+{
+    const auto v = getConstantValue(operand, constants);
+    const auto value = std::make_shared<ValueType>(v);
+    valueStack.push_back(value);
 }
 
 bool invokeAdd(std::vector<std::shared_ptr<Value>>& valueStack)
@@ -518,32 +534,24 @@ bool invokeCompareEqual(std::vector<std::shared_ptr<Value>>& valueStack)
 
 } // end of anonymous namespace
 
-bool Runtime::run(const std::vector<std::shared_ptr<Instruction>>& instructions)
+bool Runtime::run(const BytecodeProgram& program)
 {
-    for (auto & inst : instructions) {
+    for (auto & inst : program.instructions) {
         switch (inst->getOpcode()) {
         case Opcode::ConstantBool: {
-            if (!invokeConstant<BoolValue>(inst->operand, valueStack)) {
-                return false;
-            }
+            invokeConstantBool(inst->operand, valueStack);
             break;
         }
         case Opcode::ConstantDouble: {
-            if (!invokeConstant<DoubleValue>(inst->operand, valueStack)) {
-                return false;
-            }
+            invokeConstant<DoubleValue>(inst->operand, program.doubleConstants, valueStack);
             break;
         }
         case Opcode::ConstantInt64: {
-            if (!invokeConstant<Int64Value>(inst->operand, valueStack)) {
-                return false;
-            }
+            invokeConstant<Int64Value>(inst->operand, program.int64Constants, valueStack);
             break;
         }
         case Opcode::ConstantString: {
-            if (!invokeConstant<StringValue>(inst->operand, valueStack)) {
-                return false;
-            }
+            invokeConstant<StringValue>(inst->operand, program.stringConstants, valueStack);
             break;
         }
         case Opcode::Add: {
@@ -701,36 +709,31 @@ std::string Runtime::getResultString() const
     return "";
 }
 
-void Runtime::dump(const std::vector<std::shared_ptr<Instruction>>& instructions)
+void Runtime::dump(const BytecodeProgram& program)
 {
-    for (auto & inst : instructions) {
+    for (auto & inst : program.instructions) {
         switch (inst->getOpcode()) {
         case Opcode::ConstantBool: {
-            auto value = std::static_pointer_cast<BoolValue>(inst->operand);
-            assert(value);
-            auto s = value->getValue() ? "true" : "false";
+            const auto boolValue = getConstantBoolValue(inst->getOperand());
+            const auto s = boolValue ? "true" : "false";
             printf("%s %s\n", "bool", s);
             break;
         }
         case Opcode::ConstantDouble: {
-            auto value = std::static_pointer_cast<DoubleValue>(inst->operand);
-            assert(value);
-            auto s = std::to_string(value->getValue());
+            const auto doubleValue = getConstantValue<double>(inst->getOperand(), program.doubleConstants);
+            const auto s = std::to_string(doubleValue);
             printf("%s %s\n", "double", s.c_str());
             break;
         }
         case Opcode::ConstantInt64: {
-            auto value = std::static_pointer_cast<Int64Value>(inst->operand);
-            assert(value);
-            auto s = std::to_string(value->getValue());
+            const auto int64Value = getConstantValue<int64_t>(inst->getOperand(), program.int64Constants);
+            const auto s = std::to_string(int64Value);
             printf("%s %s\n", "int64", s.c_str());
             break;
         }
         case Opcode::ConstantString: {
-            auto value = std::static_pointer_cast<StringValue>(inst->operand);
-            assert(value);
-            auto s = value->getValue();
-            printf("%s %s\n", "double", s.c_str());
+            const auto stringValue = getConstantValue<std::string>(inst->getOperand(), program.stringConstants);
+            printf("%s %s\n", "string", stringValue.c_str());
             break;
         }
         case Opcode::Add: {

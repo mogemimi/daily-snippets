@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-enum class Opcode : int8_t {
+enum class Opcode : std::int8_t {
     Exit = 0,
 
     Label,

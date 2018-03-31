@@ -9,10 +9,10 @@
 
 class BytecodeGenerator final : public ASTVisitor {
 private:
-    std::vector<std::shared_ptr<Instruction>> instructions;
+    BytecodeProgram program;
 
 public:
-    std::vector<std::shared_ptr<Instruction>> getInstructions() const { return instructions; }
+    BytecodeProgram getProgram() const { return program; }
 
     void visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traverse) override;
     void visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse) override;
@@ -37,4 +37,8 @@ public:
     void visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse) override;
+
+private:
+    void addInstruction(const std::shared_ptr<Instruction>& inst);
+    // void addInstruction(Opcode opcode, int32_t operand);
 };

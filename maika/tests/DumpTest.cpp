@@ -183,15 +183,15 @@ function test() {
     printf("%s\n", dumper.getResult().c_str());
 
 
-    BytecodeGenerator irGenerator;
-    traverser.traverse(astContext, irGenerator);
+    BytecodeGenerator byteCodeGenerator;
+    traverser.traverse(astContext, byteCodeGenerator);
     REQUIRE(!diag->hasError());
 
-    auto instructions = irGenerator.getInstructions();
-    Runtime::dump(instructions);
+    auto program = byteCodeGenerator.getProgram();
+    Runtime::dump(program);
 
     Runtime runtime;
-    REQUIRE(runtime.run(instructions));
+    REQUIRE(runtime.run(program));
     auto result = runtime.getResultString();
     printf("result: %s\n", result.c_str());
 }
