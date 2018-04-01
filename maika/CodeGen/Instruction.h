@@ -8,8 +8,8 @@
 
 class Instruction final {
 public:
-    Opcode opcode : 8;
-    std::int32_t operand : 32;
+    Opcode opcode;
+    std::int32_t operand;
 
     // TODO: unused member variable:
     // std::int32_t location : 24;
@@ -21,7 +21,13 @@ public:
     bool isBinaryOp() const;
 };
 
+struct LocalVariable {
+    std::string name;
+    std::int32_t variableIndex;
+};
+
 struct BytecodeProgram final {
+    std::vector<LocalVariable> localVariables;
     std::vector<int64_t> int64Constants;
     std::vector<double> doubleConstants;
     std::vector<std::string> stringConstants;

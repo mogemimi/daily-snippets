@@ -7,7 +7,9 @@ enum class Opcode : std::int8_t {
 
     Label,
 
-    Load, // Store, Var,
+    DefineVariable,
+    LoadVariable, // Store
+
     // JumpIf,
     JumpIfNot,
 
@@ -29,7 +31,7 @@ enum class Opcode : std::int8_t {
     ConstantDouble,
     ConstantBool,
     ConstantString,
+    ConstantNull,
 
-    TypeCastFromBoolToInt64,
     TypeCastFromInt64ToDouble,
 };

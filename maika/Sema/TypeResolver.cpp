@@ -407,6 +407,39 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
         return;
     }
 
+    if (expr->getKind() == BinaryOperatorKind::Mod) {
+        if (lhsType == BuiltinTypeKind::Double) {
+            error(lhs->getLocation(), "invalid operands to binary expression ('"+lhsTypeInferred->dump()+"' and '"+rhsTypeInferred->dump()+"').");
+            return;
+        }
+        if (rhsType == BuiltinTypeKind::Double) {
+            error(rhs->getLocation(), "invalid operands to binary expression ('"+lhsTypeInferred->dump()+"' and '"+rhsTypeInferred->dump()+"').");
+            return;
+        }
+    }
+
+    if (expr->isAdditiveOp() || expr->isMultiplicativeOp()) {
+        if (lhsType == BuiltinTypeKind::Bool) {
+            error(lhs->getLocation(), "invalid operands to binary expression ('"+lhsTypeInferred->dump()+"' and '"+rhsTypeInferred->dump()+"').");
+            return;
+        }
+        if (rhsType == BuiltinTypeKind::Bool) {
+            error(rhs->getLocation(), "invalid operands to binary expression ('"+lhsTypeInferred->dump()+"' and '"+rhsTypeInferred->dump()+"').");
+            return;
+        }
+    }
+
+    if ((expr->getKind() == BinaryOperatorKind::Subtract) || expr->isMultiplicativeOp()) {
+        if (lhsType == BuiltinTypeKind::String) {
+            error(lhs->getLocation(), "invalid operands to binary expression ('"+lhsTypeInferred->dump()+"' and '"+rhsTypeInferred->dump()+"').");
+            return;
+        }
+        if (rhsType == BuiltinTypeKind::String) {
+            error(rhs->getLocation(), "invalid operands to binary expression ('"+lhsTypeInferred->dump()+"' and '"+rhsTypeInferred->dump()+"').");
+            return;
+        }
+    }
+
     if (!lhsTypeEnabled || !rhsTypeEnabled) {
         // NOTE: resolving types on runtime, so this process is skipped
         assert(!expr->getType());

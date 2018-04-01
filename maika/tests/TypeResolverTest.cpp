@@ -15,6 +15,38 @@
 #include "catch.hpp"
 
 namespace {
+bool resolveIdentifiers(const std::shared_ptr<DiagnosticHandler>& diag, const std::string& source)
+{
+    MyDriver driver;
+    auto [astContext, ok] = driver.parseString(source, diag);
+    REQUIRE(ok);
+
+    ASTTraverser traverser;
+    IdentifierContext context;
+
+    IdentifierResolver resolver(&context, diag);
+    traverser.traverse(astContext, resolver);
+    return !diag->hasError();
+}
+} // end of anonymous namespace
+
+TEST_CASE("IdentifierResolver can resolve identifier", "[identifier-resolve]")
+{
+    auto stream = std::make_shared<UnitTestDiagnosticStream>();
+    auto diag = std::make_shared<DiagnosticHandler>();
+    diag->setStream(stream);
+
+    SECTION("redeclared in this block.") {
+        constexpr auto source = R"(function test() {
+            let x;
+            let x;
+        })";
+        REQUIRE(!resolveIdentifiers(diag, source));
+        REQUIRE(stream->hasError("3:17: error: 'x' redeclared in this block."));
+    }
+}
+
+namespace {
 bool typeCheck(const std::shared_ptr<DiagnosticHandler>& diag, const std::string& source)
 {
     MyDriver driver;
@@ -34,7 +66,7 @@ bool typeCheck(const std::shared_ptr<DiagnosticHandler>& diag, const std::string
 }
 } // end of anonymous namespace
 
-TEST_CASE("TypeResolver detect type mismatch", "[type-mismtach detection]")
+TEST_CASE("TypeResolver can detect type mismatch", "[type-mismtach detection]")
 {
     auto stream = std::make_shared<UnitTestDiagnosticStream>();
     auto diag = std::make_shared<DiagnosticHandler>();
@@ -187,5 +219,43 @@ TEST_CASE("TypeResolver detect type mismatch", "[type-mismtach detection]")
         function test() { return f(2.0) + "hello"; }
         )";
         REQUIRE(!typeCheck(diag, source));
+    }
+    SECTION("Use modulus on integer") {
+        constexpr auto source = R"(function test() { 10 % 3; })";
+        REQUIRE(typeCheck(diag, source));
+    }
+    SECTION("invalid operands of types 'double' and 'double' to binary 'operator%'.") {
+        constexpr auto source = R"(function test() { 42 % 3.14; })";
+        REQUIRE(!typeCheck(diag, source));
+        REQUIRE(stream->hasError("1:24: error: invalid operands to binary expression ('int' and 'double')."));
+    }
+    SECTION("invalid operands of types 'double' and 'double' to binary 'operator%'.") {
+        constexpr auto source = R"(function test() { 3.14 % 42; })";
+        REQUIRE(!typeCheck(diag, source));
+        REQUIRE(stream->hasError("1:19: error: invalid operands to binary expression ('double' and 'int')."));
+    }
+    SECTION("invalid operands of types 'bool' and 'bool' to binary 'operator%'.") {
+        constexpr auto source = R"(function test() { 42 % true; })";
+        REQUIRE(!typeCheck(diag, source));
+        REQUIRE(stream->hasError("1:24: error: invalid operands to binary expression ('int' and 'bool')."));
+    }
+    SECTION("invalid operands of types 'bool' and 'bool' to binary 'operator%'.") {
+        constexpr auto source = R"(function test() { true % 42; })";
+        REQUIRE(!typeCheck(diag, source));
+        REQUIRE(stream->hasError("1:19: error: invalid operands to binary expression ('bool' and 'int')."));
+    }
+    SECTION("strings can concatenate using 'operator+'") {
+        constexpr auto source = R"(function test() { "a" + "b"; })";
+        REQUIRE(typeCheck(diag, source));
+    }
+    SECTION("invalid operands of types 'string' and 'string' to binary 'operator*'") {
+        constexpr auto source = R"(function test() { "a" * "b"; })";
+        REQUIRE(!typeCheck(diag, source));
+        REQUIRE(stream->hasError("1:19: error: invalid operands to binary expression ('string' and 'string')."));
+    }
+    SECTION("invalid operands of types 'string' and 'string' to binary 'operator-'") {
+        constexpr auto source = R"(function test() { "a" - "b"; })";
+        REQUIRE(!typeCheck(diag, source));
+        REQUIRE(stream->hasError("1:19: error: invalid operands to binary expression ('string' and 'string')."));
     }
 }

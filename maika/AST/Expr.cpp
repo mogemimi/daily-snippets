@@ -163,6 +163,32 @@ void BinaryOperator::traverse(ASTVisitor& visitor)
     });
 }
 
+bool BinaryOperator::isMultiplicativeOp(BinaryOperatorKind kind)
+{
+    switch (kind) {
+    case BinaryOperatorKind::Multiply: return true;
+    case BinaryOperatorKind::Divide: return true;
+    case BinaryOperatorKind::Mod: return true;
+    default: break;
+    }
+    return false;
+}
+
+bool BinaryOperator::isMultiplicativeOp() const
+{
+    return isMultiplicativeOp(kind);
+}
+
+bool BinaryOperator::isAdditiveOp(BinaryOperatorKind kind)
+{
+    return (kind == BinaryOperatorKind::Add) || (kind == BinaryOperatorKind::Subtract);
+}
+
+bool BinaryOperator::isAdditiveOp() const
+{
+    return isAdditiveOp(kind);
+}
+
 bool BinaryOperator::isEqualityOp(BinaryOperatorKind kind)
 {
     return (kind == BinaryOperatorKind::Equal) || (kind == BinaryOperatorKind::NotEqual);

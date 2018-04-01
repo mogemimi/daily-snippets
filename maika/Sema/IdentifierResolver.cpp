@@ -197,7 +197,7 @@ void IdentifierResolver::visit(const std::shared_ptr<VariableDecl>& decl, Invoke
 
     auto alt = scope->findAlt(namedDecl->getName());
     if (alt) {
-        error(namedDecl->getLocation(), "'" + namedDecl->getName() + "' redeclared in this block");
+        error(namedDecl->getLocation(), "'" + namedDecl->getName() + "' redeclared in this block.");
         return;
     }
 

@@ -502,12 +502,54 @@ bool invokeCompareEqual(std::vector<std::shared_ptr<Value>>& valueStack)
     return true;
 }
 
+    std::shared_ptr<Value> passForAssignment(const std::shared_ptr<Value>& v)
+    {
+        switch (v->getKind()) {
+        case ValueKind::Null: {
+            // pass by value
+            return std::make_shared<NullValue>();
+            break;
+        }
+        case ValueKind::Int64: {
+            // pass by value
+            auto underlyingValue = std::static_pointer_cast<Int64Value>(v);
+            return std::make_shared<Int64Value>(underlyingValue->getValue());
+            break;
+        }
+        case ValueKind::Double: {
+            // pass by value
+            auto underlyingValue = std::static_pointer_cast<DoubleValue>(v);
+            return std::make_shared<DoubleValue>(underlyingValue->getValue());
+        break;
+        }
+        case ValueKind::Bool:{
+            // pass by value
+            auto underlyingValue = std::static_pointer_cast<BoolValue>(v);
+            return std::make_shared<BoolValue>(underlyingValue->getValue());
+        break;
+        }
+        break;
+        case ValueKind::String:{
+            // pass by value
+            auto underlyingValue = std::static_pointer_cast<StringValue>(v);
+            return std::make_shared<StringValue>(underlyingValue->getValue());
+        break;
+        }
+        }
+        return v;
+    }
+
 } // end of anonymous namespace
 
 bool Runtime::run(const BytecodeProgram& program)
 {
     for (auto& inst : program.instructions) {
         switch (inst->getOpcode()) {
+        case Opcode::ConstantNull: {
+            const auto value = std::make_shared<NullValue>();
+            valueStack.push_back(value);
+            break;
+        }
         case Opcode::ConstantBool: {
             invokeConstantBool(inst->operand, valueStack);
             break;
@@ -522,6 +564,39 @@ bool Runtime::run(const BytecodeProgram& program)
         }
         case Opcode::ConstantString: {
             invokeConstant<StringValue>(inst->operand, program.stringConstants, valueStack);
+            break;
+        }
+        case Opcode::DefineVariable: {
+            const auto v = getConstantValue(inst->operand, program.localVariables);
+#if !defined(NDEBUG)
+            if (variables.find(v.name) != std::end(variables)) {
+                printf("%s\n", "runtime error: local variable redifinition error");
+                return false;
+            }
+#endif
+
+#if !defined(NDEBUG)
+            if (valueStack.empty()) {
+                printf("%s\n", "runtime error: empty stack");
+                return false;
+            }
+#endif
+            auto value = valueStack.back();
+            valueStack.pop_back();
+            variables.emplace(v.name, passForAssignment(value));
+            break;
+        }
+        case Opcode::LoadVariable: {
+            const auto v = getConstantValue(inst->operand, program.localVariables);
+
+            auto iter = variables.find(v.name);
+#if !defined(NDEBUG)
+            if (iter == std::end(variables)) {
+                printf("%s\n", "runtime error: cannot find the variable");
+                return false;
+            }
+#endif
+            valueStack.push_back(iter->second);
             break;
         }
         case Opcode::Add: {
@@ -590,30 +665,6 @@ bool Runtime::run(const BytecodeProgram& program)
             }
             break;
         }
-        case Opcode::TypeCastFromBoolToInt64: {
-            if (valueStack.size() < 1) {
-                printf("%s\n", "runtime error");
-                return false;
-            }
-            auto sourceValue = valueStack.back();
-            valueStack.pop_back();
-
-            assert(sourceValue->getKind() == ValueKind::Bool);
-#if !defined(NDEBUG)
-            if (sourceValue->getKind() != ValueKind::Bool) {
-                printf("%s\n", "runtime error: type of operand must be bool.");
-                return false;
-            }
-#endif
-            auto a = std::static_pointer_cast<BoolValue>(sourceValue);
-            assert(a);
-
-            const auto v = a->getValue() ? 1 : 0;
-
-            auto resultValue = std::make_shared<Int64Value>(v);
-            valueStack.push_back(resultValue);
-            break;
-        }
         case Opcode::TypeCastFromInt64ToDouble: {
             if (valueStack.size() < 1) {
                 printf("%s\n", "runtime error");
@@ -653,6 +704,10 @@ std::string Runtime::getResultString() const
     auto result = valueStack.back();
 
     switch (result->getKind()) {
+    case ValueKind::Null: {
+        return "null";
+        break;
+    }
     case ValueKind::Int64: {
         auto v = std::static_pointer_cast<Int64Value>(result);
         return std::to_string(v->getValue());
@@ -706,6 +761,20 @@ void Runtime::dump(const BytecodeProgram& program)
             const auto stringValue =
                 getConstantValue<std::string>(inst->getOperand(), program.stringConstants);
             printf("%s %s\n", "string", stringValue.c_str());
+            break;
+        }
+        case Opcode::ConstantNull: {
+            printf("%s\n", "null");
+            break;
+        }
+        case Opcode::DefineVariable: {
+            auto variableInfo = getConstantValue<LocalVariable>(inst->getOperand(), program.localVariables);
+            printf("%s %s\n", "var", variableInfo.name.c_str());
+            break;
+        }
+        case Opcode::LoadVariable: {
+            auto variableInfo = getConstantValue<LocalVariable>(inst->getOperand(), program.localVariables);
+            printf("%s %s\n", "load", variableInfo.name.c_str());
             break;
         }
         case Opcode::Add: {

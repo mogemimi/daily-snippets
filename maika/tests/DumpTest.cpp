@@ -152,10 +152,9 @@ TEST_CASE("BytecodeGenerator", "[codegen]")
 //     return b;
 // }
 function test() {
-    if (true) {
-        return 10 + 5;
-    }
-    return 40 + 2;
+    let a = 42;
+    let b = (7 + 7);
+    return (a * 100) / b;
 }
 )";
     auto diag = std::make_shared<DiagnosticHandler>();

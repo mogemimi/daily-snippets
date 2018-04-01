@@ -156,12 +156,22 @@ void BytecodeGenerator::visit(const std::shared_ptr<BinaryOperator>& expr, Invok
 void BytecodeGenerator::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& traverse)
 {
     traverse();
-    printf("[%s]\n", "UnaryOperator");
 }
 
 void BytecodeGenerator::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse)
 {
     traverse();
+
+    auto variableName = expr->getNamedDecl()->getName();
+    auto iter = std::find_if(std::begin(program.localVariables), std::end(program.localVariables), [&](const auto& a){
+        return variableName == a.name;
+    });
+    assert(iter != std::end(program.localVariables));
+
+    auto inst = std::make_shared<Instruction>();
+    inst->opcode = Opcode::LoadVariable;
+    inst->operand = iter->variableIndex;
+    addInstruction(inst);
 }
 
 void BytecodeGenerator::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse)
@@ -186,33 +196,12 @@ void BytecodeGenerator::visit(
         return;
     }
 
-    if (targetType == BuiltinTypeKind::Int) {
-        if (sourceType == BuiltinTypeKind::Bool) {
-            // NOTE: bool -> int64
-            auto inst = std::make_shared<Instruction>();
-            inst->opcode = Opcode::TypeCastFromBoolToInt64;
-            addInstruction(inst);
-        }
-    }
-    else if (targetType == BuiltinTypeKind::Double) {
+    if (targetType == BuiltinTypeKind::Double) {
         if (sourceType == BuiltinTypeKind::Int) {
             // NOTE: int64 -> double
             auto inst = std::make_shared<Instruction>();
             inst->opcode = Opcode::TypeCastFromInt64ToDouble;
             addInstruction(inst);
-        }
-        else if (sourceType == BuiltinTypeKind::Bool) {
-            // NOTE: bool -> int64 -> double
-            {
-                auto inst = std::make_shared<Instruction>();
-                inst->opcode = Opcode::TypeCastFromBoolToInt64;
-                addInstruction(inst);
-            }
-            {
-                auto inst = std::make_shared<Instruction>();
-                inst->opcode = Opcode::TypeCastFromInt64ToDouble;
-                addInstruction(inst);
-            }
         }
     }
 }
@@ -230,6 +219,29 @@ void BytecodeGenerator::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&
 void BytecodeGenerator::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse)
 {
     traverse();
+
+    if (!decl->getExpr()) {
+        auto inst = std::make_shared<Instruction>();
+        inst->opcode = Opcode::ConstantNull;
+        addInstruction(inst);
+    }
+
+    auto& variables = program.localVariables;
+    const auto index = variables.size();
+    LocalVariable variableInfo;
+    assert(decl);
+    assert(decl->getNamedDecl());
+    variableInfo.name = decl->getNamedDecl()->getName();
+    variableInfo.variableIndex = static_cast<int32_t>(index);
+    variables.push_back(variableInfo);
+
+    auto inst = std::make_shared<Instruction>();
+    inst->opcode = Opcode::DefineVariable;
+
+    assert(index <= static_cast<size_t>(std::numeric_limits<decltype(inst->operand)>::max()));
+    inst->operand = static_cast<int32_t>(index);
+
+    addInstruction(inst);
 }
 
 void BytecodeGenerator::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse)

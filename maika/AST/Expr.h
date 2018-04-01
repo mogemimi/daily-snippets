@@ -168,6 +168,12 @@ public:
 
     bool isLvalue() const override { return false; }
 
+    static bool isMultiplicativeOp(BinaryOperatorKind kind);
+    bool isMultiplicativeOp() const;
+
+    static bool isAdditiveOp(BinaryOperatorKind kind);
+    bool isAdditiveOp() const;
+
     static bool isEqualityOp(BinaryOperatorKind kind);
     bool isEqualityOp() const;
 
