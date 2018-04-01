@@ -95,6 +95,18 @@ public:
     static std::string toString(BuiltinTypeKind kind);
 };
 
+//class DeferredType final : public Type {
+//public:
+//};
+//
+//class IntersectionType final : public Type {
+//public:
+//};
+//
+//class UnionType final : public Type {
+//public:
+//};
+
 struct TypeHelper {
     static std::tuple<BuiltinTypeKind, bool> toBuiltinType(const std::shared_ptr<Type>& type);
 };

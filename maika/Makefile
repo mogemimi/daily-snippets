@@ -37,6 +37,7 @@ SOURCES = \
 	Sema/TypeResolver.cpp \
 	tests/DumpTest.cpp \
 	tests/LexerTest.cpp \
+	tests/TypeResolverTest.cpp \
 	tests/main.cpp
 
 COMPILER_OPTIONS = \

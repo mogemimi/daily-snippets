@@ -173,7 +173,7 @@ int toBinaryOpTypeCastBits(BuiltinTypeKind type)
     case BuiltinTypeKind::Any: return anyBit;
     case BuiltinTypeKind::Int: return intBit | doubleBit;
     case BuiltinTypeKind::Double: return doubleBit;
-    case BuiltinTypeKind::Bool: return intBit | doubleBit | boolBit;
+    case BuiltinTypeKind::Bool: return boolBit;
     case BuiltinTypeKind::String: return stringBit;
     case BuiltinTypeKind::Void: return 0b0;
     }
@@ -261,6 +261,10 @@ void TypeResolver::visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& trave
     const auto scope = getCurrentScope();
 
     traverse();
+
+    if (diag->hasError()) {
+        return;
+    }
 
     auto expr = stmt->getExpr();
     assert(expr);
@@ -387,8 +391,12 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
     assert(lhs->getType());
     assert(rhs->getType());
 
-    const auto [lhsType, lhsTypeEnabled] = TypeHelper::toBuiltinType(lhs->getType());
-    const auto [rhsType, rhsTypeEnabled] = TypeHelper::toBuiltinType(rhs->getType());
+    const auto scope = getCurrentScope();
+    const auto lhsTypeInferred = TypeInferer::infer(scope->env, lhs->getType());
+    const auto rhsTypeInferred = TypeInferer::infer(scope->env, rhs->getType());
+
+    const auto [lhsType, lhsTypeEnabled] = TypeHelper::toBuiltinType(lhsTypeInferred);
+    const auto [rhsType, rhsTypeEnabled] = TypeHelper::toBuiltinType(rhsTypeInferred);
 
     if (lhsType == BuiltinTypeKind::Void) {
         error(lhs->getLocation(), "lhs is 'void' type.");
@@ -418,34 +426,40 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
 
     if (castResult == BinaryOpTypeCastResult::TypeMismatch) {
         if (expr->isAssignmentOp()) {
-            assert(lhs->getType());
-            assert(rhs->getType());
+            assert(lhsTypeInferred);
+            assert(rhsTypeInferred);
             error(
                 expr->getLocation(),
-                "Type '" + rhs->getType()->dump() + "' is not assignable to '" +
-                    lhs->getType()->dump() + "'.");
+                "Type '" + rhsTypeInferred->dump() + "' is not assignable to '" +
+                    lhsTypeInferred->dump() + "'.");
             return;
         }
 
-        error(expr->getLocation(), "Type mismatch");
+        error(expr->getLocation(), "Operator '"+BinaryOperator::toString(expr->getKind())+"' cannot be applied to types '"+lhsTypeInferred->dump() + "' and '" + rhsTypeInferred->dump() + "'.");
         return;
     }
 
     if (castResult == BinaryOpTypeCastResult::ResolveOnRuntime) {
         // NOTE: resolving types on runtime, so this process is skipped
         assert(!expr->getType());
+
+        if (expr->isAssignmentOp()) {
+            expr->setType(lhs->getType());
+            return;
+        }
+
         expr->setType(BuiltinType::make(BuiltinTypeKind::Any));
         return;
     }
 
     if (lhsType != castType) {
         if (expr->isAssignmentOp()) {
-            assert(lhs->getType());
-            assert(rhs->getType());
+            assert(lhsTypeInferred);
+            assert(rhsTypeInferred);
             error(
                 expr->getLocation(),
-                "Type '" + rhs->getType()->dump() + "' is not assignable to '" +
-                    lhs->getType()->dump() + "'.");
+                "Type '" + rhsTypeInferred->dump() + "' is not assignable to '" +
+                    lhsTypeInferred->dump() + "'.");
             return;
         }
 
@@ -590,6 +604,10 @@ void TypeResolver::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& tra
     namedDecl->setType(typeVariable);
 
     traverse();
+
+    if (diag->hasError()) {
+        return;
+    }
 
     if (auto expr = decl->getExpr()) {
         assert(expr->getType());
