@@ -70,6 +70,8 @@ public:
 
     std::shared_ptr<Expr> getCond() const;
 
+    void setCond(const std::shared_ptr<Expr>& condExpr);
+
     std::shared_ptr<Stmt> getThen() const;
 
     std::shared_ptr<Stmt> getElse() const;
@@ -98,6 +100,8 @@ public:
 
     std::shared_ptr<Expr> getCond() const;
 
+    void setCond(const std::shared_ptr<Expr>& condExpr);
+
     std::shared_ptr<Stmt> getBody() const;
 
     static std::shared_ptr<WhileStmt> make(
@@ -121,6 +125,8 @@ public:
     std::shared_ptr<Stmt> getInit() const;
 
     std::shared_ptr<Expr> getCond() const;
+
+    void setCond(const std::shared_ptr<Expr>& condExpr);
 
     std::shared_ptr<Expr> getInc() const;
 

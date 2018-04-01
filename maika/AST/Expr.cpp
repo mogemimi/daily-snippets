@@ -358,16 +358,16 @@ std::shared_ptr<MemberExpr> MemberExpr::make(
     return expr;
 }
 
-void ImplicitStaticTypeCastExpr::traverse(ASTVisitor& visitor)
+void ImplicitStaticCastExpr::traverse(ASTVisitor& visitor)
 {
     assert(subExpr);
     visitor.visit(shared_from_this(), [&] { subExpr->traverse(visitor); });
 }
 
-std::shared_ptr<ImplicitStaticTypeCastExpr>
-ImplicitStaticTypeCastExpr::make(const Location& loc, const std::shared_ptr<Expr>& e)
+std::shared_ptr<ImplicitStaticCastExpr>
+ImplicitStaticCastExpr::make(const Location& loc, const std::shared_ptr<Expr>& e)
 {
-    auto expr = std::make_shared<ImplicitStaticTypeCastExpr>();
+    auto expr = std::make_shared<ImplicitStaticCastExpr>();
     expr->location = loc;
     expr->subExpr = e;
     return expr;

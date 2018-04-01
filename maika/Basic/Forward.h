@@ -29,7 +29,7 @@ class BinaryOperator;
 class UnaryOperator;
 class DeclRefExpr;
 class MemberExpr;
-class ImplicitStaticTypeCastExpr;
+class ImplicitStaticCastExpr;
 
 // NOTE: AST::Decl
 class Decl;

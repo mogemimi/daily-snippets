@@ -228,7 +228,10 @@ public:
     bool isLvalue() const override { return false; }
 
     UnaryOperatorKind getKind() const { return kind; }
+
     std::shared_ptr<Expr> getSubExpr() const { return subExpr; }
+
+    void setSubExpr(const std::shared_ptr<Expr>& s) { subExpr = s; }
 
     static std::shared_ptr<UnaryOperator>
     make(const Location& loc, UnaryOperatorKind k, const std::shared_ptr<Expr>& e);
@@ -275,9 +278,9 @@ public:
         const std::shared_ptr<NamedDecl>& d);
 };
 
-class ImplicitStaticTypeCastExpr final
+class ImplicitStaticCastExpr final
     : public Expr
-    , public std::enable_shared_from_this<ImplicitStaticTypeCastExpr> {
+    , public std::enable_shared_from_this<ImplicitStaticCastExpr> {
 private:
     std::shared_ptr<Expr> subExpr;
 
@@ -288,6 +291,6 @@ public:
 
     std::shared_ptr<Expr> getSubExpr() const { return subExpr; }
 
-    static std::shared_ptr<ImplicitStaticTypeCastExpr>
+    static std::shared_ptr<ImplicitStaticCastExpr>
     make(const Location& loc, const std::shared_ptr<Expr>& e);
 };

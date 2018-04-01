@@ -91,6 +91,11 @@ std::shared_ptr<Expr> IfStmt::getCond() const
     return condExpr;
 }
 
+void IfStmt::setCond(const std::shared_ptr<Expr>& c)
+{
+    condExpr = c;
+}
+
 std::shared_ptr<Stmt> IfStmt::getThen() const
 {
     return thenStmt;
@@ -144,6 +149,11 @@ std::shared_ptr<Expr> WhileStmt::getCond() const
     return condExpr;
 }
 
+void WhileStmt::setCond(const std::shared_ptr<Expr>& c)
+{
+    condExpr = c;
+}
+
 std::shared_ptr<Stmt> WhileStmt::getBody() const
 {
     return bodyStmt;
@@ -187,6 +197,11 @@ std::shared_ptr<Stmt> ForStmt::getInit() const
 std::shared_ptr<Expr> ForStmt::getCond() const
 {
     return condExpr;
+}
+
+void ForStmt::setCond(const std::shared_ptr<Expr>& c)
+{
+    condExpr = c;
 }
 
 std::shared_ptr<Expr> ForStmt::getInc() const

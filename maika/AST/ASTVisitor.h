@@ -102,8 +102,8 @@ public:
         traverse();
     }
 
-    virtual void visit(const std::shared_ptr<ImplicitStaticTypeCastExpr>& expr) {}
-    virtual void visit(const std::shared_ptr<ImplicitStaticTypeCastExpr>& expr, Invoke&& traverse)
+    virtual void visit(const std::shared_ptr<ImplicitStaticCastExpr>& expr) {}
+    virtual void visit(const std::shared_ptr<ImplicitStaticCastExpr>& expr, Invoke&& traverse)
     {
         visit(expr);
         traverse();

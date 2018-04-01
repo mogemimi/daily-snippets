@@ -194,13 +194,13 @@ void ASTDumper::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse
     dump(&dumpContext, "MemberExpr", options, std::move(traverse));
 }
 
-void ASTDumper::visit(const std::shared_ptr<ImplicitStaticTypeCastExpr>& expr, Invoke&& traverse)
+void ASTDumper::visit(const std::shared_ptr<ImplicitStaticCastExpr>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;
     if (auto type = expr->getType()) {
         options.push_back(type->dump());
     }
-    dump(&dumpContext, "ImplicitStaticTypeCastExpr", options, std::move(traverse));
+    dump(&dumpContext, "ImplicitStaticCastExpr", options, std::move(traverse));
 }
 
 void ASTDumper::visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invoke&& traverse)

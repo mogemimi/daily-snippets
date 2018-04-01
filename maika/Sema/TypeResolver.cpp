@@ -213,6 +213,37 @@ inferBinaryOpTypeCast(BuiltinTypeKind a, BuiltinTypeKind b)
     return std::make_tuple(BuiltinTypeKind::Any, BinaryOpTypeCastResult::TypeMismatch);
 }
 
+template <class GetCond, class SetCond>
+void ImplicitCastifyConditionExpr(const std::shared_ptr<TypeResolverScope>& scope, const std::shared_ptr<DiagnosticHandler>& diag, GetCond && getCond, SetCond && setCond)
+{
+    const auto condExpr = getCond();
+    assert(condExpr);
+    assert(condExpr->getType());
+
+    const auto condTypeInferred = TypeInferer::infer(scope->env, condExpr->getType());
+
+    const auto [condType, condTypeEnabled] = TypeHelper::toBuiltinType(condTypeInferred);
+
+    if (condType == BuiltinTypeKind::Void) {
+        diag->error(condExpr->getLocation(), "cond is 'void' type.");
+        return;
+    }
+
+    if (!condTypeEnabled) {
+        // NOTE: resolving type on runtime, so this process is skipped
+        return;
+    }
+
+    if (condType == BuiltinTypeKind::Bool) {
+        // NOTE: The operator doesn't need to implicitly cast types of operands.
+        return;
+    }
+
+    auto typeCastExpr = ImplicitStaticCastExpr::make(condExpr->getLocation(), condExpr);
+    typeCastExpr->setType(BuiltinType::make(BuiltinTypeKind::Bool));
+    setCond(typeCastExpr);
+}
+
 } // end of anonymous namespace
 
 TypeResolver::TypeResolver(const std::shared_ptr<DiagnosticHandler>& diagIn)
@@ -275,16 +306,37 @@ void TypeResolver::visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& trave
 void TypeResolver::visit(const std::shared_ptr<IfStmt>& stmt, Invoke&& traverse)
 {
     traverse();
+
+    const auto scope = getCurrentScope();
+
+    ImplicitCastifyConditionExpr(scope, diag, [&]{ return stmt->getCond(); }, [&](auto cond){ stmt->setCond(cond); });
+    if (diag->hasError()) {
+        return;
+    }
 }
 
 void TypeResolver::visit(const std::shared_ptr<WhileStmt>& stmt, Invoke&& traverse)
 {
     traverse();
+
+    const auto scope = getCurrentScope();
+
+    ImplicitCastifyConditionExpr(scope, diag, [&]{ return stmt->getCond(); }, [&](auto cond){ stmt->setCond(cond); });
+    if (diag->hasError()) {
+        return;
+    }
 }
 
 void TypeResolver::visit(const std::shared_ptr<ForStmt>& stmt, Invoke&& traverse)
 {
     traverse();
+
+    const auto scope = getCurrentScope();
+
+    ImplicitCastifyConditionExpr(scope, diag, [&]{ return stmt->getCond(); }, [&](auto cond){ stmt->setCond(cond); });
+    if (diag->hasError()) {
+        return;
+    }
 }
 
 void TypeResolver::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse)
@@ -497,7 +549,7 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
         }
 
         assert(rhsType == castType);
-        auto typeCastExpr = ImplicitStaticTypeCastExpr::make(lhs->getLocation(), lhs);
+        auto typeCastExpr = ImplicitStaticCastExpr::make(lhs->getLocation(), lhs);
         typeCastExpr->setType(BuiltinType::make(castType));
         expr->setLHS(typeCastExpr);
         lhs = typeCastExpr;
@@ -505,7 +557,7 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
     else {
         assert(rhsType != castType);
         assert(lhsType == castType);
-        auto typeCastExpr = ImplicitStaticTypeCastExpr::make(rhs->getLocation(), rhs);
+        auto typeCastExpr = ImplicitStaticCastExpr::make(rhs->getLocation(), rhs);
         typeCastExpr->setType(BuiltinType::make(castType));
         expr->setRHS(typeCastExpr);
         rhs = typeCastExpr;
@@ -545,7 +597,9 @@ void TypeResolver::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& tr
             return;
         }
         break;
-    case UnaryOperatorKind::LogicalNot:
+    case UnaryOperatorKind::LogicalNot: {
+        ImplicitCastifyConditionExpr(scope, diag, [&]{ return expr->getSubExpr(); }, [&](auto cond){ expr->setSubExpr(cond); });
+
         if (isBoolean(t)) {
             assert(!expr->getType());
             expr->setType(t);
@@ -554,6 +608,7 @@ void TypeResolver::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& tr
         expr->setType(BuiltinType::make(BuiltinTypeKind::Bool));
         return;
         break;
+    }
     }
     assert(!expr->getType());
     expr->setType(subExpr->getType());
