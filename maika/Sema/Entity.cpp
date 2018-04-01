@@ -18,7 +18,7 @@ std::string Entity::getName() const
 
 std::shared_ptr<NamedDecl> Entity::getDecl() const
 {
-    assert(kind == EntityKind::Variable);
+    assert((kind == EntityKind::Variable) || (kind == EntityKind::Constant));
     return decl.lock();
 }
 

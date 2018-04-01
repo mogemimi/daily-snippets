@@ -150,7 +150,7 @@ void ASTDumper::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& trav
 {
     std::vector<std::string> options;
 
-    auto op = ASTHelper::toString(expr->getKind());
+    auto op = BinaryOperator::toString(expr->getKind());
     options.push_back(op);
     if (auto type = expr->getType()) {
         options.push_back(type->dump());
@@ -162,7 +162,7 @@ void ASTDumper::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& trave
 {
     std::vector<std::string> options;
 
-    auto op = ASTHelper::toString(expr->getKind());
+    auto op = UnaryOperator::toString(expr->getKind());
     options.push_back(op);
     if (auto type = expr->getType()) {
         options.push_back(type->dump());

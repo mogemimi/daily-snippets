@@ -131,6 +131,88 @@ getParameterTypes(const std::vector<std::shared_ptr<ParmVarDecl>>& parameters)
     return parameterTypes;
 }
 
+bool hasConstantReassignedError(
+    const std::shared_ptr<Expr>& lhs, const std::shared_ptr<DiagnosticHandler>& diag)
+{
+    assert(lhs);
+    assert(diag);
+    auto declRef = std::dynamic_pointer_cast<DeclRefExpr>(lhs);
+    if (!declRef) {
+        return false;
+    }
+    auto namedDecl = declRef->getNamedDecl();
+    if (!namedDecl) {
+        return false;
+    }
+    auto entity = namedDecl->getEntity();
+    if (!entity) {
+        return false;
+    }
+    if (entity->getKind() == EntityKind::Constant) {
+        diag->error(
+            lhs->getLocation(),
+            "Cannot assign to '" + namedDecl->getName() + "' because it is constant.");
+        return true;
+    }
+    if (entity->getKind() != EntityKind::Variable) {
+        diag->error(lhs->getLocation(), "Cannot assign to '" + namedDecl->getName() + "'.");
+        return true;
+    }
+    return false;
+}
+
+constexpr int anyBit = 0b00001;
+constexpr int intBit = 0b00010;
+constexpr int doubleBit = 0b00100;
+constexpr int boolBit = 0b01000;
+constexpr int stringBit = 0b10000;
+
+int toBinaryOpTypeCastBits(BuiltinTypeKind type)
+{
+    switch (type) {
+    case BuiltinTypeKind::Any: return anyBit;
+    case BuiltinTypeKind::Int: return intBit | doubleBit;
+    case BuiltinTypeKind::Double: return doubleBit;
+    case BuiltinTypeKind::Bool: return intBit | doubleBit | boolBit;
+    case BuiltinTypeKind::String: return stringBit;
+    case BuiltinTypeKind::Void: return 0b0;
+    }
+    return anyBit;
+}
+
+enum class BinaryOpTypeCastResult {
+    Resolved,
+    ResolveOnRuntime,
+    TypeMismatch,
+};
+
+std::tuple<BuiltinTypeKind, BinaryOpTypeCastResult>
+inferBinaryOpTypeCast(BuiltinTypeKind a, BuiltinTypeKind b)
+{
+    const auto lhsBits = toBinaryOpTypeCastBits(a);
+    const auto rhsBits = toBinaryOpTypeCastBits(b);
+
+    if (((lhsBits | rhsBits) & anyBit) != 0) {
+        return std::make_tuple(BuiltinTypeKind::Any, BinaryOpTypeCastResult::ResolveOnRuntime);
+    }
+
+    const auto castBits = lhsBits & rhsBits;
+    if ((castBits & intBit) != 0) {
+        return std::make_tuple(BuiltinTypeKind::Int, BinaryOpTypeCastResult::Resolved);
+    }
+    if ((castBits & doubleBit) != 0) {
+        return std::make_tuple(BuiltinTypeKind::Double, BinaryOpTypeCastResult::Resolved);
+    }
+    if ((castBits & boolBit) != 0) {
+        return std::make_tuple(BuiltinTypeKind::Bool, BinaryOpTypeCastResult::Resolved);
+    }
+    if ((castBits & stringBit) != 0) {
+        return std::make_tuple(BuiltinTypeKind::String, BinaryOpTypeCastResult::Resolved);
+    }
+
+    return std::make_tuple(BuiltinTypeKind::Any, BinaryOpTypeCastResult::TypeMismatch);
+}
+
 } // end of anonymous namespace
 
 TypeResolver::TypeResolver(const std::shared_ptr<DiagnosticHandler>& diagIn)
@@ -277,37 +359,111 @@ void TypeResolver::visit(const std::shared_ptr<StringLiteral>& expr)
 
 void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
 {
+    if (expr->isAssignmentOp()) {
+        const auto lhs = expr->getLHS();
+        assert(lhs);
+        if (hasConstantReassignedError(lhs, diag)) {
+            return;
+        }
+
+        if (!lhs->isLvalue()) {
+            error(lhs->getLocation(), "The left-hand side of an assignment must be a variable.");
+            return;
+        }
+    }
+
     traverse();
 
-    const auto logicalOp = [&]() -> bool {
-        switch (expr->getKind()) {
-        case BinaryOperatorKind::Equal: return true;
-        case BinaryOperatorKind::NotEqual: return true;
-        case BinaryOperatorKind::LogicalAnd: return true;
-        case BinaryOperatorKind::LogicalOr: return true;
-        case BinaryOperatorKind::GreaterThan: return true;
-        case BinaryOperatorKind::GreaterThanOrEqual: return true;
-        case BinaryOperatorKind::LessThan: return true;
-        case BinaryOperatorKind::LessThanOrEqual: return true;
-        default: break;
-        }
-        return false;
-    }();
-
-    if (logicalOp) {
+    if (expr->isEqualityOp() || expr->isComparisonOp() || expr->isLogicalOp()) {
         assert(!expr->getType());
         expr->setType(BuiltinType::make(BuiltinTypeKind::Bool));
         return;
     }
 
-    const auto lhs = expr->getLHS();
-    const auto rhs = expr->getRHS();
+    auto lhs = expr->getLHS();
+    auto rhs = expr->getRHS();
     assert(lhs);
     assert(rhs);
     assert(lhs->getType());
     assert(rhs->getType());
 
-    // TODO: Not implemented
+    const auto [lhsType, lhsTypeEnabled] = TypeHelper::toBuiltinType(lhs->getType());
+    const auto [rhsType, rhsTypeEnabled] = TypeHelper::toBuiltinType(rhs->getType());
+
+    if (lhsType == BuiltinTypeKind::Void) {
+        error(lhs->getLocation(), "lhs is 'void' type.");
+        return;
+    }
+    if (rhsType == BuiltinTypeKind::Void) {
+        error(rhs->getLocation(), "rhs is 'void' type.");
+        return;
+    }
+
+    if (!lhsTypeEnabled || !rhsTypeEnabled) {
+        // NOTE: resolving types on runtime, so this process is skipped
+        assert(!expr->getType());
+        expr->setType(BuiltinType::make(BuiltinTypeKind::Any));
+        return;
+    }
+
+    if (lhsType == rhsType) {
+        // NOTE: The operator doesn't need to implicitly cast types of operands.
+        assert(!expr->getType());
+        expr->setType(lhs->getType());
+        return;
+    }
+
+    const auto [castType, castResult] = inferBinaryOpTypeCast(lhsType, rhsType);
+    assert(castType != BuiltinTypeKind::Void);
+
+    if (castResult == BinaryOpTypeCastResult::TypeMismatch) {
+        if (expr->isAssignmentOp()) {
+            assert(lhs->getType());
+            assert(rhs->getType());
+            error(
+                expr->getLocation(),
+                "Type '" + rhs->getType()->dump() + "' is not assignable to '" +
+                    lhs->getType()->dump() + "'.");
+            return;
+        }
+
+        error(expr->getLocation(), "Type mismatch");
+        return;
+    }
+
+    if (castResult == BinaryOpTypeCastResult::ResolveOnRuntime) {
+        // NOTE: resolving types on runtime, so this process is skipped
+        assert(!expr->getType());
+        expr->setType(BuiltinType::make(BuiltinTypeKind::Any));
+        return;
+    }
+
+    if (lhsType != castType) {
+        if (expr->isAssignmentOp()) {
+            assert(lhs->getType());
+            assert(rhs->getType());
+            error(
+                expr->getLocation(),
+                "Type '" + rhs->getType()->dump() + "' is not assignable to '" +
+                    lhs->getType()->dump() + "'.");
+            return;
+        }
+
+        assert(rhsType == castType);
+        auto typeCastExpr = ImplicitStaticTypeCastExpr::make(lhs->getLocation(), lhs);
+        typeCastExpr->setType(BuiltinType::make(castType));
+        expr->setLHS(typeCastExpr);
+        lhs = typeCastExpr;
+    }
+    else {
+        assert(rhsType != castType);
+        assert(lhsType == castType);
+        auto typeCastExpr = ImplicitStaticTypeCastExpr::make(rhs->getLocation(), rhs);
+        typeCastExpr->setType(BuiltinType::make(castType));
+        expr->setRHS(typeCastExpr);
+        rhs = typeCastExpr;
+    }
+
     assert(!expr->getType());
     expr->setType(lhs->getType());
 }
@@ -487,7 +643,8 @@ void TypeResolver::visit(const std::shared_ptr<NamedDecl>& decl)
 
     auto entity = decl->getEntity();
     assert(entity);
-    assert(entity->getKind() == EntityKind::Variable);
+    assert(
+        (entity->getKind() == EntityKind::Variable) || (entity->getKind() == EntityKind::Constant));
     assert(entity->getDecl());
     assert(entity->getDecl()->getType());
     if (decl == entity->getDecl()) {

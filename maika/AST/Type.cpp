@@ -99,15 +99,7 @@ std::shared_ptr<TypeVariable> TypeVariable::make()
 
 std::string BuiltinType::dump() const
 {
-    switch (kind) {
-    case BuiltinTypeKind::Bool: return "bool";
-    case BuiltinTypeKind::Int: return "int";
-    case BuiltinTypeKind::Double: return "double";
-    case BuiltinTypeKind::String: return "string";
-    case BuiltinTypeKind::Void: return "void";
-    case BuiltinTypeKind::Any: return "any";
-    }
-    return "builtin";
+    return toString(kind);
 }
 
 TypeKind BuiltinType::getKind() const
@@ -120,6 +112,19 @@ std::shared_ptr<BuiltinType> BuiltinType::make(BuiltinTypeKind kind)
     auto type = std::make_shared<BuiltinType>();
     type->kind = kind;
     return type;
+}
+
+std::string BuiltinType::toString(BuiltinTypeKind kind)
+{
+    switch (kind) {
+    case BuiltinTypeKind::Bool: return "bool";
+    case BuiltinTypeKind::Int: return "int";
+    case BuiltinTypeKind::Double: return "double";
+    case BuiltinTypeKind::String: return "string";
+    case BuiltinTypeKind::Void: return "void";
+    case BuiltinTypeKind::Any: return "any";
+    }
+    return "<unknown-builtin-type>";
 }
 
 std::tuple<BuiltinTypeKind, bool> TypeHelper::toBuiltinType(const std::shared_ptr<Type>& type)

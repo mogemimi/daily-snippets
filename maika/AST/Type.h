@@ -91,6 +91,8 @@ public:
     TypeKind getKind() const override;
 
     static std::shared_ptr<BuiltinType> make(BuiltinTypeKind kind);
+
+    static std::string toString(BuiltinTypeKind kind);
 };
 
 struct TypeHelper {

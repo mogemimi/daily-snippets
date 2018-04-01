@@ -170,7 +170,7 @@ void Formatter::visit(const std::shared_ptr<StringLiteral>& expr)
 
 void Formatter::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
 {
-    auto op = ASTHelper::toString(expr->getKind());
+    auto op = BinaryOperator::toString(expr->getKind());
 
     if (auto lhs = expr->getLHS()) {
         lhs->traverse(*this);
@@ -189,7 +189,7 @@ void Formatter::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& trave
 {
     std::vector<std::string> options;
 
-    auto op = ASTHelper::toString(expr->getKind());
+    auto op = UnaryOperator::toString(expr->getKind());
     options.push_back(op);
     if (auto type = expr->getType()) {
         options.push_back(type->dump());

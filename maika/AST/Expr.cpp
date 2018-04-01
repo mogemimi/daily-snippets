@@ -79,6 +79,18 @@ void CallExpr::traverse(ASTVisitor& visitor)
     });
 }
 
+bool CallExpr::isLvalue() const
+{
+    // TODO: Support the following case
+    // ```
+    // function f(x) : &int { return &x; }
+    // let a = 0;
+    // *f(a) = 42;
+    // print(a); // 42
+    // ```
+    return false;
+}
+
 std::shared_ptr<CallExpr> CallExpr::make(
     const Location& loc,
     const std::shared_ptr<Expr>& fn,
@@ -151,6 +163,53 @@ void BinaryOperator::traverse(ASTVisitor& visitor)
     });
 }
 
+bool BinaryOperator::isEqualityOp(BinaryOperatorKind kind)
+{
+    return (kind == BinaryOperatorKind::Equal) || (kind == BinaryOperatorKind::NotEqual);
+}
+
+bool BinaryOperator::isEqualityOp() const
+{
+    return isEqualityOp(kind);
+}
+
+bool BinaryOperator::isComparisonOp(BinaryOperatorKind kind)
+{
+    switch (kind) {
+    case BinaryOperatorKind::GreaterThan: return true;
+    case BinaryOperatorKind::GreaterThanOrEqual: return true;
+    case BinaryOperatorKind::LessThan: return true;
+    case BinaryOperatorKind::LessThanOrEqual: return true;
+    default: break;
+    }
+    return false;
+}
+
+bool BinaryOperator::isComparisonOp() const
+{
+    return isComparisonOp(kind);
+}
+
+bool BinaryOperator::isLogicalOp(BinaryOperatorKind kind)
+{
+    return (kind == BinaryOperatorKind::LogicalAnd) || (kind == BinaryOperatorKind::LogicalOr);
+}
+
+bool BinaryOperator::isLogicalOp() const
+{
+    return isLogicalOp(kind);
+}
+
+bool BinaryOperator::isAssignmentOp(BinaryOperatorKind kind)
+{
+    return kind == BinaryOperatorKind::Assign;
+}
+
+bool BinaryOperator::isAssignmentOp() const
+{
+    return isAssignmentOp(kind);
+}
+
 std::shared_ptr<BinaryOperator> BinaryOperator::make(
     const Location& loc,
     BinaryOperatorKind k,
@@ -163,6 +222,27 @@ std::shared_ptr<BinaryOperator> BinaryOperator::make(
     expr->lhs = l;
     expr->rhs = r;
     return expr;
+}
+
+std::string BinaryOperator::toString(BinaryOperatorKind kind)
+{
+    switch (kind) {
+    case BinaryOperatorKind::Assign: return "=";
+    case BinaryOperatorKind::Add: return "+";
+    case BinaryOperatorKind::Subtract: return "-";
+    case BinaryOperatorKind::Divide: return "/";
+    case BinaryOperatorKind::Multiply: return "*";
+    case BinaryOperatorKind::Mod: return "%";
+    case BinaryOperatorKind::Equal: return "==";
+    case BinaryOperatorKind::NotEqual: return "!=";
+    case BinaryOperatorKind::LogicalAnd: return "&&";
+    case BinaryOperatorKind::LogicalOr: return "||";
+    case BinaryOperatorKind::GreaterThan: return ">";
+    case BinaryOperatorKind::GreaterThanOrEqual: return ">=";
+    case BinaryOperatorKind::LessThan: return "<";
+    case BinaryOperatorKind::LessThanOrEqual: return "<=";
+    }
+    return "<unknown>";
 }
 
 void UnaryOperator::traverse(ASTVisitor& visitor)
@@ -183,10 +263,34 @@ UnaryOperator::make(const Location& loc, UnaryOperatorKind k, const std::shared_
     return expr;
 }
 
+std::string UnaryOperator::toString(UnaryOperatorKind kind)
+{
+    switch (kind) {
+    case UnaryOperatorKind::LogicalNot: return "!";
+    case UnaryOperatorKind::Plus: return "+";
+    case UnaryOperatorKind::Minus: return "-";
+    case UnaryOperatorKind::PreDec: return "prefix --";
+    case UnaryOperatorKind::PreInc: return "prefix ++";
+    case UnaryOperatorKind::PostDec: return "postfix --";
+    case UnaryOperatorKind::PostInc: return "postfix ++";
+    }
+    return "<unknown>";
+}
+
 void DeclRefExpr::traverse(ASTVisitor& visitor)
 {
     assert(decl);
     visitor.visit(shared_from_this(), [&] { decl->traverse(visitor); });
+}
+
+bool DeclRefExpr::isLvalue() const
+{
+    // if (decl) {
+    //     if (auto entity = decl->getEntity()) {
+    //         return entity->getKind() == EntityKind::Variable;
+    //     }
+    // }
+    return true;
 }
 
 std::shared_ptr<DeclRefExpr>
@@ -241,39 +345,4 @@ ImplicitStaticTypeCastExpr::make(const Location& loc, const std::shared_ptr<Expr
     expr->location = loc;
     expr->subExpr = e;
     return expr;
-}
-
-std::string ASTHelper::toString(BinaryOperatorKind kind)
-{
-    switch (kind) {
-    case BinaryOperatorKind::Assign: return "=";
-    case BinaryOperatorKind::Add: return "+";
-    case BinaryOperatorKind::Subtract: return "-";
-    case BinaryOperatorKind::Divide: return "/";
-    case BinaryOperatorKind::Multiply: return "*";
-    case BinaryOperatorKind::Mod: return "%";
-    case BinaryOperatorKind::Equal: return "==";
-    case BinaryOperatorKind::NotEqual: return "!=";
-    case BinaryOperatorKind::LogicalAnd: return "&&";
-    case BinaryOperatorKind::LogicalOr: return "||";
-    case BinaryOperatorKind::GreaterThan: return ">";
-    case BinaryOperatorKind::GreaterThanOrEqual: return ">=";
-    case BinaryOperatorKind::LessThan: return "<";
-    case BinaryOperatorKind::LessThanOrEqual: return "<=";
-    }
-    return "<unknown>";
-}
-
-std::string ASTHelper::toString(UnaryOperatorKind kind)
-{
-    switch (kind) {
-    case UnaryOperatorKind::LogicalNot: return "!";
-    case UnaryOperatorKind::Plus: return "+";
-    case UnaryOperatorKind::Minus: return "-";
-    case UnaryOperatorKind::PreDec: return "prefix --";
-    case UnaryOperatorKind::PreInc: return "prefix ++";
-    case UnaryOperatorKind::PostDec: return "postfix --";
-    case UnaryOperatorKind::PostInc: return "postfix ++";
-    }
-    return "<unknown>";
 }

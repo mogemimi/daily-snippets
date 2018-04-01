@@ -27,7 +27,7 @@ void BytecodeGenerator::visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&
 void BytecodeGenerator::visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse)
 {
     traverse();
-    printf("[%s]\n", "DeclStmt");
+    // printf("[%s]\n", "DeclStmt");
 }
 
 void BytecodeGenerator::visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse)
@@ -174,7 +174,7 @@ void BytecodeGenerator::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke
 void BytecodeGenerator::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse)
 {
     traverse();
-    printf("%s %s [%s]\n", "load", expr->getNamedDecl()->getName().c_str(), "DeclRefExpr");
+    // printf("%s %s [%s]\n", "load", expr->getNamedDecl()->getName().c_str(), "DeclRefExpr");
 }
 
 void BytecodeGenerator::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse)
@@ -250,7 +250,8 @@ void BytecodeGenerator::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&
 void BytecodeGenerator::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse)
 {
     traverse();
-    printf("[%s]\n", "VariableDecl");
+
+    // printf("[%s]\n", "VariableDecl");
 }
 
 void BytecodeGenerator::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse)
