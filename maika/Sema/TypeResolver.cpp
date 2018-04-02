@@ -422,7 +422,7 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
             return;
         }
 
-        if (!lhs->isLvalue()) {
+        if (!lhs->isLValue()) {
             error(lhs->getLocation(), "The left-hand side of an assignment must be a variable.");
             return;
         }

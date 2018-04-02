@@ -79,7 +79,7 @@ void CallExpr::traverse(ASTVisitor& visitor)
     });
 }
 
-bool CallExpr::isLvalue() const
+bool CallExpr::isLValue() const
 {
     // TODO: Support the following case
     // ```
@@ -309,7 +309,7 @@ void DeclRefExpr::traverse(ASTVisitor& visitor)
     visitor.visit(shared_from_this(), [&] { decl->traverse(visitor); });
 }
 
-bool DeclRefExpr::isLvalue() const
+bool DeclRefExpr::isLValue() const
 {
     // if (decl) {
     //     if (auto entity = decl->getEntity()) {
