@@ -124,11 +124,21 @@ void BytecodeGenerator::visit(const std::shared_ptr<StringLiteral>& expr)
 
 void BytecodeGenerator::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
 {
+    if (expr->getKind() == BinaryOperatorKind::Assign) {
+        expr->getLHS()->traverse(*this);
+        expr->getRHS()->traverse(*this);
+
+        auto inst = std::make_shared<Instruction>();
+        inst->opcode = Opcode::Store;
+        addInstruction(inst);
+
+        return;
+    }
+
     traverse();
 
     const auto opcode = [&]() -> Opcode {
         switch (expr->getKind()) {
-        // case BinaryOperatorKind::Assign: return "=";
         case BinaryOperatorKind::Add: return Opcode::Add;
         case BinaryOperatorKind::Subtract: return Opcode::Sub;
         case BinaryOperatorKind::Divide: return Opcode::Div;

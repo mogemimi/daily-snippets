@@ -130,6 +130,15 @@ void SemaChecker::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& trave
 
 namespace {
 
+template <class ValueType, class LiteralType>
+std::shared_ptr<Expr> makeLiteral(const std::shared_ptr<Expr>& expr, const Value* value)
+{
+    auto v = static_cast<const ValueType*>(value)->getValue();
+    auto literal = LiteralType::make(expr->getLocation(), v);
+    literal->setType(expr->getType());
+    return literal;
+}
+
 std::shared_ptr<Expr>
 constantFolding(const std::shared_ptr<Expr>& expr, const std::shared_ptr<DiagnosticHandler>& diag)
 {
@@ -138,30 +147,17 @@ constantFolding(const std::shared_ptr<Expr>& expr, const std::shared_ptr<Diagnos
     if (evalResult != ASTEvaluateResult::StaticEvaluation) {
         return expr;
     }
-
     if (value->getKind() == ValueKind::Int64) {
-        auto v = static_cast<Int64Value*>(value.get())->getValue();
-        auto constant = IntegerLiteral::make(expr->getLocation(), v);
-        constant->setType(expr->getType());
-        return constant;
+        return makeLiteral<Int64Value, IntegerLiteral>(expr, value.get());
     }
     if (value->getKind() == ValueKind::Double) {
-        auto v = static_cast<DoubleValue*>(value.get())->getValue();
-        auto constant = DoubleLiteral::make(expr->getLocation(), v);
-        constant->setType(expr->getType());
-        return constant;
+        return makeLiteral<DoubleValue, DoubleLiteral>(expr, value.get());
     }
     if (value->getKind() == ValueKind::Bool) {
-        auto v = static_cast<BoolValue*>(value.get())->getValue();
-        auto constant = BoolLiteral::make(expr->getLocation(), v);
-        constant->setType(expr->getType());
-        return constant;
+        return makeLiteral<BoolValue, BoolLiteral>(expr, value.get());
     }
     if (value->getKind() == ValueKind::String) {
-        auto v = static_cast<StringValue*>(value.get())->getValue();
-        auto constant = StringLiteral::make(expr->getLocation(), v);
-        constant->setType(expr->getType());
-        return constant;
+        return makeLiteral<StringValue, StringLiteral>(expr, value.get());
     }
     return expr;
 }
