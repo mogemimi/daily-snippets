@@ -9,7 +9,7 @@ enum class Opcode : std::int8_t {
 
     DefineVariable,
     LoadVariable,
-    //StoreVariable,
+    StoreVariable,
 
     // JumpIf,
     JumpIfNot,

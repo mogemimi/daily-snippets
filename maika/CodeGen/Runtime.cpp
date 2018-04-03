@@ -598,6 +598,26 @@ bool Runtime::run(const BytecodeProgram& program)
             valueStack.push_back(iter->second);
             break;
         }
+        case Opcode::StoreVariable: {
+            const auto v = getConstantValue(inst->operand, program.localVariables);
+#if !defined(NDEBUG)
+            if (variables.find(v.name) == std::end(variables)) {
+                printf("%s\n", "runtime error: cannot find variable");
+                return false;
+            }
+#endif
+
+#if !defined(NDEBUG)
+            if (valueStack.empty()) {
+                printf("%s\n", "runtime error: empty stack");
+                return false;
+            }
+#endif
+            auto value = valueStack.back();
+            valueStack.pop_back();
+            variables[v.name] = passForAssignment(value);
+            break;
+        }
         case Opcode::Add: {
             if (!invokeAdd(valueStack)) {
                 return false;
@@ -776,6 +796,12 @@ void Runtime::dump(const BytecodeProgram& program)
             auto variableInfo =
                 getConstantValue<LocalVariable>(inst->getOperand(), program.localVariables);
             printf("%s %s\n", "load", variableInfo.name.c_str());
+            break;
+        }
+        case Opcode::StoreVariable: {
+            auto variableInfo =
+                getConstantValue<LocalVariable>(inst->getOperand(), program.localVariables);
+            printf("%s %s\n", "store", variableInfo.name.c_str());
             break;
         }
         case Opcode::Add: {

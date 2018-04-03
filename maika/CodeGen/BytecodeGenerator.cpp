@@ -12,6 +12,8 @@
 
 namespace {
 
+
+
 } // end of anonymous namespace
 
 void BytecodeGenerator::addInstruction(const std::shared_ptr<Instruction>& inst)
@@ -125,13 +127,32 @@ void BytecodeGenerator::visit(const std::shared_ptr<StringLiteral>& expr)
 void BytecodeGenerator::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
 {
     if (expr->getKind() == BinaryOperatorKind::Assign) {
-        expr->getLHS()->traverse(*this);
         expr->getRHS()->traverse(*this);
 
-        auto inst = std::make_shared<Instruction>();
-        inst->opcode = Opcode::Store;
-        addInstruction(inst);
+        // TODO: Not implemented for other expression
+        auto lvalueExpr = std::static_pointer_cast<DeclRefExpr>(expr->getLHS());
+        assert(lvalueExpr);
 
+        // NOTE: lookup variable
+        auto variableName = lvalueExpr->getNamedDecl()->getName();
+        auto iter = std::find_if(
+            std::begin(program.localVariables), std::end(program.localVariables), [&](const auto& a) {
+                return variableName == a.name;
+            });
+        assert(iter != std::end(program.localVariables));
+
+        {
+            auto inst = std::make_shared<Instruction>();
+            inst->opcode = Opcode::StoreVariable;
+            inst->operand = iter->variableIndex;
+            addInstruction(inst);
+        }
+        {
+            auto inst = std::make_shared<Instruction>();
+            inst->opcode = Opcode::LoadVariable;
+            inst->operand = iter->variableIndex;
+            addInstruction(inst);
+        }
         return;
     }
 
@@ -173,6 +194,7 @@ void BytecodeGenerator::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&&
 {
     traverse();
 
+    // NOTE: lookup variable
     auto variableName = expr->getNamedDecl()->getName();
     auto iter = std::find_if(
         std::begin(program.localVariables), std::end(program.localVariables), [&](const auto& a) {
