@@ -152,9 +152,11 @@ TEST_CASE("BytecodeGenerator", "[codegen]")
 //     return b;
 // }
 function test() {
-    let a = true;
-    if (!a) {
-    }
+    let a = (3 * 2) + 1;
+    let b = a + a;
+    a = 42;
+    let c = a + b;
+    return c;
 }
 )";
     auto diag = std::make_shared<DiagnosticHandler>();
@@ -176,6 +178,10 @@ function test() {
 
     TypeResolver typeResolver(diag);
     traverser.traverse(astContext, typeResolver);
+    REQUIRE(!diag->hasError());
+
+    Optimizer optimizer(diag);
+    traverser.traverse(astContext, optimizer);
     REQUIRE(!diag->hasError());
 
     ASTDumper dumper;

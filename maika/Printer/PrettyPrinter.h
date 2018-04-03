@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-class Formatter final : public ASTVisitor {
+class PrettyPrinter final : public ASTVisitor {
 private:
     struct DumpContext {
         std::string result;

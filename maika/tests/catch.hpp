@@ -11278,7 +11278,7 @@ namespace Catch {
 
 namespace {
 
-// Formatter impl for ConsoleReporter
+// PrettyPrinter impl for ConsoleReporter
 class ConsoleAssertionPrinter {
 public:
     ConsoleAssertionPrinter& operator= (ConsoleAssertionPrinter const&) = delete;

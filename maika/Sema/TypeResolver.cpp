@@ -394,6 +394,10 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
 {
     traverse();
 
+    if (diag->hasError()) {
+        return;
+    }
+
     if (expr->isEqualityOp() || expr->isComparisonOp() || expr->isLogicalOp()) {
         assert(!expr->getType());
         expr->setType(BuiltinType::make(BuiltinTypeKind::Bool));

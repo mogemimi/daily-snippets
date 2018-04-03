@@ -1,9 +1,9 @@
+#include "Sema/IdentifierResolver.h"
 #include "AST/ASTContext.h"
 #include "AST/ASTDumper.h"
 #include "Basic/Diagnostic.h"
 #include "Driver/Driver.h"
 #include "Sema/Entity.h"
-#include "Sema/IdentifierResolver.h"
 
 #include "catch.hpp"
 
@@ -29,7 +29,8 @@ TEST_CASE("IdentifierResolver can resolve identifier", "[identifier-resolve]")
     auto diag = std::make_shared<DiagnosticHandler>();
     diag->setStream(stream);
 
-    SECTION("redeclared in this block.") {
+    SECTION("redeclared in this block.")
+    {
         constexpr auto source = R"(function test() {
             let x;
             let x;

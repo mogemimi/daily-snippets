@@ -608,7 +608,7 @@ static const flex_int16_t yy_rule_linenum[57] =
        84,   85,   86,   87,   88,   89,   90,   91,   92,   93,
        94,   95,   96,   97,   98,   99,  100,  101,  102,  103,
       104,  106,  107,  108,  109,  110,  111,  112,  113,  114,
-      115,  117,  119,  128,  137,  138
+      115,  117,  127,  136,  145,  146
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -1289,11 +1289,19 @@ case 52:
 /* rule 52 can match eol */
 YY_RULE_SETUP
 #line 117 "Parser/MyLexer.l"
-return yy::MyParser::make_STRING_LITERAL(StringLiteral::make(toLoc(loc), yytext), loc);
+{
+    std::string s = yytext;
+
+    // NOTE: Removing double quotes from string.
+    assert(s.size() >= 2);
+    s = s.substr(1, s.size() - 2);
+
+    return yy::MyParser::make_STRING_LITERAL(StringLiteral::make(toLoc(loc), s), loc);
+}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 119 "Parser/MyLexer.l"
+#line 127 "Parser/MyLexer.l"
 {
     errno = 0;
     const auto n = strtol(yytext, nullptr, 10);
@@ -1305,7 +1313,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 128 "Parser/MyLexer.l"
+#line 136 "Parser/MyLexer.l"
 {
     errno = 0;
     const auto d = strtod(yytext, nullptr);
@@ -1317,25 +1325,25 @@ YY_RULE_SETUP
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 137 "Parser/MyLexer.l"
+#line 145 "Parser/MyLexer.l"
 return yy::MyParser::make_IDENTIFIER(NamedDecl::make(toLoc(loc), yytext), loc);
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 138 "Parser/MyLexer.l"
+#line 146 "Parser/MyLexer.l"
 driver.error(toLoc(loc), "invalid character");
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(CSTYLE_COMMENT):
-#line 139 "Parser/MyLexer.l"
+#line 147 "Parser/MyLexer.l"
 return yy::MyParser::make_END(loc);
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 141 "Parser/MyLexer.l"
+#line 149 "Parser/MyLexer.l"
 ECHO;
 	YY_BREAK
-#line 1338 "Parser/MyLexer.cpp"
+#line 1346 "Parser/MyLexer.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2442,7 +2450,7 @@ void yyfree (void * ptr )
 
 /* %ok-for-header */
 
-#line 141 "Parser/MyLexer.l"
+#line 149 "Parser/MyLexer.l"
 
 
 void MyDriver::scanBegin()

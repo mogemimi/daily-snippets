@@ -113,7 +113,9 @@ public:
     void traverse(ASTVisitor& visitor) override;
 
     std::shared_ptr<NamedDecl> getNamedDecl() const { return namedDecl; }
+
     std::shared_ptr<Expr> getExpr() const { return expr; }
+    void setExpr(const std::shared_ptr<Expr>& e) { expr = e; }
 
     static std::shared_ptr<VariableDecl>
     make(const Location& loc, const std::shared_ptr<NamedDecl>& n);
@@ -133,7 +135,9 @@ public:
     void traverse(ASTVisitor& visitor) override;
 
     std::shared_ptr<NamedDecl> getNamedDecl() const { return namedDecl; }
+
     std::shared_ptr<Expr> getExpr() const { return expr; }
+    void setExpr(const std::shared_ptr<Expr>& e) { expr = e; }
 
     static std::shared_ptr<ConstDecl>
     make(const Location& loc, const std::shared_ptr<NamedDecl>& n);

@@ -113,7 +113,15 @@ crlf        (\r\n|\n)
 "true"      return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(toLoc(loc), true), loc);
 "false"     return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(toLoc(loc), false), loc);
 
-\"(\\.|[^\\"])*\" return yy::MyParser::make_STRING_LITERAL(StringLiteral::make(toLoc(loc), yytext), loc);
+\"(\\.|[^\\"])*\" {
+    std::string s = yytext;
+
+    // NOTE: Removing double quotes from string.
+    assert(s.size() >= 2);
+    s = s.substr(1, s.size() - 2);
+
+    return yy::MyParser::make_STRING_LITERAL(StringLiteral::make(toLoc(loc), s), loc);
+}
 
 {integer} {
     errno = 0;

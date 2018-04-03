@@ -164,9 +164,10 @@ void BytecodeGenerator::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&&
     traverse();
 
     auto variableName = expr->getNamedDecl()->getName();
-    auto iter = std::find_if(std::begin(program.localVariables), std::end(program.localVariables), [&](const auto& a){
-        return variableName == a.name;
-    });
+    auto iter = std::find_if(
+        std::begin(program.localVariables), std::end(program.localVariables), [&](const auto& a) {
+            return variableName == a.name;
+        });
     assert(iter != std::end(program.localVariables));
 
     auto inst = std::make_shared<Instruction>();

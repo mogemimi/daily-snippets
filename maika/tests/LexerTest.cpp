@@ -2,7 +2,7 @@
 #include "AST/ASTDumper.h"
 #include "Basic/Diagnostic.h"
 #include "Driver/Driver.h"
-#include "Printer/Formatter.h"
+#include "Printer/PrettyPrinter.h"
 #include "Sema/Entity.h"
 #include <iostream>
 #include <sstream>
@@ -78,8 +78,8 @@ function min(a : int, b : int) : int {
     REQUIRE(!diag->hasError());
     // printf("%s\n", dumper.getResult().c_str());
 
-    Formatter formatter;
-    traverser.traverse(astContext, formatter);
+    PrettyPrinter prettyPrinter;
+    traverser.traverse(astContext, prettyPrinter);
     REQUIRE(!diag->hasError());
-    // printf("%s\n", formatter.getResult().c_str());
+    // printf("%s\n", prettyPrinter.getResult().c_str());
 }

@@ -25,8 +25,7 @@ public:
     void setValueKind(ExprValueKind k) { valueKind = k; }
 
     // TODO: for constant folding
-    // isEvaluatable();
-    // Evaluate();
+    // bool isEvaluatable();
 
     std::shared_ptr<Type> getType() const;
     void setType(const std::shared_ptr<Type>& t);

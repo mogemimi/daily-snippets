@@ -8,6 +8,14 @@ class Position;
 class Comment;
 enum class CommentKind;
 
+// NOTE: ADT (Abstract data types)
+class Value;
+class BoolValue;
+class DoubleValue;
+class Int64Value;
+class StringValue;
+class NullValue;
+
 // NOTE: AST
 class ASTContext;
 class ASTVisitor;
@@ -35,6 +43,8 @@ class DeclRefExpr;
 class MemberExpr;
 class ImplicitStaticCastExpr;
 
+enum class BinaryOperatorKind;
+
 // NOTE: AST::Decl
 class Decl;
 class FunctionDecl;
@@ -57,4 +67,4 @@ class Scope;
 class DiagnosticHandler;
 
 // NOTE: Tools
-class Formatter;
+class PrettyPrinter;

@@ -1,4 +1,4 @@
-#include "Printer/Formatter.h"
+#include "Printer/PrettyPrinter.h"
 #include "AST/ASTContext.h"
 #include "AST/Decl.h"
 #include "AST/Expr.h"
@@ -50,22 +50,22 @@ void dump(
 
 } // end of anonymous namespace
 
-std::string Formatter::getResult() const
+std::string PrettyPrinter::getResult() const
 {
     return dumpContext.result;
 }
 
-void Formatter::visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& traverse)
 {
     traverse();
 }
 
-void Formatter::visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<DeclStmt>& stmt, Invoke&& traverse)
 {
     traverse();
 }
 
-void Formatter::visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse)
 {
     const auto indent = makeIndent(dumpContext.level);
     dumpContext.result += indent + "return";
@@ -80,7 +80,7 @@ void Formatter::visit(const std::shared_ptr<ReturnStmt>& stmt, Invoke&& traverse
     dumpContext.result += ";\n";
 }
 
-void Formatter::visit(const std::shared_ptr<IfStmt>& stmt, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<IfStmt>& stmt, Invoke&& traverse)
 {
     const auto indent = makeIndent(dumpContext.level);
     dumpContext.result += indent + "if (";
@@ -112,17 +112,17 @@ void Formatter::visit(const std::shared_ptr<IfStmt>& stmt, Invoke&& traverse)
     assert(dumpContext.level >= 0);
 }
 
-void Formatter::visit(const std::shared_ptr<WhileStmt>& stmt, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<WhileStmt>& stmt, Invoke&& traverse)
 {
     dump(&dumpContext, "WhileStmt", {}, std::move(traverse));
 }
 
-void Formatter::visit(const std::shared_ptr<ForStmt>& stmt, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<ForStmt>& stmt, Invoke&& traverse)
 {
     dump(&dumpContext, "ForStmt", {}, std::move(traverse));
 }
 
-void Formatter::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;
     if (auto type = expr->getType()) {
@@ -131,7 +131,7 @@ void Formatter::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse)
     dump(&dumpContext, "CallExpr", options, std::move(traverse));
 }
 
-void Formatter::visit(const std::shared_ptr<FunctionExpr>& expr, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<FunctionExpr>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;
     if (auto namedDecl = expr->getNamedDecl()) {
@@ -143,22 +143,22 @@ void Formatter::visit(const std::shared_ptr<FunctionExpr>& expr, Invoke&& traver
     dump(&dumpContext, "FunctionExpr", options, std::move(traverse));
 }
 
-void Formatter::visit(const std::shared_ptr<IntegerLiteral>& expr)
+void PrettyPrinter::visit(const std::shared_ptr<IntegerLiteral>& expr)
 {
     dumpContext.result += std::to_string(expr->getValue());
 }
 
-void Formatter::visit(const std::shared_ptr<DoubleLiteral>& expr)
+void PrettyPrinter::visit(const std::shared_ptr<DoubleLiteral>& expr)
 {
     dumpContext.result += std::to_string(expr->getValue());
 }
 
-void Formatter::visit(const std::shared_ptr<BoolLiteral>& expr)
+void PrettyPrinter::visit(const std::shared_ptr<BoolLiteral>& expr)
 {
     dumpContext.result += (expr->getValue() ? "true" : "false");
 }
 
-void Formatter::visit(const std::shared_ptr<StringLiteral>& expr)
+void PrettyPrinter::visit(const std::shared_ptr<StringLiteral>& expr)
 {
     std::vector<std::string> options;
     options.push_back(expr->getValue());
@@ -168,7 +168,7 @@ void Formatter::visit(const std::shared_ptr<StringLiteral>& expr)
     dump(&dumpContext, "StringLiteral", options);
 }
 
-void Formatter::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
 {
     auto op = BinaryOperator::toString(expr->getKind());
 
@@ -185,7 +185,7 @@ void Formatter::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& trav
     }
 }
 
-void Formatter::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;
 
@@ -197,7 +197,7 @@ void Formatter::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& trave
     dump(&dumpContext, "UnaryOperator", options, std::move(traverse));
 }
 
-void Formatter::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse)
 {
     if (auto namedDecl = expr->getNamedDecl()) {
         dumpContext.result += namedDecl->getName();
@@ -205,7 +205,7 @@ void Formatter::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& travers
     traverse();
 }
 
-void Formatter::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;
     if (auto namedDecl = expr->getMemberDecl()) {
@@ -217,13 +217,13 @@ void Formatter::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse
     dump(&dumpContext, "MemberExpr", options, std::move(traverse));
 }
 
-void Formatter::visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invoke&& traverse)
 {
     dumpContext.level = 0;
     traverse();
 }
 
-void Formatter::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse)
 {
     const auto indent = makeIndent(dumpContext.level);
     dumpContext.result += indent + "function ";
@@ -275,7 +275,7 @@ void Formatter::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traver
     dumpContext.result += "\n";
 }
 
-void Formatter::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse)
 {
     const auto indent = makeIndent(dumpContext.level);
     dumpContext.result += indent + "let ";
@@ -296,7 +296,7 @@ void Formatter::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traver
     dumpContext.result += ";\n";
 }
 
-void Formatter::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse)
+void PrettyPrinter::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse)
 {
     const auto indent = makeIndent(dumpContext.level);
     dumpContext.result += indent + "const ";

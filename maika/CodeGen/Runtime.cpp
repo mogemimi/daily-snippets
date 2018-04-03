@@ -502,42 +502,41 @@ bool invokeCompareEqual(std::vector<std::shared_ptr<Value>>& valueStack)
     return true;
 }
 
-    std::shared_ptr<Value> passForAssignment(const std::shared_ptr<Value>& v)
-    {
-        switch (v->getKind()) {
-        case ValueKind::Null: {
-            // pass by value
-            return std::make_shared<NullValue>();
-            break;
-        }
-        case ValueKind::Int64: {
-            // pass by value
-            auto underlyingValue = std::static_pointer_cast<Int64Value>(v);
-            return std::make_shared<Int64Value>(underlyingValue->getValue());
-            break;
-        }
-        case ValueKind::Double: {
-            // pass by value
-            auto underlyingValue = std::static_pointer_cast<DoubleValue>(v);
-            return std::make_shared<DoubleValue>(underlyingValue->getValue());
+std::shared_ptr<Value> passForAssignment(const std::shared_ptr<Value>& v)
+{
+    switch (v->getKind()) {
+    case ValueKind::Null: {
+        // pass by value
+        return std::make_shared<NullValue>();
         break;
-        }
-        case ValueKind::Bool:{
-            // pass by value
-            auto underlyingValue = std::static_pointer_cast<BoolValue>(v);
-            return std::make_shared<BoolValue>(underlyingValue->getValue());
-        break;
-        }
-        break;
-        case ValueKind::String:{
-            // pass by value
-            auto underlyingValue = std::static_pointer_cast<StringValue>(v);
-            return std::make_shared<StringValue>(underlyingValue->getValue());
-        break;
-        }
-        }
-        return v;
     }
+    case ValueKind::Int64: {
+        // pass by value
+        auto underlyingValue = std::static_pointer_cast<Int64Value>(v);
+        return std::make_shared<Int64Value>(underlyingValue->getValue());
+        break;
+    }
+    case ValueKind::Double: {
+        // pass by value
+        auto underlyingValue = std::static_pointer_cast<DoubleValue>(v);
+        return std::make_shared<DoubleValue>(underlyingValue->getValue());
+        break;
+    }
+    case ValueKind::Bool: {
+        // pass by value
+        auto underlyingValue = std::static_pointer_cast<BoolValue>(v);
+        return std::make_shared<BoolValue>(underlyingValue->getValue());
+        break;
+    } break;
+    case ValueKind::String: {
+        // pass by value
+        auto underlyingValue = std::static_pointer_cast<StringValue>(v);
+        return std::make_shared<StringValue>(underlyingValue->getValue());
+        break;
+    }
+    }
+    return v;
+}
 
 } // end of anonymous namespace
 
@@ -768,12 +767,14 @@ void Runtime::dump(const BytecodeProgram& program)
             break;
         }
         case Opcode::DefineVariable: {
-            auto variableInfo = getConstantValue<LocalVariable>(inst->getOperand(), program.localVariables);
+            auto variableInfo =
+                getConstantValue<LocalVariable>(inst->getOperand(), program.localVariables);
             printf("%s %s\n", "var", variableInfo.name.c_str());
             break;
         }
         case Opcode::LoadVariable: {
-            auto variableInfo = getConstantValue<LocalVariable>(inst->getOperand(), program.localVariables);
+            auto variableInfo =
+                getConstantValue<LocalVariable>(inst->getOperand(), program.localVariables);
             printf("%s %s\n", "load", variableInfo.name.c_str());
             break;
         }

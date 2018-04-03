@@ -28,13 +28,15 @@ SOURCES = \
 	CodeGen/Runtime.cpp \
 	Parser/MyLexer.cpp \
 	Parser/MyParser.cpp \
-	Printer/Formatter.cpp \
+	Printer/PrettyPrinter.cpp \
+	Sema/ASTEvaluator.cpp \
 	Sema/Entity.cpp \
 	Sema/IdentifierResolver.cpp \
 	Sema/Scope.cpp \
 	Sema/SemaChecker.cpp \
 	Sema/TypeInferer.cpp \
 	Sema/TypeResolver.cpp \
+	Sema/Value.cpp \
 	tests/DumpTest.cpp \
 	tests/LexerTest.cpp \
 	tests/IdentifierResolverTest.cpp \
