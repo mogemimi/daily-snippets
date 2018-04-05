@@ -265,20 +265,8 @@ bool invokeDiv(std::vector<std::shared_ptr<Value>>& valueStack)
         break;
     }
     case ValueKind::Bool: {
-        // TODO: adding two bool values
-        printf("%s\n", "warning: undefined behavior when dividing two bool values.");
-
-        auto a = std::static_pointer_cast<BoolValue>(lhs);
-        assert(a);
-        auto b = std::static_pointer_cast<BoolValue>(rhs);
-        assert(b);
-        if (b->getValue() == 0) {
-            printf("%s\n", "runtime error: Division by zero");
-            return false;
-        }
-        auto v = a->getValue() / b->getValue();
-        auto resultValue = std::make_shared<BoolValue>(v);
-        valueStack.push_back(resultValue);
+		printf("%s\n", "runtime error: undefined behavior when dividing two bool values.");
+		return false;
         break;
     }
     case ValueKind::String: {
@@ -328,20 +316,8 @@ bool invokeMod(std::vector<std::shared_ptr<Value>>& valueStack)
         break;
     }
     case ValueKind::Bool: {
-        // TODO: adding two bool values
-        printf("%s\n", "warning: undefined behavior when dividing two bool values.");
-
-        auto a = std::static_pointer_cast<BoolValue>(lhs);
-        assert(a);
-        auto b = std::static_pointer_cast<BoolValue>(rhs);
-        assert(b);
-        if (b->getValue() == 0) {
-            printf("%s\n", "runtime error: Division by zero");
-            return false;
-        }
-        auto v = a->getValue() % b->getValue();
-        auto resultValue = std::make_shared<BoolValue>(v);
-        valueStack.push_back(resultValue);
+		printf("%s\n", "runtime error: undefined behavior when dividing two bool values.");
+		return false;
         break;
     }
     case ValueKind::String: {
