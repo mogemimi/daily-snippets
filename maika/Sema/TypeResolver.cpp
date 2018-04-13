@@ -146,6 +146,7 @@ int toBinaryOpTypeCastBits(BuiltinTypeKind type)
     case BuiltinTypeKind::Bool: return boolBit;
     case BuiltinTypeKind::String: return stringBit;
     case BuiltinTypeKind::Void: return 0b0;
+    case BuiltinTypeKind::Null: return anyBit;
     }
     return anyBit;
 }
@@ -216,6 +217,171 @@ void ImplicitCastifyConditionExpr(
     auto typeCastExpr = ImplicitStaticCastExpr::make(condExpr->getLocation(), condExpr);
     typeCastExpr->setType(BuiltinType::make(BuiltinTypeKind::Bool));
     setCond(typeCastExpr);
+}
+
+using TypeCapability = uint64_t;
+constexpr uint64_t hasBinaryOperatorAdd = 0b000000000000001;
+constexpr uint64_t hasBinaryOperatorSubtract = 0b000000000000010;
+constexpr uint64_t hasBinaryOperatorMultiply = 0b000000000000100;
+constexpr uint64_t hasBinaryOperatorDivide = 0b000000000001000;
+constexpr uint64_t hasBinaryOperatorMod = 0b000000000010000;
+constexpr uint64_t hasBinaryOperatorEqual = 0b000000000100000;
+constexpr uint64_t hasBinaryOperatorNotEqual = 0b000000001000000;
+constexpr uint64_t hasBinaryOperatorLogicalAnd = 0b000000010000000;
+constexpr uint64_t hasBinaryOperatorLogicalOr = 0b000000100000000;
+constexpr uint64_t hasBinaryOperatorGreaterThan = 0b000001000000000;
+constexpr uint64_t hasBinaryOperatorGreaterThanOrEqual = 0b000010000000000;
+constexpr uint64_t hasBinaryOperatorLessThan = 0b000100000000000;
+constexpr uint64_t hasBinaryOperatorLessThanOrEqual = 0b001000000000000;
+
+constexpr TypeCapability disableMask(TypeCapability c, uint64_t mask)
+{
+    return c & (~hasBinaryOperatorMod);
+}
+
+constexpr TypeCapability enableMask(TypeCapability c, uint64_t mask)
+{
+    return c | hasBinaryOperatorMod;
+}
+
+TypeCapability getTypeCapability(BuiltinTypeKind type)
+{
+    TypeCapability c = 0;
+    switch (type) {
+    case BuiltinTypeKind::Any:
+        c = enableMask(c, hasBinaryOperatorAdd);
+        c = enableMask(c, hasBinaryOperatorSubtract);
+        c = enableMask(c, hasBinaryOperatorMultiply);
+        c = enableMask(c, hasBinaryOperatorDivide);
+        c = enableMask(c, hasBinaryOperatorMod);
+        c = enableMask(c, hasBinaryOperatorEqual);
+        c = enableMask(c, hasBinaryOperatorNotEqual);
+        c = enableMask(c, hasBinaryOperatorLogicalAnd);
+        c = enableMask(c, hasBinaryOperatorLogicalOr);
+        c = enableMask(c, hasBinaryOperatorGreaterThan);
+        c = enableMask(c, hasBinaryOperatorGreaterThanOrEqual);
+        c = enableMask(c, hasBinaryOperatorLessThan);
+        c = enableMask(c, hasBinaryOperatorLessThanOrEqual);
+        break;
+    case BuiltinTypeKind::Bool:
+        c = disableMask(c, hasBinaryOperatorAdd);
+        c = disableMask(c, hasBinaryOperatorSubtract);
+        c = disableMask(c, hasBinaryOperatorMultiply);
+        c = disableMask(c, hasBinaryOperatorDivide);
+        c = disableMask(c, hasBinaryOperatorMod);
+        c = enableMask(c, hasBinaryOperatorEqual);
+        c = enableMask(c, hasBinaryOperatorNotEqual);
+        c = enableMask(c, hasBinaryOperatorLogicalAnd);
+        c = enableMask(c, hasBinaryOperatorLogicalOr);
+        c = disableMask(c, hasBinaryOperatorGreaterThan);
+        c = disableMask(c, hasBinaryOperatorGreaterThanOrEqual);
+        c = disableMask(c, hasBinaryOperatorLessThan);
+        c = disableMask(c, hasBinaryOperatorLessThanOrEqual);
+        break;
+    case BuiltinTypeKind::Double:
+        c = enableMask(c, hasBinaryOperatorAdd);
+        c = enableMask(c, hasBinaryOperatorSubtract);
+        c = enableMask(c, hasBinaryOperatorMultiply);
+        c = enableMask(c, hasBinaryOperatorDivide);
+        c = disableMask(c, hasBinaryOperatorMod);
+        c = enableMask(c, hasBinaryOperatorEqual);
+        c = enableMask(c, hasBinaryOperatorNotEqual);
+        c = enableMask(c, hasBinaryOperatorLogicalAnd);
+        c = enableMask(c, hasBinaryOperatorLogicalOr);
+        c = enableMask(c, hasBinaryOperatorGreaterThan);
+        c = enableMask(c, hasBinaryOperatorGreaterThanOrEqual);
+        c = enableMask(c, hasBinaryOperatorLessThan);
+        c = enableMask(c, hasBinaryOperatorLessThanOrEqual);
+        break;
+    case BuiltinTypeKind::Int:
+        c = enableMask(c, hasBinaryOperatorAdd);
+        c = enableMask(c, hasBinaryOperatorSubtract);
+        c = enableMask(c, hasBinaryOperatorMultiply);
+        c = enableMask(c, hasBinaryOperatorDivide);
+        c = enableMask(c, hasBinaryOperatorMod);
+        c = enableMask(c, hasBinaryOperatorEqual);
+        c = enableMask(c, hasBinaryOperatorNotEqual);
+        c = enableMask(c, hasBinaryOperatorLogicalAnd);
+        c = enableMask(c, hasBinaryOperatorLogicalOr);
+        c = enableMask(c, hasBinaryOperatorGreaterThan);
+        c = enableMask(c, hasBinaryOperatorGreaterThanOrEqual);
+        c = enableMask(c, hasBinaryOperatorLessThan);
+        c = enableMask(c, hasBinaryOperatorLessThanOrEqual);
+        break;
+    case BuiltinTypeKind::Null:
+        c = disableMask(c, hasBinaryOperatorAdd);
+        c = disableMask(c, hasBinaryOperatorSubtract);
+        c = disableMask(c, hasBinaryOperatorMultiply);
+        c = disableMask(c, hasBinaryOperatorDivide);
+        c = disableMask(c, hasBinaryOperatorMod);
+        c = disableMask(c, hasBinaryOperatorEqual);
+        c = disableMask(c, hasBinaryOperatorNotEqual);
+        c = disableMask(c, hasBinaryOperatorLogicalAnd);
+        c = disableMask(c, hasBinaryOperatorLogicalOr);
+        c = disableMask(c, hasBinaryOperatorGreaterThan);
+        c = disableMask(c, hasBinaryOperatorGreaterThanOrEqual);
+        c = disableMask(c, hasBinaryOperatorLessThan);
+        c = disableMask(c, hasBinaryOperatorLessThanOrEqual);
+        break;
+    case BuiltinTypeKind::String:
+        c = enableMask(c, hasBinaryOperatorAdd);
+        c = disableMask(c, hasBinaryOperatorSubtract);
+        c = disableMask(c, hasBinaryOperatorMultiply);
+        c = disableMask(c, hasBinaryOperatorDivide);
+        c = disableMask(c, hasBinaryOperatorMod);
+        c = enableMask(c, hasBinaryOperatorEqual);
+        c = enableMask(c, hasBinaryOperatorNotEqual);
+        c = disableMask(c, hasBinaryOperatorLogicalAnd);
+        c = disableMask(c, hasBinaryOperatorLogicalOr);
+        c = disableMask(c, hasBinaryOperatorGreaterThan);
+        c = disableMask(c, hasBinaryOperatorGreaterThanOrEqual);
+        c = disableMask(c, hasBinaryOperatorLessThan);
+        c = disableMask(c, hasBinaryOperatorLessThanOrEqual);
+        break;
+    case BuiltinTypeKind::Void:
+        c = disableMask(c, hasBinaryOperatorAdd);
+        c = disableMask(c, hasBinaryOperatorSubtract);
+        c = disableMask(c, hasBinaryOperatorMultiply);
+        c = disableMask(c, hasBinaryOperatorDivide);
+        c = disableMask(c, hasBinaryOperatorMod);
+        c = disableMask(c, hasBinaryOperatorEqual);
+        c = disableMask(c, hasBinaryOperatorNotEqual);
+        c = disableMask(c, hasBinaryOperatorLogicalAnd);
+        c = disableMask(c, hasBinaryOperatorLogicalOr);
+        c = disableMask(c, hasBinaryOperatorGreaterThan);
+        c = disableMask(c, hasBinaryOperatorGreaterThanOrEqual);
+        c = disableMask(c, hasBinaryOperatorLessThan);
+        c = disableMask(c, hasBinaryOperatorLessThanOrEqual);
+        break;
+    }
+    return c;
+}
+
+uint64_t binaryOperatorMask(BinaryOperatorKind op)
+{
+    switch (op) {
+    case BinaryOperatorKind::Add: return hasBinaryOperatorAdd;
+    case BinaryOperatorKind::Subtract: return hasBinaryOperatorSubtract;
+    case BinaryOperatorKind::Multiply: return hasBinaryOperatorMultiply;
+    case BinaryOperatorKind::Divide: return hasBinaryOperatorMultiply;
+    case BinaryOperatorKind::Mod: return hasBinaryOperatorMod;
+    case BinaryOperatorKind::Assign: return 0;
+    case BinaryOperatorKind::Equal: return hasBinaryOperatorEqual;
+    case BinaryOperatorKind::NotEqual: return hasBinaryOperatorNotEqual;
+    case BinaryOperatorKind::LogicalAnd: return hasBinaryOperatorLogicalAnd;
+    case BinaryOperatorKind::LogicalOr: return hasBinaryOperatorLogicalOr;
+    case BinaryOperatorKind::GreaterThan: return hasBinaryOperatorGreaterThan;
+    case BinaryOperatorKind::GreaterThanOrEqual: return hasBinaryOperatorGreaterThanOrEqual;
+    case BinaryOperatorKind::LessThan: return hasBinaryOperatorLessThan;
+    case BinaryOperatorKind::LessThanOrEqual: return hasBinaryOperatorLessThanOrEqual;
+    }
+    return 0;
+}
+
+bool isBinaryOperatorValid(BinaryOperatorKind op, BuiltinTypeKind type)
+{
+    const auto mask = binaryOperatorMask(op);
+    return (getTypeCapability(type) | mask) != 0;
 }
 
 } // end of anonymous namespace
@@ -392,8 +558,8 @@ void TypeResolver::visit(const std::shared_ptr<StringLiteral>& expr)
 
 void TypeResolver::visit(const std::shared_ptr<NullLiteral>& expr)
 {
-	assert(!expr->getType());
-	expr->setType(BuiltinType::make(BuiltinTypeKind::Null));
+    assert(!expr->getType());
+    expr->setType(BuiltinType::make(BuiltinTypeKind::Null));
 }
 
 void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
