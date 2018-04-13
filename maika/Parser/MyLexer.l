@@ -112,6 +112,7 @@ crlf        (\r\n|\n)
 "for"       return yy::MyParser::make_FOR(loc);
 "true"      return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(toLoc(loc), true), loc);
 "false"     return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(toLoc(loc), false), loc);
+"null"      return yy::MyParser::make_NULL(loc);
 
 \"(\\.|[^\\"])*\" {
     std::string s = yytext;

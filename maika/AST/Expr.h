@@ -87,6 +87,15 @@ public:
     static std::shared_ptr<StringLiteral> make(const Location& loc, const std::string& v);
 };
 
+class NullLiteral final
+    : public Expr
+    , public std::enable_shared_from_this<NullLiteral> {
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    static std::shared_ptr<NullLiteral> make(const Location& loc);
+};
+
 class CallExpr final
     : public Expr
     , public std::enable_shared_from_this<CallExpr> {

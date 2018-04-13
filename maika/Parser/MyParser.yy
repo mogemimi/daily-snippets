@@ -126,12 +126,14 @@ Location toLoc(const yy::location& y)
 %token ELSE                 "else"
 %token WHILE                "while"
 %token FOR                  "for"
+%token NULL                 "null"
 
 %token <std::shared_ptr<NamedDecl>>                 IDENTIFIER "identifier"
 %token <std::shared_ptr<IntegerLiteral>>            INTEGER_LITERAL "integer_literal"
 %token <std::shared_ptr<DoubleLiteral>>             DOUBLE_LITERAL "double_literal"
 %token <std::shared_ptr<BoolLiteral>>               BOOL_LITERAL "bool_literal"
 %token <std::shared_ptr<StringLiteral>>             STRING_LITERAL "string_literal"
+%type  <std::shared_ptr<NullLiteral>>               null_literal
 %type  <std::shared_ptr<Expr>>                      literal
 %type  <std::shared_ptr<Expr>>                      primary_expression
 %type  <std::shared_ptr<Expr>>                      expression
@@ -282,8 +284,13 @@ literal:
      
 primary_expression:
   literal                 { $$ = $1; }
+| null_literal            { $$ = $1; }
 | "identifier"            { $$ = DeclRefExpr::make(toLoc(@$), $1); }
 | "(" expression ")"      { std::swap($$, $2); }
+;
+
+null_literal:
+  "null"  { $$ = NullLiteral::make(toLoc(@$)); }
 ;
 
 unary_expression:

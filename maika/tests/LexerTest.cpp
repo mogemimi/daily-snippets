@@ -50,6 +50,13 @@ TEST_CASE("parser can treat basic sources consistently", "[parser]")
         REQUIRE(ok);
         REQUIRE(!diag->hasError());
     }
+    SECTION("parser can treat null literal")
+    {
+        constexpr auto source = "function f() { return null; }\n";
+        auto [astContext, ok] = driver.parseString(source, diag);
+        REQUIRE(ok);
+        REQUIRE(!diag->hasError());
+    }
 }
 
 TEST_CASE("Lexer", "[lexer]")

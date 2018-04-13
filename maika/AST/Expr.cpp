@@ -72,6 +72,19 @@ std::shared_ptr<StringLiteral> StringLiteral::make(const Location& loc, const st
     return expr;
 }
 
+void NullLiteral::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this());
+}
+
+std::shared_ptr<NullLiteral> NullLiteral::make(const Location& loc)
+{
+    auto expr = std::make_shared<NullLiteral>();
+    expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
+    return expr;
+}
+
 void CallExpr::traverse(ASTVisitor& visitor)
 {
     assert(callee);

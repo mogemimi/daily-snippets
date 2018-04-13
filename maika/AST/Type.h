@@ -70,16 +70,17 @@ public:
 };
 
 enum class BuiltinTypeKind {
-    // Int32,
-    // Int64,
-    // UInt32,
-    // UInt64,
-    Bool,
-    Int,
-    Double,
-    String,
-    Void,
-    Any,
+	// Int32,
+	// Int64,
+	// UInt32,
+	// UInt64,
+	Bool,
+	Int,
+	Double,
+	String,
+	Void,
+	Any,
+	Null,
 };
 
 class BuiltinType final : public Type {

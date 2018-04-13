@@ -73,6 +73,7 @@ public:
     virtual void visit(const std::shared_ptr<DoubleLiteral>& expr) {}
     virtual void visit(const std::shared_ptr<BoolLiteral>& expr) {}
     virtual void visit(const std::shared_ptr<StringLiteral>& expr) {}
+    virtual void visit(const std::shared_ptr<NullLiteral>& expr) {}
 
     virtual void visit(const std::shared_ptr<BinaryOperator>& expr) {}
     virtual void visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)

@@ -12,11 +12,10 @@ function main() {
 }
 
 /*
-
 TODO:
-- const
 - integer
   - hex
   - binary
 - class
+- null
 */

@@ -37,6 +37,7 @@ class IntegerLiteral;
 class DoubleLiteral;
 class BoolLiteral;
 class StringLiteral;
+class NullLiteral;
 class BinaryOperator;
 class UnaryOperator;
 class DeclRefExpr;

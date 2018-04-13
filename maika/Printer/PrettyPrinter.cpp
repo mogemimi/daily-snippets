@@ -160,12 +160,12 @@ void PrettyPrinter::visit(const std::shared_ptr<BoolLiteral>& expr)
 
 void PrettyPrinter::visit(const std::shared_ptr<StringLiteral>& expr)
 {
-    std::vector<std::string> options;
-    options.push_back(expr->getValue());
-    if (auto type = expr->getType()) {
-        options.push_back(type->dump());
-    }
-    dump(&dumpContext, "StringLiteral", options);
+    dumpContext.result += ('"' + expr->getValue() + '"');
+}
+
+void PrettyPrinter::visit(const std::shared_ptr<NullLiteral>& expr)
+{
+    dumpContext.result += "null";
 }
 
 void PrettyPrinter::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)

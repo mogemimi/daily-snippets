@@ -146,6 +146,15 @@ void ASTDumper::visit(const std::shared_ptr<StringLiteral>& expr)
     dump(&dumpContext, "StringLiteral", options);
 }
 
+void ASTDumper::visit(const std::shared_ptr<NullLiteral>& expr)
+{
+    std::vector<std::string> options;
+    if (auto type = expr->getType()) {
+        options.push_back(type->dump());
+    }
+    dump(&dumpContext, "NullLiteral", options);
+}
+
 void ASTDumper::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;

@@ -390,6 +390,12 @@ void TypeResolver::visit(const std::shared_ptr<StringLiteral>& expr)
     expr->setType(BuiltinType::make(BuiltinTypeKind::String));
 }
 
+void TypeResolver::visit(const std::shared_ptr<NullLiteral>& expr)
+{
+	assert(!expr->getType());
+	expr->setType(BuiltinType::make(BuiltinTypeKind::Null));
+}
+
 void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
 {
     traverse();
