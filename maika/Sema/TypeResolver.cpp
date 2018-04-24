@@ -220,28 +220,29 @@ void ImplicitCastifyConditionExpr(
 }
 
 using TypeCapability = uint64_t;
-constexpr uint64_t hasBinaryOperatorAdd = 0b000000000000001;
-constexpr uint64_t hasBinaryOperatorSubtract = 0b000000000000010;
-constexpr uint64_t hasBinaryOperatorMultiply = 0b000000000000100;
-constexpr uint64_t hasBinaryOperatorDivide = 0b000000000001000;
-constexpr uint64_t hasBinaryOperatorMod = 0b000000000010000;
-constexpr uint64_t hasBinaryOperatorEqual = 0b000000000100000;
-constexpr uint64_t hasBinaryOperatorNotEqual = 0b000000001000000;
-constexpr uint64_t hasBinaryOperatorLogicalAnd = 0b000000010000000;
-constexpr uint64_t hasBinaryOperatorLogicalOr = 0b000000100000000;
-constexpr uint64_t hasBinaryOperatorGreaterThan = 0b000001000000000;
-constexpr uint64_t hasBinaryOperatorGreaterThanOrEqual = 0b000010000000000;
-constexpr uint64_t hasBinaryOperatorLessThan = 0b000100000000000;
-constexpr uint64_t hasBinaryOperatorLessThanOrEqual = 0b001000000000000;
+constexpr uint64_t hasBinaryOperatorAdd = 0b0000000000000001;
+constexpr uint64_t hasBinaryOperatorSubtract = 0b0000000000000010;
+constexpr uint64_t hasBinaryOperatorMultiply = 0b0000000000000100;
+constexpr uint64_t hasBinaryOperatorDivide = 0b0000000000001000;
+constexpr uint64_t hasBinaryOperatorMod = 0b0000000000010000;
+constexpr uint64_t hasBinaryOperatorAssign = 0b0000000000100000;
+constexpr uint64_t hasBinaryOperatorEqual = 0b0000000001000000;
+constexpr uint64_t hasBinaryOperatorNotEqual = 0b0000000010000000;
+constexpr uint64_t hasBinaryOperatorLogicalAnd = 0b0000000100000000;
+constexpr uint64_t hasBinaryOperatorLogicalOr = 0b0000001000000000;
+constexpr uint64_t hasBinaryOperatorGreaterThan = 0b0000010000000000;
+constexpr uint64_t hasBinaryOperatorGreaterThanOrEqual = 0b0000100000000000;
+constexpr uint64_t hasBinaryOperatorLessThan = 0b0001000000000000;
+constexpr uint64_t hasBinaryOperatorLessThanOrEqual = 0b0010000000000000;
 
 constexpr TypeCapability disableMask(TypeCapability c, uint64_t mask)
 {
-    return c & (~hasBinaryOperatorMod);
+    return c & (~mask);
 }
 
 constexpr TypeCapability enableMask(TypeCapability c, uint64_t mask)
 {
-    return c | hasBinaryOperatorMod;
+    return c | mask;
 }
 
 TypeCapability getTypeCapability(BuiltinTypeKind type)
@@ -254,6 +255,7 @@ TypeCapability getTypeCapability(BuiltinTypeKind type)
         c = enableMask(c, hasBinaryOperatorMultiply);
         c = enableMask(c, hasBinaryOperatorDivide);
         c = enableMask(c, hasBinaryOperatorMod);
+        c = enableMask(c, hasBinaryOperatorAssign);
         c = enableMask(c, hasBinaryOperatorEqual);
         c = enableMask(c, hasBinaryOperatorNotEqual);
         c = enableMask(c, hasBinaryOperatorLogicalAnd);
@@ -269,6 +271,7 @@ TypeCapability getTypeCapability(BuiltinTypeKind type)
         c = disableMask(c, hasBinaryOperatorMultiply);
         c = disableMask(c, hasBinaryOperatorDivide);
         c = disableMask(c, hasBinaryOperatorMod);
+        c = enableMask(c, hasBinaryOperatorAssign);
         c = enableMask(c, hasBinaryOperatorEqual);
         c = enableMask(c, hasBinaryOperatorNotEqual);
         c = enableMask(c, hasBinaryOperatorLogicalAnd);
@@ -284,6 +287,7 @@ TypeCapability getTypeCapability(BuiltinTypeKind type)
         c = enableMask(c, hasBinaryOperatorMultiply);
         c = enableMask(c, hasBinaryOperatorDivide);
         c = disableMask(c, hasBinaryOperatorMod);
+        c = enableMask(c, hasBinaryOperatorAssign);
         c = enableMask(c, hasBinaryOperatorEqual);
         c = enableMask(c, hasBinaryOperatorNotEqual);
         c = enableMask(c, hasBinaryOperatorLogicalAnd);
@@ -299,6 +303,7 @@ TypeCapability getTypeCapability(BuiltinTypeKind type)
         c = enableMask(c, hasBinaryOperatorMultiply);
         c = enableMask(c, hasBinaryOperatorDivide);
         c = enableMask(c, hasBinaryOperatorMod);
+        c = enableMask(c, hasBinaryOperatorAssign);
         c = enableMask(c, hasBinaryOperatorEqual);
         c = enableMask(c, hasBinaryOperatorNotEqual);
         c = enableMask(c, hasBinaryOperatorLogicalAnd);
@@ -314,6 +319,7 @@ TypeCapability getTypeCapability(BuiltinTypeKind type)
         c = disableMask(c, hasBinaryOperatorMultiply);
         c = disableMask(c, hasBinaryOperatorDivide);
         c = disableMask(c, hasBinaryOperatorMod);
+        c = enableMask(c, hasBinaryOperatorAssign);
         c = disableMask(c, hasBinaryOperatorEqual);
         c = disableMask(c, hasBinaryOperatorNotEqual);
         c = disableMask(c, hasBinaryOperatorLogicalAnd);
@@ -329,6 +335,7 @@ TypeCapability getTypeCapability(BuiltinTypeKind type)
         c = disableMask(c, hasBinaryOperatorMultiply);
         c = disableMask(c, hasBinaryOperatorDivide);
         c = disableMask(c, hasBinaryOperatorMod);
+        c = enableMask(c, hasBinaryOperatorAssign);
         c = enableMask(c, hasBinaryOperatorEqual);
         c = enableMask(c, hasBinaryOperatorNotEqual);
         c = disableMask(c, hasBinaryOperatorLogicalAnd);
@@ -344,6 +351,7 @@ TypeCapability getTypeCapability(BuiltinTypeKind type)
         c = disableMask(c, hasBinaryOperatorMultiply);
         c = disableMask(c, hasBinaryOperatorDivide);
         c = disableMask(c, hasBinaryOperatorMod);
+        c = enableMask(c, hasBinaryOperatorAssign);
         c = disableMask(c, hasBinaryOperatorEqual);
         c = disableMask(c, hasBinaryOperatorNotEqual);
         c = disableMask(c, hasBinaryOperatorLogicalAnd);
@@ -363,9 +371,9 @@ uint64_t binaryOperatorMask(BinaryOperatorKind op)
     case BinaryOperatorKind::Add: return hasBinaryOperatorAdd;
     case BinaryOperatorKind::Subtract: return hasBinaryOperatorSubtract;
     case BinaryOperatorKind::Multiply: return hasBinaryOperatorMultiply;
-    case BinaryOperatorKind::Divide: return hasBinaryOperatorMultiply;
+    case BinaryOperatorKind::Divide: return hasBinaryOperatorDivide;
     case BinaryOperatorKind::Mod: return hasBinaryOperatorMod;
-    case BinaryOperatorKind::Assign: return 0;
+    case BinaryOperatorKind::Assign: return hasBinaryOperatorAssign;
     case BinaryOperatorKind::Equal: return hasBinaryOperatorEqual;
     case BinaryOperatorKind::NotEqual: return hasBinaryOperatorNotEqual;
     case BinaryOperatorKind::LogicalAnd: return hasBinaryOperatorLogicalAnd;
@@ -381,7 +389,7 @@ uint64_t binaryOperatorMask(BinaryOperatorKind op)
 bool isBinaryOperatorValid(BinaryOperatorKind op, BuiltinTypeKind type)
 {
     const auto mask = binaryOperatorMask(op);
-    return (getTypeCapability(type) | mask) != 0;
+    return (getTypeCapability(type) & mask) != 0;
 }
 
 } // end of anonymous namespace
@@ -599,55 +607,19 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
         return;
     }
 
-    if (expr->getKind() == BinaryOperatorKind::Mod) {
-        if (lhsType == BuiltinTypeKind::Double) {
-            error(
-                lhs->getLocation(),
-                "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
-                    "' and '" + BuiltinType::toString(rhsType) + "').");
-            return;
-        }
-        if (rhsType == BuiltinTypeKind::Double) {
-            error(
-                rhs->getLocation(),
-                "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
-                    "' and '" + BuiltinType::toString(rhsType) + "').");
-            return;
-        }
+    if (lhsTypeEnabled && !isBinaryOperatorValid(expr->getKind(), lhsType)) {
+        error(
+            lhs->getLocation(),
+            "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
+                "' and '" + BuiltinType::toString(rhsType) + "').");
+        return;
     }
-
-    if (expr->isAdditiveOp() || expr->isMultiplicativeOp()) {
-        if (lhsType == BuiltinTypeKind::Bool) {
-            error(
-                lhs->getLocation(),
-                "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
-                    "' and '" + BuiltinType::toString(rhsType) + "').");
-            return;
-        }
-        if (rhsType == BuiltinTypeKind::Bool) {
-            error(
-                rhs->getLocation(),
-                "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
-                    "' and '" + BuiltinType::toString(rhsType) + "').");
-            return;
-        }
-    }
-
-    if ((expr->getKind() == BinaryOperatorKind::Subtract) || expr->isMultiplicativeOp()) {
-        if (lhsType == BuiltinTypeKind::String) {
-            error(
-                lhs->getLocation(),
-                "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
-                    "' and '" + BuiltinType::toString(rhsType) + "').");
-            return;
-        }
-        if (rhsType == BuiltinTypeKind::String) {
-            error(
-                rhs->getLocation(),
-                "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
-                    "' and '" + BuiltinType::toString(rhsType) + "').");
-            return;
-        }
+    if (rhsTypeEnabled && !isBinaryOperatorValid(expr->getKind(), rhsType)) {
+        error(
+            rhs->getLocation(),
+            "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
+                "' and '" + BuiltinType::toString(rhsType) + "').");
+        return;
     }
 
     if (!lhsTypeEnabled || !rhsTypeEnabled) {

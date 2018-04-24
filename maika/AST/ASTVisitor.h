@@ -103,6 +103,27 @@ public:
         traverse();
     }
 
+    virtual void visit(const std::shared_ptr<InitListExpr>& expr) {}
+    virtual void visit(const std::shared_ptr<InitListExpr>& expr, Invoke&& traverse)
+    {
+        visit(expr);
+        traverse();
+    }
+
+    virtual void visit(const std::shared_ptr<MapEntry>& expr) {}
+    virtual void visit(const std::shared_ptr<MapEntry>& expr, Invoke&& traverse)
+    {
+        visit(expr);
+        traverse();
+    }
+
+    virtual void visit(const std::shared_ptr<MapEntryListExpr>& expr) {}
+    virtual void visit(const std::shared_ptr<MapEntryListExpr>& expr, Invoke&& traverse)
+    {
+        visit(expr);
+        traverse();
+    }
+
     virtual void visit(const std::shared_ptr<ImplicitStaticCastExpr>& expr) {}
     virtual void visit(const std::shared_ptr<ImplicitStaticCastExpr>& expr, Invoke&& traverse)
     {

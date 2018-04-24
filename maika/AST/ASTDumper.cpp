@@ -203,6 +203,30 @@ void ASTDumper::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse
     dump(&dumpContext, "MemberExpr", options, std::move(traverse));
 }
 
+void ASTDumper::visit(const std::shared_ptr<InitListExpr>& expr, Invoke&& traverse)
+{
+    std::vector<std::string> options;
+    if (auto type = expr->getType()) {
+        options.push_back(type->dump());
+    }
+    dump(&dumpContext, "InitListExpr", options, std::move(traverse));
+}
+
+void ASTDumper::visit(const std::shared_ptr<MapEntry>& expr, Invoke&& traverse)
+{
+    std::vector<std::string> options;
+    dump(&dumpContext, "MapEntry", options, std::move(traverse));
+}
+
+void ASTDumper::visit(const std::shared_ptr<MapEntryListExpr>& expr, Invoke&& traverse)
+{
+    std::vector<std::string> options;
+    if (auto type = expr->getType()) {
+        options.push_back(type->dump());
+    }
+    dump(&dumpContext, "MapEntryListExpr", options, std::move(traverse));
+}
+
 void ASTDumper::visit(const std::shared_ptr<ImplicitStaticCastExpr>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;

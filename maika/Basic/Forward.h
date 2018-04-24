@@ -42,6 +42,9 @@ class BinaryOperator;
 class UnaryOperator;
 class DeclRefExpr;
 class MemberExpr;
+class InitListExpr;
+class MapEntry;
+class MapEntryListExpr;
 class ImplicitStaticCastExpr;
 
 enum class BinaryOperatorKind;

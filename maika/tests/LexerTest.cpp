@@ -57,6 +57,55 @@ TEST_CASE("parser can treat basic sources consistently", "[parser]")
         REQUIRE(ok);
         REQUIRE(!diag->hasError());
     }
+    SECTION("parser can treat array literal")
+    {
+        constexpr auto source = "function f() { return [1, 2, 3, 4]; }\n";
+        auto [astContext, ok] = driver.parseString(source, diag);
+        REQUIRE(ok);
+        REQUIRE(!diag->hasError());
+    }
+    SECTION("parser can treat empty array literal")
+    {
+        constexpr auto source = "function f() { return []; }\n";
+        auto [astContext, ok] = driver.parseString(source, diag);
+        REQUIRE(ok);
+        REQUIRE(!diag->hasError());
+    }
+    SECTION("parser can treat single array literal")
+    {
+        constexpr auto source = "function f() { return [42]; }\n";
+        auto [astContext, ok] = driver.parseString(source, diag);
+        REQUIRE(ok);
+        REQUIRE(!diag->hasError());
+    }
+    SECTION("parser can treat trailing comma")
+    {
+        constexpr auto source = "function f() { return [1, 2, 3, 4,]; }\n";
+        auto [astContext, ok] = driver.parseString(source, diag);
+        REQUIRE(ok);
+        REQUIRE(!diag->hasError());
+    }
+    // SECTION("parser can treat map literal")
+    //{
+    //    constexpr auto source = "function f() { return [\"a\": 1, \"b\": 2, \"c\": 3]; }\n";
+    //    auto [astContext, ok] = driver.parseString(source, diag);
+    //    REQUIRE(ok);
+    //    REQUIRE(!diag->hasError());
+    //}
+    // SECTION("parser can treat single map literal")
+    //{
+    //    constexpr auto source = "function f() { return [\"a\": 42]; }\n";
+    //    auto [astContext, ok] = driver.parseString(source, diag);
+    //    REQUIRE(ok);
+    //    REQUIRE(!diag->hasError());
+    //}
+    // SECTION("parser can treat trailing comma")
+    //{
+    //    constexpr auto source = "function f() { return [\"foo\": 42,]; }\n";
+    //    auto [astContext, ok] = driver.parseString(source, diag);
+    //    REQUIRE(ok);
+    //    REQUIRE(!diag->hasError());
+    //}
 }
 
 TEST_CASE("Lexer", "[lexer]")

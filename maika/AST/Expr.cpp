@@ -359,6 +359,60 @@ std::shared_ptr<MemberExpr> MemberExpr::make(
     return expr;
 }
 
+void InitListExpr::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        for (const auto& init : initializers) {
+            init->traverse(visitor);
+        }
+    });
+}
+
+std::shared_ptr<InitListExpr> InitListExpr::InitListExpr::make(
+    const Location& loc, const std::vector<std::shared_ptr<Expr>>& inits)
+{
+    auto expr = std::make_shared<InitListExpr>();
+    expr->location = loc;
+    expr->initializers = inits;
+    return expr;
+}
+
+void MapEntry::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        key->traverse(visitor);
+        value->traverse(visitor);
+    });
+}
+
+std::shared_ptr<MapEntry> MapEntry::make(
+    const Location& loc, const std::shared_ptr<Expr>& key, const std::shared_ptr<Expr>& value)
+{
+    auto expr = std::make_shared<MapEntry>();
+    expr->location = loc;
+    expr->key = key;
+    expr->value = value;
+    return expr;
+}
+
+void MapEntryListExpr::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        for (const auto& entry : entries) {
+            entry->traverse(visitor);
+        }
+    });
+}
+
+std::shared_ptr<MapEntryListExpr>
+MapEntryListExpr::make(const Location& loc, const std::vector<std::shared_ptr<MapEntry>>& entries)
+{
+    auto expr = std::make_shared<MapEntryListExpr>();
+    expr->location = loc;
+    expr->entries = entries;
+    return expr;
+}
+
 void ImplicitStaticCastExpr::traverse(ASTVisitor& visitor)
 {
     assert(subExpr);

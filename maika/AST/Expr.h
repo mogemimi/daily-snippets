@@ -279,6 +279,53 @@ public:
         const std::shared_ptr<NamedDecl>& d);
 };
 
+class InitListExpr final
+    : public Expr
+    , public std::enable_shared_from_this<InitListExpr> {
+private:
+    std::vector<std::shared_ptr<Expr>> initializers;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::vector<std::shared_ptr<Expr>> getInits() const { return initializers; }
+
+    static std::shared_ptr<InitListExpr>
+    make(const Location& loc, const std::vector<std::shared_ptr<Expr>>& inits);
+};
+
+class MapEntry final
+    : public Stmt // TODO: bad practice
+    , public std::enable_shared_from_this<MapEntry> {
+private:
+    std::shared_ptr<Expr> key;
+    std::shared_ptr<Expr> value;
+
+public:
+    void traverse(ASTVisitor& visitor);
+
+    std::shared_ptr<Expr> getKey() const { return key; }
+    std::shared_ptr<Expr> getValue() const { return value; }
+
+    static std::shared_ptr<MapEntry>
+    make(const Location& loc, const std::shared_ptr<Expr>& key, const std::shared_ptr<Expr>& value);
+};
+
+class MapEntryListExpr final
+    : public Expr
+    , public std::enable_shared_from_this<MapEntryListExpr> {
+private:
+    std::vector<std::shared_ptr<MapEntry>> entries;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::vector<std::shared_ptr<MapEntry>> getEntries() const { return entries; }
+
+    static std::shared_ptr<MapEntryListExpr>
+    make(const Location& loc, const std::vector<std::shared_ptr<MapEntry>>& entries);
+};
+
 class ImplicitStaticCastExpr final
     : public Expr
     , public std::enable_shared_from_this<ImplicitStaticCastExpr> {

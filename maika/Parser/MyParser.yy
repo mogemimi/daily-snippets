@@ -135,6 +135,10 @@ Location toLoc(const yy::location& y)
 %token <std::shared_ptr<StringLiteral>>             STRING_LITERAL "string_literal"
 %type  <std::shared_ptr<NullLiteral>>               null_literal
 %type  <std::shared_ptr<Expr>>                      literal
+%type  <std::shared_ptr<InitListExpr>>              initializer_list_expression
+%type  <std::shared_ptr<MapEntryListExpr>>          map_entry_list_expression
+%type  <std::vector<std::shared_ptr<MapEntry>>>     map_entry_list
+%type  <std::shared_ptr<MapEntry>>                  map_entry
 %type  <std::shared_ptr<Expr>>                      primary_expression
 %type  <std::shared_ptr<Expr>>                      expression
 %type  <std::vector<std::shared_ptr<Expr>>>         expression_list
@@ -264,6 +268,24 @@ const_definition:
 | "const" "identifier" "=" expression { $$ = ConstDecl::make(toLoc(@$), $2, $4); }
 ;
 
+initializer_list_expression:
+  "[" expression_list "]" { $$ = InitListExpr::make(toLoc(@$), $2); }
+;
+
+map_entry_list_expression:
+  "@[" map_entry_list "@]" { $$ = MapEntryListExpr::make(toLoc(@$), $2); }
+;
+
+map_entry_list:
+  %empty                        { }
+| map_entry                     { $$.push_back($1); }
+| map_entry "," map_entry_list  { $$ = appendVector($1, $3); }
+;
+
+map_entry:
+  expression ":" expression { $$ = MapEntry::make(toLoc(@$), $1, $3); }
+;
+
 literal:
   "integer_literal" { $$ = $1; }
 | "double_literal"  { $$ = $1; }
@@ -281,6 +303,7 @@ literal:
 %right "++" "--" "!";
 %left ".";
 %nonassoc "(" ")";
+%nonassoc "[" "]";
      
 primary_expression:
   literal                 { $$ = $1; }
@@ -337,6 +360,8 @@ expression:
 | call_expression                   { $$ = $1; }
 | member_expression                 { $$ = $1; }
 | function_expression               { $$ = $1; }
+| initializer_list_expression       { $$ = $1; }
+| map_entry_list_expression         { $$ = $1; }
 ;
 
 %%
