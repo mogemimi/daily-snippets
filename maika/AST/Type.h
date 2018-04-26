@@ -11,6 +11,9 @@ enum class TypeKind {
     ReturnType,
     TypeVariable,
     BuiltinType,
+    ArrayType,
+    MapType,
+    TupleType,
 };
 
 class Type {
@@ -94,6 +97,40 @@ public:
     static std::shared_ptr<BuiltinType> make(BuiltinTypeKind kind);
 
     static std::string toString(BuiltinTypeKind kind);
+};
+
+class ArrayType final : public Type {
+public:
+    std::shared_ptr<Type> primaryType;
+
+    std::string dump() const override;
+
+    TypeKind getKind() const override;
+
+    static std::shared_ptr<ArrayType> make();
+};
+
+class MapType final : public Type {
+public:
+    std::shared_ptr<Type> keyType;
+    std::shared_ptr<Type> valueType;
+
+    std::string dump() const override;
+
+    TypeKind getKind() const override;
+
+    static std::shared_ptr<MapType> make();
+};
+
+class TupleType final : public Type {
+public:
+    std::vector<std::shared_ptr<Type>> types;
+
+    std::string dump() const override;
+
+    TypeKind getKind() const override;
+
+    static std::shared_ptr<TupleType> make(std::initializer_list<std::shared_ptr<Type>>&& types);
 };
 
 // class DeferredType final : public Type {

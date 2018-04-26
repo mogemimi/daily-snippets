@@ -158,6 +158,11 @@ function test() {
     let c = a + b;
     return c;
 }
+function arrayMapTest() {
+	let n = 42;
+	let arr = [1, 2, n];
+	let map = ["a": n, "b": 33, "c": 5];
+}
 )";
     auto diag = std::make_shared<DiagnosticHandler>();
 
@@ -189,6 +194,7 @@ function test() {
     REQUIRE(!diag->hasError());
     printf("%s\n", dumper.getResult().c_str());
 
+#if 0
     BytecodeGenerator byteCodeGenerator;
     traverser.traverse(astContext, byteCodeGenerator);
     REQUIRE(!diag->hasError());
@@ -200,4 +206,5 @@ function test() {
     REQUIRE(runtime.run(program));
     auto result = runtime.getResultString();
     printf("result: %s\n", result.c_str());
+#endif
 }

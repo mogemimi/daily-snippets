@@ -45,7 +45,22 @@ bool isSameType(const std::shared_ptr<Type>& a, const std::shared_ptr<Type>& b)
         const auto y = std::static_pointer_cast<BuiltinType>(b);
         assert(x);
         assert(y);
-        return (x->getKind() == y->getKind());
+        return (x->kind == y->kind);
+    }
+    case TypeKind::TupleType: {
+        const auto x = std::static_pointer_cast<TupleType>(a);
+        const auto y = std::static_pointer_cast<TupleType>(b);
+        assert(x);
+        assert(y);
+        if (x->types.size() != y->types.size()) {
+            return false;
+        }
+        for (size_t i = 0; i < x->types.size(); i++) {
+            if (!isSameType(x->types[i], y->types[i])) {
+                return false;
+            }
+        }
+        return true;
     }
     case TypeKind::ReturnType:
         // TODO: not implemented
@@ -762,6 +777,103 @@ void TypeResolver::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& trav
     assert(namedDecl);
     assert(namedDecl->getType());
     expr->setType(namedDecl->getType());
+}
+
+void TypeResolver::visit(const std::shared_ptr<ArrayLiteral>& expr, Invoke&& traverse)
+{
+    traverse();
+
+    assert(!expr->getType());
+
+    auto arrayType = ArrayType::make();
+    auto scope = getCurrentScope();
+
+    for (auto& init : expr->getInits()) {
+        auto t = init->getType();
+        if (t->getKind() == TypeKind::TypeVariable) {
+            auto typeVariable = std::dynamic_pointer_cast<TypeVariable>(t);
+            auto s = TypeInferer::infer(scope->env, t);
+            substition(init, typeVariable, s);
+        }
+    }
+
+    if (!expr->getInits().empty()) {
+        // TODO: Use union type
+        auto first = expr->getInits().front();
+        arrayType->primaryType = first->getType();
+    }
+
+    // TODO: type check
+    for (auto& init : expr->getInits()) {
+        if (!isSameType(arrayType->primaryType, init->getType())) {
+            error(init->getLocation(), "type mismatch");
+        }
+    }
+
+    expr->setType(arrayType);
+}
+
+void TypeResolver::visit(const std::shared_ptr<MapEntry>& expr, Invoke&& traverse)
+{
+    traverse();
+
+    assert(!expr->getType());
+
+    auto key = expr->getKey();
+    auto value = expr->getValue();
+
+    assert(key);
+    assert(key->getType());
+    assert(value);
+    assert(value->getType());
+
+    auto scope = getCurrentScope();
+
+    auto infer = [&](std::shared_ptr<Expr>& ast) {
+        auto t = ast->getType();
+        if (t->getKind() == TypeKind::TypeVariable) {
+            auto typeVariable = std::dynamic_pointer_cast<TypeVariable>(t);
+            auto s = TypeInferer::infer(scope->env, t);
+            substition(ast, typeVariable, s);
+        }
+    };
+    infer(key);
+    infer(value);
+
+    auto type = TupleType::make({key->getType(), value->getType()});
+    expr->setType(type);
+}
+
+void TypeResolver::visit(const std::shared_ptr<MapLiteral>& expr, Invoke&& traverse)
+{
+    traverse();
+
+    assert(!expr->getType());
+
+    auto mapType = MapType::make();
+
+    if (!expr->getEntries().empty()) {
+        auto first = expr->getEntries().front();
+        assert(first->getType());
+        assert(first->getType()->getKind() == TypeKind::TupleType);
+
+        auto tupleType = std::dynamic_pointer_cast<TupleType>(first->getType());
+        assert(tupleType);
+        assert(tupleType->types.size() == 2);
+
+        mapType->keyType = tupleType->types[0];
+        mapType->valueType = tupleType->types[1];
+    }
+
+    // TODO: type check
+    auto tupleType = TupleType::make({mapType->keyType, mapType->valueType});
+    for (auto& entry : expr->getEntries()) {
+        if (!isSameType(tupleType, entry->getType())) {
+            error(entry->getLocation(), "type mismatch");
+        }
+    }
+
+    expr->setType(mapType);
 }
 
 void TypeResolver::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse)

@@ -140,3 +140,61 @@ std::tuple<BuiltinTypeKind, bool> TypeHelper::toBuiltinType(const std::shared_pt
     }
     return std::make_tuple(BuiltinTypeKind::Any, false);
 }
+
+std::string ArrayType::dump() const
+{
+    if (!primaryType) {
+        return "Array";
+    }
+    assert(primaryType);
+    return "Array<" + primaryType->dump() + ">";
+}
+
+TypeKind ArrayType::getKind() const
+{
+    return TypeKind::ArrayType;
+}
+
+std::shared_ptr<ArrayType> ArrayType::make()
+{
+    auto type = std::make_shared<ArrayType>();
+    return type;
+}
+
+std::string MapType::dump() const
+{
+    if (!keyType || !valueType) {
+        return "Map";
+    }
+    assert(keyType);
+    assert(valueType);
+    return "Map<" + keyType->dump() + ", " + valueType->dump() + ">";
+}
+
+TypeKind MapType::getKind() const
+{
+    return TypeKind::MapType;
+}
+
+std::shared_ptr<MapType> MapType::make()
+{
+    auto type = std::make_shared<MapType>();
+    return type;
+}
+
+std::string TupleType::dump() const
+{
+    return "Tuple<" + stringify(types) + ">";
+}
+
+TypeKind TupleType::getKind() const
+{
+    return TypeKind::TupleType;
+}
+
+std::shared_ptr<TupleType> TupleType::make(std::initializer_list<std::shared_ptr<Type>>&& types)
+{
+    auto type = std::make_shared<TupleType>();
+    type->types = std::move(types);
+    return type;
+}
