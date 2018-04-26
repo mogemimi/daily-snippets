@@ -295,7 +295,7 @@ public:
 };
 
 class MapEntry final
-    : public Stmt // TODO: bad practice
+    : public Stmt
     , public std::enable_shared_from_this<MapEntry> {
 private:
     std::shared_ptr<Expr> key;

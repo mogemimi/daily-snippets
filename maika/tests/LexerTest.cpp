@@ -9,133 +9,80 @@
 
 #include "catch.hpp"
 
+namespace {
+bool lexerCheck(const std::shared_ptr<DiagnosticHandler>& diag, const std::string& source)
+{
+    MyDriver driver;
+    auto [astContext, ok] = driver.parseString(source, diag);
+    return ok;
+}
+} // end of anonymous namespace
+
 TEST_CASE("lexer can treat basic sources consistently", "[lexer]")
 {
+    auto stream = std::make_shared<UnitTestDiagnosticStream>();
     auto diag = std::make_shared<DiagnosticHandler>();
-    MyDriver driver;
+    diag->setStream(stream);
 
     SECTION("lexer can deal with an empty source.")
     {
         constexpr auto source = "";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
+        REQUIRE(lexerCheck(diag, source));
         REQUIRE(!diag->hasError());
     }
     SECTION("lexer can skip UTF-8 BOM if it's present")
     {
         constexpr auto source = "\xEF\xBB\xBF"
                                 "function f() {}\n";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
+        REQUIRE(lexerCheck(diag, source));
         REQUIRE(!diag->hasError());
     }
     SECTION("lexer can skip CRLF if it's present")
     {
         constexpr auto source = "function f() {}\r\n";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
+        REQUIRE(lexerCheck(diag, source));
         REQUIRE(!diag->hasError());
     }
-}
-
-TEST_CASE("parser can treat basic sources consistently", "[parser]")
-{
-    auto diag = std::make_shared<DiagnosticHandler>();
-    MyDriver driver;
-
-    SECTION("parser can deal with an empty source.")
+    SECTION("lexer can treat BCPL-style comments")
     {
-        constexpr auto source = " \t";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
-        REQUIRE(!diag->hasError());
-    }
-    SECTION("parser can treat null literal")
-    {
-        constexpr auto source = "function f() { return null; }\n";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
-        REQUIRE(!diag->hasError());
-    }
-    SECTION("parser can treat array literal")
-    {
-        constexpr auto source = "function f() { return [1, 2, 3, 4]; }\n";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
-        REQUIRE(!diag->hasError());
-    }
-    SECTION("parser can treat empty array literal")
-    {
-        constexpr auto source = "function f() { return []; }\n";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
-        REQUIRE(!diag->hasError());
-    }
-    SECTION("parser can treat single array literal")
-    {
-        constexpr auto source = "function f() { return [42]; }\n";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
-        REQUIRE(!diag->hasError());
-    }
-    SECTION("parser can treat trailing comma")
-    {
-        constexpr auto source = "function f() { return [1, 2, 3, 4,]; }\n";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
-        REQUIRE(!diag->hasError());
-    }
-    // SECTION("parser can treat map literal")
-    //{
-    //    constexpr auto source = "function f() { return [\"a\": 1, \"b\": 2, \"c\": 3]; }\n";
-    //    auto [astContext, ok] = driver.parseString(source, diag);
-    //    REQUIRE(ok);
-    //    REQUIRE(!diag->hasError());
-    //}
-    // SECTION("parser can treat single map literal")
-    //{
-    //    constexpr auto source = "function f() { return [\"a\": 42]; }\n";
-    //    auto [astContext, ok] = driver.parseString(source, diag);
-    //    REQUIRE(ok);
-    //    REQUIRE(!diag->hasError());
-    //}
-    // SECTION("parser can treat trailing comma")
-    //{
-    //    constexpr auto source = "function f() { return [\"foo\": 42,]; }\n";
-    //    auto [astContext, ok] = driver.parseString(source, diag);
-    //    REQUIRE(ok);
-    //    REQUIRE(!diag->hasError());
-    //}
-}
-
-TEST_CASE("Lexer", "[lexer]")
-{
-    constexpr auto source = R"(
-function min(a : int, b : int) : int {
-    // TODO: Replace with '?' operator.
-    if (a < b) {
-		const c = 42;
-        return a;
-    }
-    return b;
+        constexpr auto source = R"(
+// foo
+function f() { // bar
+    // TODO
+	/// NOTE
+	// // //
+	// /*  */
+	//*
+	////////////
 }
 )";
-
-    auto diag = std::make_shared<DiagnosticHandler>();
-
-    MyDriver driver;
-    auto [astContext, ok] = driver.parseString(source, diag);
-    REQUIRE(ok);
-
-    ASTTraverser traverser;
-
-    ASTDumper dumper;
-    traverser.traverse(astContext, dumper);
-    REQUIRE(!diag->hasError());
-    // printf("%s\n", dumper.getResult().c_str());
-
-    PrettyPrinter prettyPrinter;
-    traverser.traverse(astContext, prettyPrinter);
-    REQUIRE(!diag->hasError());
-    // printf("%s\n", prettyPrinter.getResult().c_str());
+        REQUIRE(lexerCheck(diag, source));
+        REQUIRE(!diag->hasError());
+    }
+    SECTION("lexer can treat C-style comments")
+    {
+        constexpr auto source = R"(
+/* aaa */
+function f() { /*
+	aaa
+	// TODO
+	{
+*/
+	/******
+	aaaaaaa
+	******/
+}
+)";
+        REQUIRE(lexerCheck(diag, source));
+        REQUIRE(!diag->hasError());
+    }
+    SECTION("lexer can treat C-style comments")
+    {
+        constexpr auto source = R"(
+function f(/*){*/
+}
+)";
+        REQUIRE(!lexerCheck(diag, source));
+        REQUIRE(diag->hasError());
+    }
 }

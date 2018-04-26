@@ -38,8 +38,9 @@ SOURCES = \
 	Sema/TypeResolver.cpp \
 	Sema/Value.cpp \
 	tests/DumpTest.cpp \
-	tests/LexerTest.cpp \
 	tests/IdentifierResolverTest.cpp \
+	tests/LexerTest.cpp \
+	tests/ParserTest.cpp \
 	tests/SemaCheckerTest.cpp \
 	tests/TypeResolverTest.cpp \
 	tests/main.cpp
