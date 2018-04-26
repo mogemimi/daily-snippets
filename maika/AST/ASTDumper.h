@@ -36,9 +36,9 @@ public:
     void visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& traverse) override;
     void visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse) override;
     void visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse) override;
-    void visit(const std::shared_ptr<InitListExpr>& expr, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<ArrayLiteral>& expr, Invoke&& traverse) override;
     void visit(const std::shared_ptr<MapEntry>& expr, Invoke&& traverse) override;
-    void visit(const std::shared_ptr<MapEntryListExpr>& expr, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<MapLiteral>& expr, Invoke&& traverse) override;
     void visit(const std::shared_ptr<ImplicitStaticCastExpr>& expr, Invoke&& traverse) override;
 
     void visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invoke&& traverse) override;

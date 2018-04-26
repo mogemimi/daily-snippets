@@ -279,9 +279,9 @@ public:
         const std::shared_ptr<NamedDecl>& d);
 };
 
-class InitListExpr final
+class ArrayLiteral final
     : public Expr
-    , public std::enable_shared_from_this<InitListExpr> {
+    , public std::enable_shared_from_this<ArrayLiteral> {
 private:
     std::vector<std::shared_ptr<Expr>> initializers;
 
@@ -290,7 +290,7 @@ public:
 
     std::vector<std::shared_ptr<Expr>> getInits() const { return initializers; }
 
-    static std::shared_ptr<InitListExpr>
+    static std::shared_ptr<ArrayLiteral>
     make(const Location& loc, const std::vector<std::shared_ptr<Expr>>& inits);
 };
 
@@ -311,9 +311,9 @@ public:
     make(const Location& loc, const std::shared_ptr<Expr>& key, const std::shared_ptr<Expr>& value);
 };
 
-class MapEntryListExpr final
+class MapLiteral final
     : public Expr
-    , public std::enable_shared_from_this<MapEntryListExpr> {
+    , public std::enable_shared_from_this<MapLiteral> {
 private:
     std::vector<std::shared_ptr<MapEntry>> entries;
 
@@ -322,7 +322,7 @@ public:
 
     std::vector<std::shared_ptr<MapEntry>> getEntries() const { return entries; }
 
-    static std::shared_ptr<MapEntryListExpr>
+    static std::shared_ptr<MapLiteral>
     make(const Location& loc, const std::vector<std::shared_ptr<MapEntry>>& entries);
 };
 

@@ -9,74 +9,160 @@
 
 #include "catch.hpp"
 
+namespace {
+bool parse(const std::shared_ptr<DiagnosticHandler>& diag, const std::string& source)
+{
+    MyDriver driver;
+    auto [astContext, ok] = driver.parseString(source, diag);
+    return ok && !diag->hasError();
+}
+} // end of anonymous namespace
+
 TEST_CASE("parser can treat basic sources consistently", "[parser]")
 {
     auto stream = std::make_shared<UnitTestDiagnosticStream>();
     auto diag = std::make_shared<DiagnosticHandler>();
     diag->setStream(stream);
-    MyDriver driver;
 
     SECTION("parser can deal with an empty source.")
     {
         constexpr auto source = " \t";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
-        REQUIRE(!diag->hasError());
+        REQUIRE(parse(diag, source));
     }
     SECTION("parser can treat null literal")
     {
         constexpr auto source = "function f() { return null; }\n";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
-        REQUIRE(!diag->hasError());
+        REQUIRE(parse(diag, source));
     }
+    SECTION("parser can not use trailing commas with parameters")
+    {
+        constexpr auto source = "function f(a, b, c,) {}\n";
+        REQUIRE(!parse(diag, source));
+    }
+    SECTION("parser can not use trailing commas with arguments")
+    {
+        constexpr auto source = "function f() { g(a, b, c,); }\n";
+        REQUIRE(!parse(diag, source));
+    }
+}
+
+TEST_CASE("parser can treat array and map literals", "[parser]")
+{
+    auto stream = std::make_shared<UnitTestDiagnosticStream>();
+    auto diag = std::make_shared<DiagnosticHandler>();
+    diag->setStream(stream);
+
     SECTION("parser can treat array literal")
     {
         constexpr auto source = "function f() { return [1, 2, 3, 4]; }\n";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
-        REQUIRE(!diag->hasError());
+        REQUIRE(parse(diag, source));
     }
     SECTION("parser can treat empty array literal")
     {
         constexpr auto source = "function f() { return []; }\n";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
-        REQUIRE(!diag->hasError());
+        REQUIRE(parse(diag, source));
     }
     SECTION("parser can treat single array literal")
     {
         constexpr auto source = "function f() { return [42]; }\n";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
-        REQUIRE(!diag->hasError());
+        REQUIRE(parse(diag, source));
     }
     SECTION("parser can treat trailing comma")
     {
         constexpr auto source = "function f() { return [1, 2, 3, 4,]; }\n";
-        auto [astContext, ok] = driver.parseString(source, diag);
-        REQUIRE(ok);
-        REQUIRE(!diag->hasError());
+        REQUIRE(parse(diag, source));
     }
-    // SECTION("parser can treat map literal")
-    //{
-    //    constexpr auto source = "function f() { return [\"a\": 1, \"b\": 2, \"c\": 3]; }\n";
-    //    auto [astContext, ok] = driver.parseString(source, diag);
-    //    REQUIRE(ok);
-    //    REQUIRE(!diag->hasError());
-    //}
-    // SECTION("parser can treat single map literal")
-    //{
-    //    constexpr auto source = "function f() { return [\"a\": 42]; }\n";
-    //    auto [astContext, ok] = driver.parseString(source, diag);
-    //    REQUIRE(ok);
-    //    REQUIRE(!diag->hasError());
-    //}
-    // SECTION("parser can treat trailing comma")
-    //{
-    //    constexpr auto source = "function f() { return [\"foo\": 42,]; }\n";
-    //    auto [astContext, ok] = driver.parseString(source, diag);
-    //    REQUIRE(ok);
-    //    REQUIRE(!diag->hasError());
-    //}
+    SECTION("parser cannot allow trailing comma without elements")
+    {
+        constexpr auto source = "function f() { return [,]; }\n";
+        REQUIRE(!parse(diag, source));
+    }
+    SECTION("parser cannot allow comma without elements")
+    {
+        constexpr auto source = "function f() { return [, 2]; }\n";
+        REQUIRE(!parse(diag, source));
+    }
+    SECTION("parser can treat map literal")
+    {
+        constexpr auto source = R"(function f() { return ["a": 1, "b": 2, "c": 3]; })";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can treat single map literal")
+    {
+        constexpr auto source = R"(function f() { return ["a" : 42]; })";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can treat trailing comma with map literal")
+    {
+        constexpr auto source = R"(function f() { return ["a" : 42,]; })";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser cannot allow comma without elements")
+    {
+        constexpr auto source = R"(function f() { return [, "a" : 42,]; })";
+        REQUIRE(!parse(diag, source));
+    }
+#if 0
+	// ECMAScript-like map literal
+	SECTION("parser can treat map literal")
+	{
+		constexpr auto source = "function f() { return {\"a\": 1, \"b\": 2, \"c\": 3}; }\n";
+		REQUIRE(parse(diag, source));
+	}
+	SECTION("parser can treat single map literal")
+	{
+		constexpr auto source = "function f() { return {\"a\": 42}; }\n";
+		REQUIRE(parse(diag, source));
+	}
+	SECTION("parser can treat trailing comma with map literal")
+	{
+		constexpr auto source = "function f() { return {\"a\": 42,}; }\n";
+		REQUIRE(parse(diag, source));
+	}
+	SECTION("parser cannot allow trailing comma without elements")
+	{
+		constexpr auto source = "function f() { return {,}; }\n";
+		REQUIRE(!parse(diag, source));
+	}
+	SECTION("parser cannot allow comma without elements")
+	{
+		constexpr auto source = "function f() { return {, \"a\":42}; }\n";
+		REQUIRE(!parse(diag, source));
+	}
+	SECTION("block scope and unary expression, not binary expression with map and integer literals")
+	{
+		constexpr auto source = "function f() { {} - 1; }\n";
+		REQUIRE(parse(diag, source));
+	}
+	SECTION("block scope (not map literal) and empty statement.")
+	{
+		constexpr auto source = "function f() { {}; }\n";
+		REQUIRE(parse(diag, source));
+	}
+	SECTION("empty map literal can be used as an experession statement with parentheses.")
+	{
+		constexpr auto source = "function f() { ({}); }\n";
+		REQUIRE(parse(diag, source));
+	}
+	SECTION("map literal can't be used as an experession statement.")
+	{
+		constexpr auto source = "function f() { {\"a\":42}; }\n";
+		REQUIRE(!parse(diag, source));
+	}
+	SECTION("map literal can be used as an experession statement with parentheses.")
+	{
+		constexpr auto source = "function f() { ({\"a\":42}); }\n";
+		REQUIRE(parse(diag, source));
+	}
+	SECTION("map literal with indexer can't be used as an experession statement.")
+	{
+		constexpr auto source = "function f() { {\"a\":42}[\"a\"]; }\n";
+		REQUIRE(!parse(diag, source));
+	}
+	SECTION("map literal with indexer can be used as an experession statement with parentheses.")
+	{
+		constexpr auto source = "function f() { ({\"a\":42})[\"a\"]; }\n";
+		REQUIRE(parse(diag, source));
+	}
+#endif
 }

@@ -359,7 +359,7 @@ std::shared_ptr<MemberExpr> MemberExpr::make(
     return expr;
 }
 
-void InitListExpr::traverse(ASTVisitor& visitor)
+void ArrayLiteral::traverse(ASTVisitor& visitor)
 {
     visitor.visit(shared_from_this(), [&] {
         for (const auto& init : initializers) {
@@ -368,10 +368,10 @@ void InitListExpr::traverse(ASTVisitor& visitor)
     });
 }
 
-std::shared_ptr<InitListExpr> InitListExpr::InitListExpr::make(
+std::shared_ptr<ArrayLiteral> ArrayLiteral::ArrayLiteral::make(
     const Location& loc, const std::vector<std::shared_ptr<Expr>>& inits)
 {
-    auto expr = std::make_shared<InitListExpr>();
+    auto expr = std::make_shared<ArrayLiteral>();
     expr->location = loc;
     expr->initializers = inits;
     return expr;
@@ -395,7 +395,7 @@ std::shared_ptr<MapEntry> MapEntry::make(
     return expr;
 }
 
-void MapEntryListExpr::traverse(ASTVisitor& visitor)
+void MapLiteral::traverse(ASTVisitor& visitor)
 {
     visitor.visit(shared_from_this(), [&] {
         for (const auto& entry : entries) {
@@ -404,10 +404,10 @@ void MapEntryListExpr::traverse(ASTVisitor& visitor)
     });
 }
 
-std::shared_ptr<MapEntryListExpr>
-MapEntryListExpr::make(const Location& loc, const std::vector<std::shared_ptr<MapEntry>>& entries)
+std::shared_ptr<MapLiteral>
+MapLiteral::make(const Location& loc, const std::vector<std::shared_ptr<MapEntry>>& entries)
 {
-    auto expr = std::make_shared<MapEntryListExpr>();
+    auto expr = std::make_shared<MapLiteral>();
     expr->location = loc;
     expr->entries = entries;
     return expr;

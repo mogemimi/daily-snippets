@@ -203,13 +203,13 @@ void ASTDumper::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse
     dump(&dumpContext, "MemberExpr", options, std::move(traverse));
 }
 
-void ASTDumper::visit(const std::shared_ptr<InitListExpr>& expr, Invoke&& traverse)
+void ASTDumper::visit(const std::shared_ptr<ArrayLiteral>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;
     if (auto type = expr->getType()) {
         options.push_back(type->dump());
     }
-    dump(&dumpContext, "InitListExpr", options, std::move(traverse));
+    dump(&dumpContext, "ArrayLiteral", options, std::move(traverse));
 }
 
 void ASTDumper::visit(const std::shared_ptr<MapEntry>& expr, Invoke&& traverse)
@@ -218,13 +218,13 @@ void ASTDumper::visit(const std::shared_ptr<MapEntry>& expr, Invoke&& traverse)
     dump(&dumpContext, "MapEntry", options, std::move(traverse));
 }
 
-void ASTDumper::visit(const std::shared_ptr<MapEntryListExpr>& expr, Invoke&& traverse)
+void ASTDumper::visit(const std::shared_ptr<MapLiteral>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;
     if (auto type = expr->getType()) {
         options.push_back(type->dump());
     }
-    dump(&dumpContext, "MapEntryListExpr", options, std::move(traverse));
+    dump(&dumpContext, "MapLiteral", options, std::move(traverse));
 }
 
 void ASTDumper::visit(const std::shared_ptr<ImplicitStaticCastExpr>& expr, Invoke&& traverse)
