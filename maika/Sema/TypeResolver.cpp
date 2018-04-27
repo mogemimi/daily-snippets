@@ -47,6 +47,16 @@ bool isSameType(const std::shared_ptr<Type>& a, const std::shared_ptr<Type>& b)
         assert(y);
         return (x->kind == y->kind);
     }
+    case TypeKind::ArrayType: {
+        assert(a->getKind() == TypeKind::ArrayType);
+        assert(b->getKind() == TypeKind::ArrayType);
+        return true;
+    }
+    case TypeKind::MapType: {
+        assert(a->getKind() == TypeKind::MapType);
+        assert(b->getKind() == TypeKind::MapType);
+        return true;
+    }
     case TypeKind::TupleType: {
         const auto x = std::static_pointer_cast<TupleType>(a);
         const auto y = std::static_pointer_cast<TupleType>(b);
@@ -798,16 +808,16 @@ void TypeResolver::visit(const std::shared_ptr<ArrayLiteral>& expr, Invoke&& tra
     }
 
     if (!expr->getInits().empty()) {
-        // TODO: Use union type
+        // TODO: Use union type instead of type of first element
         auto first = expr->getInits().front();
-        arrayType->primaryType = first->getType();
-    }
-
-    // TODO: type check
-    for (auto& init : expr->getInits()) {
-        if (!isSameType(arrayType->primaryType, init->getType())) {
-            error(init->getLocation(), "type mismatch");
+        auto primaryType = first->getType();
+        for (auto& init : expr->getInits()) {
+            if (!isSameType(primaryType, init->getType())) {
+                primaryType = nullptr;
+                break;
+            }
         }
+        arrayType->primaryType = primaryType;
     }
 
     expr->setType(arrayType);
@@ -861,15 +871,17 @@ void TypeResolver::visit(const std::shared_ptr<MapLiteral>& expr, Invoke&& trave
         assert(tupleType);
         assert(tupleType->types.size() == 2);
 
-        mapType->keyType = tupleType->types[0];
-        mapType->valueType = tupleType->types[1];
-    }
+        // TODO: Use union type instead of type of first element
+        for (auto& entry : expr->getEntries()) {
+            if (!isSameType(tupleType, entry->getType())) {
+                tupleType = nullptr;
+                break;
+            }
+        }
 
-    // TODO: type check
-    auto tupleType = TupleType::make({mapType->keyType, mapType->valueType});
-    for (auto& entry : expr->getEntries()) {
-        if (!isSameType(tupleType, entry->getType())) {
-            error(entry->getLocation(), "type mismatch");
+        if (tupleType != nullptr) {
+            mapType->keyType = tupleType->types[0];
+            mapType->valueType = tupleType->types[1];
         }
     }
 

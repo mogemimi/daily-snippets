@@ -123,6 +123,7 @@ std::string BuiltinType::toString(BuiltinTypeKind kind)
     case BuiltinTypeKind::String: return "string";
     case BuiltinTypeKind::Void: return "void";
     case BuiltinTypeKind::Any: return "any";
+    case BuiltinTypeKind::Null: return "null";
     }
     return "<unknown-builtin-type>";
 }

@@ -225,3 +225,136 @@ TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
             "1:19: error: invalid operands to binary expression ('string' and 'string')."));
     }
 }
+
+TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typecheck]")
+{
+    auto stream = std::make_shared<UnitTestDiagnosticStream>();
+    auto diag = std::make_shared<DiagnosticHandler>();
+    diag->setStream(stream);
+
+    SECTION("arrays")
+    {
+        constexpr auto source = R"(function test() {
+            let x = [];
+            let y = [1, 2, 3, 4];
+            let z = [42, true, 3.14, "a", null, ["a"], [1]];
+        })";
+        REQUIRE(typeCheck(diag, source));
+    }
+    SECTION("maps")
+    {
+        constexpr auto source = R"(function test() {
+            let x = ["a": 1, "b": 2, "c": 3];
+            let y = ["a": 42, "b": true, "c": 3.14, "d": "foo", "e": null];
+        })";
+        REQUIRE(typeCheck(diag, source));
+    }
+    SECTION("maps in array")
+    {
+        constexpr auto source = R"(function test() {
+            let x = [["a": 1], ["b": 2, "c": 3]];
+        })";
+        REQUIRE(typeCheck(diag, source));
+    }
+    SECTION("arrays in map")
+    {
+        constexpr auto source = R"(function test() {
+            let x = ["a": [1, 2], "b": [3], "c": 4];
+            let y = ["a": [3.14], "b": [["x": "foo"]], "c": [["y": 42], true]];
+        })";
+        REQUIRE(typeCheck(diag, source));
+    }
+    SECTION("nested empty arrays")
+    {
+        constexpr auto source = R"(function test() {
+            let x = [[]];
+            let y = [[[]]];
+            let z = [[[]], []];
+            let w = [[[]], [[], []], [[[], []], []]];
+        })";
+        REQUIRE(typeCheck(diag, source));
+    }
+    SECTION("maps included an empty one, in array")
+    {
+        constexpr auto source = R"(function test() {
+            let x = [[], ["a": 1], ["b": 2, "c": 3]];
+            let y = [["a": 1], ["b": 2, "c": 3], []];
+        })";
+        REQUIRE(typeCheck(diag, source));
+    }
+    SECTION("int is not assignable to array")
+    {
+        constexpr auto source = R"(function f() {
+            let a = [42];
+            a = 42;
+        })";
+        REQUIRE(!typeCheck(diag, source));
+    }
+    SECTION("int is not assignable to array")
+    {
+        constexpr auto source = R"(function f() {
+            let a = [42];
+            a = 3.14;
+        })";
+        REQUIRE(!typeCheck(diag, source));
+    }
+    SECTION("bool is not assignable to array")
+    {
+        constexpr auto source = R"(function f() {
+            let a = [42];
+            a = true;
+        })";
+        REQUIRE(!typeCheck(diag, source));
+    }
+    SECTION("string is not assignable to array")
+    {
+        constexpr auto source = R"(function f() {
+            let a = [42];
+            a = "foo";
+        })";
+        REQUIRE(!typeCheck(diag, source));
+    }
+    SECTION("int is not assignable to map")
+    {
+        constexpr auto source = R"(function f() {
+            let x = ["a": 42];
+            x = 42;
+        })";
+        REQUIRE(!typeCheck(diag, source));
+    }
+    SECTION("int is not assignable to map")
+    {
+        constexpr auto source = R"(function f() {
+            let x = ["a": 42];
+            x = 3.14;
+        })";
+        REQUIRE(!typeCheck(diag, source));
+    }
+    SECTION("bool is not assignable to map")
+    {
+        constexpr auto source = R"(function f() {
+            let x = ["a": 42];
+            x = true;
+        })";
+        REQUIRE(!typeCheck(diag, source));
+    }
+    SECTION("string is not assignable to map")
+    {
+        constexpr auto source = R"(function f() {
+            let x = ["a": 42];
+            x = "foo";
+        })";
+        REQUIRE(!typeCheck(diag, source));
+    }
+
+    SECTION("'operator+' cannot be applied to arrays")
+    {
+        constexpr auto source = R"(function f() { [42] + [3]; })";
+        REQUIRE(!typeCheck(diag, source));
+    }
+    SECTION("'operator+' cannot be applied to maps")
+    {
+        constexpr auto source = R"(function f() { ["a":42] + ["b":3]; })";
+        REQUIRE(!typeCheck(diag, source));
+    }
+}

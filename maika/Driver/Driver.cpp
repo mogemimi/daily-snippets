@@ -44,7 +44,7 @@ MyDriver::parseString(const std::string& text, const std::shared_ptr<DiagnosticH
 
     assert(diag);
 
-    auto state = yy_scan_bytes(sourceText.c_str(), sourceText.size());
+    auto state = yy_scan_bytes(sourceText.c_str(), static_cast<int>(sourceText.size()));
     this->defer = [state] { yy_delete_buffer(state); };
 
     scanBegin();

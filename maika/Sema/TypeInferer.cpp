@@ -135,6 +135,15 @@ std::shared_ptr<Type> fresh(
     case TypeKind::FunctionType: {
         break;
     }
+    case TypeKind::ArrayType: {
+        break;
+    }
+    case TypeKind::MapType: {
+        break;
+    }
+    case TypeKind::TupleType: {
+        break;
+    }
     }
     return type;
 }

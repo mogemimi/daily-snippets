@@ -694,13 +694,13 @@ namespace yy {
 
 
     // User initialization code.
-    #line 43 "Parser/MyParser.yy" // lalr1.cc:741
+    #line 43 "Parser/MyParser.yy" // lalr1.cc:745
 {
     // Initialize the initial location.
     yyla.location.begin.filename = yyla.location.end.filename = &driver.file;
 }
 
-#line 704 "Parser/MyParser.cpp" // lalr1.cc:741
+#line 704 "Parser/MyParser.cpp" // lalr1.cc:745
 
     /* Initialize the stack.  The initial state will be set in
        yynewstate, since the latter expects the semantical and the
