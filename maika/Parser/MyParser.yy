@@ -304,7 +304,8 @@ array_literal:
 ;
 
 map_literal:
-  "[" map_entry_list comma_opt "]"  { $$ = MapLiteral::make(toLoc(@$), $2); }
+  "[" ":" "]"                       { $$ = MapLiteral::make(toLoc(@$), std::vector<std::shared_ptr<MapEntry>>{}); }
+| "[" map_entry_list comma_opt "]"  { $$ = MapLiteral::make(toLoc(@$), $2); }
 ;
 
 map_entry:

@@ -234,7 +234,7 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
 
     SECTION("arrays")
     {
-        constexpr auto source = R"(function test() {
+        constexpr auto source = R"(function f() {
             let x = [];
             let y = [1, 2, 3, 4];
             let z = [42, true, 3.14, "a", null, ["a"], [1]];
@@ -243,9 +243,10 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
     }
     SECTION("maps")
     {
-        constexpr auto source = R"(function test() {
-            let x = ["a": 1, "b": 2, "c": 3];
-            let y = ["a": 42, "b": true, "c": 3.14, "d": "foo", "e": null];
+        constexpr auto source = R"(function f() {
+            let x = [:];
+            let y = ["a": 1, "b": 2, "c": 3];
+            let z = ["a": 42, "b": true, "c": 3.14, "d": "foo", "e": null];
         })";
         REQUIRE(typeCheck(diag, source));
     }
