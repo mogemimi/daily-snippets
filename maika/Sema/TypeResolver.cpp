@@ -156,11 +156,11 @@ getParameterTypes(const std::vector<std::shared_ptr<ParmVarDecl>>& parameters)
     return parameterTypes;
 }
 
-constexpr int anyBit = 0b00001;
-constexpr int intBit = 0b00010;
-constexpr int doubleBit = 0b00100;
-constexpr int boolBit = 0b01000;
-constexpr int stringBit = 0b10000;
+constexpr int anyBit = 0b0000001;
+constexpr int intBit = 0b0000010;
+constexpr int doubleBit = 0b0000100;
+constexpr int boolBit = 0b0001000;
+constexpr int stringBit = 0b0010000;
 
 int toBinaryOpTypeCastBits(BuiltinTypeKind type)
 {
@@ -390,6 +390,57 @@ TypeCapability getTypeCapability(BuiltinTypeKind type)
     return c;
 }
 
+TypeCapability getTypeCapability(const std::shared_ptr<Type>& type)
+{
+    TypeCapability c = 0;
+    switch (type->getKind()) {
+    case TypeKind::BuiltinType:
+        {
+            auto t = std::static_pointer_cast<BuiltinType>(type);
+            assert(t == std::dynamic_pointer_cast<BuiltinType>(type));
+            c = getTypeCapability(t->kind);
+        }
+        break;
+    case TypeKind::ArrayType:
+    case TypeKind::MapType:
+    case TypeKind::TupleType:
+    case TypeKind::FunctionType:
+        c = disableMask(c, hasBinaryOperatorAdd);
+        c = disableMask(c, hasBinaryOperatorSubtract);
+        c = disableMask(c, hasBinaryOperatorMultiply);
+        c = disableMask(c, hasBinaryOperatorDivide);
+        c = disableMask(c, hasBinaryOperatorMod);
+        c = enableMask(c, hasBinaryOperatorAssign);
+        c = enableMask(c, hasBinaryOperatorEqual);
+        c = enableMask(c, hasBinaryOperatorNotEqual);
+        c = disableMask(c, hasBinaryOperatorLogicalAnd);
+        c = disableMask(c, hasBinaryOperatorLogicalOr);
+        c = disableMask(c, hasBinaryOperatorGreaterThan);
+        c = disableMask(c, hasBinaryOperatorGreaterThanOrEqual);
+        c = disableMask(c, hasBinaryOperatorLessThan);
+        c = disableMask(c, hasBinaryOperatorLessThanOrEqual);
+        break;
+    case TypeKind::TypeVariable:
+    case TypeKind::ReturnType:
+        c = enableMask(c, hasBinaryOperatorAdd);
+        c = enableMask(c, hasBinaryOperatorSubtract);
+        c = enableMask(c, hasBinaryOperatorMultiply);
+        c = enableMask(c, hasBinaryOperatorDivide);
+        c = enableMask(c, hasBinaryOperatorMod);
+        c = enableMask(c, hasBinaryOperatorAssign);
+        c = enableMask(c, hasBinaryOperatorEqual);
+        c = enableMask(c, hasBinaryOperatorNotEqual);
+        c = enableMask(c, hasBinaryOperatorLogicalAnd);
+        c = enableMask(c, hasBinaryOperatorLogicalOr);
+        c = enableMask(c, hasBinaryOperatorGreaterThan);
+        c = enableMask(c, hasBinaryOperatorGreaterThanOrEqual);
+        c = enableMask(c, hasBinaryOperatorLessThan);
+        c = enableMask(c, hasBinaryOperatorLessThanOrEqual);
+        break;
+    }
+    return c;
+}
+
 uint64_t binaryOperatorMask(BinaryOperatorKind op)
 {
     switch (op) {
@@ -411,10 +462,26 @@ uint64_t binaryOperatorMask(BinaryOperatorKind op)
     return 0;
 }
 
-bool isBinaryOperatorValid(BinaryOperatorKind op, BuiltinTypeKind type)
+bool isBinaryOperatorValid(BinaryOperatorKind op, const std::shared_ptr<Type>& type)
 {
     const auto mask = binaryOperatorMask(op);
     return (getTypeCapability(type) & mask) != 0;
+}
+
+std::string getDiagnosticString(const std::shared_ptr<Type>& type)
+{
+    switch (type->getKind()) {
+    case TypeKind::BuiltinType:
+    case TypeKind::ArrayType:
+    case TypeKind::MapType:
+    case TypeKind::TupleType:
+    case TypeKind::FunctionType:
+    case TypeKind::ReturnType:
+        break;
+    case TypeKind::TypeVariable:
+        return "any";
+    }
+    return type->dump();
 }
 
 } // end of anonymous namespace
@@ -620,6 +687,21 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
     const auto lhsTypeInferred = TypeInferer::infer(scope->env, lhs->getType());
     const auto rhsTypeInferred = TypeInferer::infer(scope->env, rhs->getType());
 
+    if (!isBinaryOperatorValid(expr->getKind(), lhsTypeInferred)) {
+        error(
+            lhs->getLocation(),
+            "invalid operands to binary expression ('" + getDiagnosticString(lhsTypeInferred) +
+                "' and '" + getDiagnosticString(rhsTypeInferred) + "').");
+        return;
+    }
+    if (!isBinaryOperatorValid(expr->getKind(), rhsTypeInferred)) {
+        error(
+            rhs->getLocation(),
+            "invalid operands to binary expression ('" + getDiagnosticString(lhsTypeInferred) +
+                "' and '" + getDiagnosticString(rhsTypeInferred) + "').");
+        return;
+    }
+
     const auto [lhsType, lhsTypeEnabled] = TypeHelper::toBuiltinType(lhsTypeInferred);
     const auto [rhsType, rhsTypeEnabled] = TypeHelper::toBuiltinType(rhsTypeInferred);
 
@@ -632,18 +714,32 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
         return;
     }
 
-    if (lhsTypeEnabled && !isBinaryOperatorValid(expr->getKind(), lhsType)) {
+    if (lhsTypeInferred->getKind() == TypeKind::MapType) {
+        if (rhsTypeInferred->getKind() == TypeKind::MapType) {
+            // NOTE: The operator doesn't need to implicitly cast types of operands.
+            assert(!expr->getType());
+            expr->setType(lhs->getType());
+            return;
+        }
         error(
-            lhs->getLocation(),
-            "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
-                "' and '" + BuiltinType::toString(rhsType) + "').");
+            expr->getLocation(),
+            "Operator '" + BinaryOperator::toString(expr->getKind()) +
+                "' cannot be applied to types '" + getDiagnosticString(lhsTypeInferred) + "' and '" +
+                getDiagnosticString(rhsTypeInferred) + "'.");
         return;
     }
-    if (rhsTypeEnabled && !isBinaryOperatorValid(expr->getKind(), rhsType)) {
+    if (lhsTypeInferred->getKind() == TypeKind::ArrayType) {
+        if (rhsTypeInferred->getKind() == TypeKind::ArrayType) {
+            // NOTE: The operator doesn't need to implicitly cast types of operands.
+            assert(!expr->getType());
+            expr->setType(lhs->getType());
+            return;
+        }
         error(
-            rhs->getLocation(),
-            "invalid operands to binary expression ('" + BuiltinType::toString(lhsType) +
-                "' and '" + BuiltinType::toString(rhsType) + "').");
+            expr->getLocation(),
+            "Operator '" + BinaryOperator::toString(expr->getKind()) +
+                "' cannot be applied to types '" + getDiagnosticString(lhsTypeInferred) + "' and '" +
+                getDiagnosticString(rhsTypeInferred) + "'.");
         return;
     }
 

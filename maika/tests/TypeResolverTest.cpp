@@ -290,7 +290,7 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
         })";
         REQUIRE(!typeCheck(diag, source));
     }
-    SECTION("int is not assignable to array")
+    SECTION("double is not assignable to array")
     {
         constexpr auto source = R"(function f() {
             let a = [42];
@@ -346,7 +346,6 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
         })";
         REQUIRE(!typeCheck(diag, source));
     }
-
     SECTION("'operator+' cannot be applied to arrays")
     {
         constexpr auto source = R"(function f() { [42] + [3]; })";
@@ -356,5 +355,25 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
     {
         constexpr auto source = R"(function f() { ["a":42] + ["b":3]; })";
         REQUIRE(!typeCheck(diag, source));
+    }
+    SECTION("'operator==' can be applied to arrays")
+    {
+        constexpr auto source = R"(function f() { [42] == [3]; })";
+        REQUIRE(typeCheck(diag, source));
+    }
+    SECTION("'operator==' can be applied to maps")
+    {
+        constexpr auto source = R"(function f() { ["a":42] == ["b":3]; })";
+        REQUIRE(typeCheck(diag, source));
+    }
+    SECTION("'operator!=' can be applied to arrays")
+    {
+        constexpr auto source = R"(function f() { [42] != [3]; })";
+        REQUIRE(typeCheck(diag, source));
+    }
+    SECTION("'operator!=' can be applied to maps")
+    {
+        constexpr auto source = R"(function f() { ["a":42] != ["b":3]; })";
+        REQUIRE(typeCheck(diag, source));
     }
 }

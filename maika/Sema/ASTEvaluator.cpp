@@ -249,12 +249,12 @@ std::tuple<std::unique_ptr<Value>, ASTEvaluateResult> evaluateImplicitCast(
 
     auto [value, result] = ASTEvaluator::evaluate(subExpr, diag);
 
-	if (result == ASTEvaluateResult::SemanticError) {
-		return semanticError();
-	}
-	if (result == ASTEvaluateResult::RuntimeEvaluation) {
-		return runtimeEvaluation();
-	}
+    if (result == ASTEvaluateResult::SemanticError) {
+        return semanticError();
+    }
+    if (result == ASTEvaluateResult::RuntimeEvaluation) {
+        return runtimeEvaluation();
+    }
 
     if (value->getKind() == ValueKind::Int64) {
         assert(value->getKind() == ValueKind::Int64);

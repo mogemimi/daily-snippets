@@ -12,8 +12,6 @@
 
 namespace {
 
-
-
 } // end of anonymous namespace
 
 void BytecodeGenerator::addInstruction(const std::shared_ptr<Instruction>& inst)
@@ -136,9 +134,9 @@ void BytecodeGenerator::visit(const std::shared_ptr<BinaryOperator>& expr, Invok
         // NOTE: lookup variable
         auto variableName = lvalueExpr->getNamedDecl()->getName();
         auto iter = std::find_if(
-            std::begin(program.localVariables), std::end(program.localVariables), [&](const auto& a) {
-                return variableName == a.name;
-            });
+            std::begin(program.localVariables),
+            std::end(program.localVariables),
+            [&](const auto& a) { return variableName == a.name; });
         assert(iter != std::end(program.localVariables));
 
         {

@@ -265,8 +265,8 @@ bool invokeDiv(std::vector<std::shared_ptr<Value>>& valueStack)
         break;
     }
     case ValueKind::Bool: {
-		printf("%s\n", "runtime error: undefined behavior when dividing two bool values.");
-		return false;
+        printf("%s\n", "runtime error: undefined behavior when dividing two bool values.");
+        return false;
         break;
     }
     case ValueKind::String: {
@@ -316,8 +316,8 @@ bool invokeMod(std::vector<std::shared_ptr<Value>>& valueStack)
         break;
     }
     case ValueKind::Bool: {
-		printf("%s\n", "runtime error: undefined behavior when dividing two bool values.");
-		return false;
+        printf("%s\n", "runtime error: undefined behavior when dividing two bool values.");
+        return false;
         break;
     }
     case ValueKind::String: {

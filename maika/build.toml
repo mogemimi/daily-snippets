@@ -1,0 +1,53 @@
+[[targets]]
+name = "maika"
+type = "executable"
+cflags_cc = [
+  "-std=c++1z",
+]
+include_dirs = [
+  ".",
+]
+sources = [
+  "AST/ASTContext.cpp",
+  "AST/ASTDumper.cpp",
+  "AST/ASTVisitor.cpp",
+  "AST/Comment.cpp",
+  "AST/Decl.cpp",
+  "AST/Expr.cpp",
+  "AST/Stmt.cpp",
+  "AST/Type.cpp",
+  "Basic/Diagnostic.cpp",
+  "Basic/Location.cpp",
+  "CodeGen/BytecodeGenerator.cpp",
+  "CodeGen/Instruction.cpp",
+  "CodeGen/Runtime.cpp",
+  "Driver/Driver.cpp",
+  "Parser/MyLexer.cpp",
+  "Parser/MyParser.cpp",
+  "Printer/PrettyPrinter.cpp",
+  "Sema/ASTEvaluator.cpp",
+  "Sema/Entity.cpp",
+  "Sema/IdentifierResolver.cpp",
+  "Sema/Scope.cpp",
+  "Sema/SemaChecker.cpp",
+  "Sema/TypeInferer.cpp",
+  "Sema/TypeResolver.cpp",
+  "Sema/Value.cpp",
+  "tests/DumpTest.cpp",
+  "tests/IdentifierResolverTest.cpp",
+  "tests/LexerTest.cpp",
+  "tests/main.cpp",
+  "tests/ParserTest.cpp",
+  "tests/SemaCheckerTest.cpp",
+  "tests/TypeResolverTest.cpp",
+]
+
+[targets.tagged."mac"]
+cflags = [
+  "-target x86_64-apple-macosx10.11",
+]
+ldflags = [
+  "-lSystem",
+  "-lc++",
+  "-macosx_version_min 10.11",
+]
