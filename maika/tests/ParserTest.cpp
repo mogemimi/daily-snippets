@@ -44,9 +44,22 @@ TEST_CASE("parser can treat basic sources consistently", "[parser]")
         constexpr auto source = "function f() { g(a, b, c,); }\n";
         REQUIRE(!parse(diag, source));
     }
+    SECTION("parser can treat subscript expression")
+    {
+        constexpr auto source = R"(
+        function g(x) { return x; }
+        function f() {
+            let a = [40, 41, 42];
+            a[0] = a[1];
+            a[1] = a[0] + a[2];
+            a[g(3)] = g(a[0]);
+            a = [4, 3, 2, 1];
+        })";
+        REQUIRE(parse(diag, source));
+    }
 }
 
-TEST_CASE("parser can treat array and map literals", "[parser]")
+TEST_CASE("parser can treat array literal", "[parser]")
 {
     auto stream = std::make_shared<UnitTestDiagnosticStream>();
     auto diag = std::make_shared<DiagnosticHandler>();
@@ -82,9 +95,22 @@ TEST_CASE("parser can treat array and map literals", "[parser]")
         constexpr auto source = "function f() { return [, 2]; }\n";
         REQUIRE(!parse(diag, source));
     }
+}
+
+TEST_CASE("parser can treat map literal", "[parser]")
+{
+    auto stream = std::make_shared<UnitTestDiagnosticStream>();
+    auto diag = std::make_shared<DiagnosticHandler>();
+    diag->setStream(stream);
+
     SECTION("parser can treat map literal")
     {
         constexpr auto source = R"(function f() { return ["a": 1, "b": 2, "c": 3]; })";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can treat empty map literal")
+    {
+        constexpr auto source = "function f() { return [:]; }\n";
         REQUIRE(parse(diag, source));
     }
     SECTION("parser can treat single map literal")

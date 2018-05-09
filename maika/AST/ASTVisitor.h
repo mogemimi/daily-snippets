@@ -103,6 +103,13 @@ public:
         traverse();
     }
 
+    virtual void visit(const std::shared_ptr<SubscriptExpr>& expr) {}
+    virtual void visit(const std::shared_ptr<SubscriptExpr>& expr, Invoke&& traverse)
+    {
+        visit(expr);
+        traverse();
+    }
+
     virtual void visit(const std::shared_ptr<ArrayLiteral>& expr) {}
     virtual void visit(const std::shared_ptr<ArrayLiteral>& expr, Invoke&& traverse)
     {

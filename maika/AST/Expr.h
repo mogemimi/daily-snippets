@@ -279,6 +279,26 @@ public:
         const std::shared_ptr<NamedDecl>& d);
 };
 
+class SubscriptExpr final
+    : public Expr
+    , public std::enable_shared_from_this<SubscriptExpr> {
+private:
+    std::shared_ptr<Expr> base;
+    std::shared_ptr<Expr> index;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<Expr> getBase() const;
+
+    std::shared_ptr<Expr> getIndex() const;
+
+    static std::shared_ptr<SubscriptExpr> make(
+        const Location& loc,
+        const std::shared_ptr<Expr>& base,
+        const std::shared_ptr<Expr>& index);
+};
+
 class ArrayLiteral final
     : public Expr
     , public std::enable_shared_from_this<ArrayLiteral> {

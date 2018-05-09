@@ -359,6 +359,37 @@ std::shared_ptr<MemberExpr> MemberExpr::make(
     return expr;
 }
 
+void SubscriptExpr::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        assert(base);
+        assert(index);
+        base->traverse(visitor);
+        index->traverse(visitor);
+    });
+}
+
+std::shared_ptr<Expr> SubscriptExpr::getBase() const
+{
+    return base;
+}
+
+std::shared_ptr<Expr> SubscriptExpr::getIndex() const
+{
+    return index;
+}
+
+std::shared_ptr<SubscriptExpr> SubscriptExpr::make(
+    const Location& loc, const std::shared_ptr<Expr>& base, const std::shared_ptr<Expr>& index)
+{
+    auto expr = std::make_shared<SubscriptExpr>();
+    expr->location = loc;
+    expr->valueKind = ExprValueKind::LValue;
+    expr->base = base;
+    expr->index = index;
+    return expr;
+}
+
 void ArrayLiteral::traverse(ASTVisitor& visitor)
 {
     visitor.visit(shared_from_this(), [&] {

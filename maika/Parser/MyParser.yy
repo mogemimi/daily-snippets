@@ -139,6 +139,7 @@ Location toLoc(const yy::location& y)
 %type  <std::vector<std::shared_ptr<Stmt>>>         statement_list
 %type  <std::shared_ptr<NamedDecl>>                 binding_identifier
 %type  <std::shared_ptr<MemberExpr>>                member_expression
+%type  <std::shared_ptr<SubscriptExpr>>             subscript_expression
 %type  <std::shared_ptr<CallExpr>>                  call_expression
 %type  <std::vector<std::shared_ptr<ParmVarDecl>>>  parameter_variables
 %type  <std::shared_ptr<ParmVarDecl>>               parameter_variable
@@ -282,7 +283,7 @@ literal:
 %left "*" "/" "%";
 %left "unary_plus" "unary_minus";
 %right "++" "--" "!";
-%left ".";
+%left "." "[" "]";
 %nonassoc "(" ")";
 
 primary_expression:
@@ -319,6 +320,10 @@ map_entry_list:
 
 member_expression:
   expression "." "identifier" { $$ = MemberExpr::make(toLoc(@$), $1, $3); }
+;
+
+subscript_expression:
+  expression "[" expression "]" { $$ = SubscriptExpr::make(toLoc(@$), $1, $3); }
 ;
 
 call_expression:
@@ -368,6 +373,7 @@ expression:
 | unary_expression                  { $$ = $1; }
 | call_expression                   { $$ = $1; }
 | member_expression                 { $$ = $1; }
+| subscript_expression              { $$ = $1; }
 | function_expression               { $$ = $1; }
 ;
 

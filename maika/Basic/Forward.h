@@ -42,6 +42,7 @@ class BinaryOperator;
 class UnaryOperator;
 class DeclRefExpr;
 class MemberExpr;
+class SubscriptExpr;
 class ArrayLiteral;
 class MapEntry;
 class MapLiteral;
