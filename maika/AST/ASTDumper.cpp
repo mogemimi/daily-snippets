@@ -203,6 +203,15 @@ void ASTDumper::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse
     dump(&dumpContext, "MemberExpr", options, std::move(traverse));
 }
 
+void ASTDumper::visit(const std::shared_ptr<SubscriptExpr>& expr, Invoke&& traverse)
+{
+    std::vector<std::string> options;
+    if (auto type = expr->getType()) {
+        options.push_back(type->dump());
+    }
+    dump(&dumpContext, "SubscriptExpr", options, std::move(traverse));
+}
+
 void ASTDumper::visit(const std::shared_ptr<ArrayLiteral>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;

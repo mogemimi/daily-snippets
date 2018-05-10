@@ -294,9 +294,7 @@ public:
     std::shared_ptr<Expr> getIndex() const;
 
     static std::shared_ptr<SubscriptExpr> make(
-        const Location& loc,
-        const std::shared_ptr<Expr>& base,
-        const std::shared_ptr<Expr>& index);
+        const Location& loc, const std::shared_ptr<Expr>& base, const std::shared_ptr<Expr>& index);
 };
 
 class ArrayLiteral final

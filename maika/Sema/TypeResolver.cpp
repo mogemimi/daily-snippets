@@ -26,8 +26,26 @@ void substition(
     ast->setType(type);
 }
 
+bool isSameType(const std::shared_ptr<Type>& a, const std::shared_ptr<Type>& b);
+
+bool isSameTypeOrNull(const std::shared_ptr<Type>& a, const std::shared_ptr<Type>& b)
+{
+    if (a == nullptr) {
+        return b == nullptr;
+    }
+    if (b == nullptr) {
+        return false;
+    }
+    assert(a);
+    assert(b);
+    return isSameType(a, b);
+}
+
 bool isSameType(const std::shared_ptr<Type>& a, const std::shared_ptr<Type>& b)
 {
+    assert(a);
+    assert(b);
+
     if (a->getKind() != b->getKind()) {
         return false;
     }
@@ -50,12 +68,21 @@ bool isSameType(const std::shared_ptr<Type>& a, const std::shared_ptr<Type>& b)
     case TypeKind::ArrayType: {
         assert(a->getKind() == TypeKind::ArrayType);
         assert(b->getKind() == TypeKind::ArrayType);
-        return true;
+        const auto x = std::static_pointer_cast<ArrayType>(a);
+        const auto y = std::static_pointer_cast<ArrayType>(b);
+        assert(x);
+        assert(y);
+        return isSameTypeOrNull(x->primaryType, y->primaryType);
     }
     case TypeKind::MapType: {
         assert(a->getKind() == TypeKind::MapType);
         assert(b->getKind() == TypeKind::MapType);
-        return true;
+        const auto x = std::static_pointer_cast<MapType>(a);
+        const auto y = std::static_pointer_cast<MapType>(b);
+        assert(x);
+        assert(y);
+        return isSameTypeOrNull(x->keyType, y->keyType) &&
+               isSameTypeOrNull(x->valueType, y->valueType);
     }
     case TypeKind::TupleType: {
         const auto x = std::static_pointer_cast<TupleType>(a);
@@ -394,13 +421,11 @@ TypeCapability getTypeCapability(const std::shared_ptr<Type>& type)
 {
     TypeCapability c = 0;
     switch (type->getKind()) {
-    case TypeKind::BuiltinType:
-        {
-            auto t = std::static_pointer_cast<BuiltinType>(type);
-            assert(t == std::dynamic_pointer_cast<BuiltinType>(type));
-            c = getTypeCapability(t->kind);
-        }
-        break;
+    case TypeKind::BuiltinType: {
+        auto t = std::static_pointer_cast<BuiltinType>(type);
+        assert(t == std::dynamic_pointer_cast<BuiltinType>(type));
+        c = getTypeCapability(t->kind);
+    } break;
     case TypeKind::ArrayType:
     case TypeKind::MapType:
     case TypeKind::TupleType:
@@ -476,10 +501,8 @@ std::string getDiagnosticString(const std::shared_ptr<Type>& type)
     case TypeKind::MapType:
     case TypeKind::TupleType:
     case TypeKind::FunctionType:
-    case TypeKind::ReturnType:
-        break;
-    case TypeKind::TypeVariable:
-        return "any";
+    case TypeKind::ReturnType: break;
+    case TypeKind::TypeVariable: return "any";
     }
     return type->dump();
 }
@@ -724,8 +747,8 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
         error(
             expr->getLocation(),
             "Operator '" + BinaryOperator::toString(expr->getKind()) +
-                "' cannot be applied to types '" + getDiagnosticString(lhsTypeInferred) + "' and '" +
-                getDiagnosticString(rhsTypeInferred) + "'.");
+                "' cannot be applied to types '" + getDiagnosticString(lhsTypeInferred) +
+                "' and '" + getDiagnosticString(rhsTypeInferred) + "'.");
         return;
     }
     if (lhsTypeInferred->getKind() == TypeKind::ArrayType) {
@@ -738,8 +761,8 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
         error(
             expr->getLocation(),
             "Operator '" + BinaryOperator::toString(expr->getKind()) +
-                "' cannot be applied to types '" + getDiagnosticString(lhsTypeInferred) + "' and '" +
-                getDiagnosticString(rhsTypeInferred) + "'.");
+                "' cannot be applied to types '" + getDiagnosticString(lhsTypeInferred) +
+                "' and '" + getDiagnosticString(rhsTypeInferred) + "'.");
         return;
     }
 
@@ -908,6 +931,9 @@ void TypeResolver::visit(const std::shared_ptr<ArrayLiteral>& expr, Invoke&& tra
         auto first = expr->getInits().front();
         auto primaryType = first->getType();
         for (auto& init : expr->getInits()) {
+            if (primaryType == init->getType()) {
+                continue;
+            }
             if (!isSameType(primaryType, init->getType())) {
                 primaryType = nullptr;
                 break;
@@ -969,6 +995,9 @@ void TypeResolver::visit(const std::shared_ptr<MapLiteral>& expr, Invoke&& trave
 
         // TODO: Use union type instead of type of first element
         for (auto& entry : expr->getEntries()) {
+            if (tupleType == entry->getType()) {
+                continue;
+            }
             if (!isSameType(tupleType, entry->getType())) {
                 tupleType = nullptr;
                 break;
