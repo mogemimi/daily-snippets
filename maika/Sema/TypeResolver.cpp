@@ -908,6 +908,55 @@ void TypeResolver::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& trav
     expr->setType(namedDecl->getType());
 }
 
+void TypeResolver::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse)
+{
+    traverse();
+
+    // TODO: Not implemented for class (or struct type)
+    expr->setType(BuiltinType::make(BuiltinTypeKind::Any));
+}
+
+void TypeResolver::visit(const std::shared_ptr<SubscriptExpr>& expr, Invoke&& traverse)
+{
+    traverse();
+
+    assert(expr->getBase());
+    assert(expr->getIndex());
+
+    auto baseType = expr->getBase()->getType();
+    assert(baseType);
+
+    auto indexType = expr->getIndex()->getType();
+    assert(indexType);
+
+    switch (baseType->getKind()) {
+    case TypeKind::ArrayType: {
+        auto arrayType = std::static_pointer_cast<ArrayType>(baseType);
+        assert(arrayType == std::dynamic_pointer_cast<ArrayType>(baseType));
+
+        if (arrayType->primaryType) {
+            expr->setType(arrayType->primaryType);
+            return;
+        }
+        break;
+    }
+    case TypeKind::MapType: {
+        auto mapType = std::static_pointer_cast<MapType>(baseType);
+        assert(mapType == std::dynamic_pointer_cast<MapType>(baseType));
+
+        if (mapType->valueType) {
+            expr->setType(mapType->valueType);
+            return;
+        }
+        break;
+    }
+    default: break;
+    }
+
+    // TODO: Not implemented for class/struct
+    expr->setType(BuiltinType::make(BuiltinTypeKind::Any));
+}
+
 void TypeResolver::visit(const std::shared_ptr<ArrayLiteral>& expr, Invoke&& traverse)
 {
     traverse();
