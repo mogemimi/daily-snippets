@@ -236,6 +236,26 @@ TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
         REQUIRE(typeCheck(diag, source, astContext, context));
         REQUIRE(requireType(context, "a", "any"));
     }
+    SECTION("Type 'Array' is not callable.")
+    {
+        constexpr auto source = R"(function f() {
+            let a = [];
+            a();
+        })";
+        REQUIRE(!typeCheck(diag, source, astContext, context));
+        REQUIRE(requireType(context, "a", "Array"));
+        REQUIRE(stream->hasError("3:13: error: Cannot call a non-function whose type is 'Array'."));
+    }
+    SECTION("Type 'Map' is not callable.")
+    {
+        constexpr auto source = R"(function f() {
+            let a = [:];
+            a();
+        })";
+        REQUIRE(!typeCheck(diag, source, astContext, context));
+        REQUIRE(requireType(context, "a", "Map"));
+        REQUIRE(stream->hasError("3:13: error: Cannot call a non-function whose type is 'Map'."));
+    }
     SECTION("Operator '+' cannot be applied to types 'string' and 'double'.")
     {
         constexpr auto source = R"(
