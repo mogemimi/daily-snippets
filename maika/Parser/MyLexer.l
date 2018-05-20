@@ -110,6 +110,7 @@ crlf        (\r\n|\n)
 "else"      return yy::MyParser::make_ELSE(loc);
 "while"     return yy::MyParser::make_WHILE(loc);
 "for"       return yy::MyParser::make_FOR(loc);
+"in"        return yy::MyParser::make_IN(loc);
 "true"      return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(toLoc(loc), true), loc);
 "false"     return yy::MyParser::make_BOOL_LITERAL(BoolLiteral::make(toLoc(loc), false), loc);
 "null"      return yy::MyParser::make_NULL(loc);

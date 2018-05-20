@@ -85,6 +85,11 @@ void ASTDumper::visit(const std::shared_ptr<ForStmt>& stmt, Invoke&& traverse)
     dump(&dumpContext, "ForStmt", {}, std::move(traverse));
 }
 
+void ASTDumper::visit(const std::shared_ptr<ForRangeStmt>& stmt, Invoke&& traverse)
+{
+    dump(&dumpContext, "ForRangeStmt", {}, std::move(traverse));
+}
+
 void ASTDumper::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;

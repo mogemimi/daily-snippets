@@ -229,3 +229,47 @@ std::shared_ptr<ForStmt> ForStmt::make(
     stmt->bodyStmt = bodyStmt;
     return stmt;
 }
+
+void ForRangeStmt::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        if (loopVariable) {
+            loopVariable->traverse(visitor);
+        }
+        if (rangeExpr) {
+            rangeExpr->traverse(visitor);
+        }
+        if (bodyStmt) {
+            bodyStmt->traverse(visitor);
+        }
+    });
+}
+
+std::shared_ptr<Decl> ForRangeStmt::getLoopVariable() const
+{
+    return loopVariable;
+}
+
+std::shared_ptr<Expr> ForRangeStmt::getRangeExpr() const
+{
+    return rangeExpr;
+}
+
+std::shared_ptr<Stmt> ForRangeStmt::getBody() const
+{
+    return bodyStmt;
+}
+
+std::shared_ptr<ForRangeStmt> ForRangeStmt::make(
+    const Location& loc,
+    const std::shared_ptr<Decl>& loopVariable,
+    const std::shared_ptr<Expr>& rangeExpr,
+    const std::shared_ptr<Stmt>& bodyStmt)
+{
+    auto stmt = std::make_shared<ForRangeStmt>();
+    stmt->location = loc;
+    stmt->loopVariable = loopVariable;
+    stmt->rangeExpr = rangeExpr;
+    stmt->bodyStmt = bodyStmt;
+    return stmt;
+}

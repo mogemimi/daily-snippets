@@ -116,6 +116,7 @@ Location toLoc(const yy::location& y)
 %token ELSE                 "else"
 %token WHILE                "while"
 %token FOR                  "for"
+%token IN                   "in"
 %token NULL                 "null"
 
 %token <std::shared_ptr<NamedDecl>>                 IDENTIFIER "identifier"
@@ -149,6 +150,8 @@ Location toLoc(const yy::location& y)
 %type  <std::shared_ptr<WhileStmt>>                 while_statement
 %type  <std::shared_ptr<ForStmt>>                   for_statement
 %type  <std::shared_ptr<Stmt>>                      for_init_statement
+%type  <std::shared_ptr<ForRangeStmt>>              for_range_statement
+%type  <std::shared_ptr<Decl>>                      for_range_init
 %type  <std::vector<std::shared_ptr<FunctionDecl>>> function_definitions
 %type  <std::shared_ptr<FunctionDecl>>              function_definition
 %type  <std::shared_ptr<FunctionExpr>>              function_expression
@@ -213,6 +216,7 @@ statement:
 | if_statement              { $$ = $1; }
 | while_statement           { $$ = $1; }
 | for_statement             { $$ = $1; }
+| for_range_statement       { $$ = $1; }
 ;
 
 compound_statement:
@@ -249,6 +253,16 @@ for_init_statement:
   ";"                     { }
 | expression ";"          { $$ = $1; }
 | variable_definition ";" { $$ = DeclStmt::make(toLoc(@$), $1); }
+;
+
+for_range_statement:
+  "for" "(" for_range_init "in" expression ")" statement  { $$ = ForRangeStmt::make(toLoc(@$), $3, $5, $7); }
+;
+
+for_range_init:
+  "identifier"          { $$ = $1; }
+| "let" "identifier"    { $$ = VariableDecl::make(toLoc(@$), $2); }
+| "const" "identifier"  { $$ = ConstDecl::make(toLoc(@$), $2); }
 ;
 
 variable_definition:

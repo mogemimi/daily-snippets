@@ -139,3 +139,27 @@ public:
         const std::shared_ptr<Expr>& incExpr,
         const std::shared_ptr<Stmt>& bodyStmt);
 };
+
+class ForRangeStmt final
+    : public Stmt
+    , public std::enable_shared_from_this<ForRangeStmt> {
+private:
+    std::shared_ptr<Decl> loopVariable;
+    std::shared_ptr<Expr> rangeExpr;
+    std::shared_ptr<Stmt> bodyStmt;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<Decl> getLoopVariable() const;
+
+    std::shared_ptr<Expr> getRangeExpr() const;
+
+    std::shared_ptr<Stmt> getBody() const;
+
+    static std::shared_ptr<ForRangeStmt> make(
+        const Location& loc,
+        const std::shared_ptr<Decl>& loopVariable,
+        const std::shared_ptr<Expr>& rangeExpr,
+        const std::shared_ptr<Stmt>& bodyStmt);
+};

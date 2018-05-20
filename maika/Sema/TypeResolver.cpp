@@ -621,16 +621,11 @@ void TypeResolver::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& travers
         switch (functionType->getKind()) {
         case TypeKind::ArrayType:
         case TypeKind::MapType:
-        case TypeKind::TupleType:
-            return false;
-            break;
+        case TypeKind::TupleType: return false; break;
         case TypeKind::FunctionType:
         case TypeKind::ReturnType:
-        case TypeKind::TypeVariable:
-            return true;
-            break;
-        case TypeKind::BuiltinType:
-            break;
+        case TypeKind::TypeVariable: return true; break;
+        case TypeKind::BuiltinType: break;
         }
         assert(functionType->getKind() == TypeKind::BuiltinType);
 
@@ -642,19 +637,17 @@ void TypeResolver::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& travers
         case BuiltinTypeKind::Void:
         case BuiltinTypeKind::String:
         case BuiltinTypeKind::Int:
-        case BuiltinTypeKind::Null:
-            return false;
-            break;
-        case BuiltinTypeKind::Any:
-            return true;
-            break;
+        case BuiltinTypeKind::Null: return false; break;
+        case BuiltinTypeKind::Any: return true; break;
         }
         return true;
     }();
 
     if (!isCallable) {
-        error(callee->getLocation(),
-            "Cannot call a non-function whose type is '" + getDiagnosticString(functionType) + "'.");
+        error(
+            callee->getLocation(),
+            "Cannot call a non-function whose type is '" + getDiagnosticString(functionType) +
+                "'.");
         return;
     }
 

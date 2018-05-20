@@ -55,6 +55,13 @@ public:
         traverse();
     }
 
+    virtual void visit(const std::shared_ptr<ForRangeStmt>& stmt) {}
+    virtual void visit(const std::shared_ptr<ForRangeStmt>& stmt, Invoke&& traverse)
+    {
+        visit(stmt);
+        traverse();
+    }
+
     virtual void visit(const std::shared_ptr<CallExpr>& expr) {}
     virtual void visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse)
     {

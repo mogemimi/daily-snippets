@@ -192,3 +192,50 @@ TEST_CASE("parser can treat map literal", "[parser]")
 	}
 #endif
 }
+
+TEST_CASE("parser can treat if, while, for and for...in statements", "[parser]")
+{
+    auto stream = std::make_shared<UnitTestDiagnosticStream>();
+    auto diag = std::make_shared<DiagnosticHandler>();
+    diag->setStream(stream);
+
+    SECTION("parser can treat if statement")
+    {
+        constexpr auto source = R"(function f() {
+            let a = 42;
+            if (a > 0) {}
+            //if (let b = a) {} // TODO: Not implemented
+        })";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can treat while statement")
+    {
+        constexpr auto source = R"(function f() {
+            let i = 0;
+            while (i < 42) {
+                ++i;
+            }
+        })";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can treat for statement")
+    {
+        constexpr auto source = R"(function f() {
+            for (let i = 0; i < 42; i++) {
+                print(i);
+            }
+        })";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can treat for...in statement")
+    {
+        constexpr auto source = R"(function f() {
+            let a = [42, 43, 44];
+            let m;
+            for (m in a) { print(m); }
+            for (let n in a) { print(n); }
+            for (const n in a) { print(n); }
+        })";
+        REQUIRE(parse(diag, source));
+    }
+}

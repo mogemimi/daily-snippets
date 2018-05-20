@@ -195,7 +195,8 @@ TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
         REQUIRE(requireType(context, "a", "double"));
-        REQUIRE(stream->hasError("3:13: error: Cannot call a non-function whose type is 'double'."));
+        REQUIRE(
+            stream->hasError("3:13: error: Cannot call a non-function whose type is 'double'."));
     }
     SECTION("Type 'bool' is not callable.")
     {
@@ -215,7 +216,8 @@ TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
         REQUIRE(requireType(context, "a", "string"));
-        REQUIRE(stream->hasError("3:13: error: Cannot call a non-function whose type is 'string'."));
+        REQUIRE(
+            stream->hasError("3:13: error: Cannot call a non-function whose type is 'string'."));
     }
     SECTION("Type 'null' is not callable.")
     {
