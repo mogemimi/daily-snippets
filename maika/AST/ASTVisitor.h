@@ -180,6 +180,20 @@ public:
         traverse();
     }
 
+    virtual void visit(const std::shared_ptr<BindingDecl>& decl) {}
+    virtual void visit(const std::shared_ptr<BindingDecl>& decl, Invoke&& traverse)
+    {
+        visit(decl);
+        traverse();
+    }
+
+    virtual void visit(const std::shared_ptr<DecompositionDecl>& decl) {}
+    virtual void visit(const std::shared_ptr<DecompositionDecl>& decl, Invoke&& traverse)
+    {
+        visit(decl);
+        traverse();
+    }
+
     virtual void visit(const std::shared_ptr<NamedDecl>& decl) {}
 };
 

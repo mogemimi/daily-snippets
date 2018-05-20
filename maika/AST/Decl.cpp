@@ -203,3 +203,57 @@ std::shared_ptr<ConstDecl> ConstDecl::make(
     decl->expr = e;
     return decl;
 }
+
+void BindingDecl::traverse(ASTVisitor& visitor)
+{
+    assert(namedDecl);
+    visitor.visit(shared_from_this(), [&] {
+        namedDecl->traverse(visitor);
+        if (expr) {
+            expr->traverse(visitor);
+        }
+    });
+}
+
+std::shared_ptr<BindingDecl>
+BindingDecl::make(const Location& loc, const std::shared_ptr<NamedDecl>& n)
+{
+    auto decl = std::make_shared<BindingDecl>();
+    decl->location = loc;
+    decl->namedDecl = n;
+    return decl;
+}
+
+void DecompositionDecl::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        for (auto& binding : bindings) {
+            assert(binding);
+            binding->traverse(visitor);
+        }
+        if (expr) {
+            expr->traverse(visitor);
+        }
+    });
+}
+
+std::shared_ptr<DecompositionDecl> DecompositionDecl::make(
+    const Location& loc, const std::vector<std::shared_ptr<BindingDecl>>& bindings)
+{
+    auto decl = std::make_shared<DecompositionDecl>();
+    decl->location = loc;
+    decl->bindings = bindings;
+    return decl;
+}
+
+std::shared_ptr<DecompositionDecl> DecompositionDecl::make(
+    const Location& loc,
+    const std::vector<std::shared_ptr<BindingDecl>>& bindings,
+    const std::shared_ptr<Expr>& e)
+{
+    auto decl = std::make_shared<DecompositionDecl>();
+    decl->location = loc;
+    decl->bindings = bindings;
+    decl->expr = e;
+    return decl;
+}

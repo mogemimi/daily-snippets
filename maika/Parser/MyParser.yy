@@ -158,6 +158,9 @@ Location toLoc(const yy::location& y)
 %type  <CallSignature>                              call_signature
 %type  <std::shared_ptr<VariableDecl>>              variable_definition
 %type  <std::shared_ptr<ConstDecl>>                 const_definition
+%type  <std::shared_ptr<DecompositionDecl>>         decomposition_definition
+%type  <std::vector<std::shared_ptr<BindingDecl>>>  binding_declarations
+%type  <std::shared_ptr<BindingDecl>>               binding_declaration
 %type  <std::shared_ptr<NamedDecl>>                 type_specifier
 %type  <std::shared_ptr<TranslationUnitDecl>>       translation_unit
 
@@ -208,15 +211,16 @@ type_specifier:
 ;
 
 statement:
-  compound_statement        { $$ = $1; }
-| expression ";"            { $$ = $1; }
-| return_statement          { $$ = $1; }
-| variable_definition ";"   { $$ = DeclStmt::make(toLoc(@$), $1); }
-| const_definition ";"      { $$ = DeclStmt::make(toLoc(@$), $1); }
-| if_statement              { $$ = $1; }
-| while_statement           { $$ = $1; }
-| for_statement             { $$ = $1; }
-| for_range_statement       { $$ = $1; }
+  compound_statement            { $$ = $1; }
+| expression ";"                { $$ = $1; }
+| return_statement              { $$ = $1; }
+| variable_definition ";"       { $$ = DeclStmt::make(toLoc(@$), $1); }
+| const_definition ";"          { $$ = DeclStmt::make(toLoc(@$), $1); }
+| decomposition_definition ";"  { $$ = DeclStmt::make(toLoc(@$), $1); }
+| if_statement                  { $$ = $1; }
+| while_statement               { $$ = $1; }
+| for_statement                 { $$ = $1; }
+| for_range_statement           { $$ = $1; }
 ;
 
 compound_statement:
@@ -260,9 +264,11 @@ for_range_statement:
 ;
 
 for_range_init:
-  "identifier"          { $$ = $1; }
-| "let" "identifier"    { $$ = VariableDecl::make(toLoc(@$), $2); }
-| "const" "identifier"  { $$ = ConstDecl::make(toLoc(@$), $2); }
+  "identifier"                          { $$ = $1; }
+| "let" "identifier"                    { $$ = VariableDecl::make(toLoc(@$), $2); }
+| "const" "identifier"                  { $$ = ConstDecl::make(toLoc(@$), $2); }
+| "let" "(" binding_declarations ")"    { $$ = DecompositionDecl::make(toLoc(@$), $3); }
+| "const" "(" binding_declarations ")"  { $$ = DecompositionDecl::make(toLoc(@$), $3); }
 ;
 
 variable_definition:
@@ -273,6 +279,20 @@ variable_definition:
 const_definition:
   "const" "identifier"                { $$ = ConstDecl::make(toLoc(@$), $2); }
 | "const" "identifier" "=" expression { $$ = ConstDecl::make(toLoc(@$), $2, $4); }
+;
+
+decomposition_definition:
+  "let" "(" binding_declarations ")" "=" expression { $$ = DecompositionDecl::make(toLoc(@$), $3, $6); }
+| "const" "(" binding_declarations ")" "=" expression { $$ = DecompositionDecl::make(toLoc(@$), $3, $6); }
+;
+
+binding_declarations:
+  binding_declaration                           { $$.push_back($1); }
+| binding_declarations "," binding_declaration  { $1.push_back($3); $$ = std::move($1); }
+;
+
+binding_declaration:
+  "identifier"  { $$ = BindingDecl::make(toLoc(@$), $1); }
 ;
 
 comma_opt:

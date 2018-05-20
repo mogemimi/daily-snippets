@@ -322,106 +322,115 @@ namespace yy {
       // assignment_expression
       char dummy3[sizeof(std::shared_ptr<BinaryOperator>)];
 
+      // binding_declaration
+      char dummy4[sizeof(std::shared_ptr<BindingDecl>)];
+
       // "bool_literal"
-      char dummy4[sizeof(std::shared_ptr<BoolLiteral>)];
+      char dummy5[sizeof(std::shared_ptr<BoolLiteral>)];
 
       // call_expression
-      char dummy5[sizeof(std::shared_ptr<CallExpr>)];
+      char dummy6[sizeof(std::shared_ptr<CallExpr>)];
 
       // compound_statement
-      char dummy6[sizeof(std::shared_ptr<CompoundStmt>)];
+      char dummy7[sizeof(std::shared_ptr<CompoundStmt>)];
 
       // const_definition
-      char dummy7[sizeof(std::shared_ptr<ConstDecl>)];
+      char dummy8[sizeof(std::shared_ptr<ConstDecl>)];
 
       // for_range_init
-      char dummy8[sizeof(std::shared_ptr<Decl>)];
+      char dummy9[sizeof(std::shared_ptr<Decl>)];
+
+      // decomposition_definition
+      char dummy10[sizeof(std::shared_ptr<DecompositionDecl>)];
 
       // "double_literal"
-      char dummy9[sizeof(std::shared_ptr<DoubleLiteral>)];
+      char dummy11[sizeof(std::shared_ptr<DoubleLiteral>)];
 
       // literal
       // primary_expression
       // expression
-      char dummy10[sizeof(std::shared_ptr<Expr>)];
+      char dummy12[sizeof(std::shared_ptr<Expr>)];
 
       // for_range_statement
-      char dummy11[sizeof(std::shared_ptr<ForRangeStmt>)];
+      char dummy13[sizeof(std::shared_ptr<ForRangeStmt>)];
 
       // for_statement
-      char dummy12[sizeof(std::shared_ptr<ForStmt>)];
+      char dummy14[sizeof(std::shared_ptr<ForStmt>)];
 
       // function_definition
-      char dummy13[sizeof(std::shared_ptr<FunctionDecl>)];
+      char dummy15[sizeof(std::shared_ptr<FunctionDecl>)];
 
       // function_expression
-      char dummy14[sizeof(std::shared_ptr<FunctionExpr>)];
+      char dummy16[sizeof(std::shared_ptr<FunctionExpr>)];
 
       // if_statement
-      char dummy15[sizeof(std::shared_ptr<IfStmt>)];
+      char dummy17[sizeof(std::shared_ptr<IfStmt>)];
 
       // "integer_literal"
-      char dummy16[sizeof(std::shared_ptr<IntegerLiteral>)];
+      char dummy18[sizeof(std::shared_ptr<IntegerLiteral>)];
 
       // map_entry
-      char dummy17[sizeof(std::shared_ptr<MapEntry>)];
+      char dummy19[sizeof(std::shared_ptr<MapEntry>)];
 
       // map_literal
-      char dummy18[sizeof(std::shared_ptr<MapLiteral>)];
+      char dummy20[sizeof(std::shared_ptr<MapLiteral>)];
 
       // member_expression
-      char dummy19[sizeof(std::shared_ptr<MemberExpr>)];
+      char dummy21[sizeof(std::shared_ptr<MemberExpr>)];
 
       // "identifier"
       // binding_identifier
       // type_specifier
-      char dummy20[sizeof(std::shared_ptr<NamedDecl>)];
+      char dummy22[sizeof(std::shared_ptr<NamedDecl>)];
 
       // null_literal
-      char dummy21[sizeof(std::shared_ptr<NullLiteral>)];
+      char dummy23[sizeof(std::shared_ptr<NullLiteral>)];
 
       // parameter_variable
-      char dummy22[sizeof(std::shared_ptr<ParmVarDecl>)];
+      char dummy24[sizeof(std::shared_ptr<ParmVarDecl>)];
 
       // return_statement
-      char dummy23[sizeof(std::shared_ptr<ReturnStmt>)];
+      char dummy25[sizeof(std::shared_ptr<ReturnStmt>)];
 
       // statement
       // for_init_statement
-      char dummy24[sizeof(std::shared_ptr<Stmt>)];
+      char dummy26[sizeof(std::shared_ptr<Stmt>)];
 
       // "string_literal"
-      char dummy25[sizeof(std::shared_ptr<StringLiteral>)];
+      char dummy27[sizeof(std::shared_ptr<StringLiteral>)];
 
       // subscript_expression
-      char dummy26[sizeof(std::shared_ptr<SubscriptExpr>)];
+      char dummy28[sizeof(std::shared_ptr<SubscriptExpr>)];
 
       // translation_unit
-      char dummy27[sizeof(std::shared_ptr<TranslationUnitDecl>)];
+      char dummy29[sizeof(std::shared_ptr<TranslationUnitDecl>)];
 
       // unary_expression
-      char dummy28[sizeof(std::shared_ptr<UnaryOperator>)];
+      char dummy30[sizeof(std::shared_ptr<UnaryOperator>)];
 
       // variable_definition
-      char dummy29[sizeof(std::shared_ptr<VariableDecl>)];
+      char dummy31[sizeof(std::shared_ptr<VariableDecl>)];
 
       // while_statement
-      char dummy30[sizeof(std::shared_ptr<WhileStmt>)];
+      char dummy32[sizeof(std::shared_ptr<WhileStmt>)];
+
+      // binding_declarations
+      char dummy33[sizeof(std::vector<std::shared_ptr<BindingDecl>>)];
 
       // expression_list
-      char dummy31[sizeof(std::vector<std::shared_ptr<Expr>>)];
+      char dummy34[sizeof(std::vector<std::shared_ptr<Expr>>)];
 
       // function_definitions
-      char dummy32[sizeof(std::vector<std::shared_ptr<FunctionDecl>>)];
+      char dummy35[sizeof(std::vector<std::shared_ptr<FunctionDecl>>)];
 
       // map_entry_list
-      char dummy33[sizeof(std::vector<std::shared_ptr<MapEntry>>)];
+      char dummy36[sizeof(std::vector<std::shared_ptr<MapEntry>>)];
 
       // parameter_variables
-      char dummy34[sizeof(std::vector<std::shared_ptr<ParmVarDecl>>)];
+      char dummy37[sizeof(std::vector<std::shared_ptr<ParmVarDecl>>)];
 
       // statement_list
-      char dummy35[sizeof(std::vector<std::shared_ptr<Stmt>>)];
+      char dummy38[sizeof(std::vector<std::shared_ptr<Stmt>>)];
 };
 
     /// Symbol semantic values.
@@ -536,6 +545,8 @@ namespace yy {
 
   basic_symbol (typename Base::kind_type t, const std::shared_ptr<BinaryOperator> v, const location_type& l);
 
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<BindingDecl> v, const location_type& l);
+
   basic_symbol (typename Base::kind_type t, const std::shared_ptr<BoolLiteral> v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::shared_ptr<CallExpr> v, const location_type& l);
@@ -545,6 +556,8 @@ namespace yy {
   basic_symbol (typename Base::kind_type t, const std::shared_ptr<ConstDecl> v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::shared_ptr<Decl> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<DecompositionDecl> v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::shared_ptr<DoubleLiteral> v, const location_type& l);
 
@@ -589,6 +602,8 @@ namespace yy {
   basic_symbol (typename Base::kind_type t, const std::shared_ptr<VariableDecl> v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::shared_ptr<WhileStmt> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<BindingDecl>> v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<Expr>> v, const location_type& l);
 
@@ -938,7 +953,7 @@ namespace yy {
   static const unsigned char yydefact_[];
 
   // YYPGOTO[NTERM-NUM].
-  static const signed char yypgoto_[];
+  static const short int yypgoto_[];
 
   // YYDEFGOTO[NTERM-NUM].
   static const short int yydefgoto_[];
@@ -1069,7 +1084,7 @@ namespace yy {
     {
       yyeof_ = 0,
       yylast_ = 828,     ///< Last index in yytable_.
-      yynnts_ = 38,  ///< Number of nonterminal symbols.
+      yynnts_ = 41,  ///< Number of nonterminal symbols.
       yyfinal_ = 3, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
@@ -1159,20 +1174,24 @@ namespace yy {
         value.copy< CallSignature > (other.value);
         break;
 
-      case 80: // array_literal
+      case 83: // array_literal
         value.copy< std::shared_ptr<ArrayLiteral> > (other.value);
         break;
 
-      case 88: // binary_expression
-      case 89: // assignment_expression
+      case 91: // binary_expression
+      case 92: // assignment_expression
         value.copy< std::shared_ptr<BinaryOperator> > (other.value);
+        break;
+
+      case 78: // binding_declaration
+        value.copy< std::shared_ptr<BindingDecl> > (other.value);
         break;
 
       case 49: // "bool_literal"
         value.copy< std::shared_ptr<BoolLiteral> > (other.value);
         break;
 
-      case 86: // call_expression
+      case 89: // call_expression
         value.copy< std::shared_ptr<CallExpr> > (other.value);
         break;
 
@@ -1188,13 +1207,17 @@ namespace yy {
         value.copy< std::shared_ptr<Decl> > (other.value);
         break;
 
+      case 76: // decomposition_definition
+        value.copy< std::shared_ptr<DecompositionDecl> > (other.value);
+        break;
+
       case 48: // "double_literal"
         value.copy< std::shared_ptr<DoubleLiteral> > (other.value);
         break;
 
-      case 77: // literal
-      case 78: // primary_expression
-      case 91: // expression
+      case 80: // literal
+      case 81: // primary_expression
+      case 94: // expression
         value.copy< std::shared_ptr<Expr> > (other.value);
         break;
 
@@ -1222,15 +1245,15 @@ namespace yy {
         value.copy< std::shared_ptr<IntegerLiteral> > (other.value);
         break;
 
-      case 82: // map_entry
+      case 85: // map_entry
         value.copy< std::shared_ptr<MapEntry> > (other.value);
         break;
 
-      case 81: // map_literal
+      case 84: // map_literal
         value.copy< std::shared_ptr<MapLiteral> > (other.value);
         break;
 
-      case 84: // member_expression
+      case 87: // member_expression
         value.copy< std::shared_ptr<MemberExpr> > (other.value);
         break;
 
@@ -1240,7 +1263,7 @@ namespace yy {
         value.copy< std::shared_ptr<NamedDecl> > (other.value);
         break;
 
-      case 79: // null_literal
+      case 82: // null_literal
         value.copy< std::shared_ptr<NullLiteral> > (other.value);
         break;
 
@@ -1261,7 +1284,7 @@ namespace yy {
         value.copy< std::shared_ptr<StringLiteral> > (other.value);
         break;
 
-      case 85: // subscript_expression
+      case 88: // subscript_expression
         value.copy< std::shared_ptr<SubscriptExpr> > (other.value);
         break;
 
@@ -1269,7 +1292,7 @@ namespace yy {
         value.copy< std::shared_ptr<TranslationUnitDecl> > (other.value);
         break;
 
-      case 87: // unary_expression
+      case 90: // unary_expression
         value.copy< std::shared_ptr<UnaryOperator> > (other.value);
         break;
 
@@ -1281,7 +1304,11 @@ namespace yy {
         value.copy< std::shared_ptr<WhileStmt> > (other.value);
         break;
 
-      case 90: // expression_list
+      case 77: // binding_declarations
+        value.copy< std::vector<std::shared_ptr<BindingDecl>> > (other.value);
+        break;
+
+      case 93: // expression_list
         value.copy< std::vector<std::shared_ptr<Expr>> > (other.value);
         break;
 
@@ -1289,7 +1316,7 @@ namespace yy {
         value.copy< std::vector<std::shared_ptr<FunctionDecl>> > (other.value);
         break;
 
-      case 83: // map_entry_list
+      case 86: // map_entry_list
         value.copy< std::vector<std::shared_ptr<MapEntry>> > (other.value);
         break;
 
@@ -1322,20 +1349,24 @@ namespace yy {
         value.copy< CallSignature > (v);
         break;
 
-      case 80: // array_literal
+      case 83: // array_literal
         value.copy< std::shared_ptr<ArrayLiteral> > (v);
         break;
 
-      case 88: // binary_expression
-      case 89: // assignment_expression
+      case 91: // binary_expression
+      case 92: // assignment_expression
         value.copy< std::shared_ptr<BinaryOperator> > (v);
+        break;
+
+      case 78: // binding_declaration
+        value.copy< std::shared_ptr<BindingDecl> > (v);
         break;
 
       case 49: // "bool_literal"
         value.copy< std::shared_ptr<BoolLiteral> > (v);
         break;
 
-      case 86: // call_expression
+      case 89: // call_expression
         value.copy< std::shared_ptr<CallExpr> > (v);
         break;
 
@@ -1351,13 +1382,17 @@ namespace yy {
         value.copy< std::shared_ptr<Decl> > (v);
         break;
 
+      case 76: // decomposition_definition
+        value.copy< std::shared_ptr<DecompositionDecl> > (v);
+        break;
+
       case 48: // "double_literal"
         value.copy< std::shared_ptr<DoubleLiteral> > (v);
         break;
 
-      case 77: // literal
-      case 78: // primary_expression
-      case 91: // expression
+      case 80: // literal
+      case 81: // primary_expression
+      case 94: // expression
         value.copy< std::shared_ptr<Expr> > (v);
         break;
 
@@ -1385,15 +1420,15 @@ namespace yy {
         value.copy< std::shared_ptr<IntegerLiteral> > (v);
         break;
 
-      case 82: // map_entry
+      case 85: // map_entry
         value.copy< std::shared_ptr<MapEntry> > (v);
         break;
 
-      case 81: // map_literal
+      case 84: // map_literal
         value.copy< std::shared_ptr<MapLiteral> > (v);
         break;
 
-      case 84: // member_expression
+      case 87: // member_expression
         value.copy< std::shared_ptr<MemberExpr> > (v);
         break;
 
@@ -1403,7 +1438,7 @@ namespace yy {
         value.copy< std::shared_ptr<NamedDecl> > (v);
         break;
 
-      case 79: // null_literal
+      case 82: // null_literal
         value.copy< std::shared_ptr<NullLiteral> > (v);
         break;
 
@@ -1424,7 +1459,7 @@ namespace yy {
         value.copy< std::shared_ptr<StringLiteral> > (v);
         break;
 
-      case 85: // subscript_expression
+      case 88: // subscript_expression
         value.copy< std::shared_ptr<SubscriptExpr> > (v);
         break;
 
@@ -1432,7 +1467,7 @@ namespace yy {
         value.copy< std::shared_ptr<TranslationUnitDecl> > (v);
         break;
 
-      case 87: // unary_expression
+      case 90: // unary_expression
         value.copy< std::shared_ptr<UnaryOperator> > (v);
         break;
 
@@ -1444,7 +1479,11 @@ namespace yy {
         value.copy< std::shared_ptr<WhileStmt> > (v);
         break;
 
-      case 90: // expression_list
+      case 77: // binding_declarations
+        value.copy< std::vector<std::shared_ptr<BindingDecl>> > (v);
+        break;
+
+      case 93: // expression_list
         value.copy< std::vector<std::shared_ptr<Expr>> > (v);
         break;
 
@@ -1452,7 +1491,7 @@ namespace yy {
         value.copy< std::vector<std::shared_ptr<FunctionDecl>> > (v);
         break;
 
-      case 83: // map_entry_list
+      case 86: // map_entry_list
         value.copy< std::vector<std::shared_ptr<MapEntry>> > (v);
         break;
 
@@ -1501,6 +1540,13 @@ namespace yy {
   {}
 
   template <typename Base>
+  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<BindingDecl> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
   MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<BoolLiteral> v, const location_type& l)
     : Base (t)
     , value (v)
@@ -1530,6 +1576,13 @@ namespace yy {
 
   template <typename Base>
   MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<Decl> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<DecompositionDecl> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
@@ -1690,6 +1743,13 @@ namespace yy {
   {}
 
   template <typename Base>
+  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<BindingDecl>> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
   MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<Expr>> v, const location_type& l)
     : Base (t)
     , value (v)
@@ -1754,20 +1814,24 @@ namespace yy {
         value.template destroy< CallSignature > ();
         break;
 
-      case 80: // array_literal
+      case 83: // array_literal
         value.template destroy< std::shared_ptr<ArrayLiteral> > ();
         break;
 
-      case 88: // binary_expression
-      case 89: // assignment_expression
+      case 91: // binary_expression
+      case 92: // assignment_expression
         value.template destroy< std::shared_ptr<BinaryOperator> > ();
+        break;
+
+      case 78: // binding_declaration
+        value.template destroy< std::shared_ptr<BindingDecl> > ();
         break;
 
       case 49: // "bool_literal"
         value.template destroy< std::shared_ptr<BoolLiteral> > ();
         break;
 
-      case 86: // call_expression
+      case 89: // call_expression
         value.template destroy< std::shared_ptr<CallExpr> > ();
         break;
 
@@ -1783,13 +1847,17 @@ namespace yy {
         value.template destroy< std::shared_ptr<Decl> > ();
         break;
 
+      case 76: // decomposition_definition
+        value.template destroy< std::shared_ptr<DecompositionDecl> > ();
+        break;
+
       case 48: // "double_literal"
         value.template destroy< std::shared_ptr<DoubleLiteral> > ();
         break;
 
-      case 77: // literal
-      case 78: // primary_expression
-      case 91: // expression
+      case 80: // literal
+      case 81: // primary_expression
+      case 94: // expression
         value.template destroy< std::shared_ptr<Expr> > ();
         break;
 
@@ -1817,15 +1885,15 @@ namespace yy {
         value.template destroy< std::shared_ptr<IntegerLiteral> > ();
         break;
 
-      case 82: // map_entry
+      case 85: // map_entry
         value.template destroy< std::shared_ptr<MapEntry> > ();
         break;
 
-      case 81: // map_literal
+      case 84: // map_literal
         value.template destroy< std::shared_ptr<MapLiteral> > ();
         break;
 
-      case 84: // member_expression
+      case 87: // member_expression
         value.template destroy< std::shared_ptr<MemberExpr> > ();
         break;
 
@@ -1835,7 +1903,7 @@ namespace yy {
         value.template destroy< std::shared_ptr<NamedDecl> > ();
         break;
 
-      case 79: // null_literal
+      case 82: // null_literal
         value.template destroy< std::shared_ptr<NullLiteral> > ();
         break;
 
@@ -1856,7 +1924,7 @@ namespace yy {
         value.template destroy< std::shared_ptr<StringLiteral> > ();
         break;
 
-      case 85: // subscript_expression
+      case 88: // subscript_expression
         value.template destroy< std::shared_ptr<SubscriptExpr> > ();
         break;
 
@@ -1864,7 +1932,7 @@ namespace yy {
         value.template destroy< std::shared_ptr<TranslationUnitDecl> > ();
         break;
 
-      case 87: // unary_expression
+      case 90: // unary_expression
         value.template destroy< std::shared_ptr<UnaryOperator> > ();
         break;
 
@@ -1876,7 +1944,11 @@ namespace yy {
         value.template destroy< std::shared_ptr<WhileStmt> > ();
         break;
 
-      case 90: // expression_list
+      case 77: // binding_declarations
+        value.template destroy< std::vector<std::shared_ptr<BindingDecl>> > ();
+        break;
+
+      case 93: // expression_list
         value.template destroy< std::vector<std::shared_ptr<Expr>> > ();
         break;
 
@@ -1884,7 +1956,7 @@ namespace yy {
         value.template destroy< std::vector<std::shared_ptr<FunctionDecl>> > ();
         break;
 
-      case 83: // map_entry_list
+      case 86: // map_entry_list
         value.template destroy< std::vector<std::shared_ptr<MapEntry>> > ();
         break;
 
@@ -1923,20 +1995,24 @@ namespace yy {
         value.move< CallSignature > (s.value);
         break;
 
-      case 80: // array_literal
+      case 83: // array_literal
         value.move< std::shared_ptr<ArrayLiteral> > (s.value);
         break;
 
-      case 88: // binary_expression
-      case 89: // assignment_expression
+      case 91: // binary_expression
+      case 92: // assignment_expression
         value.move< std::shared_ptr<BinaryOperator> > (s.value);
+        break;
+
+      case 78: // binding_declaration
+        value.move< std::shared_ptr<BindingDecl> > (s.value);
         break;
 
       case 49: // "bool_literal"
         value.move< std::shared_ptr<BoolLiteral> > (s.value);
         break;
 
-      case 86: // call_expression
+      case 89: // call_expression
         value.move< std::shared_ptr<CallExpr> > (s.value);
         break;
 
@@ -1952,13 +2028,17 @@ namespace yy {
         value.move< std::shared_ptr<Decl> > (s.value);
         break;
 
+      case 76: // decomposition_definition
+        value.move< std::shared_ptr<DecompositionDecl> > (s.value);
+        break;
+
       case 48: // "double_literal"
         value.move< std::shared_ptr<DoubleLiteral> > (s.value);
         break;
 
-      case 77: // literal
-      case 78: // primary_expression
-      case 91: // expression
+      case 80: // literal
+      case 81: // primary_expression
+      case 94: // expression
         value.move< std::shared_ptr<Expr> > (s.value);
         break;
 
@@ -1986,15 +2066,15 @@ namespace yy {
         value.move< std::shared_ptr<IntegerLiteral> > (s.value);
         break;
 
-      case 82: // map_entry
+      case 85: // map_entry
         value.move< std::shared_ptr<MapEntry> > (s.value);
         break;
 
-      case 81: // map_literal
+      case 84: // map_literal
         value.move< std::shared_ptr<MapLiteral> > (s.value);
         break;
 
-      case 84: // member_expression
+      case 87: // member_expression
         value.move< std::shared_ptr<MemberExpr> > (s.value);
         break;
 
@@ -2004,7 +2084,7 @@ namespace yy {
         value.move< std::shared_ptr<NamedDecl> > (s.value);
         break;
 
-      case 79: // null_literal
+      case 82: // null_literal
         value.move< std::shared_ptr<NullLiteral> > (s.value);
         break;
 
@@ -2025,7 +2105,7 @@ namespace yy {
         value.move< std::shared_ptr<StringLiteral> > (s.value);
         break;
 
-      case 85: // subscript_expression
+      case 88: // subscript_expression
         value.move< std::shared_ptr<SubscriptExpr> > (s.value);
         break;
 
@@ -2033,7 +2113,7 @@ namespace yy {
         value.move< std::shared_ptr<TranslationUnitDecl> > (s.value);
         break;
 
-      case 87: // unary_expression
+      case 90: // unary_expression
         value.move< std::shared_ptr<UnaryOperator> > (s.value);
         break;
 
@@ -2045,7 +2125,11 @@ namespace yy {
         value.move< std::shared_ptr<WhileStmt> > (s.value);
         break;
 
-      case 90: // expression_list
+      case 77: // binding_declarations
+        value.move< std::vector<std::shared_ptr<BindingDecl>> > (s.value);
+        break;
+
+      case 93: // expression_list
         value.move< std::vector<std::shared_ptr<Expr>> > (s.value);
         break;
 
@@ -2053,7 +2137,7 @@ namespace yy {
         value.move< std::vector<std::shared_ptr<FunctionDecl>> > (s.value);
         break;
 
-      case 83: // map_entry_list
+      case 86: // map_entry_list
         value.move< std::vector<std::shared_ptr<MapEntry>> > (s.value);
         break;
 
@@ -2427,7 +2511,7 @@ namespace yy {
 
 
 } // yy
-#line 2431 "Parser/MyParser.h" // lalr1.cc:392
+#line 2515 "Parser/MyParser.h" // lalr1.cc:392
 
 
 

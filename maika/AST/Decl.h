@@ -145,3 +145,46 @@ public:
     static std::shared_ptr<ConstDecl>
     make(const Location& loc, const std::shared_ptr<NamedDecl>& n, const std::shared_ptr<Expr>& e);
 };
+
+class BindingDecl final
+    : public Decl
+    , public std::enable_shared_from_this<BindingDecl> {
+private:
+    std::shared_ptr<NamedDecl> namedDecl;
+    std::shared_ptr<Expr> expr;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<NamedDecl> getNamedDecl() const { return namedDecl; }
+
+    std::shared_ptr<Expr> getExpr() const { return expr; }
+    void setExpr(const std::shared_ptr<Expr>& e) { expr = e; }
+
+    static std::shared_ptr<BindingDecl>
+    make(const Location& loc, const std::shared_ptr<NamedDecl>& n);
+};
+
+class DecompositionDecl final
+    : public Decl
+    , public std::enable_shared_from_this<DecompositionDecl> {
+private:
+    std::vector<std::shared_ptr<BindingDecl>> bindings;
+    std::shared_ptr<Expr> expr;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::vector<std::shared_ptr<BindingDecl>> getBindings() const { return bindings; }
+
+    std::shared_ptr<Expr> getExpr() const { return expr; }
+    void setExpr(const std::shared_ptr<Expr>& e) { expr = e; }
+
+    static std::shared_ptr<DecompositionDecl>
+    make(const Location& loc, const std::vector<std::shared_ptr<BindingDecl>>& bindings);
+
+    static std::shared_ptr<DecompositionDecl> make(
+        const Location& loc,
+        const std::vector<std::shared_ptr<BindingDecl>>& bindings,
+        const std::shared_ptr<Expr>& e);
+};

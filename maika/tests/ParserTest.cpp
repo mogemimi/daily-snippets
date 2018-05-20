@@ -239,3 +239,45 @@ TEST_CASE("parser can treat if, while, for and for...in statements", "[parser]")
         REQUIRE(parse(diag, source));
     }
 }
+
+TEST_CASE("parser can treat binding declaration", "[parser]")
+{
+    auto stream = std::make_shared<UnitTestDiagnosticStream>();
+    auto diag = std::make_shared<DiagnosticHandler>();
+    diag->setStream(stream);
+
+    SECTION("parser can treat binding declaration")
+    {
+        constexpr auto source = R"(function f() {
+            let (a, b, c) = [1, 2, 3];
+            let (x) = [42];
+        })";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can treat binding declaration for constants")
+    {
+        constexpr auto source = R"(function f() {
+            const (a, b, c) = [1, 2, 3];
+            const (x) = [42];
+        })";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can not use trailing commas with bindings")
+    {
+        constexpr auto source = "function f() { let (a, b, c,) = v; }\n";
+        REQUIRE(!parse(diag, source));
+    }
+    SECTION("parser can not use an empty binding declaration")
+    {
+        constexpr auto source = "function f() { let () = v; }\n";
+        REQUIRE(!parse(diag, source));
+    }
+    SECTION("parser can treat binding declaration in for-in loop")
+    {
+        constexpr auto source = R"(function f() {
+            for (let (a, b) in v) {}
+            for (const (a, b) in v) {}
+        })";
+        REQUIRE(parse(diag, source));
+    }
+}
