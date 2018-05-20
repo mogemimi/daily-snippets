@@ -120,6 +120,16 @@ TEST_CASE("lvalue and rvalue", "[semacheck]")
         REQUIRE(stream->hasError(
             "4:14: error: The left-hand side of an assignment must be a variable."));
     }
+    SECTION("The left-hand side of an assignment must be a variable.")
+    {
+        constexpr auto source = R"(function test() {
+            let a = 42;
+            (a = 0) = 2;
+        })";
+        REQUIRE(!semaCheck(diag, source));
+        REQUIRE(stream->hasError(
+            "3:14: error: The left-hand side of an assignment must be a variable."));
+    }
     SECTION("Function call is rvalue.")
     {
         constexpr auto source = R"(function f() { f() = 2; })";

@@ -427,25 +427,25 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
         constexpr auto source = R"(function g(x) { return x; }
         function f() {
             let a = ["b", "c"];
-            let z = a[0];
-            let w = b[g(0)];
+            let b = a[0];
+            let c = a[g(1)];
         })";
         REQUIRE(typeCheck(diag, source, astContext, context));
-        // REQUIRE(requireType(context, "a", "Array<string>"));
-        // REQUIRE(requireType(context, "z", "string"));
-        // REQUIRE(requireType(context, "w", "string"));
+        REQUIRE(requireType(context, "a", "Array<string>"));
+        REQUIRE(requireType(context, "b", "string"));
+        REQUIRE(requireType(context, "c", "string"));
     }
     SECTION("type resolver can infer type of map keys")
     {
         constexpr auto source = R"(function g(x) { return x; }
         function f() {
             let a = ["b": 42, "c": 43];
-            let z = a["b"];
-            let w = b[g("c")];
+            let b = a["b"];
+            let c = a[g("c")];
         })";
         REQUIRE(typeCheck(diag, source, astContext, context));
-        // REQUIRE(requireType(context, "a", "Map<string, int>"));
-        // REQUIRE(requireType(context, "z", "string"));
-        // REQUIRE(requireType(context, "w", "string"));
+        REQUIRE(requireType(context, "a", "Map<string, int>"));
+        REQUIRE(requireType(context, "b", "int"));
+        REQUIRE(requireType(context, "c", "int"));
     }
 }
