@@ -307,3 +307,21 @@ void ASTDumper::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse)
     }
     dump(&dumpContext, "ConstDecl", options, std::move(traverse));
 }
+
+void ASTDumper::visit(const std::shared_ptr<BindingDecl>& decl, Invoke&& traverse)
+{
+    std::vector<std::string> options;
+    if (auto namedDecl = decl->getNamedDecl()) {
+        options.push_back(namedDecl->getName());
+        if (auto type = namedDecl->getType()) {
+            options.push_back(type->dump());
+        }
+    }
+    dump(&dumpContext, "BindingDecl", options, std::move(traverse));
+}
+
+void ASTDumper::visit(const std::shared_ptr<DecompositionDecl>& decl, Invoke&& traverse)
+{
+    std::vector<std::string> options;
+    dump(&dumpContext, "DecompositionDecl", options, std::move(traverse));
+}
