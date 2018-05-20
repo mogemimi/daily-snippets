@@ -52,6 +52,10 @@ bool requireType(
     auto actual = entity->getDecl()->getType();
     REQUIRE(actual);
 
+    if (actual->getKind() == TypeKind::TypeVariable) {
+        return "any" == expect;
+    }
+
     return actual->dump() == expect;
 }
 } // end of anonymous namespace
@@ -172,6 +176,65 @@ TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
         function test() { return 3.14 + f(2.0); }
         )";
         REQUIRE(typeCheck(diag, source, astContext, context));
+    }
+    SECTION("Type 'int' is not callable.")
+    {
+        constexpr auto source = R"(function f() {
+            let a = 42;
+            a();
+        })";
+        REQUIRE(!typeCheck(diag, source, astContext, context));
+        REQUIRE(requireType(context, "a", "int"));
+        REQUIRE(stream->hasError("3:13: error: Cannot call a non-function whose type is 'int'."));
+    }
+    SECTION("Type 'double' is not callable.")
+    {
+        constexpr auto source = R"(function f() {
+            let a = 3.14;
+            a();
+        })";
+        REQUIRE(!typeCheck(diag, source, astContext, context));
+        REQUIRE(requireType(context, "a", "double"));
+        REQUIRE(stream->hasError("3:13: error: Cannot call a non-function whose type is 'double'."));
+    }
+    SECTION("Type 'bool' is not callable.")
+    {
+        constexpr auto source = R"(function f() {
+            let a = true;
+            a();
+        })";
+        REQUIRE(!typeCheck(diag, source, astContext, context));
+        REQUIRE(requireType(context, "a", "bool"));
+        REQUIRE(stream->hasError("3:13: error: Cannot call a non-function whose type is 'bool'."));
+    }
+    SECTION("Type 'string' is not callable.")
+    {
+        constexpr auto source = R"(function f() {
+            let a = "hello";
+            a();
+        })";
+        REQUIRE(!typeCheck(diag, source, astContext, context));
+        REQUIRE(requireType(context, "a", "string"));
+        REQUIRE(stream->hasError("3:13: error: Cannot call a non-function whose type is 'string'."));
+    }
+    SECTION("Type 'null' is not callable.")
+    {
+        constexpr auto source = R"(function f() {
+            let a = null;
+            a();
+        })";
+        REQUIRE(!typeCheck(diag, source, astContext, context));
+        REQUIRE(requireType(context, "a", "null"));
+        REQUIRE(stream->hasError("3:13: error: Cannot call a non-function whose type is 'null'."));
+    }
+    SECTION("Type 'any' is callable.")
+    {
+        constexpr auto source = R"(function f() {
+            let a;
+            a();
+        })";
+        REQUIRE(typeCheck(diag, source, astContext, context));
+        REQUIRE(requireType(context, "a", "any"));
     }
     SECTION("Operator '+' cannot be applied to types 'string' and 'double'.")
     {

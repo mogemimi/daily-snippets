@@ -617,6 +617,47 @@ void TypeResolver::visit(const std::shared_ptr<CallExpr>& expr, Invoke&& travers
     const auto functionType = callee->getType();
     assert(functionType);
 
+    const auto isCallable = [&]() -> bool {
+        switch (functionType->getKind()) {
+        case TypeKind::ArrayType:
+        case TypeKind::MapType:
+        case TypeKind::TupleType:
+            return false;
+            break;
+        case TypeKind::FunctionType:
+        case TypeKind::ReturnType:
+        case TypeKind::TypeVariable:
+            return true;
+            break;
+        case TypeKind::BuiltinType:
+            break;
+        }
+        assert(functionType->getKind() == TypeKind::BuiltinType);
+
+        auto builtinType = std::static_pointer_cast<BuiltinType>(functionType);
+        assert(builtinType == std::dynamic_pointer_cast<BuiltinType>(functionType));
+        switch (builtinType->kind) {
+        case BuiltinTypeKind::Bool:
+        case BuiltinTypeKind::Double:
+        case BuiltinTypeKind::Void:
+        case BuiltinTypeKind::String:
+        case BuiltinTypeKind::Int:
+        case BuiltinTypeKind::Null:
+            return false;
+            break;
+        case BuiltinTypeKind::Any:
+            return true;
+            break;
+        }
+        return true;
+    }();
+
+    if (!isCallable) {
+        error(callee->getLocation(),
+            "Cannot call a non-function whose type is '" + getDiagnosticString(functionType) + "'.");
+        return;
+    }
+
     std::vector<std::shared_ptr<Type>> argumentTypes;
     for (const auto& arg : expr->getArguments()) {
         assert(arg);
