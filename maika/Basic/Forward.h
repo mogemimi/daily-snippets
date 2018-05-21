@@ -61,6 +61,7 @@ class VariableDecl;
 class ConstDecl;
 class BindingDecl;
 class DecompositionDecl;
+class ClassDecl;
 
 // NOTE: AST::Type
 class Type;

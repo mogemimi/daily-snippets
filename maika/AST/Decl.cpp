@@ -24,19 +24,19 @@ Location Decl::getLocation() const
 void TranslationUnitDecl::traverse(ASTVisitor& visitor)
 {
     visitor.visit(shared_from_this(), [&] {
-        for (const auto& funcDecl : functionDecls) {
-            assert(funcDecl);
-            funcDecl->traverse(visitor);
+        for (const auto& decl : declarations) {
+            assert(decl);
+            decl->traverse(visitor);
         }
     });
 }
 
 std::shared_ptr<TranslationUnitDecl> TranslationUnitDecl::make(
-    const Location& loc, const std::vector<std::shared_ptr<FunctionDecl>>& functions)
+    const Location& loc, const std::vector<std::shared_ptr<Decl>>& declarations)
 {
     auto decl = std::make_shared<TranslationUnitDecl>();
     decl->location = loc;
-    decl->functionDecls = functions;
+    decl->declarations = declarations;
     return decl;
 }
 
@@ -255,5 +255,41 @@ std::shared_ptr<DecompositionDecl> DecompositionDecl::make(
     decl->location = loc;
     decl->bindings = bindings;
     decl->expr = e;
+    return decl;
+}
+
+void ClassDecl::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        for (auto& member : members) {
+            assert(member);
+            member->traverse(visitor);
+        }
+    });
+}
+
+void ClassDecl::addMember(const std::shared_ptr<Decl>& member)
+{
+    assert(member);
+    members.push_back(member);
+}
+
+std::shared_ptr<ClassDecl> ClassDecl::make(const Location& loc, const std::shared_ptr<NamedDecl>& n)
+{
+    auto decl = std::make_shared<ClassDecl>();
+    decl->location = loc;
+    decl->namedDecl = n;
+    return decl;
+}
+
+std::shared_ptr<ClassDecl> ClassDecl::make(
+    const Location& loc,
+    const std::shared_ptr<NamedDecl>& n,
+    const std::vector<std::shared_ptr<Decl>>& members)
+{
+    auto decl = std::make_shared<ClassDecl>();
+    decl->location = loc;
+    decl->namedDecl = n;
+    decl->members = members;
     return decl;
 }

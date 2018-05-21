@@ -26,12 +26,12 @@ class TranslationUnitDecl final
     : public Decl
     , public std::enable_shared_from_this<TranslationUnitDecl> {
 public:
-    std::vector<std::shared_ptr<FunctionDecl>> functionDecls;
+    std::vector<std::shared_ptr<Decl>> declarations;
 
     void traverse(ASTVisitor& visitor) override;
 
     static std::shared_ptr<TranslationUnitDecl>
-    make(const Location& loc, const std::vector<std::shared_ptr<FunctionDecl>>& n);
+    make(const Location& loc, const std::vector<std::shared_ptr<Decl>>& declarations);
 };
 
 class NamedDecl final
@@ -187,4 +187,32 @@ public:
         const Location& loc,
         const std::vector<std::shared_ptr<BindingDecl>>& bindings,
         const std::shared_ptr<Expr>& e);
+};
+
+class ClassDecl final
+    : public Decl
+    , public std::enable_shared_from_this<ClassDecl> {
+private:
+    std::shared_ptr<NamedDecl> namedDecl;
+
+    // TODO: replace the following container with MemberLookupTable
+    // using MemberLookupTable = std::map<std::string, std::shared_ptr<Decl>>;
+    std::vector<std::shared_ptr<Decl>> members;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<NamedDecl> getNamedDecl() const { return namedDecl; }
+
+    std::vector<std::shared_ptr<Decl>> getMembers() const { return members; }
+
+    void addMember(const std::shared_ptr<Decl>& member);
+
+    static std::shared_ptr<ClassDecl>
+    make(const Location& loc, const std::shared_ptr<NamedDecl>& n);
+
+    static std::shared_ptr<ClassDecl> make(
+        const Location& loc,
+        const std::shared_ptr<NamedDecl>& n,
+        const std::vector<std::shared_ptr<Decl>>& members);
 };

@@ -281,3 +281,28 @@ TEST_CASE("parser can treat binding declaration", "[parser]")
         REQUIRE(parse(diag, source));
     }
 }
+
+TEST_CASE("parser can treat class declarations", "[parser]")
+{
+    auto stream = std::make_shared<UnitTestDiagnosticStream>();
+    auto diag = std::make_shared<DiagnosticHandler>();
+    diag->setStream(stream);
+
+    SECTION("parser can treat class declaration")
+    {
+        constexpr auto source = R"(
+        class Vector2 {
+            let x = 0;
+            let y = 0;
+            function dot(v : Vector2) { return x * v.x + y * v.y; }
+            function cross(v : Vector2) { return x * v.y - y * v.x; }
+        }
+        )";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can treat empty class definition")
+    {
+        constexpr auto source = "class Foo {}\n";
+        REQUIRE(parse(diag, source));
+    }
+}

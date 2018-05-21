@@ -194,6 +194,13 @@ public:
         traverse();
     }
 
+    virtual void visit(const std::shared_ptr<ClassDecl>& decl) {}
+    virtual void visit(const std::shared_ptr<ClassDecl>& decl, Invoke&& traverse)
+    {
+        visit(decl);
+        traverse();
+    }
+
     virtual void visit(const std::shared_ptr<NamedDecl>& decl) {}
 };
 

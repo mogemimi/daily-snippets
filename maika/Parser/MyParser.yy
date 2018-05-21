@@ -117,6 +117,7 @@ Location toLoc(const yy::location& y)
 %token WHILE                "while"
 %token FOR                  "for"
 %token IN                   "in"
+%token CLASS                "class"
 %token NULL                 "null"
 
 %token <std::shared_ptr<NamedDecl>>                 IDENTIFIER "identifier"
@@ -152,7 +153,6 @@ Location toLoc(const yy::location& y)
 %type  <std::shared_ptr<Stmt>>                      for_init_statement
 %type  <std::shared_ptr<ForRangeStmt>>              for_range_statement
 %type  <std::shared_ptr<Decl>>                      for_range_init
-%type  <std::vector<std::shared_ptr<FunctionDecl>>> function_definitions
 %type  <std::shared_ptr<FunctionDecl>>              function_definition
 %type  <std::shared_ptr<FunctionExpr>>              function_expression
 %type  <CallSignature>                              call_signature
@@ -162,18 +162,29 @@ Location toLoc(const yy::location& y)
 %type  <std::vector<std::shared_ptr<BindingDecl>>>  binding_declarations
 %type  <std::shared_ptr<BindingDecl>>               binding_declaration
 %type  <std::shared_ptr<NamedDecl>>                 type_specifier
+%type  <std::shared_ptr<ClassDecl>>                 class_declaration
+%type  <std::vector<std::shared_ptr<Decl>>>         member_declaration_list
+%type  <std::shared_ptr<Decl>>                      member_declaration
+%type  <std::vector<std::shared_ptr<Decl>>>         translation_unit_declarations
+%type  <std::shared_ptr<Decl>>                      translation_unit_declaration
 %type  <std::shared_ptr<TranslationUnitDecl>>       translation_unit
 
 %%
 %start translation_unit;
 
 translation_unit:
-  function_definitions  { driver.ast.translationUnit = TranslationUnitDecl::make(toLoc(@$), $1); }
+  %empty                        { driver.ast.translationUnit = TranslationUnitDecl::make(toLoc(@$), std::vector<std::shared_ptr<Decl>>{}); }
+| translation_unit_declarations { driver.ast.translationUnit = TranslationUnitDecl::make(toLoc(@$), $1); }
 ;
 
-function_definitions:
-  %empty                                    { }
-| function_definitions function_definition  { $1.push_back($2); $$ = std::move($1); }
+translation_unit_declarations:
+  translation_unit_declaration                                { $$.push_back($1); }
+| translation_unit_declarations translation_unit_declaration  { $1.push_back($2); $$ = std::move($1); }
+;
+
+translation_unit_declaration:
+  class_declaration   { $$ = $1; }
+| function_definition { $$ = $1; }
 ;
 
 function_definition:
@@ -208,6 +219,22 @@ parameter_variable:
 
 type_specifier:
   "identifier"  { $$ = $1; }
+;
+
+class_declaration:
+  "class" "identifier" "{" "}"                          { $$ = ClassDecl::make(toLoc(@$), $2, std::vector<std::shared_ptr<Decl>>{}); }
+| "class" "identifier" "{" member_declaration_list "}"  { $$ = ClassDecl::make(toLoc(@$), $2, $4); }
+;
+
+member_declaration_list:
+  member_declaration                          { $$.push_back($1); }
+| member_declaration_list member_declaration  { $1.push_back($2); $$ = std::move($1); }
+;
+
+member_declaration:
+  function_definition     { $$ = $1; }
+| variable_definition ";" { $$ = $1; }
+| const_definition ";"    { $$ = $1; }
 ;
 
 statement:
