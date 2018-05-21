@@ -34,16 +34,6 @@ TEST_CASE("parser can treat basic sources consistently", "[parser]")
         constexpr auto source = "function f() { return null; }\n";
         REQUIRE(parse(diag, source));
     }
-    SECTION("parser can not use trailing commas with parameters")
-    {
-        constexpr auto source = "function f(a, b, c,) {}\n";
-        REQUIRE(!parse(diag, source));
-    }
-    SECTION("parser can not use trailing commas with arguments")
-    {
-        constexpr auto source = "function f() { g(a, b, c,); }\n";
-        REQUIRE(!parse(diag, source));
-    }
     SECTION("parser can treat subscript expression")
     {
         constexpr auto source = R"(
@@ -56,6 +46,29 @@ TEST_CASE("parser can treat basic sources consistently", "[parser]")
             a = [4, 3, 2, 1];
         })";
         REQUIRE(parse(diag, source));
+    }
+}
+
+TEST_CASE("parser can treat function declarations", "[parser]")
+{
+    auto stream = std::make_shared<UnitTestDiagnosticStream>();
+    auto diag = std::make_shared<DiagnosticHandler>();
+    diag->setStream(stream);
+
+    SECTION("parser can treat function declaration with type hints")
+    {
+        constexpr auto source = "function f(a : int, b : int) : int {}\n";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can not use trailing commas with parameters")
+    {
+        constexpr auto source = "function f(a, b, c,) {}\n";
+        REQUIRE(!parse(diag, source));
+    }
+    SECTION("parser can not use trailing commas with arguments")
+    {
+        constexpr auto source = "function f() { g(a, b, c,); }\n";
+        REQUIRE(!parse(diag, source));
     }
 }
 
@@ -300,9 +313,26 @@ TEST_CASE("parser can treat class declarations", "[parser]")
         )";
         REQUIRE(parse(diag, source));
     }
+    SECTION("parser can treat members with type annotations")
+    {
+        constexpr auto source = R"(class Vector2 {
+            let x;
+//            let y : double;
+//            let z : double = 0;
+        })";
+        REQUIRE(parse(diag, source));
+    }
     SECTION("parser can treat empty class definition")
     {
         constexpr auto source = "class Foo {}\n";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can treat const member")
+    {
+        constexpr auto source = R"(class Math {
+            const Epsilon = 2.71828;
+//            const Pi : double = 3.141592;
+        })";
         REQUIRE(parse(diag, source));
     }
 }
