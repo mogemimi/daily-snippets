@@ -17,11 +17,11 @@
 TEST_CASE("ASTDump", "[ast-dump]")
 {
     constexpr auto source = R"(
-function mul(a: int, b: int) {
+func mul(a: int, b: int) {
     return a * b;
 }
 
-function main() {
+func main() {
     let a = 95 / 4;
     let b = 3.141592;
     let c = mul(a + a, b);
@@ -93,14 +93,14 @@ function main() {
 TEST_CASE("TypeInfer", "[type-inference]")
 {
     constexpr auto source = R"(
-function sub(a, b) {
+func sub(a, b) {
     if (a) {
         return --b;
     }
     return a - b;
 }
 
-function main() {
+func main() {
     let a = 42;
     let b = 70;
     let c = 3.14 * (a + b);
@@ -109,7 +109,7 @@ function main() {
     let y = sub(c, d);
     let z = sub;
     let w = z(a, b);
-    let v = function(m, n) {
+    let v = func(m, n) {
         if (m == n) {
             return "temp";
         }
@@ -145,20 +145,20 @@ function main() {
 TEST_CASE("BytecodeGenerator", "[codegen]")
 {
     constexpr auto source = R"(
-// function min(a, b) {
+// func min(a, b) {
 //     if (a < b) {
 //         return a;
 //     }
 //     return b;
 // }
-function test() {
+func test() {
     let a = (3 * 2) + 1;
     let b = a + a;
     a = 42;
     let c = a + b;
     return c;
 }
-function arrayMapTest() {
+func arrayMapTest() {
 	let n = 42;
 	let arr = [1, 2, n];
 	let map = ["a": n, "b": 33, "c": 5];
@@ -192,7 +192,7 @@ function arrayMapTest() {
     ASTDumper dumper;
     traverser.traverse(astContext, dumper);
     REQUIRE(!diag->hasError());
-    printf("%s\n", dumper.getResult().c_str());
+    //    printf("%s\n", dumper.getResult().c_str());
 
 #if 0
     BytecodeGenerator byteCodeGenerator;

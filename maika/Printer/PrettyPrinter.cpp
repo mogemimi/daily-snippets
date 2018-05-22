@@ -226,7 +226,7 @@ void PrettyPrinter::visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invo
 void PrettyPrinter::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse)
 {
     const auto indent = makeIndent(dumpContext.level);
-    dumpContext.result += indent + "function ";
+    dumpContext.result += indent + "func ";
     if (auto namedDecl = decl->getNamedDecl()) {
         dumpContext.result += namedDecl->getName();
     }

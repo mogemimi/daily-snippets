@@ -108,7 +108,8 @@ Location toLoc(const yy::location& y)
 %token COMMA                ","
 %token DOT                  "."
 %token QUESTION             "?"
-%token FUNCTION             "function"
+%token ARROW                "->"
+%token FUNCTION             "func"
 %token RETURN               "return"
 %token LET                  "let"
 %token CONST                "const"
@@ -188,18 +189,18 @@ translation_unit_declaration:
 ;
 
 function_definition:
-  "function" "identifier" call_signature compound_statement { $$ = FunctionDecl::make(toLoc(@$), $2, std::get<0>($3), std::get<1>($3), $4); }
+  "func" "identifier" call_signature compound_statement { $$ = FunctionDecl::make(toLoc(@$), $2, std::get<0>($3), std::get<1>($3), $4); }
 ;
 
 function_expression:
-  "function" binding_identifier call_signature compound_statement { $$ = FunctionExpr::make(toLoc(@$), $2, std::get<0>($3), std::get<1>($3), $4); }
+  "func" binding_identifier call_signature compound_statement { $$ = FunctionExpr::make(toLoc(@$), $2, std::get<0>($3), std::get<1>($3), $4); }
 ;
 
 call_signature:
   "(" ")"                                         { std::get<1>($$) = nullptr; }
 | "(" ")" ":" type_specifier                      { std::get<1>($$) = $4; }
 | "(" parameter_variables ")"                     { std::get<0>($$) = $2; std::get<1>($$) = nullptr; }
-| "(" parameter_variables ")" ":" type_specifier  { std::get<0>($$) = $2; std::get<1>($$) = $5; }
+| "(" parameter_variables ")" "->" type_specifier { std::get<0>($$) = $2; std::get<1>($$) = $5; }
 ;
 
 binding_identifier:
@@ -292,20 +293,24 @@ for_range_statement:
 
 for_range_init:
   "identifier"                          { $$ = $1; }
-| "let" "identifier"                    { $$ = VariableDecl::make(toLoc(@$), $2); }
-| "const" "identifier"                  { $$ = ConstDecl::make(toLoc(@$), $2); }
+| "let" "identifier"                    { $$ = VariableDecl::make(toLoc(@$), $2, nullptr, nullptr); }
+| "const" "identifier"                  { $$ = ConstDecl::make(toLoc(@$), $2, nullptr, nullptr); }
 | "let" "(" binding_declarations ")"    { $$ = DecompositionDecl::make(toLoc(@$), $3); }
 | "const" "(" binding_declarations ")"  { $$ = DecompositionDecl::make(toLoc(@$), $3); }
 ;
 
 variable_definition:
-  "let" "identifier"                { $$ = VariableDecl::make(toLoc(@$), $2); }
-| "let" "identifier" "=" expression { $$ = VariableDecl::make(toLoc(@$), $2, $4); }
+  "let" "identifier"                                    { $$ = VariableDecl::make(toLoc(@$), $2, nullptr, nullptr); }
+| "let" "identifier" "=" expression                     { $$ = VariableDecl::make(toLoc(@$), $2, nullptr, $4); }
+| "let" "identifier" ":" type_specifier                 { $$ = VariableDecl::make(toLoc(@$), $2, $4, nullptr); }
+| "let" "identifier" ":" type_specifier "=" expression  { $$ = VariableDecl::make(toLoc(@$), $2, $4, $6); }
 ;
 
 const_definition:
-  "const" "identifier"                { $$ = ConstDecl::make(toLoc(@$), $2); }
-| "const" "identifier" "=" expression { $$ = ConstDecl::make(toLoc(@$), $2, $4); }
+  "const" "identifier"                                    { $$ = ConstDecl::make(toLoc(@$), $2, nullptr, nullptr); }
+| "const" "identifier" "=" expression                     { $$ = ConstDecl::make(toLoc(@$), $2, nullptr, $4); }
+| "const" "identifier" ":" type_specifier                 { $$ = ConstDecl::make(toLoc(@$), $2, $4, nullptr); }
+| "const" "identifier" ":" type_specifier "=" expression  { $$ = ConstDecl::make(toLoc(@$), $2, $4, $6); }
 ;
 
 decomposition_definition:

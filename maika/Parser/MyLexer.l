@@ -101,8 +101,9 @@ crlf        (\r\n|\n)
 ","         return yy::MyParser::make_COMMA(loc);
 "."         return yy::MyParser::make_DOT(loc);
 "?"         return yy::MyParser::make_QUESTION(loc);
+"->"        return yy::MyParser::make_ARROW(loc);
 
-"function"  return yy::MyParser::make_FUNCTION(loc);
+"func"      return yy::MyParser::make_FUNCTION(loc);
 "return"    return yy::MyParser::make_RETURN(loc);
 "let"       return yy::MyParser::make_LET(loc);
 "const"     return yy::MyParser::make_CONST(loc);

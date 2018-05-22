@@ -19,80 +19,103 @@ make xcode
 
 ## Language Specification
 
+#### Arrays
+
 ```swift
-class Vector2 {
-    let x : double = 0;
-    let y : double = 0;
+let arr = [42, 100];
+let empty_array = [];
+arr[1] = 42;
+```
 
-    func dot(v : Vector2) -> double
-    {
-        return x * v.x + y * v.y;
-    }
+#### Maps
 
-    func cross(v : Vector2) -> double
-    {
-        return x * v.y - y * v.x;
-    }
+```swift
+let m = ["x": 42, "y": 3];
+let empty_map = [:];
+m["y"] = 42;
+```
+
+#### For loops
+
+```swift
+for (let i = 0; i < 42; i++) {
+    println(i);
 }
+```
 
-func main()
-{
-    print("hello");
+#### For-in loops
 
-    // Array
-    let arr = [42, 100];
-    arr[1] = 42;
-
-    // Map
-    let m = ["x": 42, "y": 3];
-    m["y"] = 42;
-
-    // Empty array and map
-    let empty_array = [];
-    let empty_map = [:];
-
-    // Class
-    let vec = Vector2();
-    vec.x = 3.141592;
-    vec.y = 1.0;
-    let d = vec.dot(vec);
-
-    // Structured binding
-    let (u, v) = [42, 100];
-
-    // for
-    for (let i = 0; i < 42; i++) {
-        println(i);
-    }
-
-    // for...in
-    for (let i in arr) {
-        println(i);
-    }
-
-    // while
-    while (vec.x < 0.0) {
-        vec.x -= 1.0;
-    }
-
-    // if
-    if (vec.x < 0.0) {
-        vec.x = 0.0;
-    }
+```swift
+for (let i in arr) {
+    println(i);
 }
+```
+
+#### While loops
+
+```swift
+while (vec.x < 0.0) {
+    vec.x -= 1.0;
+}
+```
+
+#### If statements
+
+```swift
+if (vec.x < 0.0) {
+    vec.x = 0.0;
+}
+```
+
+#### Tuple
+
+```swift
+// Structured binding
+let (u, v) = [42, 100];
 ```
 
 #### Functions
 
 ```swift
-func run(f : func(Int)->Int) -> Int
-{
+func min(a : Double, b : Double) -> Double {
+    if (a < b) {
+        return a;
+    }
+    return b;
+}
+```
+
+```swift
+func run(f : func(Int)->Int) -> Int {
     return f(42);
 }
 
-func main()
-{
+func main() {
     let f = func(x : Int) -> Int { return x; };
     run(f);
+}
+```
+
+#### Classes
+
+```swift
+class Vector2 {
+    let x : Double = 0;
+    let y : Double = 0;
+
+    func dot(v : Vector2) -> Double {
+        return x * v.x + y * v.y;
+    }
+
+    func cross(v : Vector2) -> Double {
+        return x * v.y - y * v.x;
+    }
+}
+
+func main() {
+    let vec = Vector2();
+    vec.x = 3.141592;
+    vec.y = 1.0;
+    let d = vec.dot(vec);
 }
 ```

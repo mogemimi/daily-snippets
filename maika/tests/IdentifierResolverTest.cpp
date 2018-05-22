@@ -31,7 +31,7 @@ TEST_CASE("IdentifierResolver can resolve identifier", "[identifier-resolve]")
 
     SECTION("redeclared in this block.")
     {
-        constexpr auto source = R"(function test() {
+        constexpr auto source = R"(func test() {
             let x;
             let x;
         })";

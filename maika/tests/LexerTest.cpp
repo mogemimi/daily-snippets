@@ -33,13 +33,13 @@ TEST_CASE("lexer can treat basic sources consistently", "[lexer]")
     SECTION("lexer can skip UTF-8 BOM if it's present")
     {
         constexpr auto source = "\xEF\xBB\xBF"
-                                "function f() {}\n";
+                                "func f() {}\n";
         REQUIRE(lexerCheck(diag, source));
         REQUIRE(!diag->hasError());
     }
     SECTION("lexer can skip CRLF if it's present")
     {
-        constexpr auto source = "function f() {}\r\n";
+        constexpr auto source = "func f() {}\r\n";
         REQUIRE(lexerCheck(diag, source));
         REQUIRE(!diag->hasError());
     }
@@ -47,7 +47,7 @@ TEST_CASE("lexer can treat basic sources consistently", "[lexer]")
     {
         constexpr auto source = R"(
 // foo
-function f() { // bar
+func f() { // bar
     // TODO
 	/// NOTE
 	// // //
@@ -63,7 +63,7 @@ function f() { // bar
     {
         constexpr auto source = R"(
 /* aaa */
-function f() { /*
+func f() { /*
 	aaa
 	// TODO
 	{
@@ -79,7 +79,7 @@ function f() { /*
     SECTION("lexer can treat C-style comments")
     {
         constexpr auto source = R"(
-function f(/*){*/
+func f(/*){*/
 }
 )";
         REQUIRE(!lexerCheck(diag, source));

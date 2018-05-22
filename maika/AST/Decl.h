@@ -107,21 +107,23 @@ class VariableDecl final
     , public std::enable_shared_from_this<VariableDecl> {
 private:
     std::shared_ptr<NamedDecl> namedDecl;
+    std::shared_ptr<NamedDecl> typeAnnotation;
     std::shared_ptr<Expr> expr;
 
 public:
     void traverse(ASTVisitor& visitor) override;
 
     std::shared_ptr<NamedDecl> getNamedDecl() const { return namedDecl; }
+    std::shared_ptr<NamedDecl> getTypeAnnotation() const { return typeAnnotation; }
 
     std::shared_ptr<Expr> getExpr() const { return expr; }
     void setExpr(const std::shared_ptr<Expr>& e) { expr = e; }
 
-    static std::shared_ptr<VariableDecl>
-    make(const Location& loc, const std::shared_ptr<NamedDecl>& n);
-
-    static std::shared_ptr<VariableDecl>
-    make(const Location& loc, const std::shared_ptr<NamedDecl>& n, const std::shared_ptr<Expr>& e);
+    static std::shared_ptr<VariableDecl> make(
+        const Location& loc,
+        const std::shared_ptr<NamedDecl>& n,
+        const std::shared_ptr<NamedDecl>& typeAnnotation,
+        const std::shared_ptr<Expr>& e);
 };
 
 class ConstDecl final
@@ -129,21 +131,23 @@ class ConstDecl final
     , public std::enable_shared_from_this<ConstDecl> {
 private:
     std::shared_ptr<NamedDecl> namedDecl;
+    std::shared_ptr<NamedDecl> typeAnnotation;
     std::shared_ptr<Expr> expr;
 
 public:
     void traverse(ASTVisitor& visitor) override;
 
     std::shared_ptr<NamedDecl> getNamedDecl() const { return namedDecl; }
+    std::shared_ptr<NamedDecl> getTypeAnnotation() const { return typeAnnotation; }
 
     std::shared_ptr<Expr> getExpr() const { return expr; }
     void setExpr(const std::shared_ptr<Expr>& e) { expr = e; }
 
-    static std::shared_ptr<ConstDecl>
-    make(const Location& loc, const std::shared_ptr<NamedDecl>& n);
-
-    static std::shared_ptr<ConstDecl>
-    make(const Location& loc, const std::shared_ptr<NamedDecl>& n, const std::shared_ptr<Expr>& e);
+    static std::shared_ptr<ConstDecl> make(
+        const Location& loc,
+        const std::shared_ptr<NamedDecl>& n,
+        const std::shared_ptr<NamedDecl>& typeAnnotation,
+        const std::shared_ptr<Expr>& e);
 };
 
 class BindingDecl final

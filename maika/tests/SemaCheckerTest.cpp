@@ -36,25 +36,24 @@ TEST_CASE("const can be defined as constant data types", "[semacheck]")
 
     SECTION("const can be defined as constant data types")
     {
-        constexpr auto source = R"(function f() { const a = 42; })";
+        constexpr auto source = R"(func f() { const a = 42; })";
         REQUIRE(semaCheck(diag, source));
     }
     SECTION("const cannot be reassigned.")
     {
-        constexpr auto source = R"(function f() {
+        constexpr auto source = R"(func f() {
             const a = 42;
             a = 100;
         })";
         REQUIRE(!semaCheck(diag, source));
-        REQUIRE(
-            stream->hasError("3:13: error: 'a' cannot be reassigned because it is a constant."));
+        REQUIRE(stream->hasError("error: 'a' cannot be reassigned because it is a constant."));
     }
     SECTION("typename cannot be assigned.")
     {
-        constexpr auto source = R"(function f() { int = 42; })";
+        constexpr auto source = R"(func f() { int = 42; })";
         REQUIRE(!semaCheck(diag, source));
-        REQUIRE(stream->hasError(
-            "1:16: error: 'int' cannot be assigned because it only refers to a type."));
+        REQUIRE(
+            stream->hasError("error: 'int' cannot be assigned because it only refers to a type."));
     }
 }
 
@@ -66,26 +65,24 @@ TEST_CASE("lvalue and rvalue", "[semacheck]")
 
     SECTION("The left-hand side of an assignment must be a variable.")
     {
-        constexpr auto source = R"(function test() { 4 = 2; })";
+        constexpr auto source = R"(func test() { 4 = 2; })";
         REQUIRE(!semaCheck(diag, source));
-        REQUIRE(stream->hasError(
-            "1:19: error: The left-hand side of an assignment must be a variable."));
+        REQUIRE(stream->hasError("error: The left-hand side of an assignment must be a variable."));
     }
     SECTION("The left-hand side of an assignment must be a variable.")
     {
-        constexpr auto source = R"(function test() { "a" = "a"; })";
+        constexpr auto source = R"(func test() { "a" = "a"; })";
         REQUIRE(!semaCheck(diag, source));
-        REQUIRE(stream->hasError(
-            "1:19: error: The left-hand side of an assignment must be a variable."));
+        REQUIRE(stream->hasError("error: The left-hand side of an assignment must be a variable."));
     }
     SECTION("The LHS is correctly a variable.")
     {
-        constexpr auto source = R"(function test() { let a = "a"; })";
+        constexpr auto source = R"(func test() { let a = "a"; })";
         REQUIRE(semaCheck(diag, source));
     }
     SECTION("The left-hand side of an assignment must be a variable.")
     {
-        constexpr auto source = R"(function test() {
+        constexpr auto source = R"(func test() {
             let a;
             let b;
             a = b = 2;
@@ -94,7 +91,7 @@ TEST_CASE("lvalue and rvalue", "[semacheck]")
     }
     SECTION("The left-hand side of an assignment must be a variable.")
     {
-        constexpr auto source = R"(function test() {
+        constexpr auto source = R"(func test() {
             let a;
             (a) = 2;
         })";
@@ -102,7 +99,7 @@ TEST_CASE("lvalue and rvalue", "[semacheck]")
     }
     SECTION("The left-hand side of an assignment must be a variable.")
     {
-        constexpr auto source = R"(function test() {
+        constexpr auto source = R"(func test() {
             let a;
             let b;
             a = (b = 2);
@@ -111,28 +108,26 @@ TEST_CASE("lvalue and rvalue", "[semacheck]")
     }
     SECTION("The left-hand side of an assignment must be a variable.")
     {
-        constexpr auto source = R"(function test() {
+        constexpr auto source = R"(func test() {
             let a;
             let b;
             (a = b) = 2;
         })";
         REQUIRE(!semaCheck(diag, source));
-        REQUIRE(stream->hasError(
-            "4:14: error: The left-hand side of an assignment must be a variable."));
+        REQUIRE(stream->hasError("error: The left-hand side of an assignment must be a variable."));
     }
     SECTION("The left-hand side of an assignment must be a variable.")
     {
-        constexpr auto source = R"(function test() {
+        constexpr auto source = R"(func test() {
             let a = 42;
             (a = 0) = 2;
         })";
         REQUIRE(!semaCheck(diag, source));
-        REQUIRE(stream->hasError(
-            "3:14: error: The left-hand side of an assignment must be a variable."));
+        REQUIRE(stream->hasError("error: The left-hand side of an assignment must be a variable."));
     }
     SECTION("Function call is rvalue.")
     {
-        constexpr auto source = R"(function f() { f() = 2; })";
+        constexpr auto source = R"(func f() { f() = 2; })";
         REQUIRE(!semaCheck(diag, source));
     }
 }
