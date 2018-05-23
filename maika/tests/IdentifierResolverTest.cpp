@@ -31,11 +31,35 @@ TEST_CASE("IdentifierResolver can resolve identifier", "[identifier-resolve]")
 
     SECTION("redeclared in this block.")
     {
-        constexpr auto source = R"(func test() {
+        constexpr auto source = R"(func f() {
             let x;
             let x;
         })";
         REQUIRE(!resolveIdentifiers(diag, source));
-        REQUIRE(stream->hasError("3:17: error: 'x' redeclared in this block."));
+        REQUIRE(stream->hasError("error: 'x' redeclared in this block."));
+    }
+    SECTION("resolver emits an undefined identifier when using unknown symbols")
+    {
+        constexpr auto source = R"(func f() {
+            x = 42;
+        })";
+        REQUIRE(!resolveIdentifiers(diag, source));
+        REQUIRE(stream->hasError("error: 'x' was not declared in this scope."));
+    }
+    SECTION("resolver emits an undefined identifier when calling unknown function")
+    {
+        constexpr auto source = R"(
+        func f() { g(); }
+        )";
+        REQUIRE(!resolveIdentifiers(diag, source));
+        REQUIRE(stream->hasError("error: 'g' was not declared in this scope."));
+    }
+    SECTION("resolving function name")
+    {
+        constexpr auto source = R"(
+        func g() { }
+        func f() { g(); }
+        )";
+        REQUIRE(resolveIdentifiers(diag, source));
     }
 }
