@@ -1,8 +1,8 @@
 %skeleton "lalr1.cc"
 %require "3.0.4"
-%defines "Parser/MyParser.h"
-%output "Parser/MyParser.cpp"
-%define parser_class_name {MyParser}
+%defines "Parser/Parser.h"
+%output "Parser/Parser.cpp"
+%define parser_class_name {Parser}
 %define api.token.constructor
 %define api.value.type variant
 %define parse.assert
@@ -20,7 +20,7 @@
 #include <tuple>
 #include <vector>
 
-class MyDriver;
+class Driver;
 
 namespace yy {
 class position;
@@ -36,7 +36,7 @@ using CallSignature = std::tuple<
 Location toLoc(const yy::location& y);
 }
 
-%param { MyDriver& driver }
+%param { Driver& driver }
 
 %locations
 %initial-action
@@ -445,7 +445,7 @@ expression:
 
 %%
 
-void yy::MyParser::error(const location_type& l, const std::string& m)
+void yy::Parser::error(const location_type& l, const std::string& m)
 {
     driver.error(toLoc(l), m);
 }

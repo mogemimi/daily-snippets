@@ -78,7 +78,7 @@ func main() {
 
     auto diag = std::make_shared<DiagnosticHandler>();
 
-    MyDriver driver;
+    Driver driver;
     auto [astContext, ok] = driver.parseString(source, diag);
     REQUIRE(ok);
 
@@ -121,7 +121,7 @@ func main() {
 )";
     auto diag = std::make_shared<DiagnosticHandler>();
 
-    MyDriver driver;
+    Driver driver;
     auto [astContext, ok] = driver.parseString(source, diag);
     REQUIRE(ok);
 
@@ -166,7 +166,7 @@ func arrayMapTest() {
 )";
     auto diag = std::make_shared<DiagnosticHandler>();
 
-    MyDriver driver;
+    Driver driver;
     auto [astContext, ok] = driver.parseString(source, diag);
     REQUIRE(ok);
 

@@ -31,16 +31,16 @@
 // version 2.2 of Bison.
 
 /**
- ** \file Parser/MyParser.h
+ ** \file Parser/Parser.h
  ** Define the yy::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
 
-#ifndef YY_YY_PARSER_MYPARSER_H_INCLUDED
-# define YY_YY_PARSER_MYPARSER_H_INCLUDED
+#ifndef YY_YY_PARSER_PARSER_H_INCLUDED
+# define YY_YY_PARSER_PARSER_H_INCLUDED
 // //                    "%code requires" blocks.
-#line 11 "Parser/MyParser.yy" // lalr1.cc:392
+#line 11 "Parser/Parser.yy" // lalr1.cc:392
 
 #include "AST/ASTContext.h"
 #include "AST/Decl.h"
@@ -53,7 +53,7 @@
 #include <tuple>
 #include <vector>
 
-class MyDriver;
+class Driver;
 
 namespace yy {
 class position;
@@ -68,7 +68,7 @@ using CallSignature = std::tuple<
 // https://www.gnu.org/software/bison/manual/html_node/User-Defined-Location-Type.html#User-Defined-Location-Type
 Location toLoc(const yy::location& y);
 
-#line 72 "Parser/MyParser.h" // lalr1.cc:392
+#line 72 "Parser/Parser.h" // lalr1.cc:392
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -145,7 +145,7 @@ Location toLoc(const yy::location& y);
 
 
 namespace yy {
-#line 149 "Parser/MyParser.h" // lalr1.cc:392
+#line 149 "Parser/Parser.h" // lalr1.cc:392
 
 
 
@@ -305,7 +305,7 @@ namespace yy {
 
 
   /// A Bison parser.
-  class MyParser
+  class Parser
   {
   public:
 #ifndef YYSTYPE
@@ -898,8 +898,8 @@ namespace yy {
 
 
     /// Build a parser object.
-    MyParser (MyDriver& driver_yyarg);
-    virtual ~MyParser ();
+    Parser (Driver& driver_yyarg);
+    virtual ~Parser ();
 
     /// Parse.
     /// \returns  0 iff parsing succeeded.
@@ -929,8 +929,8 @@ namespace yy {
 
   private:
     /// This class is not copyable.
-    MyParser (const MyParser&);
-    MyParser& operator= (const MyParser&);
+    Parser (const Parser&);
+    Parser& operator= (const Parser&);
 
     /// State numbers.
     typedef int state_type;
@@ -1111,13 +1111,13 @@ namespace yy {
 
 
     // User arguments.
-    MyDriver& driver;
+    Driver& driver;
   };
 
   // Symbol number corresponding to token number t.
   inline
-  MyParser::token_number_type
-  MyParser::yytranslate_ (token_type t)
+  Parser::token_number_type
+  Parser::yytranslate_ (token_type t)
   {
     static
     const token_number_type
@@ -1168,7 +1168,7 @@ namespace yy {
   }
 
   inline
-  MyParser::syntax_error::syntax_error (const location_type& l, const std::string& m)
+  Parser::syntax_error::syntax_error (const location_type& l, const std::string& m)
     : std::runtime_error (m)
     , location (l)
   {}
@@ -1176,13 +1176,13 @@ namespace yy {
   // basic_symbol.
   template <typename Base>
   inline
-  MyParser::basic_symbol<Base>::basic_symbol ()
+  Parser::basic_symbol<Base>::basic_symbol ()
     : value ()
   {}
 
   template <typename Base>
   inline
-  MyParser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
+  Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
     : Base (other)
     , value ()
     , location (other.location)
@@ -1363,7 +1363,7 @@ namespace yy {
 
   template <typename Base>
   inline
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v, const location_type& l)
     : Base (t)
     , value ()
     , location (l)
@@ -1545,280 +1545,280 @@ namespace yy {
   // Implementation of basic_symbol constructor for each type.
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
     : Base (t)
     , value ()
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const CallSignature v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const CallSignature v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ArrayLiteral> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ArrayLiteral> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<BinaryOperator> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<BinaryOperator> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<BindingDecl> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<BindingDecl> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<BoolLiteral> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<BoolLiteral> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<CallExpr> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<CallExpr> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ClassDecl> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ClassDecl> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<CompoundStmt> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<CompoundStmt> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ConstDecl> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ConstDecl> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<Decl> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<Decl> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<DecompositionDecl> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<DecompositionDecl> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<DoubleLiteral> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<DoubleLiteral> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<Expr> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<Expr> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ForRangeStmt> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ForRangeStmt> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ForStmt> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ForStmt> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<FunctionDecl> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<FunctionDecl> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<FunctionExpr> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<FunctionExpr> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<IfStmt> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<IfStmt> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<IntegerLiteral> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<IntegerLiteral> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<MapEntry> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<MapEntry> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<MapLiteral> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<MapLiteral> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<MemberExpr> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<MemberExpr> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<NamedDecl> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<NamedDecl> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<NullLiteral> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<NullLiteral> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ParmVarDecl> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ParmVarDecl> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ReturnStmt> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ReturnStmt> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<Stmt> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<Stmt> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<StringLiteral> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<StringLiteral> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<SubscriptExpr> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<SubscriptExpr> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<TranslationUnitDecl> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<TranslationUnitDecl> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<UnaryOperator> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<UnaryOperator> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<VariableDecl> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<VariableDecl> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<WhileStmt> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<WhileStmt> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<BindingDecl>> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<BindingDecl>> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<Decl>> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<Decl>> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<Expr>> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<Expr>> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<MapEntry>> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<MapEntry>> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<ParmVarDecl>> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<ParmVarDecl>> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  MyParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<Stmt>> v, const location_type& l)
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<Stmt>> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
@@ -1827,7 +1827,7 @@ namespace yy {
 
   template <typename Base>
   inline
-  MyParser::basic_symbol<Base>::~basic_symbol ()
+  Parser::basic_symbol<Base>::~basic_symbol ()
   {
     clear ();
   }
@@ -1835,7 +1835,7 @@ namespace yy {
   template <typename Base>
   inline
   void
-  MyParser::basic_symbol<Base>::clear ()
+  Parser::basic_symbol<Base>::clear ()
   {
     // User destructor.
     symbol_number_type yytype = this->type_get ();
@@ -2025,7 +2025,7 @@ namespace yy {
   template <typename Base>
   inline
   bool
-  MyParser::basic_symbol<Base>::empty () const
+  Parser::basic_symbol<Base>::empty () const
   {
     return Base::type_get () == empty_symbol;
   }
@@ -2033,7 +2033,7 @@ namespace yy {
   template <typename Base>
   inline
   void
-  MyParser::basic_symbol<Base>::move (basic_symbol& s)
+  Parser::basic_symbol<Base>::move (basic_symbol& s)
   {
     super_type::move(s);
       switch (this->type_get ())
@@ -2212,30 +2212,30 @@ namespace yy {
 
   // by_type.
   inline
-  MyParser::by_type::by_type ()
+  Parser::by_type::by_type ()
     : type (empty_symbol)
   {}
 
   inline
-  MyParser::by_type::by_type (const by_type& other)
+  Parser::by_type::by_type (const by_type& other)
     : type (other.type)
   {}
 
   inline
-  MyParser::by_type::by_type (token_type t)
+  Parser::by_type::by_type (token_type t)
     : type (yytranslate_ (t))
   {}
 
   inline
   void
-  MyParser::by_type::clear ()
+  Parser::by_type::clear ()
   {
     type = empty_symbol;
   }
 
   inline
   void
-  MyParser::by_type::move (by_type& that)
+  Parser::by_type::move (by_type& that)
   {
     type = that.type;
     that.clear ();
@@ -2243,14 +2243,14 @@ namespace yy {
 
   inline
   int
-  MyParser::by_type::type_get () const
+  Parser::by_type::type_get () const
   {
     return type;
   }
 
   inline
-  MyParser::token_type
-  MyParser::by_type::token () const
+  Parser::token_type
+  Parser::by_type::token () const
   {
     // YYTOKNUM[NUM] -- (External) token number corresponding to the
     // (internal) symbol number NUM (which must be that of a token).  */
@@ -2268,308 +2268,308 @@ namespace yy {
     return static_cast<token_type> (yytoken_number_[type]);
   }
   // Implementation of make_symbol for each symbol type.
-  MyParser::symbol_type
-  MyParser::make_END (const location_type& l)
+  Parser::symbol_type
+  Parser::make_END (const location_type& l)
   {
     return symbol_type (token::TOK_END, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_ASSIGN (const location_type& l)
+  Parser::symbol_type
+  Parser::make_ASSIGN (const location_type& l)
   {
     return symbol_type (token::TOK_ASSIGN, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_MINUS (const location_type& l)
+  Parser::symbol_type
+  Parser::make_MINUS (const location_type& l)
   {
     return symbol_type (token::TOK_MINUS, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_PLUS (const location_type& l)
+  Parser::symbol_type
+  Parser::make_PLUS (const location_type& l)
   {
     return symbol_type (token::TOK_PLUS, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_STAR (const location_type& l)
+  Parser::symbol_type
+  Parser::make_STAR (const location_type& l)
   {
     return symbol_type (token::TOK_STAR, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_SLASH (const location_type& l)
+  Parser::symbol_type
+  Parser::make_SLASH (const location_type& l)
   {
     return symbol_type (token::TOK_SLASH, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_MOD (const location_type& l)
+  Parser::symbol_type
+  Parser::make_MOD (const location_type& l)
   {
     return symbol_type (token::TOK_MOD, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_SUB_ASSIGN (const location_type& l)
+  Parser::symbol_type
+  Parser::make_SUB_ASSIGN (const location_type& l)
   {
     return symbol_type (token::TOK_SUB_ASSIGN, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_ADD_ASSIGN (const location_type& l)
+  Parser::symbol_type
+  Parser::make_ADD_ASSIGN (const location_type& l)
   {
     return symbol_type (token::TOK_ADD_ASSIGN, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_MUL_ASSIGN (const location_type& l)
+  Parser::symbol_type
+  Parser::make_MUL_ASSIGN (const location_type& l)
   {
     return symbol_type (token::TOK_MUL_ASSIGN, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_DIV_ASSIGN (const location_type& l)
+  Parser::symbol_type
+  Parser::make_DIV_ASSIGN (const location_type& l)
   {
     return symbol_type (token::TOK_DIV_ASSIGN, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_MOD_ASSIGN (const location_type& l)
+  Parser::symbol_type
+  Parser::make_MOD_ASSIGN (const location_type& l)
   {
     return symbol_type (token::TOK_MOD_ASSIGN, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_PLUS_PLUS (const location_type& l)
+  Parser::symbol_type
+  Parser::make_PLUS_PLUS (const location_type& l)
   {
     return symbol_type (token::TOK_PLUS_PLUS, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_MINUS_MINUS (const location_type& l)
+  Parser::symbol_type
+  Parser::make_MINUS_MINUS (const location_type& l)
   {
     return symbol_type (token::TOK_MINUS_MINUS, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_LOGICAL_NOT (const location_type& l)
+  Parser::symbol_type
+  Parser::make_LOGICAL_NOT (const location_type& l)
   {
     return symbol_type (token::TOK_LOGICAL_NOT, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_LOGICAL_AND (const location_type& l)
+  Parser::symbol_type
+  Parser::make_LOGICAL_AND (const location_type& l)
   {
     return symbol_type (token::TOK_LOGICAL_AND, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_LOGICAL_OR (const location_type& l)
+  Parser::symbol_type
+  Parser::make_LOGICAL_OR (const location_type& l)
   {
     return symbol_type (token::TOK_LOGICAL_OR, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_EQUAL (const location_type& l)
+  Parser::symbol_type
+  Parser::make_EQUAL (const location_type& l)
   {
     return symbol_type (token::TOK_EQUAL, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_NOT_EQUAL (const location_type& l)
+  Parser::symbol_type
+  Parser::make_NOT_EQUAL (const location_type& l)
   {
     return symbol_type (token::TOK_NOT_EQUAL, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_LESS_THAN_EQUAL (const location_type& l)
+  Parser::symbol_type
+  Parser::make_LESS_THAN_EQUAL (const location_type& l)
   {
     return symbol_type (token::TOK_LESS_THAN_EQUAL, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_GREATER_THAN_EQUAL (const location_type& l)
+  Parser::symbol_type
+  Parser::make_GREATER_THAN_EQUAL (const location_type& l)
   {
     return symbol_type (token::TOK_GREATER_THAN_EQUAL, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_LESS_THAN (const location_type& l)
+  Parser::symbol_type
+  Parser::make_LESS_THAN (const location_type& l)
   {
     return symbol_type (token::TOK_LESS_THAN, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_GREATER_THAN (const location_type& l)
+  Parser::symbol_type
+  Parser::make_GREATER_THAN (const location_type& l)
   {
     return symbol_type (token::TOK_GREATER_THAN, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_LEFT_PARENTHESIS (const location_type& l)
+  Parser::symbol_type
+  Parser::make_LEFT_PARENTHESIS (const location_type& l)
   {
     return symbol_type (token::TOK_LEFT_PARENTHESIS, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_RIGHT_PARENTHESIS (const location_type& l)
+  Parser::symbol_type
+  Parser::make_RIGHT_PARENTHESIS (const location_type& l)
   {
     return symbol_type (token::TOK_RIGHT_PARENTHESIS, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_LEFT_CURLY_BRACKET (const location_type& l)
+  Parser::symbol_type
+  Parser::make_LEFT_CURLY_BRACKET (const location_type& l)
   {
     return symbol_type (token::TOK_LEFT_CURLY_BRACKET, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_RIGHT_CURLY_BRACKET (const location_type& l)
+  Parser::symbol_type
+  Parser::make_RIGHT_CURLY_BRACKET (const location_type& l)
   {
     return symbol_type (token::TOK_RIGHT_CURLY_BRACKET, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_LEFT_SQUARE_BRACKET (const location_type& l)
+  Parser::symbol_type
+  Parser::make_LEFT_SQUARE_BRACKET (const location_type& l)
   {
     return symbol_type (token::TOK_LEFT_SQUARE_BRACKET, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_RIGHT_SQUARE_BRACKET (const location_type& l)
+  Parser::symbol_type
+  Parser::make_RIGHT_SQUARE_BRACKET (const location_type& l)
   {
     return symbol_type (token::TOK_RIGHT_SQUARE_BRACKET, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_COLON (const location_type& l)
+  Parser::symbol_type
+  Parser::make_COLON (const location_type& l)
   {
     return symbol_type (token::TOK_COLON, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_SEMICOLON (const location_type& l)
+  Parser::symbol_type
+  Parser::make_SEMICOLON (const location_type& l)
   {
     return symbol_type (token::TOK_SEMICOLON, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_COMMA (const location_type& l)
+  Parser::symbol_type
+  Parser::make_COMMA (const location_type& l)
   {
     return symbol_type (token::TOK_COMMA, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_DOT (const location_type& l)
+  Parser::symbol_type
+  Parser::make_DOT (const location_type& l)
   {
     return symbol_type (token::TOK_DOT, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_QUESTION (const location_type& l)
+  Parser::symbol_type
+  Parser::make_QUESTION (const location_type& l)
   {
     return symbol_type (token::TOK_QUESTION, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_ARROW (const location_type& l)
+  Parser::symbol_type
+  Parser::make_ARROW (const location_type& l)
   {
     return symbol_type (token::TOK_ARROW, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_FUNCTION (const location_type& l)
+  Parser::symbol_type
+  Parser::make_FUNCTION (const location_type& l)
   {
     return symbol_type (token::TOK_FUNCTION, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_RETURN (const location_type& l)
+  Parser::symbol_type
+  Parser::make_RETURN (const location_type& l)
   {
     return symbol_type (token::TOK_RETURN, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_LET (const location_type& l)
+  Parser::symbol_type
+  Parser::make_LET (const location_type& l)
   {
     return symbol_type (token::TOK_LET, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_CONST (const location_type& l)
+  Parser::symbol_type
+  Parser::make_CONST (const location_type& l)
   {
     return symbol_type (token::TOK_CONST, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_IF (const location_type& l)
+  Parser::symbol_type
+  Parser::make_IF (const location_type& l)
   {
     return symbol_type (token::TOK_IF, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_ELSE (const location_type& l)
+  Parser::symbol_type
+  Parser::make_ELSE (const location_type& l)
   {
     return symbol_type (token::TOK_ELSE, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_WHILE (const location_type& l)
+  Parser::symbol_type
+  Parser::make_WHILE (const location_type& l)
   {
     return symbol_type (token::TOK_WHILE, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_FOR (const location_type& l)
+  Parser::symbol_type
+  Parser::make_FOR (const location_type& l)
   {
     return symbol_type (token::TOK_FOR, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_IN (const location_type& l)
+  Parser::symbol_type
+  Parser::make_IN (const location_type& l)
   {
     return symbol_type (token::TOK_IN, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_CLASS (const location_type& l)
+  Parser::symbol_type
+  Parser::make_CLASS (const location_type& l)
   {
     return symbol_type (token::TOK_CLASS, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_NULL (const location_type& l)
+  Parser::symbol_type
+  Parser::make_NULL (const location_type& l)
   {
     return symbol_type (token::TOK_NULL, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_IDENTIFIER (const std::shared_ptr<NamedDecl>& v, const location_type& l)
+  Parser::symbol_type
+  Parser::make_IDENTIFIER (const std::shared_ptr<NamedDecl>& v, const location_type& l)
   {
     return symbol_type (token::TOK_IDENTIFIER, v, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_INTEGER_LITERAL (const std::shared_ptr<IntegerLiteral>& v, const location_type& l)
+  Parser::symbol_type
+  Parser::make_INTEGER_LITERAL (const std::shared_ptr<IntegerLiteral>& v, const location_type& l)
   {
     return symbol_type (token::TOK_INTEGER_LITERAL, v, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_DOUBLE_LITERAL (const std::shared_ptr<DoubleLiteral>& v, const location_type& l)
+  Parser::symbol_type
+  Parser::make_DOUBLE_LITERAL (const std::shared_ptr<DoubleLiteral>& v, const location_type& l)
   {
     return symbol_type (token::TOK_DOUBLE_LITERAL, v, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_BOOL_LITERAL (const std::shared_ptr<BoolLiteral>& v, const location_type& l)
+  Parser::symbol_type
+  Parser::make_BOOL_LITERAL (const std::shared_ptr<BoolLiteral>& v, const location_type& l)
   {
     return symbol_type (token::TOK_BOOL_LITERAL, v, l);
   }
 
-  MyParser::symbol_type
-  MyParser::make_STRING_LITERAL (const std::shared_ptr<StringLiteral>& v, const location_type& l)
+  Parser::symbol_type
+  Parser::make_STRING_LITERAL (const std::shared_ptr<StringLiteral>& v, const location_type& l)
   {
     return symbol_type (token::TOK_STRING_LITERAL, v, l);
   }
@@ -2577,9 +2577,9 @@ namespace yy {
 
 
 } // yy
-#line 2581 "Parser/MyParser.h" // lalr1.cc:392
+#line 2581 "Parser/Parser.h" // lalr1.cc:392
 
 
 
 
-#endif // !YY_YY_PARSER_MYPARSER_H_INCLUDED
+#endif // !YY_YY_PARSER_PARSER_H_INCLUDED

@@ -3,14 +3,14 @@
 #include "AST/ASTContext.h"
 #include "AST/Comment.h"
 #include "Basic/Forward.h"
-#include "Parser/MyParser.h"
+#include "Parser/Parser.h"
 #include <functional>
 #include <map>
 #include <memory>
 #include <string>
 #include <tuple>
 
-class MyDriver final {
+class Driver final {
 private:
     std::shared_ptr<DiagnosticHandler> diag;
     std::function<void()> defer;
@@ -36,6 +36,6 @@ public:
 };
 
 // Tell Flex the lexer's prototype ...
-#define YY_DECL yy::MyParser::symbol_type yylex(MyDriver& driver)
+#define YY_DECL yy::Parser::symbol_type yylex(Driver& driver)
 // ... and declare it for the parser's sake.
 YY_DECL;

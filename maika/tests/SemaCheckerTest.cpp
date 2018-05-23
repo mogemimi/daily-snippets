@@ -11,7 +11,7 @@
 namespace {
 bool semaCheck(const std::shared_ptr<DiagnosticHandler>& diag, const std::string& source)
 {
-    MyDriver driver;
+    Driver driver;
     auto [astContext, ok] = driver.parseString(source, diag);
     REQUIRE(ok);
 

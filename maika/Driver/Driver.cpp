@@ -1,12 +1,12 @@
 #include "Driver/Driver.h"
 #include "Basic/Diagnostic.h"
-#include "Parser/MyParser.h"
+#include "Parser/Parser.h"
 
 #define YY_NO_UNISTD_H 1
-#include "Parser/MyLexer.h"
+#include "Parser/Lexer.h"
 
 std::tuple<ASTContext, bool>
-MyDriver::parseFile(const std::string& filename, const std::shared_ptr<DiagnosticHandler>& diagIn)
+Driver::parseFile(const std::string& filename, const std::shared_ptr<DiagnosticHandler>& diagIn)
 {
     this->traceScanning = false;
     this->file = filename;
@@ -26,7 +26,7 @@ MyDriver::parseFile(const std::string& filename, const std::shared_ptr<Diagnosti
     this->defer = [] { fclose(yyin); };
 
     scanBegin();
-    yy::MyParser parser(*this);
+    yy::Parser parser(*this);
     const auto resultCode = parser.parse();
     scanEnd();
 
@@ -35,7 +35,7 @@ MyDriver::parseFile(const std::string& filename, const std::shared_ptr<Diagnosti
 }
 
 std::tuple<ASTContext, bool>
-MyDriver::parseString(const std::string& text, const std::shared_ptr<DiagnosticHandler>& diagIn)
+Driver::parseString(const std::string& text, const std::shared_ptr<DiagnosticHandler>& diagIn)
 {
     this->traceScanning = false;
     this->file.clear();
@@ -48,7 +48,7 @@ MyDriver::parseString(const std::string& text, const std::shared_ptr<DiagnosticH
     this->defer = [state] { yy_delete_buffer(state); };
 
     scanBegin();
-    yy::MyParser parser(*this);
+    yy::Parser parser(*this);
     const auto resultCode = parser.parse();
     scanEnd();
 
@@ -56,7 +56,7 @@ MyDriver::parseString(const std::string& text, const std::shared_ptr<DiagnosticH
     return std::make_tuple(ast, ok);
 }
 
-void MyDriver::visitComment(const Location& loc, CommentKind kind, const std::string& text)
+void Driver::visitComment(const Location& loc, CommentKind kind, const std::string& text)
 {
     auto comment = std::make_shared<Comment>();
     comment->location = loc;
@@ -65,13 +65,13 @@ void MyDriver::visitComment(const Location& loc, CommentKind kind, const std::st
     ast.comments.push_back(std::move(comment));
 }
 
-void MyDriver::error(const Location& l, const std::string& m)
+void Driver::error(const Location& l, const std::string& m)
 {
     assert(diag);
     diag->error(l, m);
 }
 
-void MyDriver::error(const std::string& m)
+void Driver::error(const std::string& m)
 {
     assert(diag);
     diag->error(m);

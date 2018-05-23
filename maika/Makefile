@@ -26,8 +26,8 @@ SOURCES = \
 	CodeGen/BytecodeGenerator.cpp \
 	CodeGen/Instruction.cpp \
 	CodeGen/Runtime.cpp \
-	Parser/MyLexer.cpp \
-	Parser/MyParser.cpp \
+	Parser/Lexer.cpp \
+	Parser/Parser.cpp \
 	Printer/PrettyPrinter.cpp \
 	Sema/ASTEvaluator.cpp \
 	Sema/Entity.cpp \
@@ -69,12 +69,12 @@ format:
 		tests/*.cpp
 
 bison:
-	@flex Parser/MyLexer.l
-	@bison Parser/MyParser.yy
+	@flex Parser/Lexer.l
+	@bison Parser/Parser.yy
 
 xcode:
-	@flex Parser/MyLexer.l
-	@bison Parser/MyParser.yy
+	@flex Parser/Lexer.l
+	@bison Parser/Parser.yy
 	$(NORI) \
 		-generator=xcode \
 		$(HEADERS) \
@@ -84,9 +84,10 @@ xcode:
 	@cp build/Release/$(PRODUCTNAME) bin/$(PRODUCTNAME)
 
 clean:
-	@rm -f Parser/MyLexer.cpp
-	@rm -f Parser/MyParser.cpp
-	@rm -f Parser/MyParser.h
+	@rm -f Parser/Lexer.cpp
+	@rm -f Parser/Lexer.h
+	@rm -f Parser/Parser.cpp
+	@rm -f Parser/Parser.h
 	@rm -f Parser/location.hh
 	@rm -f Parser/position.hh
 	@rm -f Parser/stack.hh

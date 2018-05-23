@@ -17,7 +17,7 @@ bool typeCheck(
     ASTContext& astContextOut,
     IdentifierContext& context)
 {
-    MyDriver driver;
+    Driver driver;
     auto [astContext, ok] = driver.parseString(source, diag);
     REQUIRE(ok);
     astContextOut = astContext;

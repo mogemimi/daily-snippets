@@ -1,5 +1,4 @@
-func hello(_ x : Any) -> Any
-{
+func hello(_ x : Any) -> Any {
     return x;
 }
 
