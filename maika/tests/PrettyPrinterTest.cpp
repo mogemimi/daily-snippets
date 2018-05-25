@@ -87,6 +87,22 @@ TEST_CASE("pretty print", "[prettyprinter]")
                                 "}\n";
         REQUIRE(prettyPrint(diag, source) == source);
     }
+    SECTION("printer prints arrays")
+    {
+        constexpr auto source = "func f() {\n"
+                                "    let x = [0, 1 + 2, (3 - 4) * 5, 6];\n"
+                                "    let y = [];\n"
+                                "}\n";
+        REQUIRE(prettyPrint(diag, source) == source);
+    }
+    SECTION("printer prints maps")
+    {
+        constexpr auto source = "func f() {\n"
+                                "    let x = [\"a\": 42, \"b\": 5];\n"
+                                "    let y = [:];\n"
+                                "}\n";
+        REQUIRE(prettyPrint(diag, source) == source);
+    }
 }
 
 TEST_CASE("ast formatter", "[astformatter]")

@@ -58,8 +58,11 @@ void PrettyPrinter::visit(const std::shared_ptr<CompoundStmt>& stmt, Invoke&& tr
     for (auto& s : stmt->getStatements()) {
         dumpContext.result += makeIndent(dumpContext.level);
         s->traverse(*this);
-        if (auto e = std::dynamic_pointer_cast<Expr>(s)) {
+        if (std::dynamic_pointer_cast<Expr>(s)) {
             dumpContext.result += ";";
+            dumpContext.result += "\n";
+        }
+        if (std::dynamic_pointer_cast<DeclStmt>(s)) {
             dumpContext.result += "\n";
         }
     }
@@ -314,20 +317,46 @@ void PrettyPrinter::visit(const std::shared_ptr<SubscriptExpr>& expr, Invoke&& t
 
 void PrettyPrinter::visit(const std::shared_ptr<ArrayLiteral>& expr, Invoke&& traverse)
 {
-    // TODO: not implemented
-    traverse();
+    dumpContext.result += "[";
+    bool needToInsertComma = false;
+    for (auto& e : expr->getInits()) {
+        if (needToInsertComma) {
+            dumpContext.result += ", ";
+        }
+        e->traverse(*this);
+        needToInsertComma = true;
+    }
+    dumpContext.result += "]";
 }
 
 void PrettyPrinter::visit(const std::shared_ptr<MapEntry>& expr, Invoke&& traverse)
 {
-    // TODO: not implemented
-    traverse();
+    if (auto key = expr->getKey()) {
+        key->traverse(*this);
+    }
+
+    dumpContext.result += ": ";
+
+    if (auto value = expr->getValue()) {
+        value->traverse(*this);
+    }
 }
 
 void PrettyPrinter::visit(const std::shared_ptr<MapLiteral>& expr, Invoke&& traverse)
 {
-    // TODO: not implemented
-    traverse();
+    dumpContext.result += "[";
+    bool needToInsertComma = false;
+    for (auto& e : expr->getEntries()) {
+        if (needToInsertComma) {
+            dumpContext.result += ", ";
+        }
+        e->traverse(*this);
+        needToInsertComma = true;
+    }
+    if (expr->getEntries().empty()) {
+        dumpContext.result += ":";
+    }
+    dumpContext.result += "]";
 }
 
 void PrettyPrinter::visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invoke&& traverse)
