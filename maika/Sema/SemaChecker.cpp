@@ -102,6 +102,8 @@ void SemaChecker::visit(const std::shared_ptr<FunctionExpr>& expr, Invoke&& trav
 
 void SemaChecker::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
 {
+    traverse();
+
     if (expr->isAssignmentOp()) {
         const auto lhs = expr->getLHS();
         assert(lhs);
@@ -114,8 +116,6 @@ void SemaChecker::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& tr
             return;
         }
     }
-
-    traverse();
 }
 
 void SemaChecker::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& traverse)
@@ -126,6 +126,15 @@ void SemaChecker::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& tra
 void SemaChecker::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse)
 {
     traverse();
+}
+
+void SemaChecker::visit(const std::shared_ptr<ParenExpr>& expr, Invoke&& traverse)
+{
+    traverse();
+
+    auto subExpr = expr->getSubExpr();
+    assert(subExpr);
+    expr->setValueKind(subExpr->getValueKind());
 }
 
 namespace {

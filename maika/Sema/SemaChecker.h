@@ -25,6 +25,7 @@ public:
     void visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse) override;
     void visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& traverse) override;
     void visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<ParenExpr>& expr, Invoke&& traverse) override;
 };
 
 class Optimizer final : public ASTVisitor {

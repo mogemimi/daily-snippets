@@ -63,17 +63,20 @@ func main() {
           BoolLiteral 'true'
       DeclStmt
         VariableDecl 'e'
-          BinaryOperator '!='
-            DeclRefExpr 'd'
-            BoolLiteral 'false'
+          ParenExpr
+            BinaryOperator '!='
+              DeclRefExpr 'd'
+              BoolLiteral 'false'
       ReturnStmt
         BinaryOperator '*'
-          BinaryOperator '+'
-            DeclRefExpr 'c'
-            IntegerLiteral '4'
-          BinaryOperator '-'
-            DeclRefExpr 'a'
-            IntegerLiteral '75'
+          ParenExpr
+            BinaryOperator '+'
+              DeclRefExpr 'c'
+              IntegerLiteral '4'
+          ParenExpr
+            BinaryOperator '-'
+              DeclRefExpr 'a'
+              IntegerLiteral '75'
 )";
 
     auto diag = std::make_shared<DiagnosticHandler>();

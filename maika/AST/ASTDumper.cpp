@@ -196,6 +196,12 @@ void ASTDumper::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& travers
     dump(&dumpContext, "DeclRefExpr", options, std::move(traverse));
 }
 
+void ASTDumper::visit(const std::shared_ptr<ParenExpr>& expr, Invoke&& traverse)
+{
+    std::vector<std::string> options;
+    dump(&dumpContext, "ParenExpr", options, std::move(traverse));
+}
+
 void ASTDumper::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse)
 {
     std::vector<std::string> options;

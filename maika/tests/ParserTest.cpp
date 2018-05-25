@@ -1,8 +1,6 @@
 #include "AST/ASTContext.h"
-#include "AST/ASTDumper.h"
 #include "Basic/Diagnostic.h"
 #include "Driver/Driver.h"
-#include "Printer/PrettyPrinter.h"
 #include "Sema/Entity.h"
 #include <iostream>
 #include <sstream>
@@ -24,7 +22,7 @@ TEST_CASE("parser can treat basic sources consistently", "[parser]")
     auto diag = std::make_shared<DiagnosticHandler>();
     diag->setStream(stream);
 
-    SECTION("parser can deal with an empty source.")
+    SECTION("parser can deal with an empty source")
     {
         constexpr auto source = " \t";
         REQUIRE(parse(diag, source));

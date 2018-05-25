@@ -259,6 +259,21 @@ public:
     make(const Location& loc, const std::shared_ptr<NamedDecl>& d);
 };
 
+class ParenExpr final
+    : public Expr
+    , public std::enable_shared_from_this<ParenExpr> {
+private:
+    std::shared_ptr<Expr> subExpr;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<Expr> getSubExpr() const { return subExpr; }
+    void setSubExpr(const std::shared_ptr<Expr>& s) { this->subExpr = s; }
+
+    static std::shared_ptr<ParenExpr> make(const Location& loc, const std::shared_ptr<Expr>& e);
+};
+
 class MemberExpr final
     : public Expr
     , public std::enable_shared_from_this<MemberExpr> {

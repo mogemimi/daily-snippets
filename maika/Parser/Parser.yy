@@ -140,6 +140,7 @@ Location toLoc(const yy::location& y)
 %type  <std::shared_ptr<BinaryOperator>>            assignment_expression                
 %type  <std::shared_ptr<Stmt>>                      statement
 %type  <std::vector<std::shared_ptr<Stmt>>>         statement_list
+%type  <std::shared_ptr<ParenExpr>>                 parenthesized_expression
 %type  <std::shared_ptr<NamedDecl>>                 binding_identifier
 %type  <std::shared_ptr<MemberExpr>>                member_expression
 %type  <std::shared_ptr<SubscriptExpr>>             subscript_expression
@@ -353,12 +354,16 @@ literal:
 %nonassoc "(" ")";
 
 primary_expression:
-  literal                 { $$ = $1; }
-| null_literal            { $$ = $1; }
-| "identifier"            { $$ = DeclRefExpr::make(toLoc(@$), $1); }
-| "(" expression ")"      { std::swap($$, $2); }
-| array_literal           { $$ = $1; }
-| map_literal             { $$ = $1; }
+  literal                   { $$ = $1; }
+| null_literal              { $$ = $1; }
+| "identifier"              { $$ = DeclRefExpr::make(toLoc(@$), $1); }
+| parenthesized_expression  { $$ = $1; }
+| array_literal             { $$ = $1; }
+| map_literal               { $$ = $1; }
+;
+
+parenthesized_expression:
+  "(" expression ")"  { $$ = ParenExpr::make(toLoc(@$), $2); }
 ;
 
 null_literal:

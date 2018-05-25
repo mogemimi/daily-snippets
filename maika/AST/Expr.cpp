@@ -328,6 +328,23 @@ DeclRefExpr::make(const Location& loc, const std::shared_ptr<NamedDecl>& d)
     return expr;
 }
 
+void ParenExpr::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        assert(subExpr);
+        subExpr->traverse(visitor);
+    });
+}
+
+std::shared_ptr<ParenExpr> ParenExpr::make(const Location& loc, const std::shared_ptr<Expr>& e)
+{
+    auto expr = std::make_shared<ParenExpr>();
+    expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
+    expr->subExpr = e;
+    return expr;
+}
+
 void MemberExpr::traverse(ASTVisitor& visitor)
 {
     visitor.visit(shared_from_this(), [&] {
@@ -404,6 +421,7 @@ std::shared_ptr<ArrayLiteral> ArrayLiteral::ArrayLiteral::make(
 {
     auto expr = std::make_shared<ArrayLiteral>();
     expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
     expr->initializers = inits;
     return expr;
 }
@@ -421,6 +439,7 @@ std::shared_ptr<MapEntry> MapEntry::make(
 {
     auto expr = std::make_shared<MapEntry>();
     expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
     expr->key = key;
     expr->value = value;
     return expr;
@@ -440,6 +459,7 @@ MapLiteral::make(const Location& loc, const std::vector<std::shared_ptr<MapEntry
 {
     auto expr = std::make_shared<MapLiteral>();
     expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
     expr->entries = entries;
     return expr;
 }

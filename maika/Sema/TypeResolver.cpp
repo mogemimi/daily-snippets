@@ -942,6 +942,16 @@ void TypeResolver::visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& trav
     expr->setType(namedDecl->getType());
 }
 
+void TypeResolver::visit(const std::shared_ptr<ParenExpr>& expr, Invoke&& traverse)
+{
+    traverse();
+
+    assert(!expr->getType());
+    auto subExpr = expr->getSubExpr();
+    assert(subExpr);
+    expr->setType(subExpr->getType());
+}
+
 void TypeResolver::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse)
 {
     traverse();

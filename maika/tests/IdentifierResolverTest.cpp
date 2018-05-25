@@ -46,6 +46,22 @@ TEST_CASE("IdentifierResolver can resolve identifier", "[identifier-resolve]")
         REQUIRE(!resolveIdentifiers(diag, source));
         REQUIRE(stream->hasError("error: 'x' was not declared in this scope."));
     }
+    SECTION("resolver emits an undefined identifier when using unknown symbols")
+    {
+        constexpr auto source = R"(func f() {
+            x = 42;
+            let x;
+        })";
+        REQUIRE(!resolveIdentifiers(diag, source));
+        REQUIRE(stream->hasError("error: 'x' was not declared in this scope."));
+    }
+    SECTION("resolver emits an undefined identifier when using unknown symbols")
+    {
+        constexpr auto source = R"(func f(x) {
+            x = 42;
+        })";
+        REQUIRE(resolveIdentifiers(diag, source));
+    }
     SECTION("resolver emits an undefined identifier when calling unknown function")
     {
         constexpr auto source = R"(

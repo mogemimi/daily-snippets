@@ -26,6 +26,8 @@ private:
 public:
     void traverse(ASTVisitor& visitor) override;
 
+    std::vector<std::shared_ptr<Stmt>> getStatements() const { return statements; }
+
     static std::shared_ptr<CompoundStmt>
     make(const Location& loc, const std::vector<std::shared_ptr<Stmt>>& s);
 };
@@ -73,8 +75,10 @@ public:
     void setCond(const std::shared_ptr<Expr>& condExpr);
 
     std::shared_ptr<Stmt> getThen() const;
+    void setThen(const std::shared_ptr<Stmt>& t) { this->thenStmt = t; }
 
     std::shared_ptr<Stmt> getElse() const;
+    void setElse(const std::shared_ptr<Stmt>& e) { this->elseStmt = e; }
 
     static std::shared_ptr<IfStmt> make(
         const Location& loc,
@@ -103,6 +107,7 @@ public:
     void setCond(const std::shared_ptr<Expr>& condExpr);
 
     std::shared_ptr<Stmt> getBody() const;
+    void setBody(const std::shared_ptr<Stmt>& b) { this->bodyStmt = b; }
 
     static std::shared_ptr<WhileStmt> make(
         const Location& loc,
@@ -131,6 +136,7 @@ public:
     std::shared_ptr<Expr> getInc() const;
 
     std::shared_ptr<Stmt> getBody() const;
+    void setBody(const std::shared_ptr<Stmt>& b) { this->bodyStmt = b; }
 
     static std::shared_ptr<ForStmt> make(
         const Location& loc,
@@ -156,6 +162,7 @@ public:
     std::shared_ptr<Expr> getRangeExpr() const;
 
     std::shared_ptr<Stmt> getBody() const;
+    void setBody(const std::shared_ptr<Stmt>& b) { this->bodyStmt = b; }
 
     static std::shared_ptr<ForRangeStmt> make(
         const Location& loc,

@@ -26,8 +26,10 @@ SOURCES = \
 	CodeGen/BytecodeGenerator.cpp \
 	CodeGen/Instruction.cpp \
 	CodeGen/Runtime.cpp \
+	CodeGen/Transpiler.cpp \
 	Parser/Lexer.cpp \
 	Parser/Parser.cpp \
+	Printer/ASTFormatter.cpp \
 	Printer/PrettyPrinter.cpp \
 	Sema/ASTEvaluator.cpp \
 	Sema/Entity.cpp \
@@ -41,6 +43,7 @@ SOURCES = \
 	tests/IdentifierResolverTest.cpp \
 	tests/LexerTest.cpp \
 	tests/ParserTest.cpp \
+	tests/PrettyPrinterTest.cpp \
 	tests/SemaCheckerTest.cpp \
 	tests/TypeResolverTest.cpp \
 	tests/main.cpp
