@@ -145,7 +145,10 @@ void PrettyPrinter::visit(const std::shared_ptr<ForStmt>& stmt, Invoke&& travers
     if (auto init = stmt->getInit()) {
         init->traverse(*this);
     }
-    dumpContext.result += ";";
+    else {
+        dumpContext.result += ";";
+    }
+
     if (auto cond = stmt->getCond()) {
         dumpContext.result += " ";
         cond->traverse(*this);
@@ -226,7 +229,7 @@ void PrettyPrinter::visit(const std::shared_ptr<NullLiteral>& expr)
 
 void PrettyPrinter::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
 {
-    auto op = BinaryOperator::toString(expr->getKind());
+    auto op = BinaryOperator::toString(expr->getOpcode());
 
     if (auto lhs = expr->getLHS()) {
         lhs->traverse(*this);
@@ -244,7 +247,7 @@ void PrettyPrinter::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& 
 void PrettyPrinter::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& traverse)
 {
     auto [op, isPre] = [&]() -> std::tuple<std::string, bool> {
-        switch (expr->getKind()) {
+        switch (expr->getOpcode()) {
         case UnaryOperatorKind::LogicalNot: return std::make_tuple("!", false);
         case UnaryOperatorKind::Plus: return std::make_tuple("+", false);
         case UnaryOperatorKind::Minus: return std::make_tuple("-", false);
@@ -293,14 +296,38 @@ void PrettyPrinter::visit(const std::shared_ptr<ParenExpr>& expr, Invoke&& trave
 
 void PrettyPrinter::visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse)
 {
-    std::vector<std::string> options;
+    auto base = expr->getBase();
+    base->traverse(*this);
+
+    dumpContext.result += ".";
+
     if (auto namedDecl = expr->getMemberDecl()) {
-        options.push_back(namedDecl->getName());
-        if (auto type = namedDecl->getType()) {
-            options.push_back(type->dump());
-        }
+        dumpContext.result += namedDecl->getName();
     }
-    dump(&dumpContext, "MemberExpr", options, std::move(traverse));
+}
+
+void PrettyPrinter::visit(const std::shared_ptr<SubscriptExpr>& expr, Invoke&& traverse)
+{
+    // TODO: not implemented
+    traverse();
+}
+
+void PrettyPrinter::visit(const std::shared_ptr<ArrayLiteral>& expr, Invoke&& traverse)
+{
+    // TODO: not implemented
+    traverse();
+}
+
+void PrettyPrinter::visit(const std::shared_ptr<MapEntry>& expr, Invoke&& traverse)
+{
+    // TODO: not implemented
+    traverse();
+}
+
+void PrettyPrinter::visit(const std::shared_ptr<MapLiteral>& expr, Invoke&& traverse)
+{
+    // TODO: not implemented
+    traverse();
 }
 
 void PrettyPrinter::visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invoke&& traverse)
@@ -311,8 +338,7 @@ void PrettyPrinter::visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invo
 
 void PrettyPrinter::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse)
 {
-    const auto indent = makeIndent(dumpContext.level);
-    dumpContext.result += indent + "func ";
+    dumpContext.result += "func ";
     if (auto namedDecl = decl->getNamedDecl()) {
         dumpContext.result += namedDecl->getName();
     }
@@ -339,12 +365,11 @@ void PrettyPrinter::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& tr
     dumpContext.result += ")";
 
     if (auto returnType = decl->getReturnType()) {
-        dumpContext.result += "-> ";
+        dumpContext.result += " -> ";
         dumpContext.result += returnType->getName();
     }
 
-    dumpContext.result += " " + indent;
-    dumpContext.result += "{\n";
+    dumpContext.result += " {\n";
 
     {
         ++dumpContext.level;
@@ -357,6 +382,7 @@ void PrettyPrinter::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& tr
         assert(dumpContext.level >= 0);
     }
 
+    const auto indent = makeIndent(dumpContext.level);
     dumpContext.result += indent + "}\n";
 }
 
@@ -367,15 +393,18 @@ void PrettyPrinter::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& tr
         dumpContext.result += namedDecl->getName();
     }
 
-    if (auto type = decl->getType()) {
+    if (auto typeAnnotation = decl->getTypeAnnotation()) {
+        assert(typeAnnotation);
         dumpContext.result += ": ";
-        dumpContext.result += type->dump();
+        dumpContext.result += typeAnnotation->getName();
     }
 
     if (auto expr = decl->getExpr()) {
         dumpContext.result += " = ";
         expr->traverse(*this);
     }
+
+    dumpContext.result += ";";
 }
 
 void PrettyPrinter::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse)
@@ -385,13 +414,55 @@ void PrettyPrinter::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& trave
         dumpContext.result += namedDecl->getName();
     }
 
-    if (auto type = decl->getType()) {
+    if (auto typeAnnotation = decl->getTypeAnnotation()) {
+        assert(typeAnnotation);
         dumpContext.result += ": ";
-        dumpContext.result += type->dump();
+        dumpContext.result += typeAnnotation->getName();
     }
 
     if (auto expr = decl->getExpr()) {
         dumpContext.result += " = ";
         expr->traverse(*this);
     }
+
+    dumpContext.result += ";";
+}
+
+void PrettyPrinter::visit(const std::shared_ptr<BindingDecl>& decl, Invoke&& traverse)
+{
+    // TODO: not implemented
+    traverse();
+}
+
+void PrettyPrinter::visit(const std::shared_ptr<DecompositionDecl>& decl, Invoke&& traverse)
+{
+    // TODO: not implemented
+    traverse();
+}
+
+void PrettyPrinter::visit(const std::shared_ptr<ClassDecl>& decl, Invoke&& traverse)
+{
+    const auto indent = makeIndent(dumpContext.level);
+
+    dumpContext.result += "class ";
+    if (auto namedDecl = decl->getNamedDecl()) {
+        dumpContext.result += namedDecl->getName();
+    }
+
+    dumpContext.result += " " + indent;
+    dumpContext.result += "{";
+
+    {
+        ++dumpContext.level;
+        for (auto& member : decl->getMembers()) {
+            assert(member);
+            dumpContext.result += "\n";
+            dumpContext.result += makeIndent(dumpContext.level);
+            member->traverse(*this);
+        }
+        --dumpContext.level;
+        assert(dumpContext.level >= 0);
+    }
+
+    dumpContext.result += indent + "}\n";
 }

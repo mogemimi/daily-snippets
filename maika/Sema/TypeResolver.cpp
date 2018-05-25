@@ -744,14 +744,14 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
     const auto lhsTypeInferred = TypeInferer::infer(scope->env, lhs->getType());
     const auto rhsTypeInferred = TypeInferer::infer(scope->env, rhs->getType());
 
-    if (!isBinaryOperatorValid(expr->getKind(), lhsTypeInferred)) {
+    if (!isBinaryOperatorValid(expr->getOpcode(), lhsTypeInferred)) {
         error(
             lhs->getLocation(),
             "invalid operands to binary expression ('" + getDiagnosticString(lhsTypeInferred) +
                 "' and '" + getDiagnosticString(rhsTypeInferred) + "').");
         return;
     }
-    if (!isBinaryOperatorValid(expr->getKind(), rhsTypeInferred)) {
+    if (!isBinaryOperatorValid(expr->getOpcode(), rhsTypeInferred)) {
         error(
             rhs->getLocation(),
             "invalid operands to binary expression ('" + getDiagnosticString(lhsTypeInferred) +
@@ -780,7 +780,7 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
         }
         error(
             expr->getLocation(),
-            "Operator '" + BinaryOperator::toString(expr->getKind()) +
+            "Operator '" + BinaryOperator::toString(expr->getOpcode()) +
                 "' cannot be applied to types '" + getDiagnosticString(lhsTypeInferred) +
                 "' and '" + getDiagnosticString(rhsTypeInferred) + "'.");
         return;
@@ -794,7 +794,7 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
         }
         error(
             expr->getLocation(),
-            "Operator '" + BinaryOperator::toString(expr->getKind()) +
+            "Operator '" + BinaryOperator::toString(expr->getOpcode()) +
                 "' cannot be applied to types '" + getDiagnosticString(lhsTypeInferred) +
                 "' and '" + getDiagnosticString(rhsTypeInferred) + "'.");
         return;
@@ -830,7 +830,7 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
 
         error(
             expr->getLocation(),
-            "Operator '" + BinaryOperator::toString(expr->getKind()) +
+            "Operator '" + BinaryOperator::toString(expr->getOpcode()) +
                 "' cannot be applied to types '" + lhsTypeInferred->dump() + "' and '" +
                 rhsTypeInferred->dump() + "'.");
         return;
@@ -896,7 +896,7 @@ void TypeResolver::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& tr
     const auto t = TypeInferer::infer(scope->env, subExpr->getType());
     assert(t);
 
-    switch (expr->getKind()) {
+    switch (expr->getOpcode()) {
     case UnaryOperatorKind::Plus:
     case UnaryOperatorKind::Minus:
     case UnaryOperatorKind::PostDec:

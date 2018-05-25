@@ -51,4 +51,5 @@ public:
     void visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<BindingDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<DecompositionDecl>& decl, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<ClassDecl>& decl, Invoke&& traverse) override;
 };

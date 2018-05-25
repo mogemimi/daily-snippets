@@ -45,7 +45,7 @@ std::tuple<std::unique_ptr<Value>, ASTEvaluateResult> evalBinaryOp(
     assert(lhsValue != nullptr);
     assert(rhsValue != nullptr);
 
-    const auto op = binaryOp->getKind();
+    const auto op = binaryOp->getOpcode();
     const auto lhs = lhsValue->getValue();
     const auto rhs = rhsValue->getValue();
 
@@ -83,7 +83,7 @@ std::tuple<std::unique_ptr<Value>, ASTEvaluateResult> evalBinaryOp(
     assert(lhsValue != nullptr);
     assert(rhsValue != nullptr);
 
-    const auto op = binaryOp->getKind();
+    const auto op = binaryOp->getOpcode();
     const auto lhs = lhsValue->getValue();
     const auto rhs = rhsValue->getValue();
 
@@ -123,7 +123,7 @@ std::tuple<std::unique_ptr<Value>, ASTEvaluateResult> evalBinaryOp(
     assert(lhsValue != nullptr);
     assert(rhsValue != nullptr);
 
-    const auto op = binaryOp->getKind();
+    const auto op = binaryOp->getOpcode();
     const auto lhs = lhsValue->getValue();
     const auto rhs = rhsValue->getValue();
 
@@ -153,7 +153,7 @@ std::tuple<std::unique_ptr<Value>, ASTEvaluateResult> evalBinaryOp(
     assert(lhsValue != nullptr);
     assert(rhsValue != nullptr);
 
-    const auto op = binaryOp->getKind();
+    const auto op = binaryOp->getOpcode();
     const auto lhs = lhsValue->getValue();
     const auto rhs = rhsValue->getValue();
 

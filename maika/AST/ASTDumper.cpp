@@ -164,7 +164,7 @@ void ASTDumper::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& trav
 {
     std::vector<std::string> options;
 
-    auto op = BinaryOperator::toString(expr->getKind());
+    auto op = BinaryOperator::toString(expr->getOpcode());
     options.push_back(op);
     if (auto type = expr->getType()) {
         options.push_back(type->dump());
@@ -176,7 +176,7 @@ void ASTDumper::visit(const std::shared_ptr<UnaryOperator>& expr, Invoke&& trave
 {
     std::vector<std::string> options;
 
-    auto op = UnaryOperator::toString(expr->getKind());
+    auto op = UnaryOperator::toString(expr->getOpcode());
     options.push_back(op);
     if (auto type = expr->getType()) {
         options.push_back(type->dump());
@@ -330,4 +330,13 @@ void ASTDumper::visit(const std::shared_ptr<DecompositionDecl>& decl, Invoke&& t
 {
     std::vector<std::string> options;
     dump(&dumpContext, "DecompositionDecl", options, std::move(traverse));
+}
+
+void ASTDumper::visit(const std::shared_ptr<ClassDecl>& decl, Invoke&& traverse)
+{
+    std::vector<std::string> options;
+    if (auto namedDecl = decl->getNamedDecl()) {
+        options.push_back(namedDecl->getName());
+    }
+    dump(&dumpContext, "ClassDecl", options, std::move(traverse));
 }

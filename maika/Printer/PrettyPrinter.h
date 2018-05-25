@@ -37,9 +37,16 @@ public:
     void visit(const std::shared_ptr<DeclRefExpr>& expr, Invoke&& traverse) override;
     void visit(const std::shared_ptr<ParenExpr>& expr, Invoke&& traverse) override;
     void visit(const std::shared_ptr<MemberExpr>& expr, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<SubscriptExpr>& expr, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<ArrayLiteral>& expr, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<MapEntry>& expr, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<MapLiteral>& expr, Invoke&& traverse) override;
 
     void visit(const std::shared_ptr<TranslationUnitDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse) override;
     void visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<BindingDecl>& decl, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<DecompositionDecl>& decl, Invoke&& traverse) override;
+    void visit(const std::shared_ptr<ClassDecl>& decl, Invoke&& traverse) override;
 };

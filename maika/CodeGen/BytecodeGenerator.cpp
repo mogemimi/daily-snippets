@@ -124,7 +124,7 @@ void BytecodeGenerator::visit(const std::shared_ptr<StringLiteral>& expr)
 
 void BytecodeGenerator::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& traverse)
 {
-    if (expr->getKind() == BinaryOperatorKind::Assign) {
+    if (expr->getOpcode() == BinaryOperatorKind::Assign) {
         expr->getRHS()->traverse(*this);
 
         // TODO: Not implemented for other expression
@@ -157,7 +157,7 @@ void BytecodeGenerator::visit(const std::shared_ptr<BinaryOperator>& expr, Invok
     traverse();
 
     const auto opcode = [&]() -> Opcode {
-        switch (expr->getKind()) {
+        switch (expr->getOpcode()) {
         case BinaryOperatorKind::Add: return Opcode::Add;
         case BinaryOperatorKind::Subtract: return Opcode::Sub;
         case BinaryOperatorKind::Divide: return Opcode::Div;

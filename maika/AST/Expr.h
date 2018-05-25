@@ -6,6 +6,26 @@
 #include <string>
 #include <vector>
 
+enum class ExprKind {
+    CallExpr,
+    FunctionExpr,
+    IntegerLiteral,
+    DoubleLiteral,
+    BoolLiteral,
+    StringLiteral,
+    NullLiteral,
+    BinaryOperator,
+    UnaryOperator,
+    DeclRefExpr,
+    ParenExpr,
+    MemberExpr,
+    SubscriptExpr,
+    ArrayLiteral,
+    MapEntry,
+    MapLiteral,
+    ImplicitStaticCastExpr,
+};
+
 enum class ExprValueKind {
     LValue,
     RValue,
@@ -18,6 +38,8 @@ protected:
 
 public:
     virtual ~Expr() = default;
+
+    virtual ExprKind getKind() const = 0;
 
     bool isLValue() const { return getValueKind() == ExprValueKind::LValue; }
 
@@ -39,6 +61,7 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::IntegerLiteral; }
 
     int64_t getValue() const noexcept { return value; }
 
@@ -53,6 +76,7 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::DoubleLiteral; }
 
     double getValue() const noexcept { return value; }
 
@@ -67,6 +91,7 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::BoolLiteral; }
 
     bool getValue() const noexcept { return value; }
 
@@ -81,6 +106,7 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::StringLiteral; }
 
     std::string getValue() const noexcept { return value; }
 
@@ -92,6 +118,7 @@ class NullLiteral final
     , public std::enable_shared_from_this<NullLiteral> {
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::NullLiteral; }
 
     static std::shared_ptr<NullLiteral> make(const Location& loc);
 };
@@ -105,6 +132,7 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::CallExpr; }
 
     std::shared_ptr<Expr> getCallee() const { return callee; }
     std::vector<std::shared_ptr<Expr>> getArguments() const { return arguments; }
@@ -126,6 +154,7 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::FunctionExpr; }
 
     std::shared_ptr<NamedDecl> getNamedDecl() const;
 
@@ -174,6 +203,7 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::BinaryOperator; }
 
     static bool isMultiplicativeOp(BinaryOperatorKind kind);
     bool isMultiplicativeOp() const;
@@ -193,7 +223,7 @@ public:
     static bool isAssignmentOp(BinaryOperatorKind kind);
     bool isAssignmentOp() const;
 
-    BinaryOperatorKind getKind() const { return kind; }
+    BinaryOperatorKind getOpcode() const { return kind; }
 
     std::shared_ptr<Expr> getLHS() const { return lhs; }
     std::shared_ptr<Expr> getRHS() const { return rhs; }
@@ -231,8 +261,9 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::UnaryOperator; }
 
-    UnaryOperatorKind getKind() const { return kind; }
+    UnaryOperatorKind getOpcode() const { return kind; }
 
     std::shared_ptr<Expr> getSubExpr() const { return subExpr; }
 
@@ -252,6 +283,7 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::DeclRefExpr; }
 
     std::shared_ptr<NamedDecl> getNamedDecl() const { return decl; }
 
@@ -267,6 +299,7 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::ParenExpr; }
 
     std::shared_ptr<Expr> getSubExpr() const { return subExpr; }
     void setSubExpr(const std::shared_ptr<Expr>& s) { this->subExpr = s; }
@@ -283,6 +316,7 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::MemberExpr; }
 
     std::shared_ptr<Expr> getBase() const;
 
@@ -303,6 +337,7 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::SubscriptExpr; }
 
     std::shared_ptr<Expr> getBase() const;
 
@@ -320,6 +355,7 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::ArrayLiteral; }
 
     std::vector<std::shared_ptr<Expr>> getInits() const { return initializers; }
 
@@ -335,7 +371,8 @@ private:
     std::shared_ptr<Expr> value;
 
 public:
-    void traverse(ASTVisitor& visitor);
+    void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::MapEntry; }
 
     std::shared_ptr<Expr> getKey() const { return key; }
     std::shared_ptr<Expr> getValue() const { return value; }
@@ -352,6 +389,7 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::MapLiteral; }
 
     std::vector<std::shared_ptr<MapEntry>> getEntries() const { return entries; }
 
@@ -367,6 +405,7 @@ private:
 
 public:
     void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::ImplicitStaticCastExpr; }
 
     std::shared_ptr<Expr> getSubExpr() const { return subExpr; }
 

@@ -72,6 +72,21 @@ TEST_CASE("pretty print", "[prettyprinter]")
                                 "}\n";
         REQUIRE(prettyPrint(diag, source) == source);
     }
+    SECTION("printer prints classes")
+    {
+        constexpr auto source = "class Vector2 {\n"
+                                "    let x: int = 0;\n"
+                                "    let y: int = 0;\n"
+                                "    func dot(v: Vector2) -> int {\n"
+                                "        return x * v.x + y * v.y;\n"
+                                "    }\n"
+                                "\n"
+                                "    func cross(v: Vector2) -> int {\n"
+                                "        return x * v.y - y * v.x;\n"
+                                "    }\n"
+                                "}\n";
+        REQUIRE(prettyPrint(diag, source) == source);
+    }
 }
 
 TEST_CASE("ast formatter", "[astformatter]")
