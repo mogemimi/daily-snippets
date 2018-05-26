@@ -96,6 +96,20 @@ public:
         traverse();
     }
 
+    virtual void visit(const std::shared_ptr<ConditionalOperator>& expr) {}
+    virtual void visit(const std::shared_ptr<ConditionalOperator>& expr, Invoke&& traverse)
+    {
+        visit(expr);
+        traverse();
+    }
+
+    virtual void visit(const std::shared_ptr<NullConditionalOperator>& expr) {}
+    virtual void visit(const std::shared_ptr<NullConditionalOperator>& expr, Invoke&& traverse)
+    {
+        visit(expr);
+        traverse();
+    }
+
     virtual void visit(const std::shared_ptr<ParenExpr>& expr) {}
     virtual void visit(const std::shared_ptr<ParenExpr>& expr, Invoke&& traverse)
     {

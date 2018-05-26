@@ -108,6 +108,7 @@ Location toLoc(const yy::location& y)
 %token COMMA                ","
 %token DOT                  "."
 %token QUESTION             "?"
+%token NULL_COALESCING      "??"
 %token ARROW                "->"
 %token FUNCTION             "func"
 %token RETURN               "return"
@@ -135,8 +136,11 @@ Location toLoc(const yy::location& y)
 %type  <std::shared_ptr<Expr>>                      primary_expression
 %type  <std::shared_ptr<Expr>>                      expression
 %type  <std::vector<std::shared_ptr<Expr>>>         expression_list
+%type  <std::shared_ptr<NullConditionalOperator>>   null_conditional_expression
 %type  <std::shared_ptr<UnaryOperator>>             unary_expression
+%type  <BinaryOperatorKind>                         binary_op
 %type  <std::shared_ptr<BinaryOperator>>            binary_expression
+%type  <std::shared_ptr<ConditionalOperator>>       conditional_expression
 %type  <std::shared_ptr<BinaryOperator>>            assignment_expression                
 %type  <std::shared_ptr<Stmt>>                      statement
 %type  <std::vector<std::shared_ptr<Stmt>>>         statement_list
@@ -170,6 +174,24 @@ Location toLoc(const yy::location& y)
 %type  <std::vector<std::shared_ptr<Decl>>>         translation_unit_declarations
 %type  <std::shared_ptr<Decl>>                      translation_unit_declaration
 %type  <std::shared_ptr<TranslationUnitDecl>>       translation_unit
+
+%left ",";
+%right "=";
+%right "ternary_question" "conditional_expression";
+%left "binary_op";
+%left "||";
+%left "&&";
+%left "==" "!=";
+%left "<=" ">=" "<" ">";
+%right "??";
+%left "+" "-";
+%left "*" "/" "%";
+%right "unary_plus" "unary_minus";
+%right "++" "--" "!";
+%left "." "[" "]";
+%nonassoc "(" ")" "grouping";
+%nonassoc "then";
+%nonassoc "else";
 
 %%
 %start translation_unit;
@@ -267,8 +289,6 @@ return_statement:
 | "return" expression ";" { $$ = ReturnStmt::make(toLoc(@$), $2); }
 ;
 
-%nonassoc "then";
-%nonassoc "else";
 if_statement:
   "if" "(" expression ")" statement %prec "then"      { $$ = IfStmt::make(toLoc(@$), $3, $5); }
 | "if" "(" expression ")" statement "else" statement  { $$ = IfStmt::make(toLoc(@$), $3, $5, $7); }
@@ -340,30 +360,21 @@ literal:
 | "string_literal"  { $$ = $1; }
 ;
 
-%left ",";
-%right "=";
-%left "||";
-%left "&&";
-%left "==" "!=";
-%left "<=" ">=" "<" ">";
-%left "+" "-";
-%left "*" "/" "%";
-%left "unary_plus" "unary_minus";
-%right "++" "--" "!";
-%left "." "[" "]";
-%nonassoc "(" ")";
-
 primary_expression:
-  literal                   { $$ = $1; }
-| null_literal              { $$ = $1; }
-| "identifier"              { $$ = DeclRefExpr::make(toLoc(@$), $1); }
-| parenthesized_expression  { $$ = $1; }
-| array_literal             { $$ = $1; }
-| map_literal               { $$ = $1; }
+  literal                     { $$ = $1; }
+| null_literal                { $$ = $1; }
+| "identifier"                { $$ = DeclRefExpr::make(toLoc(@$), $1); }
+| parenthesized_expression    { $$ = $1; }
+| array_literal               { $$ = $1; }
+| map_literal                 { $$ = $1; }
+| call_expression             { $$ = $1; }
+| member_expression           { $$ = $1; }
+| subscript_expression        { $$ = $1; }
+| null_conditional_expression { $$ = $1; }
 ;
 
 parenthesized_expression:
-  "(" expression ")"  { $$ = ParenExpr::make(toLoc(@$), $2); }
+  "(" expression ")" %prec "grouping" { $$ = ParenExpr::make(toLoc(@$), $2); }
 ;
 
 null_literal:
@@ -390,16 +401,23 @@ map_entry_list:
 ;
 
 member_expression:
-  expression "." "identifier" { $$ = MemberExpr::make(toLoc(@$), $1, $3); }
+  primary_expression "." "identifier" { $$ = MemberExpr::make(toLoc(@$), $1, $3); }
 ;
 
 subscript_expression:
-  expression "[" expression "]" { $$ = SubscriptExpr::make(toLoc(@$), $1, $3); }
+  primary_expression "[" expression "]" { $$ = SubscriptExpr::make(toLoc(@$), $1, $3); }
 ;
 
 call_expression:
-  expression "(" ")"                  { $$ = CallExpr::make(toLoc(@$), $1, std::vector<std::shared_ptr<Expr>>{}); }
-| expression "(" expression_list ")"  { $$ = CallExpr::make(toLoc(@$), $1, $3); }
+  primary_expression "(" ")"                  { $$ = CallExpr::make(toLoc(@$), $1, std::vector<std::shared_ptr<Expr>>{}); }
+| primary_expression "(" expression_list ")"  { $$ = CallExpr::make(toLoc(@$), $1, $3); }
+;
+
+null_conditional_expression:
+  primary_expression "?" "." "identifier"         { $$ = NullConditionalOperator::make(toLoc(@$), $1, MemberExpr::make(toLoc(@$), $1, $4)); }
+| primary_expression "?" "[" expression "]"       { $$ = NullConditionalOperator::make(toLoc(@$), $1, SubscriptExpr::make(toLoc(@$), $1, $4)); }
+| primary_expression "?" "(" ")"                  { $$ = NullConditionalOperator::make(toLoc(@$), $1, CallExpr::make(toLoc(@$), $1, std::vector<std::shared_ptr<Expr>>{})); }
+| primary_expression "?" "(" expression_list ")"  { $$ = NullConditionalOperator::make(toLoc(@$), $1, CallExpr::make(toLoc(@$), $1, $4)); }
 ;
 
 unary_expression:
@@ -412,40 +430,51 @@ unary_expression:
 | "!" primary_expression                      { $$ = UnaryOperator::make(toLoc(@$), UnaryOperatorKind::LogicalNot, $2); }
 ;
 
+binary_op:
+  "+"   { $$ = BinaryOperatorKind::Add; }
+| "-"   { $$ = BinaryOperatorKind::Subtract; }
+| "*"   { $$ = BinaryOperatorKind::Multiply; }
+| "/"   { $$ = BinaryOperatorKind::Divide; }
+| "%"   { $$ = BinaryOperatorKind::Mod; }
+| "=="  { $$ = BinaryOperatorKind::Equal; }
+| "!="  { $$ = BinaryOperatorKind::NotEqual; }
+| "&&"  { $$ = BinaryOperatorKind::LogicalAnd; }
+| "||"  { $$ = BinaryOperatorKind::LogicalOr; }
+| ">"   { $$ = BinaryOperatorKind::GreaterThan; }
+| ">="  { $$ = BinaryOperatorKind::GreaterThanOrEqual; }
+| "<"   { $$ = BinaryOperatorKind::LessThan; }
+| "<="  { $$ = BinaryOperatorKind::LessThanOrEqual; }
+| "??"  { $$ = BinaryOperatorKind::NullCoalescing; }
+;
+
 binary_expression:
-  expression "+" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Add, $1, $3); }
-| expression "-" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Subtract, $1, $3); }
-| expression "*" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Multiply, $1, $3); }
-| expression "/" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Divide, $1, $3); }
-| expression "%" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Mod, $1, $3); }
-| expression "==" expression        { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Equal, $1, $3); }
-| expression "!=" expression        { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::NotEqual, $1, $3); }
-| expression "&&" expression        { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::LogicalAnd, $1, $3); }
-| expression "||" expression        { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::LogicalOr, $1, $3); }
-| expression ">" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::GreaterThan, $1, $3); }
-| expression ">=" expression        { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::GreaterThanOrEqual, $1, $3); }
-| expression "<" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::LessThan, $1, $3); }
-| expression "<=" expression        { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::LessThanOrEqual, $1, $3); }
+  expression binary_op expression %prec "binary_op" { $$ = BinaryOperator::make(toLoc(@$), $2, $1, $3); }
+;
+
+conditional_expression:
+  primary_expression ternary_question expression ":" expression %prec "conditional_expression" { $$ = ConditionalOperator::make(toLoc(@$), $1, $3, $5); }
+;
+
+ternary_question:
+  "?" %prec "ternary_question"    { }
 ;
 
 assignment_expression:
-  expression "=" expression         { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Assign, $1, $3); }
+  expression "=" expression       { $$ = BinaryOperator::make(toLoc(@$), BinaryOperatorKind::Assign, $1, $3); }
 ;
 
 expression_list:
-  expression                        { $$.push_back($1); }
-| expression_list "," expression    { $1.push_back($3); $$ = std::move($1); }
+  expression                      { $$.push_back($1); }
+| expression_list "," expression  { $1.push_back($3); $$ = std::move($1); }
 ;
 
 expression:
-  primary_expression                { $$ = $1; }
-| assignment_expression             { $$ = $1; }
-| binary_expression                 { $$ = $1; }
-| unary_expression                  { $$ = $1; }
-| call_expression                   { $$ = $1; }
-| member_expression                 { $$ = $1; }
-| subscript_expression              { $$ = $1; }
-| function_expression               { $$ = $1; }
+  primary_expression              { $$ = $1; }
+| assignment_expression           { $$ = $1; }
+| binary_expression               { $$ = $1; }
+| unary_expression                { $$ = $1; }
+| conditional_expression          { $$ = $1; }
+| function_expression             { $$ = $1; }
 ;
 
 %%

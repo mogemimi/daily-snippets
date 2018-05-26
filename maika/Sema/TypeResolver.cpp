@@ -272,20 +272,21 @@ void ImplicitCastifyConditionExpr(
 }
 
 using TypeCapability = uint64_t;
-constexpr uint64_t hasBinaryOperatorAdd = 0b0000000000000001;
-constexpr uint64_t hasBinaryOperatorSubtract = 0b0000000000000010;
-constexpr uint64_t hasBinaryOperatorMultiply = 0b0000000000000100;
-constexpr uint64_t hasBinaryOperatorDivide = 0b0000000000001000;
-constexpr uint64_t hasBinaryOperatorMod = 0b0000000000010000;
-constexpr uint64_t hasBinaryOperatorAssign = 0b0000000000100000;
-constexpr uint64_t hasBinaryOperatorEqual = 0b0000000001000000;
-constexpr uint64_t hasBinaryOperatorNotEqual = 0b0000000010000000;
-constexpr uint64_t hasBinaryOperatorLogicalAnd = 0b0000000100000000;
-constexpr uint64_t hasBinaryOperatorLogicalOr = 0b0000001000000000;
-constexpr uint64_t hasBinaryOperatorGreaterThan = 0b0000010000000000;
-constexpr uint64_t hasBinaryOperatorGreaterThanOrEqual = 0b0000100000000000;
-constexpr uint64_t hasBinaryOperatorLessThan = 0b0001000000000000;
-constexpr uint64_t hasBinaryOperatorLessThanOrEqual = 0b0010000000000000;
+constexpr uint64_t hasBinaryOperatorAdd = 0b00000000000000001;
+constexpr uint64_t hasBinaryOperatorSubtract = 0b00000000000000010;
+constexpr uint64_t hasBinaryOperatorMultiply = 0b00000000000000100;
+constexpr uint64_t hasBinaryOperatorDivide = 0b00000000000001000;
+constexpr uint64_t hasBinaryOperatorMod = 0b00000000000010000;
+constexpr uint64_t hasBinaryOperatorAssign = 0b00000000000100000;
+constexpr uint64_t hasBinaryOperatorEqual = 0b00000000001000000;
+constexpr uint64_t hasBinaryOperatorNotEqual = 0b00000000010000000;
+constexpr uint64_t hasBinaryOperatorLogicalAnd = 0b00000000100000000;
+constexpr uint64_t hasBinaryOperatorLogicalOr = 0b00000001000000000;
+constexpr uint64_t hasBinaryOperatorGreaterThan = 0b00000010000000000;
+constexpr uint64_t hasBinaryOperatorGreaterThanOrEqual = 0b00000100000000000;
+constexpr uint64_t hasBinaryOperatorLessThan = 0b00001000000000000;
+constexpr uint64_t hasBinaryOperatorLessThanOrEqual = 0b00010000000000000;
+constexpr uint64_t hasBinaryOperatorNullCoalescing = 0b00100000000000000;
 
 constexpr TypeCapability disableMask(TypeCapability c, uint64_t mask)
 {
@@ -483,6 +484,7 @@ uint64_t binaryOperatorMask(BinaryOperatorKind op)
     case BinaryOperatorKind::GreaterThanOrEqual: return hasBinaryOperatorGreaterThanOrEqual;
     case BinaryOperatorKind::LessThan: return hasBinaryOperatorLessThan;
     case BinaryOperatorKind::LessThanOrEqual: return hasBinaryOperatorLessThanOrEqual;
+    case BinaryOperatorKind::NullCoalescing: return hasBinaryOperatorNullCoalescing;
     }
     return 0;
 }

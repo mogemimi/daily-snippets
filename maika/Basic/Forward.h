@@ -41,6 +41,8 @@ class StringLiteral;
 class NullLiteral;
 class BinaryOperator;
 class UnaryOperator;
+class ConditionalOperator;
+class NullConditionalOperator;
 class DeclRefExpr;
 class ParenExpr;
 class MemberExpr;

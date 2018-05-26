@@ -64,6 +64,7 @@ std::tuple<std::unique_ptr<Value>, ASTEvaluateResult> evalBinaryOp(
     case BinaryOperatorKind::NotEqual: return staticEvaluation<BoolValue>(lhs != rhs);
     case BinaryOperatorKind::LogicalOr: return staticEvaluation<BoolValue>(lhs || rhs);
     case BinaryOperatorKind::LogicalAnd: return staticEvaluation<BoolValue>(lhs && rhs);
+    case BinaryOperatorKind::NullCoalescing: break;
     }
 
     auto type = BuiltinType::toString(BuiltinTypeKind::Int);
@@ -104,6 +105,7 @@ std::tuple<std::unique_ptr<Value>, ASTEvaluateResult> evalBinaryOp(
     case BinaryOperatorKind::Mod:
         // NOTE: Cannot use modulus on double
         break;
+    case BinaryOperatorKind::NullCoalescing: break;
     }
 
     auto type = BuiltinType::toString(BuiltinTypeKind::Double);

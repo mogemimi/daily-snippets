@@ -16,6 +16,8 @@ enum class ExprKind {
     NullLiteral,
     BinaryOperator,
     UnaryOperator,
+    ConditionalOperator,
+    NullConditionalOperator,
     DeclRefExpr,
     ParenExpr,
     MemberExpr,
@@ -179,14 +181,15 @@ enum class BinaryOperatorKind {
     Divide,
     Mod,
     Assign,
-    Equal,
-    NotEqual,
+    Equal,              // ==
+    NotEqual,           // !=
     LogicalAnd,         // &&
     LogicalOr,          // ||
     GreaterThan,        // >
     GreaterThanOrEqual, // >=
     LessThan,           // <
     LessThanOrEqual,    // <=
+    NullCoalescing,     // ??
 
     // And, // &
     // Xor, // ^
@@ -273,6 +276,49 @@ public:
     make(const Location& loc, UnaryOperatorKind k, const std::shared_ptr<Expr>& e);
 
     static std::string toString(UnaryOperatorKind kind);
+};
+
+class ConditionalOperator final
+    : public Expr
+    , public std::enable_shared_from_this<ConditionalOperator> {
+private:
+    std::shared_ptr<Expr> condExpr;
+    std::shared_ptr<Expr> trueExpr;
+    std::shared_ptr<Expr> falseExpr;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::ConditionalOperator; }
+
+    std::shared_ptr<Expr> getCond() const { return condExpr; }
+    std::shared_ptr<Expr> getTrueExpr() const { return trueExpr; }
+    std::shared_ptr<Expr> getFalseExpr() const { return falseExpr; }
+
+    static std::shared_ptr<ConditionalOperator> make(
+        const Location& loc,
+        const std::shared_ptr<Expr>& cond,
+        const std::shared_ptr<Expr>& lhs,
+        const std::shared_ptr<Expr>& rhs);
+};
+
+class NullConditionalOperator final
+    : public Expr
+    , public std::enable_shared_from_this<NullConditionalOperator> {
+private:
+    std::shared_ptr<Expr> condExpr;
+    std::shared_ptr<Expr> trueExpr;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+    ExprKind getKind() const override { return ExprKind::NullConditionalOperator; }
+
+    std::shared_ptr<Expr> getCond() const { return condExpr; }
+    std::shared_ptr<Expr> getTrueExpr() const { return trueExpr; }
+
+    static std::shared_ptr<NullConditionalOperator> make(
+        const Location& loc,
+        const std::shared_ptr<Expr>& cond,
+        const std::shared_ptr<Expr>& trueExpr);
 };
 
 class DeclRefExpr final
@@ -395,6 +441,9 @@ public:
 
     static std::shared_ptr<MapLiteral>
     make(const Location& loc, const std::vector<std::shared_ptr<MapEntry>>& entries);
+};
+
+class OptionalEvaluation final {
 };
 
 class ImplicitStaticCastExpr final

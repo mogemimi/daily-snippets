@@ -1,5 +1,3 @@
-func hello(_ x : Any) -> Any {
-    return x;
+func hello(_ x : String?) -> String? {
+    return x ?? "a";
 }
-
-let hoge = hello(42);

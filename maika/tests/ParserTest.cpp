@@ -32,6 +32,31 @@ TEST_CASE("parser can treat basic sources consistently", "[parser]")
         constexpr auto source = "func f() { return null; }\n";
         REQUIRE(parse(diag, source));
     }
+    SECTION("parser can treat null-coalescing operators")
+    {
+        constexpr auto source = "func f(a) { return a ?? 42; }\n";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can treat optional evaluation operators")
+    {
+        constexpr auto source = "func f(a) { return a?.b; }\n";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can treat optional chaining operators")
+    {
+        constexpr auto source = "func f(a) { return a?[42].b?().c?.d?(42); }\n";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser does not allow using optional chaining without members")
+    {
+        constexpr auto source = "func f(a) { return a?; }\n";
+        REQUIRE(!parse(diag, source));
+    }
+    SECTION("parser can treat conditional operators")
+    {
+        constexpr auto source = "func f(a, b, c) { return a ? b : c; }\n";
+        REQUIRE(parse(diag, source));
+    }
     SECTION("parser can treat subscript expression")
     {
         constexpr auto source = R"(

@@ -275,6 +275,7 @@ std::string BinaryOperator::toString(BinaryOperatorKind kind)
     case BinaryOperatorKind::GreaterThanOrEqual: return ">=";
     case BinaryOperatorKind::LessThan: return "<";
     case BinaryOperatorKind::LessThanOrEqual: return "<=";
+    case BinaryOperatorKind::NullCoalescing: return "??";
     }
     return "<unknown>";
 }
@@ -310,6 +311,54 @@ std::string UnaryOperator::toString(UnaryOperatorKind kind)
     case UnaryOperatorKind::PostInc: return "postfix ++";
     }
     return "<unknown>";
+}
+
+void ConditionalOperator::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        assert(condExpr);
+        assert(trueExpr);
+        assert(falseExpr);
+        condExpr->traverse(visitor);
+        trueExpr->traverse(visitor);
+        falseExpr->traverse(visitor);
+    });
+}
+
+std::shared_ptr<ConditionalOperator> ConditionalOperator::make(
+    const Location& loc,
+    const std::shared_ptr<Expr>& cond,
+    const std::shared_ptr<Expr>& lhs,
+    const std::shared_ptr<Expr>& rhs)
+{
+    auto expr = std::make_shared<ConditionalOperator>();
+    expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
+    expr->condExpr = cond;
+    expr->trueExpr = lhs;
+    expr->falseExpr = rhs;
+    return expr;
+}
+
+void NullConditionalOperator::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        assert(condExpr);
+        assert(trueExpr);
+        condExpr->traverse(visitor);
+        trueExpr->traverse(visitor);
+    });
+}
+
+std::shared_ptr<NullConditionalOperator> NullConditionalOperator::make(
+    const Location& loc, const std::shared_ptr<Expr>& cond, const std::shared_ptr<Expr>& trueExpr)
+{
+    auto expr = std::make_shared<NullConditionalOperator>();
+    expr->location = loc;
+    expr->valueKind = ExprValueKind::RValue;
+    expr->condExpr = cond;
+    expr->trueExpr = trueExpr;
+    return expr;
 }
 
 void DeclRefExpr::traverse(ASTVisitor& visitor)
