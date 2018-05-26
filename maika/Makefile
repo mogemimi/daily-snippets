@@ -39,6 +39,7 @@ SOURCES = \
 	Sema/TypeInferer.cpp \
 	Sema/TypeResolver.cpp \
 	Sema/Value.cpp \
+	thirdparty/duktape/duktape.c \
 	tests/DumpTest.cpp \
 	tests/IdentifierResolverTest.cpp \
 	tests/LexerTest.cpp \
@@ -53,6 +54,8 @@ COMPILER_OPTIONS = \
 	-std=c++17 \
 	-stdlib=libc++ \
 	-I. \
+	-Ithirdparty/catch2 \
+	-Ithirdparty \
 	$(SOURCES)
 
 format:

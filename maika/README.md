@@ -19,6 +19,35 @@ make xcode
 
 ## Language Specification
 
+#### Basic Types
+
+```swift
+let a : Int = 42;
+let b : Double = 3.1415926535;
+let c : Bool = true;
+let d : String = "hello";
+```
+
+#### Literals
+
+```swift
+// Int
+42
+
+// Double
+3.1415926535
+
+// Bool
+true
+false
+
+// String
+"hello, world"
+
+// Null
+null
+```
+
 #### Arrays
 
 ```swift

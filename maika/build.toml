@@ -6,6 +6,8 @@ cflags_cc = [
 ]
 include_dirs = [
   ".",
+  "thirdparty/catch2",
+  "thirdparty",
 ]
 sources = [
   "AST/ASTContext.cpp",
@@ -43,6 +45,7 @@ sources = [
   "tests/PrettyPrinterTest.cpp",
   "tests/SemaCheckerTest.cpp",
   "tests/TypeResolverTest.cpp",
+  "thirdparty/duktape/duktape.c",
 ]
 
 [targets.tagged."mac"]

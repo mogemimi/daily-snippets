@@ -177,7 +177,7 @@ Location toLoc(const yy::location& y)
 
 %left ",";
 %right "=";
-%right "ternary_question" "conditional_expression";
+%right "conditional_expression";
 %left "binary_op";
 %left "||";
 %left "&&";
@@ -186,8 +186,10 @@ Location toLoc(const yy::location& y)
 %right "??";
 %left "+" "-";
 %left "*" "/" "%";
+%left ":";
 %right "unary_plus" "unary_minus";
 %right "++" "--" "!";
+%right "ternary_question";
 %left "." "[" "]";
 %nonassoc "(" ")" "grouping";
 %nonassoc "then";
