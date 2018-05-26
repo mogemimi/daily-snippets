@@ -48,6 +48,12 @@ false
 null
 ```
 
+#### Constants
+
+```swift
+const Pi : Double = 3.1415926535;
+```
+
 #### Arrays
 
 ```swift
@@ -64,7 +70,7 @@ let empty_map = [:];
 m["y"] = 42;
 ```
 
-#### For loops
+#### For Statement
 
 ```swift
 for (let i = 0; i < 42; i++) {
@@ -72,7 +78,7 @@ for (let i = 0; i < 42; i++) {
 }
 ```
 
-#### For-in loops
+#### For-in Statement
 
 ```swift
 for (let i in arr) {
@@ -80,7 +86,7 @@ for (let i in arr) {
 }
 ```
 
-#### While loops
+#### While Statement
 
 ```swift
 while (vec.x < 0.0) {
@@ -88,12 +94,26 @@ while (vec.x < 0.0) {
 }
 ```
 
-#### If statements
+#### If Statement
 
 ```swift
 if (vec.x < 0.0) {
     vec.x = 0.0;
 }
+```
+
+#### Defer Statement
+
+```swift
+func f() {
+    defer { print("hello"); }
+    print("hi");
+}
+
+f();
+
+// Prints "hi"
+// Prints "hello"
 ```
 
 #### Tuple

@@ -62,6 +62,13 @@ public:
         traverse();
     }
 
+    virtual void visit(const std::shared_ptr<DeferStmt>& stmt) {}
+    virtual void visit(const std::shared_ptr<DeferStmt>& stmt, Invoke&& traverse)
+    {
+        visit(stmt);
+        traverse();
+    }
+
     virtual void visit(const std::shared_ptr<CallExpr>& expr) {}
     virtual void visit(const std::shared_ptr<CallExpr>& expr, Invoke&& traverse)
     {

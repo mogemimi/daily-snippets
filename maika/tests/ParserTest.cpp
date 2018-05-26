@@ -72,11 +72,17 @@ TEST_CASE("parser can treat basic sources consistently", "[parser]")
     }
     SECTION("parser can treat type specifier")
     {
-        constexpr auto source = R"(
-        func f() {
+        constexpr auto source = R"(func f() {
             let a : int = 42;
             let b : string = "hello";
             const c : double = 3.141592;
+        })";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can treat defer statement")
+    {
+        constexpr auto source = R"(func f() {
+            defer { print("hello"); }
         })";
         REQUIRE(parse(diag, source));
     }

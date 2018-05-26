@@ -273,3 +273,27 @@ std::shared_ptr<ForRangeStmt> ForRangeStmt::make(
     stmt->bodyStmt = bodyStmt;
     return stmt;
 }
+
+void DeferStmt::traverse(ASTVisitor& visitor)
+{
+    visitor.visit(shared_from_this(), [&] {
+        if (bodyStmt) {
+            bodyStmt->traverse(visitor);
+        }
+    });
+}
+
+std::shared_ptr<Stmt> DeferStmt::getBody() const
+{
+    return bodyStmt;
+}
+
+std::shared_ptr<DeferStmt> DeferStmt::make(
+    const Location& loc,
+    const std::shared_ptr<Stmt>& bodyStmt)
+{
+    auto stmt = std::make_shared<DeferStmt>();
+    stmt->location = loc;
+    stmt->bodyStmt = bodyStmt;
+    return stmt;
+}

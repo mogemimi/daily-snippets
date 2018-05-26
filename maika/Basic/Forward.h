@@ -29,6 +29,7 @@ class IfStmt;
 class WhileStmt;
 class ForStmt;
 class ForRangeStmt;
+class DeferStmt;
 
 // NOTE: AST::Expr
 class Expr;

@@ -170,3 +170,20 @@ public:
         const std::shared_ptr<Expr>& rangeExpr,
         const std::shared_ptr<Stmt>& bodyStmt);
 };
+
+class DeferStmt final
+    : public Stmt
+    , public std::enable_shared_from_this<DeferStmt> {
+private:
+    std::shared_ptr<Stmt> bodyStmt;
+
+public:
+    void traverse(ASTVisitor& visitor) override;
+
+    std::shared_ptr<Stmt> getBody() const;
+    void setBody(const std::shared_ptr<Stmt>& b) { this->bodyStmt = b; }
+
+    static std::shared_ptr<DeferStmt> make(
+        const Location& loc,
+        const std::shared_ptr<Stmt>& bodyStmt);
+};

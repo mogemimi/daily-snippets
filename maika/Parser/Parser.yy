@@ -119,6 +119,7 @@ Location toLoc(const yy::location& y)
 %token WHILE                "while"
 %token FOR                  "for"
 %token IN                   "in"
+%token DEFER                "defer"
 %token CLASS                "class"
 %token NULL                 "null"
 
@@ -159,6 +160,7 @@ Location toLoc(const yy::location& y)
 %type  <std::shared_ptr<Stmt>>                      for_init_statement
 %type  <std::shared_ptr<ForRangeStmt>>              for_range_statement
 %type  <std::shared_ptr<Decl>>                      for_range_init
+%type  <std::shared_ptr<DeferStmt>>                 defer_statement
 %type  <std::shared_ptr<FunctionDecl>>              function_definition
 %type  <std::shared_ptr<FunctionExpr>>              function_expression
 %type  <CallSignature>                              call_signature
@@ -274,6 +276,7 @@ statement:
 | while_statement               { $$ = $1; }
 | for_statement                 { $$ = $1; }
 | for_range_statement           { $$ = $1; }
+| defer_statement               { $$ = $1; }
 ;
 
 compound_statement:
@@ -320,6 +323,10 @@ for_range_init:
 | "const" "identifier"                  { $$ = ConstDecl::make(toLoc(@$), $2, nullptr, nullptr); }
 | "let" "(" binding_declarations ")"    { $$ = DecompositionDecl::make(toLoc(@$), $3); }
 | "const" "(" binding_declarations ")"  { $$ = DecompositionDecl::make(toLoc(@$), $3); }
+;
+
+defer_statement:
+  "defer" statement { $$ = DeferStmt::make(toLoc(@$), $2); }
 ;
 
 variable_definition:

@@ -73,10 +73,6 @@ public:
 };
 
 enum class BuiltinTypeKind {
-    // Int32,
-    // Int64,
-    // UInt32,
-    // UInt64,
     Bool,
     Int,
     Double,
