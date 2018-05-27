@@ -117,12 +117,12 @@ std::shared_ptr<BuiltinType> BuiltinType::make(BuiltinTypeKind kind)
 std::string BuiltinType::toString(BuiltinTypeKind kind)
 {
     switch (kind) {
-    case BuiltinTypeKind::Bool: return "bool";
-    case BuiltinTypeKind::Int: return "int";
-    case BuiltinTypeKind::Double: return "double";
-    case BuiltinTypeKind::String: return "string";
-    case BuiltinTypeKind::Void: return "void";
-    case BuiltinTypeKind::Any: return "any";
+    case BuiltinTypeKind::Bool: return "Bool";
+    case BuiltinTypeKind::Int: return "Int";
+    case BuiltinTypeKind::Double: return "Double";
+    case BuiltinTypeKind::String: return "String";
+    case BuiltinTypeKind::Void: return "Void";
+    case BuiltinTypeKind::Any: return "Any";
     case BuiltinTypeKind::Null: return "null";
     }
     return "<unknown-builtin-type>";

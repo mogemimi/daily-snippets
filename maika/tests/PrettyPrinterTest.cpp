@@ -75,13 +75,13 @@ TEST_CASE("pretty print", "[prettyprinter]")
     SECTION("printer prints classes")
     {
         constexpr auto source = "class Vector2 {\n"
-                                "    let x: int = 0;\n"
-                                "    let y: int = 0;\n"
-                                "    func dot(v: Vector2) -> int {\n"
+                                "    let x: Int = 0;\n"
+                                "    let y: Int = 0;\n"
+                                "    func dot(v: Vector2) -> Int {\n"
                                 "        return x * v.x + y * v.y;\n"
                                 "    }\n"
                                 "\n"
-                                "    func cross(v: Vector2) -> int {\n"
+                                "    func cross(v: Vector2) -> Int {\n"
                                 "        return x * v.y - y * v.x;\n"
                                 "    }\n"
                                 "}\n";
@@ -113,9 +113,9 @@ TEST_CASE("ast formatter", "[astformatter]")
 
     SECTION("printer abbreviates redundant parentheses")
     {
-        constexpr auto source = "func f(a,b){return ((((a)))*((b)));}\n";
-        constexpr auto expect = "func f(a, b) {\n"
-                                "    return (a * b);\n"
+        constexpr auto source = "func f(a,b,c){return ((((a)+b))*((c)));}\n";
+        constexpr auto expect = "func f(a, b, c) {\n"
+                                "    return ((a + b) * c);\n"
                                 "}\n";
         REQUIRE(prettyPrint(diag, source) == expect);
     }

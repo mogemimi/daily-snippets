@@ -159,40 +159,27 @@ void VariableDecl::traverse(ASTVisitor& visitor)
 std::shared_ptr<VariableDecl> VariableDecl::make(
     const Location& loc,
     const std::shared_ptr<NamedDecl>& n,
+    VariableDeclSpecifier sp,
     const std::shared_ptr<NamedDecl>& typeAnnotation,
     const std::shared_ptr<Expr>& e)
 {
     auto decl = std::make_shared<VariableDecl>();
     decl->location = loc;
     decl->namedDecl = n;
+    decl->specifier = sp;
     decl->typeAnnotation = typeAnnotation;
     decl->expr = e;
     return decl;
 }
 
-void ConstDecl::traverse(ASTVisitor& visitor)
+std::string VariableDecl::getSpecifierString(VariableDeclSpecifier specifier)
 {
-    assert(namedDecl);
-    visitor.visit(shared_from_this(), [&] {
-        namedDecl->traverse(visitor);
-        if (expr) {
-            expr->traverse(visitor);
-        }
-    });
-}
-
-std::shared_ptr<ConstDecl> ConstDecl::make(
-    const Location& loc,
-    const std::shared_ptr<NamedDecl>& n,
-    const std::shared_ptr<NamedDecl>& typeAnnotation,
-    const std::shared_ptr<Expr>& e)
-{
-    auto decl = std::make_shared<ConstDecl>();
-    decl->location = loc;
-    decl->namedDecl = n;
-    decl->typeAnnotation = typeAnnotation;
-    decl->expr = e;
-    return decl;
+    switch (specifier) {
+    case VariableDeclSpecifier::Let: return "let";
+    case VariableDeclSpecifier::Var: return "var";
+    case VariableDeclSpecifier::Const: return "const";
+    }
+    return "<unknown-specifier>";
 }
 
 void BindingDecl::traverse(ASTVisitor& visitor)
@@ -229,21 +216,26 @@ void DecompositionDecl::traverse(ASTVisitor& visitor)
 }
 
 std::shared_ptr<DecompositionDecl> DecompositionDecl::make(
-    const Location& loc, const std::vector<std::shared_ptr<BindingDecl>>& bindings)
+    const Location& loc,
+    VariableDeclSpecifier sp,
+    const std::vector<std::shared_ptr<BindingDecl>>& bindings)
 {
     auto decl = std::make_shared<DecompositionDecl>();
     decl->location = loc;
+    decl->specifier = sp;
     decl->bindings = bindings;
     return decl;
 }
 
 std::shared_ptr<DecompositionDecl> DecompositionDecl::make(
     const Location& loc,
+    VariableDeclSpecifier sp,
     const std::vector<std::shared_ptr<BindingDecl>>& bindings,
     const std::shared_ptr<Expr>& e)
 {
     auto decl = std::make_shared<DecompositionDecl>();
     decl->location = loc;
+    decl->specifier = sp;
     decl->bindings = bindings;
     decl->expr = e;
     return decl;

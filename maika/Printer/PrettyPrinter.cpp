@@ -417,28 +417,7 @@ void PrettyPrinter::visit(const std::shared_ptr<FunctionDecl>& decl, Invoke&& tr
 
 void PrettyPrinter::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traverse)
 {
-    dumpContext.result += "let ";
-    if (auto namedDecl = decl->getNamedDecl()) {
-        dumpContext.result += namedDecl->getName();
-    }
-
-    if (auto typeAnnotation = decl->getTypeAnnotation()) {
-        assert(typeAnnotation);
-        dumpContext.result += ": ";
-        dumpContext.result += typeAnnotation->getName();
-    }
-
-    if (auto expr = decl->getExpr()) {
-        dumpContext.result += " = ";
-        expr->traverse(*this);
-    }
-
-    dumpContext.result += ";";
-}
-
-void PrettyPrinter::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse)
-{
-    dumpContext.result += "const ";
+    dumpContext.result += VariableDecl::getSpecifierString(decl->getSpecifier()) + " ";
     if (auto namedDecl = decl->getNamedDecl()) {
         dumpContext.result += namedDecl->getName();
     }

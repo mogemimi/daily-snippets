@@ -52,7 +52,7 @@ bool requireType(
     REQUIRE(actual);
 
     if (actual->getKind() == TypeKind::TypeVariable) {
-        return "any" == expect;
+        return "Any" == expect;
     }
 
     return actual->dump() == expect;
@@ -68,17 +68,17 @@ TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
     ASTContext astContext;
     IdentifierContext context;
 
-    SECTION("Type 'int' is not assignable to 'string'.")
+    SECTION("Type 'Int' is not assignable to 'String'.")
     {
         constexpr auto source = R"(func test() {
             let a = "a";
             a = 2;
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
-        REQUIRE(requireType(context, "a", "string"));
-        REQUIRE(stream->hasError("error: Type 'int' is not assignable to 'string'."));
+        REQUIRE(requireType(context, "a", "String"));
+        REQUIRE(stream->hasError("error: Type 'Int' is not assignable to 'String'."));
     }
-    SECTION("Implicit type conversion: int to double")
+    SECTION("Implicit type conversion: Int to Double")
     {
         constexpr auto source = R"(func test() {
             let a = 2.0;
@@ -86,34 +86,34 @@ TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
         })";
         REQUIRE(typeCheck(diag, source, astContext, context));
     }
-    SECTION("Type 'double' is not assignable to 'int'.")
+    SECTION("Type 'Double' is not assignable to 'Int'.")
     {
         constexpr auto source = R"(func test() {
             let a = 2;
             a = 2.0;
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
-        REQUIRE(stream->hasError("error: Type 'double' is not assignable to 'int'."));
+        REQUIRE(stream->hasError("error: Type 'Double' is not assignable to 'Int'."));
     }
-    SECTION("Type 'int' is not assignable to 'bool'.")
+    SECTION("Type 'Int' is not assignable to 'Bool'.")
     {
         constexpr auto source = R"(func test() {
             let a = true;
             a = 1;
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
-        REQUIRE(stream->hasError("error: Type 'int' is not assignable to 'bool'."));
+        REQUIRE(stream->hasError("error: Type 'Int' is not assignable to 'Bool'."));
     }
-    SECTION("Type 'bool' is not assignable to 'double'")
+    SECTION("Type 'Bool' is not assignable to 'Double'")
     {
         constexpr auto source = R"(func test() {
             let a = 1.0;
             a = true;
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
-        REQUIRE(stream->hasError("error: Type 'bool' is not assignable to 'double'."));
+        REQUIRE(stream->hasError("error: Type 'Bool' is not assignable to 'Double'."));
     }
-    SECTION("Implicit type conversion: int to double")
+    SECTION("Implicit type conversion: Int to Double")
     {
         constexpr auto source = R"(func test() {
             let a = 1.0;
@@ -121,21 +121,21 @@ TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
         })";
         REQUIRE(typeCheck(diag, source, astContext, context));
     }
-    SECTION("Implicit type conversion: int to double")
+    SECTION("Implicit type conversion: Int to Double")
     {
         constexpr auto source = R"(func test() {
             return 10 + 4.2;
         })";
         REQUIRE(typeCheck(diag, source, astContext, context));
     }
-    SECTION("Operator '+' cannot be applied to types 'int' and 'string'")
+    SECTION("Operator '+' cannot be applied to types 'Int' and 'String'")
     {
         constexpr auto source = R"(func test() {
             let a = 10 + "hello";
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
         REQUIRE(
-            stream->hasError("error: Operator '+' cannot be applied to types 'int' and 'string'."));
+            stream->hasError("error: Operator '+' cannot be applied to types 'Int' and 'String'."));
     }
     SECTION("Call a function")
     {
@@ -158,7 +158,7 @@ TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
         }
         )";
         REQUIRE(!typeCheck(diag, source, astContext, context));
-        REQUIRE(stream->hasError("error: Type 'int' is not assignable to 'string'."));
+        REQUIRE(stream->hasError("error: Type 'Int' is not assignable to 'String'."));
     }
     SECTION("Call a function")
     {
@@ -176,45 +176,45 @@ TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
         )";
         REQUIRE(typeCheck(diag, source, astContext, context));
     }
-    SECTION("Type 'int' is not callable.")
+    SECTION("Type 'Int' is not callable.")
     {
         constexpr auto source = R"(func f() {
             let a = 42;
             a();
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
-        REQUIRE(requireType(context, "a", "int"));
-        REQUIRE(stream->hasError("error: Cannot call a non-function whose type is 'int'."));
+        REQUIRE(requireType(context, "a", "Int"));
+        REQUIRE(stream->hasError("error: Cannot call a non-function whose type is 'Int'."));
     }
-    SECTION("Type 'double' is not callable.")
+    SECTION("Type 'Double' is not callable.")
     {
         constexpr auto source = R"(func f() {
             let a = 3.14;
             a();
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
-        REQUIRE(requireType(context, "a", "double"));
-        REQUIRE(stream->hasError("error: Cannot call a non-function whose type is 'double'."));
+        REQUIRE(requireType(context, "a", "Double"));
+        REQUIRE(stream->hasError("error: Cannot call a non-function whose type is 'Double'."));
     }
-    SECTION("Type 'bool' is not callable.")
+    SECTION("Type 'Bool' is not callable.")
     {
         constexpr auto source = R"(func f() {
             let a = true;
             a();
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
-        REQUIRE(requireType(context, "a", "bool"));
-        REQUIRE(stream->hasError("error: Cannot call a non-function whose type is 'bool'."));
+        REQUIRE(requireType(context, "a", "Bool"));
+        REQUIRE(stream->hasError("error: Cannot call a non-function whose type is 'Bool'."));
     }
-    SECTION("Type 'string' is not callable.")
+    SECTION("Type 'String' is not callable.")
     {
         constexpr auto source = R"(func f() {
             let a = "hello";
             a();
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
-        REQUIRE(requireType(context, "a", "string"));
-        REQUIRE(stream->hasError("error: Cannot call a non-function whose type is 'string'."));
+        REQUIRE(requireType(context, "a", "String"));
+        REQUIRE(stream->hasError("error: Cannot call a non-function whose type is 'String'."));
     }
     SECTION("Type 'null' is not callable.")
     {
@@ -226,14 +226,14 @@ TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
         REQUIRE(requireType(context, "a", "null"));
         REQUIRE(stream->hasError("error: Cannot call a non-function whose type is 'null'."));
     }
-    SECTION("Type 'any' is callable.")
+    SECTION("Type 'Any' is callable.")
     {
         constexpr auto source = R"(func f() {
             let a;
             a();
         })";
         REQUIRE(typeCheck(diag, source, astContext, context));
-        REQUIRE(requireType(context, "a", "any"));
+        REQUIRE(requireType(context, "a", "Any"));
     }
     SECTION("Type 'Array' is not callable.")
     {
@@ -255,7 +255,7 @@ TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
         REQUIRE(requireType(context, "a", "Map"));
         REQUIRE(stream->hasError("error: Cannot call a non-function whose type is 'Map'."));
     }
-    SECTION("Operator '+' cannot be applied to types 'string' and 'double'.")
+    SECTION("Operator '+' cannot be applied to types 'String' and 'Double'.")
     {
         constexpr auto source = R"(
         func f(x) { return x; }
@@ -263,9 +263,9 @@ TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
         )";
         REQUIRE(!typeCheck(diag, source, astContext, context));
         REQUIRE(stream->hasError(
-            "error: Operator '+' cannot be applied to types 'string' and 'double'."));
+            "error: Operator '+' cannot be applied to types 'String' and 'Double'."));
     }
-    SECTION("Operator '+' cannot be applied to types 'double' and 'string'.")
+    SECTION("Operator '+' cannot be applied to types 'Double' and 'String'.")
     {
         constexpr auto source = R"(
         func f(x) { return x; }
@@ -278,59 +278,59 @@ TEST_CASE("TypeResolver can detect type mismatch", "[typecheck]")
         constexpr auto source = R"(func test() { 10 % 3; })";
         REQUIRE(typeCheck(diag, source, astContext, context));
     }
-    SECTION("invalid operands of types 'double' and 'double' to binary 'operator%'.")
+    SECTION("invalid operands of types 'Double' and 'Double' to binary 'operator%'.")
     {
         constexpr auto source = R"(func test() { 42 % 3.14; })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
         REQUIRE(
-            stream->hasError("error: invalid operands to binary expression ('int' and 'double')."));
+            stream->hasError("error: invalid operands to binary expression ('Int' and 'Double')."));
     }
-    SECTION("invalid operands of types 'double' and 'double' to binary 'operator%'.")
+    SECTION("invalid operands of types 'Double' and 'Double' to binary 'operator%'.")
     {
         constexpr auto source = R"(func test() { 3.14 % 42; })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
         REQUIRE(
-            stream->hasError("error: invalid operands to binary expression ('double' and 'int')."));
+            stream->hasError("error: invalid operands to binary expression ('Double' and 'Int')."));
     }
-    SECTION("invalid operands of types 'double' and 'double' to binary 'operator%'.")
+    SECTION("invalid operands of types 'Double' and 'Double' to binary 'operator%'.")
     {
         constexpr auto source = R"(func f(x) { x % 3.14; })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
         REQUIRE(
-            stream->hasError("error: invalid operands to binary expression ('any' and 'double')."));
+            stream->hasError("error: invalid operands to binary expression ('Any' and 'Double')."));
     }
-    SECTION("invalid operands of types 'bool' and 'bool' to binary 'operator%'.")
+    SECTION("invalid operands of types 'Bool' and 'Bool' to binary 'operator%'.")
     {
         constexpr auto source = R"(func test() { 42 % true; })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
         REQUIRE(
-            stream->hasError("error: invalid operands to binary expression ('int' and 'bool')."));
+            stream->hasError("error: invalid operands to binary expression ('Int' and 'Bool')."));
     }
-    SECTION("invalid operands of types 'bool' and 'bool' to binary 'operator%'.")
+    SECTION("invalid operands of types 'Bool' and 'Bool' to binary 'operator%'.")
     {
         constexpr auto source = R"(func test() { true % 42; })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
         REQUIRE(
-            stream->hasError("error: invalid operands to binary expression ('bool' and 'int')."));
+            stream->hasError("error: invalid operands to binary expression ('Bool' and 'Int')."));
     }
     SECTION("strings can concatenate using 'operator+'")
     {
         constexpr auto source = R"(func test() { "a" + "b"; })";
         REQUIRE(typeCheck(diag, source, astContext, context));
     }
-    SECTION("invalid operands of types 'string' and 'string' to binary 'operator*'")
+    SECTION("invalid operands of types 'String' and 'String' to binary 'operator*'")
     {
         constexpr auto source = R"(func test() { "a" * "b"; })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
         REQUIRE(stream->hasError(
-            "error: invalid operands to binary expression ('string' and 'string')."));
+            "error: invalid operands to binary expression ('String' and 'String')."));
     }
-    SECTION("invalid operands of types 'string' and 'string' to binary 'operator-'")
+    SECTION("invalid operands of types 'String' and 'String' to binary 'operator-'")
     {
         constexpr auto source = R"(func test() { "a" - "b"; })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
         REQUIRE(stream->hasError(
-            "error: invalid operands to binary expression ('string' and 'string')."));
+            "error: invalid operands to binary expression ('String' and 'String')."));
     }
 }
 
@@ -352,7 +352,7 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
         })";
         REQUIRE(typeCheck(diag, source, astContext, context));
         REQUIRE(requireType(context, "x", "Array"));
-        REQUIRE(requireType(context, "y", "Array<int>"));
+        REQUIRE(requireType(context, "y", "Array<Int>"));
         REQUIRE(requireType(context, "z", "Array"));
     }
     SECTION("maps")
@@ -364,7 +364,7 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
         })";
         REQUIRE(typeCheck(diag, source, astContext, context));
         REQUIRE(requireType(context, "x", "Map"));
-        REQUIRE(requireType(context, "y", "Map<string, int>"));
+        REQUIRE(requireType(context, "y", "Map<String, Int>"));
         REQUIRE(requireType(context, "z", "Map"));
     }
     SECTION("maps in array")
@@ -373,7 +373,7 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
             let x = [["a": 1], ["b": 2, "c": 3]];
         })";
         REQUIRE(typeCheck(diag, source, astContext, context));
-        REQUIRE(requireType(context, "x", "Array<Map<string, int>>"));
+        REQUIRE(requireType(context, "x", "Array<Map<String, Int>>"));
     }
     SECTION("arrays in map")
     {
@@ -409,16 +409,16 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
         REQUIRE(requireType(context, "x", "Array"));
         REQUIRE(requireType(context, "y", "Array"));
     }
-    SECTION("int is not assignable to array")
+    SECTION("Int is not assignable to array")
     {
         constexpr auto source = R"(func f() {
             let a = [42];
             a = 42;
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
-        REQUIRE(requireType(context, "a", "Array<int>"));
+        REQUIRE(requireType(context, "a", "Array<Int>"));
     }
-    SECTION("double is not assignable to array")
+    SECTION("Double is not assignable to array")
     {
         constexpr auto source = R"(func f() {
             let a = [42];
@@ -426,7 +426,7 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
     }
-    SECTION("bool is not assignable to array")
+    SECTION("Bool is not assignable to array")
     {
         constexpr auto source = R"(func f() {
             let a = [42];
@@ -434,7 +434,7 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
     }
-    SECTION("string is not assignable to array")
+    SECTION("String is not assignable to array")
     {
         constexpr auto source = R"(func f() {
             let a = [42];
@@ -442,7 +442,7 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
     }
-    SECTION("int is not assignable to map")
+    SECTION("Int is not assignable to map")
     {
         constexpr auto source = R"(func f() {
             let x = ["a": 42];
@@ -450,7 +450,7 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
     }
-    SECTION("int is not assignable to map")
+    SECTION("Int is not assignable to map")
     {
         constexpr auto source = R"(func f() {
             let x = ["a": 42];
@@ -458,7 +458,7 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
     }
-    SECTION("bool is not assignable to map")
+    SECTION("Bool is not assignable to map")
     {
         constexpr auto source = R"(func f() {
             let x = ["a": 42];
@@ -466,7 +466,7 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
         })";
         REQUIRE(!typeCheck(diag, source, astContext, context));
     }
-    SECTION("string is not assignable to map")
+    SECTION("String is not assignable to map")
     {
         constexpr auto source = R"(func f() {
             let x = ["a": 42];
@@ -513,9 +513,9 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
             let c = a[g(1)];
         })";
         REQUIRE(typeCheck(diag, source, astContext, context));
-        REQUIRE(requireType(context, "a", "Array<string>"));
-        REQUIRE(requireType(context, "b", "string"));
-        REQUIRE(requireType(context, "c", "string"));
+        REQUIRE(requireType(context, "a", "Array<String>"));
+        REQUIRE(requireType(context, "b", "String"));
+        REQUIRE(requireType(context, "c", "String"));
     }
     SECTION("type resolver can infer type of map keys")
     {
@@ -526,8 +526,8 @@ TEST_CASE("TypeResolver can detect type mismatch for arrays and maps", "[typeche
             let c = a[g("c")];
         })";
         REQUIRE(typeCheck(diag, source, astContext, context));
-        REQUIRE(requireType(context, "a", "Map<string, int>"));
-        REQUIRE(requireType(context, "b", "int"));
-        REQUIRE(requireType(context, "c", "int"));
+        REQUIRE(requireType(context, "a", "Map<String, Int>"));
+        REQUIRE(requireType(context, "b", "Int"));
+        REQUIRE(requireType(context, "c", "Int"));
     }
 }

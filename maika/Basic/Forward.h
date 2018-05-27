@@ -62,7 +62,6 @@ class NamedDecl;
 class ParmVarDecl;
 class TranslationUnitDecl;
 class VariableDecl;
-class ConstDecl;
 class BindingDecl;
 class DecompositionDecl;
 class ClassDecl;

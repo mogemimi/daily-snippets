@@ -298,20 +298,9 @@ void ASTDumper::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traver
         if (auto type = namedDecl->getType()) {
             options.push_back(type->dump());
         }
+        options.push_back(VariableDecl::getSpecifierString(decl->getSpecifier()));
     }
     dump(&dumpContext, "VariableDecl", options, std::move(traverse));
-}
-
-void ASTDumper::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse)
-{
-    std::vector<std::string> options;
-    if (auto namedDecl = decl->getNamedDecl()) {
-        options.push_back(namedDecl->getName());
-        if (auto type = namedDecl->getType()) {
-            options.push_back(type->dump());
-        }
-    }
-    dump(&dumpContext, "ConstDecl", options, std::move(traverse));
 }
 
 void ASTDumper::visit(const std::shared_ptr<BindingDecl>& decl, Invoke&& traverse)

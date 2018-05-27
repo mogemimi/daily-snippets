@@ -73,9 +73,9 @@ TEST_CASE("parser can treat basic sources consistently", "[parser]")
     SECTION("parser can treat type specifier")
     {
         constexpr auto source = R"(func f() {
-            let a : int = 42;
-            let b : string = "hello";
-            const c : double = 3.141592;
+            let a : Int = 42;
+            let b : String = "hello";
+            const c : Double = 3.141592;
         })";
         REQUIRE(parse(diag, source));
     }
@@ -83,6 +83,14 @@ TEST_CASE("parser can treat basic sources consistently", "[parser]")
     {
         constexpr auto source = R"(func f() {
             defer { print("hello"); }
+        })";
+        REQUIRE(parse(diag, source));
+    }
+    SECTION("parser can treat 'var' variable specifier")
+    {
+        constexpr auto source = R"(func f() {
+            var a = 42;
+            var b : String = "hello";
         })";
         REQUIRE(parse(diag, source));
     }
@@ -96,7 +104,7 @@ TEST_CASE("parser can treat func declarations", "[parser]")
 
     SECTION("parser can treat func declaration with type hints")
     {
-        constexpr auto source = "func f(a : int, b : int) -> int {}\n";
+        constexpr auto source = "func f(a : Int, b : Int) -> Int {}\n";
         REQUIRE(parse(diag, source));
     }
     SECTION("parser can not use trailing commas with parameters")
@@ -306,6 +314,14 @@ TEST_CASE("parser can treat binding declaration", "[parser]")
         })";
         REQUIRE(parse(diag, source));
     }
+    SECTION("parser can treat binding declaration with 'var' specifier")
+    {
+        constexpr auto source = R"(func f() {
+            var (a, b, c) = [1, 2, 3];
+            var (x) = [42];
+        })";
+        REQUIRE(parse(diag, source));
+    }
     SECTION("parser can treat binding declaration for constants")
     {
         constexpr auto source = R"(func f() {
@@ -328,6 +344,7 @@ TEST_CASE("parser can treat binding declaration", "[parser]")
     {
         constexpr auto source = R"(func f() {
             for (let (a, b) in v) {}
+            for (var (a, b) in v) {}
             for (const (a, b) in v) {}
         })";
         REQUIRE(parse(diag, source));
@@ -356,8 +373,8 @@ TEST_CASE("parser can treat class declarations", "[parser]")
     {
         constexpr auto source = R"(class Vector2 {
             let x;
-            let y : double;
-            let z : double = 0;
+            let y : Double;
+            let z : Double = 0;
         })";
         REQUIRE(parse(diag, source));
     }
@@ -370,7 +387,7 @@ TEST_CASE("parser can treat class declarations", "[parser]")
     {
         constexpr auto source = R"(class Math {
             const Epsilon = 2.71828;
-            const Pi : double = 3.141592;
+            const Pi : Double = 3.141592;
         })";
         REQUIRE(parse(diag, source));
     }

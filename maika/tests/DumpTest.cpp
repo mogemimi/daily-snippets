@@ -17,7 +17,7 @@
 TEST_CASE("ASTDump", "[ast-dump]")
 {
     constexpr auto source = R"(
-func mul(a: int, b: int) {
+func mul(a: Int, b: Int) {
     return a * b;
 }
 
@@ -33,8 +33,8 @@ func main() {
 
     constexpr auto expect = R"(TranslationUnitDecl
   FunctionDecl 'mul'
-    ParmVarDecl 'a' 'int'
-    ParmVarDecl 'b' 'int'
+    ParmVarDecl 'a' 'Int'
+    ParmVarDecl 'b' 'Int'
     CompoundStmt
       ReturnStmt
         BinaryOperator '*'
@@ -43,15 +43,15 @@ func main() {
   FunctionDecl 'main'
     CompoundStmt
       DeclStmt
-        VariableDecl 'a'
+        VariableDecl 'a' 'let'
           BinaryOperator '/'
             IntegerLiteral '95'
             IntegerLiteral '4'
       DeclStmt
-        VariableDecl 'b'
+        VariableDecl 'b' 'let'
           DoubleLiteral '3.141592'
       DeclStmt
-        VariableDecl 'c'
+        VariableDecl 'c' 'let'
           CallExpr
             DeclRefExpr 'mul'
             BinaryOperator '+'
@@ -59,10 +59,10 @@ func main() {
               DeclRefExpr 'a'
             DeclRefExpr 'b'
       DeclStmt
-        VariableDecl 'd'
+        VariableDecl 'd' 'let'
           BoolLiteral 'true'
       DeclStmt
-        VariableDecl 'e'
+        VariableDecl 'e' 'let'
           ParenExpr
             BinaryOperator '!='
               DeclRefExpr 'd'

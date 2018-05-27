@@ -183,7 +183,6 @@ public:
     std::shared_ptr<Stmt> getBody() const;
     void setBody(const std::shared_ptr<Stmt>& b) { this->bodyStmt = b; }
 
-    static std::shared_ptr<DeferStmt> make(
-        const Location& loc,
-        const std::shared_ptr<Stmt>& bodyStmt);
+    static std::shared_ptr<DeferStmt>
+    make(const Location& loc, const std::shared_ptr<Stmt>& bodyStmt);
 };

@@ -113,6 +113,7 @@ Location toLoc(const yy::location& y)
 %token FUNCTION             "func"
 %token RETURN               "return"
 %token LET                  "let"
+%token VAR                  "var"
 %token CONST                "const"
 %token IF                   "if"
 %token ELSE                 "else"
@@ -165,7 +166,7 @@ Location toLoc(const yy::location& y)
 %type  <std::shared_ptr<FunctionExpr>>              function_expression
 %type  <CallSignature>                              call_signature
 %type  <std::shared_ptr<VariableDecl>>              variable_definition
-%type  <std::shared_ptr<ConstDecl>>                 const_definition
+%type  <VariableDeclSpecifier>                      variable_decl_specifier
 %type  <std::shared_ptr<DecompositionDecl>>         decomposition_definition
 %type  <std::vector<std::shared_ptr<BindingDecl>>>  binding_declarations
 %type  <std::shared_ptr<BindingDecl>>               binding_declaration
@@ -262,7 +263,6 @@ member_declaration_list:
 member_declaration:
   function_definition     { $$ = $1; }
 | variable_definition ";" { $$ = $1; }
-| const_definition ";"    { $$ = $1; }
 ;
 
 statement:
@@ -270,7 +270,6 @@ statement:
 | expression ";"                { $$ = $1; }
 | return_statement              { $$ = $1; }
 | variable_definition ";"       { $$ = DeclStmt::make(toLoc(@$), $1); }
-| const_definition ";"          { $$ = DeclStmt::make(toLoc(@$), $1); }
 | decomposition_definition ";"  { $$ = DeclStmt::make(toLoc(@$), $1); }
 | if_statement                  { $$ = $1; }
 | while_statement               { $$ = $1; }
@@ -318,11 +317,9 @@ for_range_statement:
 ;
 
 for_range_init:
-  "identifier"                          { $$ = $1; }
-| "let" "identifier"                    { $$ = VariableDecl::make(toLoc(@$), $2, nullptr, nullptr); }
-| "const" "identifier"                  { $$ = ConstDecl::make(toLoc(@$), $2, nullptr, nullptr); }
-| "let" "(" binding_declarations ")"    { $$ = DecompositionDecl::make(toLoc(@$), $3); }
-| "const" "(" binding_declarations ")"  { $$ = DecompositionDecl::make(toLoc(@$), $3); }
+  "identifier"                                          { $$ = $1; }
+| variable_decl_specifier "identifier"                  { $$ = VariableDecl::make(toLoc(@$), $2, $1, nullptr, nullptr); }
+| variable_decl_specifier "(" binding_declarations ")"  { $$ = DecompositionDecl::make(toLoc(@$), $1, $3); }
 ;
 
 defer_statement:
@@ -330,22 +327,20 @@ defer_statement:
 ;
 
 variable_definition:
-  "let" "identifier"                                    { $$ = VariableDecl::make(toLoc(@$), $2, nullptr, nullptr); }
-| "let" "identifier" "=" expression                     { $$ = VariableDecl::make(toLoc(@$), $2, nullptr, $4); }
-| "let" "identifier" ":" type_specifier                 { $$ = VariableDecl::make(toLoc(@$), $2, $4, nullptr); }
-| "let" "identifier" ":" type_specifier "=" expression  { $$ = VariableDecl::make(toLoc(@$), $2, $4, $6); }
+  variable_decl_specifier "identifier"                                    { $$ = VariableDecl::make(toLoc(@$), $2, $1, nullptr, nullptr); }
+| variable_decl_specifier "identifier" "=" expression                     { $$ = VariableDecl::make(toLoc(@$), $2, $1, nullptr, $4); }
+| variable_decl_specifier "identifier" ":" type_specifier                 { $$ = VariableDecl::make(toLoc(@$), $2, $1, $4, nullptr); }
+| variable_decl_specifier "identifier" ":" type_specifier "=" expression  { $$ = VariableDecl::make(toLoc(@$), $2, $1, $4, $6); }
 ;
 
-const_definition:
-  "const" "identifier"                                    { $$ = ConstDecl::make(toLoc(@$), $2, nullptr, nullptr); }
-| "const" "identifier" "=" expression                     { $$ = ConstDecl::make(toLoc(@$), $2, nullptr, $4); }
-| "const" "identifier" ":" type_specifier                 { $$ = ConstDecl::make(toLoc(@$), $2, $4, nullptr); }
-| "const" "identifier" ":" type_specifier "=" expression  { $$ = ConstDecl::make(toLoc(@$), $2, $4, $6); }
+variable_decl_specifier:
+  "let"   { $$ = VariableDeclSpecifier::Let; }
+| "var"   { $$ = VariableDeclSpecifier::Var; }
+| "const" { $$ = VariableDeclSpecifier::Const; }
 ;
 
 decomposition_definition:
-  "let" "(" binding_declarations ")" "=" expression { $$ = DecompositionDecl::make(toLoc(@$), $3, $6); }
-| "const" "(" binding_declarations ")" "=" expression { $$ = DecompositionDecl::make(toLoc(@$), $3, $6); }
+  variable_decl_specifier "(" binding_declarations ")" "=" expression { $$ = DecompositionDecl::make(toLoc(@$), $1, $3, $6); }
 ;
 
 binding_declarations:

@@ -211,12 +211,3 @@ void Optimizer::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& traver
         decl->setExpr(constantFolding(expr, diag));
     }
 }
-
-void Optimizer::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse)
-{
-    traverse();
-
-    if (auto expr = decl->getExpr()) {
-        decl->setExpr(constantFolding(expr, diag));
-    }
-}

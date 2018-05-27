@@ -288,9 +288,8 @@ std::shared_ptr<Stmt> DeferStmt::getBody() const
     return bodyStmt;
 }
 
-std::shared_ptr<DeferStmt> DeferStmt::make(
-    const Location& loc,
-    const std::shared_ptr<Stmt>& bodyStmt)
+std::shared_ptr<DeferStmt>
+DeferStmt::make(const Location& loc, const std::shared_ptr<Stmt>& bodyStmt)
 {
     auto stmt = std::make_shared<DeferStmt>();
     stmt->location = loc;

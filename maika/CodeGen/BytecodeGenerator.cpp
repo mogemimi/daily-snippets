@@ -275,8 +275,3 @@ void BytecodeGenerator::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&
 
     addInstruction(inst);
 }
-
-void BytecodeGenerator::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse)
-{
-    traverse();
-}

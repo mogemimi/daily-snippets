@@ -49,10 +49,10 @@ TEST_CASE("const can be defined as constant data types", "[semacheck]")
     }
     SECTION("typename cannot be assigned.")
     {
-        constexpr auto source = R"(func f() { int = 42; })";
+        constexpr auto source = R"(func f() { Int = 42; })";
         REQUIRE(!semaCheck(diag, source));
         REQUIRE(
-            stream->hasError("error: 'int' cannot be assigned because it only refers to a type."));
+            stream->hasError("error: 'Int' cannot be assigned because it only refers to a type."));
     }
 }
 

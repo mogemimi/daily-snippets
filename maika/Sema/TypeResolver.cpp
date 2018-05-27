@@ -252,7 +252,9 @@ void ImplicitCastifyConditionExpr(
     const auto [condType, condTypeEnabled] = TypeHelper::toBuiltinType(condTypeInferred);
 
     if (condType == BuiltinTypeKind::Void) {
-        diag->error(condExpr->getLocation(), "cond is 'void' type.");
+        diag->error(
+            condExpr->getLocation(),
+            "cond is '" + BuiltinType::toString(BuiltinTypeKind::Void) + "' type.");
         return;
     }
 
@@ -504,7 +506,7 @@ std::string getDiagnosticString(const std::shared_ptr<Type>& type)
     case TypeKind::TupleType:
     case TypeKind::FunctionType:
     case TypeKind::ReturnType: break;
-    case TypeKind::TypeVariable: return "any";
+    case TypeKind::TypeVariable: return BuiltinType::toString(BuiltinTypeKind::Any);
     }
     return type->dump();
 }
@@ -765,11 +767,15 @@ void TypeResolver::visit(const std::shared_ptr<BinaryOperator>& expr, Invoke&& t
     const auto [rhsType, rhsTypeEnabled] = TypeHelper::toBuiltinType(rhsTypeInferred);
 
     if (lhsType == BuiltinTypeKind::Void) {
-        error(lhs->getLocation(), "lhs is 'void' type.");
+        error(
+            lhs->getLocation(),
+            "lhs is '" + BuiltinType::toString(BuiltinTypeKind::Void) + "' type.");
         return;
     }
     if (rhsType == BuiltinTypeKind::Void) {
-        error(rhs->getLocation(), "rhs is 'void' type.");
+        error(
+            rhs->getLocation(),
+            "rhs is '" + BuiltinType::toString(BuiltinTypeKind::Void) + "' type.");
         return;
     }
 
@@ -1192,34 +1198,8 @@ void TypeResolver::visit(const std::shared_ptr<VariableDecl>& decl, Invoke&& tra
     }
 
     assert(!decl->getType());
-    decl->setType(BuiltinType::make(BuiltinTypeKind::Void));
-}
 
-void TypeResolver::visit(const std::shared_ptr<ConstDecl>& decl, Invoke&& traverse)
-{
-    const auto namedDecl = decl->getNamedDecl();
-    assert(namedDecl);
-    assert(!namedDecl->getName().empty());
-    assert(!namedDecl->getType());
-
-    const auto typeVariable = TypeVariable::make();
-    namedDecl->setType(typeVariable);
-
-    traverse();
-
-    if (auto expr = decl->getExpr()) {
-        assert(expr->getType());
-        auto scope = getCurrentScope();
-        typeVariable->setType(expr->getType());
-
-        auto s = TypeInferer::infer(scope->env, typeVariable);
-        substition(namedDecl, typeVariable, s);
-    }
-    else {
-        typeVariable->setType(BuiltinType::make(BuiltinTypeKind::Any));
-    }
-
-    assert(!decl->getType());
+    // NOTE: VariableDecl has no type.
     decl->setType(BuiltinType::make(BuiltinTypeKind::Void));
 }
 

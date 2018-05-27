@@ -107,6 +107,7 @@ crlf        (\r\n|\n)
 "func"      return yy::Parser::make_FUNCTION(loc);
 "return"    return yy::Parser::make_RETURN(loc);
 "let"       return yy::Parser::make_LET(loc);
+"var"       return yy::Parser::make_VAR(loc);
 "const"     return yy::Parser::make_CONST(loc);
 "if"        return yy::Parser::make_IF(loc);
 "else"      return yy::Parser::make_ELSE(loc);

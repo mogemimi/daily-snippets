@@ -5,8 +5,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "duktape/duktape.h"
 #include "catch.hpp"
+#include "duktape/duktape.h"
 
 TEST_CASE("duktape vm", "[duktape]")
 {
