@@ -54,6 +54,15 @@ null
 const Pi : Double = 3.1415926535;
 ```
 
+#### `var` and `let`
+
+```swift
+var a;
+a = 42;
+
+let b = 42;
+```
+
 #### Arrays
 
 ```swift
@@ -89,8 +98,8 @@ for (let i in arr) {
 #### While Statement
 
 ```swift
-while (vec.x < 0.0) {
-    vec.x -= 1.0;
+while (vec.x < 3.141592) {
+    vec.x += 0.5;
 }
 ```
 
@@ -121,6 +130,14 @@ f();
 ```swift
 // Structured binding
 let (u, v) = [42, 100];
+```
+
+```swift
+let m = ["a": 42, "b": 5];
+for (let (k, v) in map) {
+    print(k);
+    print(v);
+}
 ```
 
 #### Functions
