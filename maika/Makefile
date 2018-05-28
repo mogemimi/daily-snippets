@@ -22,6 +22,7 @@ SOURCES = \
 	AST/Type.cpp \
 	Basic/Diagnostic.cpp \
 	Basic/Location.cpp \
+	Basic/StringHelper.cpp \
 	Driver/Driver.cpp \
 	CodeGen/BytecodeGenerator.cpp \
 	CodeGen/Instruction.cpp \
@@ -40,6 +41,7 @@ SOURCES = \
 	Sema/TypeResolver.cpp \
 	Sema/Value.cpp \
 	thirdparty/duktape/duktape.c \
+	tests/CommentTest.cpp \
 	tests/DumpTest.cpp \
 	tests/IdentifierResolverTest.cpp \
 	tests/LexerTest.cpp \

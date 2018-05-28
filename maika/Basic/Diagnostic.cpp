@@ -1,5 +1,6 @@
 #include "Basic/Diagnostic.h"
 #include "Basic/Location.h"
+#include "Basic/StringHelper.h"
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -33,17 +34,6 @@ std::string getErrorString(
     return ss.str();
 }
 
-bool endWith(const std::string& text, const std::string& suffix)
-{
-    if (suffix.empty()) {
-        return true;
-    }
-    if (text.size() < suffix.size()) {
-        return false;
-    }
-    return (text.compare(text.size() - suffix.size(), suffix.size(), suffix) == 0);
-}
-
 } // end of anonymous namespace
 
 void StdoutDiagnosticStream::error(const std::string& err)
@@ -69,7 +59,7 @@ void UnitTestDiagnosticStream::warn(const std::string& warning)
 bool UnitTestDiagnosticStream::hasError(const std::string& err) const
 {
     return std::find_if(std::begin(errors), std::end(errors), [&](const std::string& e) -> bool {
-               return endWith(e, err);
+               return StringHelper::endWith(e, err);
            }) != std::end(errors);
 }
 

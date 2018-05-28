@@ -15,5 +15,7 @@ public:
     std::string text;
 
 public:
+    std::string getText() const;
+
     std::string dump() const;
 };
