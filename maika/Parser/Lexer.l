@@ -57,13 +57,13 @@ crlf        (\r\n|\n)
 "/*"                    BEGIN(CSTYLE_COMMENT); comment = yytext;
 <CSTYLE_COMMENT>"*/"    {
     BEGIN(INITIAL);
-    driver.visitComment(toLoc(loc), CommentKind::C, comment + yytext);
+    driver.visitComment(toLoc(loc), CommentKind::Block, comment + yytext);
     comment.clear();
 }
 <CSTYLE_COMMENT>\n      loc.lines(yyleng); comment += yytext;
 <CSTYLE_COMMENT>.       comment += yytext;
 
-"//".*      driver.visitComment(toLoc(loc), CommentKind::BCPL, yytext);
+"//".*      driver.visitComment(toLoc(loc), CommentKind::Line, yytext);
 {blank}+    loc.step();
 {crlf}+     loc.lines(yyleng); loc.step();
 ^{utf8_bom} loc.step();

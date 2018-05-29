@@ -58,10 +58,7 @@ Driver::parseString(const std::string& text, const std::shared_ptr<DiagnosticHan
 
 void Driver::visitComment(const Location& loc, CommentKind kind, const std::string& text)
 {
-    auto comment = std::make_shared<Comment>();
-    comment->location = loc;
-    comment->kind = kind;
-    comment->text = text;
+    auto comment = Comment::make(loc, kind, text);
     ast.comments.push_back(std::move(comment));
 }
 

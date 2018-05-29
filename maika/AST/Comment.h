@@ -4,18 +4,24 @@
 #include <string>
 
 enum class CommentKind {
-    C,    // /* comment */
-    BCPL, // // comment
+    Block,
+    Line,
 };
 
 class Comment final {
-public:
+private:
     Location location;
     CommentKind kind;
     std::string text;
 
 public:
+    Location getLocation() const;
+
+    CommentKind getKind() const;
+
     std::string getText() const;
 
     std::string dump() const;
+
+    static std::shared_ptr<Comment> make(Location loc, CommentKind kind, const std::string& text);
 };

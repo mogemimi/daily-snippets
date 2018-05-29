@@ -1042,7 +1042,7 @@ YY_RULE_SETUP
 #line 59 "Parser/Lexer.l"
 {
     BEGIN(INITIAL);
-    driver.visitComment(toLoc(loc), CommentKind::C, comment + yytext);
+    driver.visitComment(toLoc(loc), CommentKind::Block, comment + yytext);
     comment.clear();
 }
 	YY_BREAK
@@ -1060,7 +1060,7 @@ comment += yytext;
 case 5:
 YY_RULE_SETUP
 #line 67 "Parser/Lexer.l"
-driver.visitComment(toLoc(loc), CommentKind::BCPL, yytext);
+driver.visitComment(toLoc(loc), CommentKind::Line, yytext);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
